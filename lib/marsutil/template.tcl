@@ -22,32 +22,24 @@ namespace eval ::marsutil:: {
     namespace export tforeach
     namespace export tif
     namespace export swallow
-    namespace export defval
 }
 
 #-----------------------------------------------------------------------
 # Public commands
 
-#-----------------------------------------------------------------------
-# NAME
-#   tsubst tstring
+# tsubst tstring
 #
-# INPUTS
-#   tstring   - A template string
+# tstring     A template string
 #
-# RETURNS
-#   A subst'd string
-#
-# DESCRIPTION
-#   tstring is a template string.  
-#   If the first non-whitespace token is anything but "|<--", then
-#   tsubst simply calls subst to substitute variables, backslashes,
-#   and command calls.  Otherwise, the "|" in "|<--" marks the leftmost
-#   column of the template string.  That column is remembered, and all
-#   text up to and including the "\n" at the end of the line that
-#   begins "|<--" is deleted.  Then, the excess whitespace is trimmed 
-#   from the beginning of each successive line.  Finally, subst is
-#   called on the modified template, and the result is returned.
+# Returns the result of substituting data into the template string.
+# If the first non-whitespace token is anything but "|<--", then
+# tsubst simply calls subst to substitute variables, backslashes, and
+# command calls.  Otherwise, the "|" in "|<--" marks the leftmost
+# column of the template string.  That column is remembered, and all
+# text up to and including the "\n" at the end of the line that begins
+# "|<--" is deleted.  Then, the excess whitespace is trimmed from the
+# beginning of each successive line.  Finally, subst is called on the
+# modified template, and the result is returned.
 
 proc ::marsutil::tsubst {tstring} {
     # If the string begins with the indent mark, process it.
@@ -67,26 +59,22 @@ proc ::marsutil::tsubst {tstring} {
     return [uplevel 1 [list subst $tstring]]
 }
 
-#-----------------------------------------------------------------------
-# NAME
-#   template name arglist ?initbody? template
+# template name arglist ?initbody? template
 #
-# INPUTS
-#   name        - The template command's name
-#   arglist     - The template command's argument list
-#   initbody    - Optionally, some code to execute before evaluating
-#                 the template.
-#   template    - The actual "subst" template string.
+# name        The template command's name
+# arglist     The template command's argument list
+# initbody    Optionally, some code to execute before evaluating
+#             the template.
+# template    The actual "subst" template string.
 #
-# DESCRIPTION
-#   Defines a template command called "name" in the caller's
-#   context.  The template takes the arguments listed in
-#   "arglist", which follows the normal Tcl proc rules.  When
-#   called, the template command does a "subst" on the "template"
-#   string and returns the result.  If given, "initbody" is
-#   executed before the substitution; it can define variables to
-#   be used in the template string, including declaring
-#   global variables.
+# Defines a template command called "name" in the caller's
+# context.  The template takes the arguments listed in
+# "arglist", which follows the normal Tcl proc rules.  When
+# called, the template command does a "subst" on the "template"
+# string and returns the result.  If given, "initbody" is
+# executed before the substitution; it can define variables to
+# be used in the template string, including declaring
+# global variables.
 
 proc ::marsutil::template {name arglist initbody {template ""}} {
     # FIRST, have we an initbody?
@@ -104,24 +92,18 @@ proc ::marsutil::template {name arglist initbody {template ""}} {
 }
 
 
-#-----------------------------------------------------------------------
-# NAME
-#   tforeach vars items ?initbody? template
+# tforeach vars items ?initbody? template
 #
-# INPUTS
-#   vars       - A list of index variable names
-#   items      - A list of items to iterate over
-#   initbody   - Initializations to perform before each substitution.
-#   template   - A template string.
+# vars       A list of index variable names
+# items      A list of items to iterate over
+# initbody   Initializations to perform before each substitution.
+# template   A template string.
 #
-# RETURNS
-#   A substituted string.
-#
-# DESCRIPTION
-#   Iterates vars over items in the manner of "foreach".  On each
-#   iteration, does a subst on the template, accumulating the
-#   result.  The subst is done in the caller's context; the index
-#   variables are available as well.
+# Iterates vars over items in the manner of "foreach".  On each
+# iteration, does a subst on the template, accumulating the
+# result.  The subst is done in the caller's context; the index
+# variables are available as well.  Returns the accumulated
+# result.
 
 proc ::marsutil::tforeach {vars items initbody {template ""}} {
     # FIRST, have we an initbody?
@@ -149,22 +131,15 @@ proc ::marsutil::tforeach {vars items initbody {template ""}} {
 }
 
 
-#-----------------------------------------------------------------------
-# NAME
-#   tif condition thenbody else ?elsebody?
+# tif condition thenbody else ?elsebody?
 #
-# INPUTS
-#   condition   - A boolean expression
-#   thenbody    - Template to subst if condition is true
-#   elsebody    - Template to subst if condition is false;
-#                   defaults to ""
+# condition   A boolean expression
+# thenbody    Template to subst if condition is true
+# elsebody    Template to subst if condition is false; defaults to ""
 #
-# RETURNS
-#   A substituted string, or "".
-#
-# DESCRIPTION
-#   Calls subst in the caller's context on either thenbody or
-#   elsebody, depending on whether condition is true or not.
+# Calls subst in the caller's context on either thenbody or
+# elsebody, depending on whether condition is true or not, and
+# returns the result.
 
 proc ::marsutil::tif {condition thenbody {"else" "else"} {elsebody ""}} {
     # FIRST, evaluate the condition
@@ -179,63 +154,32 @@ proc ::marsutil::tif {condition thenbody {"else" "else"} {elsebody ""}} {
 }
 
 
-#-----------------------------------------------------------------------
-# NAME
-#   swallow body
+# swallow body
 #
-# INPUTS
-#   body    - A Tcl script.
+# body    A Tcl script.
 #
-# DESCRIPTION
-#   Evaluates its body in the caller's context, but always returns
-#   the empty string.
+# Evaluates its body in the caller's context, but always returns
+# the empty string.
 
 proc ::marsutil::swallow {body} {
     uplevel 1 $body
     return
 }
 
-
-#-----------------------------------------------------------------------
-# NAME
-#   defval aString defaultValue
-#
-# INPUTS
-#   aString       - Some string
-#   defaultValue  - Its default value
-#
-# RETURNS
-#   A string or its default
-#
-# DESCRIPTION
-#   If the string is not empty, returns it; otherwise, returns
-#   the default value.
-
-proc ::marsutil::defval {aString defaultValue} {
-    if {"" != $aString} {
-        return $aString
-    } else {
-        return $defaultValue
-    }
-}
-
 #-------------------------------------------------------------------
 # snit::macros
 
-#-----------------------------------------------------------------------
-# NAME
-#   Macro: template name arglist ?initbody? template
+# Macro: template name arglist ?initbody? template
 #
-# INPUTS
-#   proctype    - proc, method, typemethod
-#   name        - The template command's name
-#   arglist     - The template command's argument list
-#   initbody    - Optionally, some code to execute before evaluating
-#                 the template.
-#   template    - The actual "subst" template string.
+# proctype    proc, method, typemethod
+# name        The template command's name
+# arglist     The template command's argument list
+# initbody    Optionally, some code to execute before evaluating
+#             the template.
+# template    The actual "subst" template string.
 #
-# DESCRIPTION
-#   Defines a proc, method, or typemethod which is a template.
+# When used within a Snit type or widget definition,
+# defines a proc, method, or typemethod which is a template.
 
 snit::macro template {proctype name arglist initbody {template ""}} {
     # FIRST, have we an initbody?

@@ -179,14 +179,6 @@ it always returns the empty string.
 
 <code>swallow</code>'s body may contain any number of Tcl commands.<p>
 
-
-<<defitem defval {defval <i>aString defaultValue</i>}>>
-
-When querying for data in a <<iref template>> definition, it sometimes
-happens that a value is undefined (i.e., is the empty string), and a
-default value must be inserted.  This command returns <i>aString</i>
-if it isn't empty; otherwise it returns <i>defaultValue</i>.<p>
-
 <</deflist>>
 
 <<section ENVIRONMENT>>
