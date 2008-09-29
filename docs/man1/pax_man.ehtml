@@ -1,0 +1,81 @@
+<<manpage {pax_man(1)} "Paxsim Man Page Tool">>
+
+<<section SYNOPSIS>>
+
+<<itemlist>>
+
+<<section DESCRIPTION>>
+
+<<deflist program>>
+
+<<defitem pax_man {pax_man ?<i>options...</i>?}>>
+
+<</deflist program>>
+
+pax_man(1) is a processor for man pages written in
+<<xref pax_man(5)>> format, an "Extended HTML" format,
+consisting of HTML text with embedded macros.  pax_man(1) expands the
+macros, and adds boilerplate and CSS formatting.<p>
+
+The tool is designed to process all of the ".ehtml" files in a source
+directory all at once, producing a matching ".html" page in the
+destination directory.<p>
+
+Man pages can define their own macros; the standard set is defined
+in <<xref pax_man(5)>>.<p>
+
+<<section OPTIONS>>
+
+TBD: This list of options needs to be extended now that pax_man(1) is
+used by client projects.<p>
+
+<<deflist options>>
+
+<<defopt {-version <i>x.y.z</i>}>>
+
+Specifies the client project's version number, for inclusion in the
+generated man pages.  Defaults to "x.y.z", as a placeholder.<p>
+
+<<defopt {-srcdir <i>path</i>}>>
+
+Specifies the source directory; pax_man(1) will process all ".ehtml"
+files found in the directory.  Defaults to ".", the current working
+directory.<p>
+
+<<defopt {-destdir <i>path</i>}>>
+
+Specifies the destination directory; pax_man(1) will write a
+"<tt><i>name</i>.html</tt>" file to this directory for each
+"<tt><i>name</i>.ehtml</tt>" file found in the source directory.
+Defaults to ".", the current working directory.<p>
+
+<<defopt {-section <i>title</i>}>>
+
+Specifies the section title for the collection of man pages in the
+<tt>-srcdir</tt>.  This section title will be used in the generated
+index page.<p>
+
+<</deflist options>>
+
+<<section ENVIRONMENT>>
+
+pax_man(1) requires Tcl 8.5 or later.
+
+To execute pax_man(1), the standard <tt>tclsh8.5(1)</tt> must be
+available on the <code>PATH</code>.<p>
+
+<<section AUTHOR>>
+
+Will Duquette<p>
+
+<<section HISTORY>>
+
+Originally written for JNEM as pax_man(1); migrated to Paxsim in
+September 2008.<p>
+
+<</manpage>>
+
+
+
+
+

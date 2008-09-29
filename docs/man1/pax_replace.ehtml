@@ -1,0 +1,44 @@
+<<manpage {pax_replace(1)} "Global search-and-replace tool">>
+
+<<section SYNOPSIS>>
+
+<<itemlist>>
+
+<<section DESCRIPTION>>
+
+<<deflist program>>
+
+<<defitem pax_replace {pax_replace <i>target replacement files...</i>}>>
+
+<</deflist program>>
+
+pax_replace(1) does a global-search-and-replace of the <i>target</i>
+with its <i>replacement</i> in each of the <i>files</i>.  The
+<i>target</i> is a string literal, not a regular expression.<p>
+
+The changes are made in place.  A backup file is made for each file
+which contains the target; the backup file's name is the original file
+name with a "~" appended to the end.<p>
+
+Files which do not contain the <i>target</i> are left untouched.<p>
+
+<<section ENVIRONMENT>>
+
+pax_replace(1) requires Tcl 8.5 or later.
+
+To execute pax_replace(1), the standard <tt>tclsh8.5(1)</tt> must be
+available on the <code>PATH</code>.<p>
+
+<<section AUTHOR>>
+
+Will Duquette<p>
+
+<<section HISTORY>>
+
+Originally written for JNEM as bulk_replace(1); migrated to Paxsim in
+September 2008.<p>
+
+<</manpage>>
+
+
+

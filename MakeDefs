@@ -1,0 +1,26 @@
+# -*-Makefile-*-
+#---------------------------------------------------------------------
+# TITLE:
+#    MakeDefs -- Standard Make Definitions
+#
+# AUTHOR:
+#    Will Duquette
+#
+# DESCRIPTION:
+#    The following definitions are used in all Paxsim Makefiles.
+#
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+# Settings
+
+# Set PAX_VERSION for development if it isn't set.
+ifndef PAX_VERSION
+    export PAX_VERSION = 1.x
+endif
+
+# Tools
+
+MAN_TOOL = $(TOP_DIR)/bin/pax_man
+DOC_TOOL = $(TOP_DIR)/bin/pax_doc -docroot $(DOC_ROOT)
+
