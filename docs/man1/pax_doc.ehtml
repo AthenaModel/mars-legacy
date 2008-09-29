@@ -1,4 +1,4 @@
-<<manpage {pax_doc(1)} "Paxsim Document Processor">>
+<<manpage {mars_doc(1)} "Mars Document Processor">>
 
 <<section SYNOPSIS>>
 
@@ -8,24 +8,24 @@
 
 <<deflist program>>
 
-<<defitem pax_doc {pax_doc ?<i>options...</i>? file.ehtml ?file.ehtml...?}>>
+<<defitem mars_doc {mars_doc ?<i>options...</i>? file.ehtml ?file.ehtml...?}>>
 
 <</deflist program>>
 
-pax_doc(1) is a program to convert <<xref pax_doc(5)>> documents
-into standard HTML.  The <<xref pax_doc(5)>> format is an
-"Extended HTML" format; <<xref pax_doc(5)>> input consists of
-arbitrary HTML text with embedded macros.  pax_doc(1)
+mars_doc(1) is a program to convert <<xref mars_doc(5)>> documents
+into standard HTML.  The <<xref mars_doc(5)>> format is an
+"Extended HTML" format; <<xref mars_doc(5)>> input consists of
+arbitrary HTML text with embedded macros.  mars_doc(1)
 expands the macros, producing a full-fledged HTML page.<p>
 
-Unlike <<xref pax_man(1)>>, which simply produces man pages,
-pax_doc(1) can be used for arbitrary documents.<p>
+Unlike <<xref mars_man(1)>>, which simply produces man pages,
+mars_doc(1) can be used for arbitrary documents.<p>
 
 The tool is designed to process all of the ".ehtml" files specified on
 its command-line, producing a matching ".html" file for each in the same
 directory.<p>
 
-The standard set of macros is defined in <<xref pax_doc(5)>>; in
+The standard set of macros is defined in <<xref mars_doc(5)>>; in
 addition, individual documents can define their own macros.<p>
 
 <<section OPTIONS>>
@@ -43,9 +43,9 @@ will need to be generalized.<p>
 
 <<section ENVIRONMENT>>
 
-pax_doc(1) requires Tcl 8.5 or later.
+mars_doc(1) requires Tcl 8.5 or later.
 
-To execute pax_doc(1), the standard <tt>tclsh8.5(1)</tt> must be
+To execute mars_doc(1), the standard <tt>tclsh8.5(1)</tt> must be
 available on the <code>PATH</code>.<p>
 
 <<section AUTHOR>>
@@ -54,10 +54,12 @@ Will Duquette<p>
 
 <<section HISTORY>>
 
-Originally written for JNEM as jnem_ehtml(1); migrated to Paxsim in
+Originally written for JNEM as jnem_ehtml(1); migrated to Mars in
 September 2008.
 
 <</manpage>>
+
+
 
 
 

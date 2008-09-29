@@ -1,4 +1,4 @@
-<<manpage pax_man(5) "Paxsim Man Page Format">>
+<<manpage mars_man(5) "Mars Man Page Format">>
 
 <<section SYNOPSIS>>
 
@@ -6,14 +6,14 @@
 
 <<section DESCRIPTION>>
 
-This man page defines the pax_man(5) man page format,
+This man page defines the mars_man(5) man page format,
 a flavor of "Extended HTML", i.e., HTML extended with Tcl macros.
-The <<xref pax_man(1)>> tool translates man pages in
-pax_man(5) format into HTML.<p>
+The <<xref mars_man(1)>> tool translates man pages in
+mars_man(5) format into HTML.<p>
 
 <<section "BASIC SYNTAX">>
 
-The majority of the content of a pax_man(5) man page is standard HTML
+The majority of the content of a mars_man(5) man page is standard HTML
 body text; the HTML &lt;html&gt;, &lt;head&gt;, and &lt;body&gt; tags
 are omitted.  Macros are entered in double angle brackets, like so:<p>
 
@@ -34,7 +34,7 @@ with the <<iref manpage>> macro and end with the <<iref /manpage>> macro:<p>
 
 <<section MACROS>>
 
-pax_man(5) man pages may use the following macros.  Note that these
+mars_man(5) man pages may use the following macros.  Note that these
 macros are simply Tcl commands; if you define your own macros
 (see <<xref "DEFINING MACROS">>) you can call them as such.<p>
 
@@ -50,7 +50,7 @@ the name of the man page; <i>description</i> is a short one-line
 description of the documented library, file format, or program:<p>
 
 <pre>
-<<lb>>manpage pax_man(5) "Paxsim Man Page Format"<<rb>>
+<<lb>>manpage mars_man(5) "Mars Man Page Format"<<rb>>
 </pre>
 
 The second form is used when the man page documents a submodule of a
@@ -230,8 +230,8 @@ section.
 <<lb>>xref SYNOPSIS<<rb>>
 </pre>
 
-If the <i>id</i> looks like a manpage reference, like "pax_man(5)",
-then it is assumed to name another Paxsim man page; <<iref xref>>
+If the <i>id</i> looks like a manpage reference, like "mars_man(5)",
+then it is assumed to name another Mars man page; <<iref xref>>
 links to it.  In this particular case, <i>anchor</i>, if present, is
 assumed to be an item within the man page.  For example,<p>
 
@@ -293,7 +293,7 @@ See <<xref "DEFINING MACROS">> for an example.<p>
 The <<iref exppass>> command, which generally is never used as a real
 macro, just returns the pass number, "1" or "2".<p>
 
-As described in <<xref "DEFINING MACROS">>, pax_man(1) makes two
+As described in <<xref "DEFINING MACROS">>, mars_man(1) makes two
 passes over each man page.  It accumulates table-of-contents
 information in the first pass, and actually outputs the formatted man
 page in the second.  If you're defining new macros, you might wish to
@@ -359,7 +359,7 @@ as a replacement for <<lb>>xref soandsolib(n)<<rb>>...."&lt;p&gt;
 
 <<section "DEFINING MACROS">>
 
-pax_man(5) macros have Tcl syntax; in fact, a macro can contain arbitrary Tcl
+mars_man(5) macros have Tcl syntax; in fact, a macro can contain arbitrary Tcl
 code.  In particular, the man page can define new
 macros using the standard Tcl <tt>proc</tt> command or the
 <<xref template(n) template>> command.  This is usually done in
@@ -378,7 +378,7 @@ using Tcl's <tt>clock</tt> command:<p>
 }<<rb>>
 </pre>
 
-When writing macros, remember that pax_man(1) makes <b>two passes</b>
+When writing macros, remember that mars_man(1) makes <b>two passes</b>
 over its input, and so every macro will be executed <b>twice</b>.
 This is usually only a problem when a macro is accumulating data into
 a Tcl variable in the first pass so that it can be used during the
@@ -394,9 +394,11 @@ Will Duquette<p>
 
 <<section HISTORY>>
 
-Originally written for JNEM as jnem_man(5); migrated to Paxsim in
+Originally written for JNEM as jnem_man(5); migrated to Mars in
 September 2008.<p>
 
 <</manpage>>
+
+
 
 

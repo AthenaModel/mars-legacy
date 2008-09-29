@@ -1,13 +1,14 @@
 #-------------------------------------------------------------------------
-#
 # TITLE:
-#	pkgIndex.tcl
+#    pkgIndex.tcl
 #
 # AUTHOR:
-#	William H. Duquette
+#    William H. Duquette
 #
 # DESCRIPTION:
-#	Paxsim: paxutil(n) package index file
+#    Mars: marsutil(n) package index file
 
-package ifneeded paxutil 1.0 [list source [file join $dir paxutil.tcl]]
+package ifneeded marsutil 1.0 [list source [file join $dir marsutil.tcl]]
+
+
 

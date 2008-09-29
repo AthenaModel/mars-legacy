@@ -5,7 +5,7 @@ exec tclsh8.5 "$0" "$@"
 
 #-----------------------------------------------------------------------
 # TITLE:
-#	pax_doc
+#	mars_doc
 #
 # AUTHOR:
 #	Will Duquette
@@ -26,13 +26,13 @@ exec tclsh8.5 "$0" "$@"
 package require textutil::expander
 
 #-------------------------------------------------------------------
-# Paxsim packages
+# Mars packages
 
 set bindir [file dirname [info script]]
 set auto_path [linsert $auto_path 0 [file join $bindir .. lib]]
 
-package require paxutil 1.0
-namespace import paxutil::*
+package require marsutil 1.0
+namespace import marsutil::*
 
 # Expander
 # 
@@ -408,25 +408,25 @@ proc addFigureId {id title} {
 #-----------------------------------------------------------------------
 # Simple Macros
 
-# The current Paxsim version
+# The current Mars version
 # TBD: Should be settable by the caller
 proc version {} {
     global env
 
-    if {![info exists env(PAX_VERSION)]} {
+    if {![info exists env(Mars_VERSION)]} {
         return x.y.z
     } else {
-        return $env(PAX_VERSION)
+        return $env(Mars_VERSION)
     }
 }
 
-# Paxsim Banner
+# Mars Banner
 # TBD: Should be settable by the caller
 template banner {} {
-    <h1 style="background: red;">&nbsp;Paxsim: Simulation Infrastructure</h1>
+    <h1 style="background: red;">&nbsp;Mars: Simulation Infrastructure</h1>
 }
 
-# The URL for Paxsim man pages
+# The URL for Mars man pages
 # TBD: Should be settable by the caller.
 # We'll probably need a list of man page directories.
 proc manurl {} {return $::docRoot}
@@ -738,7 +738,7 @@ template /change {} {
 # Main line code
 
 proc showhelp {} {
-    puts "Usage: pax_doc \[options\] file.ehtml..."
+    puts "Usage: mars_doc \[options\] file.ehtml..."
     puts ""
     puts "-docroot <relpath>    Top docs directory relative to file.ehtml"
     puts ""
@@ -784,6 +784,10 @@ foreach infile $argv {
 
     puts "Wrote $outfile"
 }
+
+
+
+
 
 
 

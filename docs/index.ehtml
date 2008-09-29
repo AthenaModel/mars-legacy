@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Paxsim <<version>>: Simulation Infrastructure Library</title>
+<title>Mars <<version>>: Simulation Infrastructure Library</title>
 </head>
 
 <body bgcolor="#F5F5F5" alink="Blue" link="Blue">
-<h1 style="background: red;">&nbsp;Paxsim <<version>>: Simulation
+<h1 style="background: red;">&nbsp;Mars <<version>>: Simulation
 Infrastructure Library</h1>
 
 <h2>Man Pages</h2>
@@ -31,3 +31,4 @@ to foreign countries or providing access to foreign nationals.<p>
 
 </body>
 </html>
+

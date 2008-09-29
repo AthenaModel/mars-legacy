@@ -1,4 +1,4 @@
-<<manpage pax_doc(5) "Paxsim Document Format">>
+<<manpage mars_doc(5) "Mars Document Format">>
 
 <<section SYNOPSIS>>
 
@@ -6,20 +6,20 @@
 
 <<section DESCRIPTION>>
 
-This man page defines the pax_doc(5) format for writing HTML
+This man page defines the mars_doc(5) format for writing HTML
 documents.  It is an "Extended HTML" format, i.e., it extends
-HTML with embedded macros.  It is similar to <<xref pax_man(5)>>, but
-is used for arbitrary documents.  <<xref pax_doc(1)>> translates
-pax_doc(5) files into standard HTML files.<p>
+HTML with embedded macros.  It is similar to <<xref mars_man(5)>>, but
+is used for arbitrary documents.  <<xref mars_doc(1)>> translates
+mars_doc(5) files into standard HTML files.<p>
 
-pax_doc(5) documents can contain automatically numbered and linked
+mars_doc(5) documents can contain automatically numbered and linked
 tables, figures, and sections; sections can be nested arbitrarily
 deeply, and the table of contents and lists of figures and tables can
 be generated automatically.<p>
 
 <<section "BASIC SYNTAX">>
 
-The majority of the content of a pax_doc(5) document is standard HTML
+The majority of the content of a mars_doc(5) document is standard HTML
 body text.  The author is responsible for the
 &lt;html&gt;, &lt;head&gt;, and &lt;body&gt; tags, and for any style
 sheet information; they are not added automatically.<p>
@@ -43,8 +43,8 @@ the <<iref table>> macro and end with the <<iref /table>> macro:<p>
 
 <<section "DOCUMENT STRUCTURE">>
 
-pax_doc(5) can be used to write any kind of document that can be
-represented in HTML.  If you wish to use pax_doc(5)'s automatic
+mars_doc(5) can be used to write any kind of document that can be
+represented in HTML.  If you wish to use mars_doc(5)'s automatic
 numbering and table-of-contents generation, your document will
 typically look like this:<p>
 
@@ -71,7 +71,7 @@ table has a unique identifier.
 
 <<subsection "Section Identifiers">>
 
-pax_doc(5) allows you to define automatically-numbered sections and
+mars_doc(5) allows you to define automatically-numbered sections and
 subsections.  Each section and subsection has an ID that uniquely
 identifies it; the ID also indicates how the section relates to its
 neighbors.<p>
@@ -94,7 +94,7 @@ numbered and titled as follows:<p>
   <li> 1.2 References</li>
 </ul><p>
 
-In the pax_doc(5) input, the section headers are written as follows:<p>
+In the mars_doc(5) input, the section headers are written as follows:<p>
 
 <pre>
     <<lb>>section intro "Introduction"<<rb>>
@@ -116,7 +116,7 @@ confused with section IDs.<p>
 
 <<section MACROS>>
 
-pax_doc(5) man pages may use the following macros, as well as all
+mars_doc(5) man pages may use the following macros, as well as all
 commands defined by the <<xref template(n)>>.  Note that these
 macros are simply Tcl commands; if you define your own macros
 (see <<xref "DEFINING MACROS">>) you can call them as such.<p>
@@ -161,7 +161,7 @@ figures if need be.<p>
 The <<iref exppass>> command is seldom actually used as a
 macro; it returns the pass number, "1" or "2".<p>
 
-As described in <<xref "DEFINING MACROS">>, pax_doc(1) makes two
+As described in <<xref "DEFINING MACROS">>, mars_doc(1) makes two
 passes over the document.  It accumulates table-of-contents
 information in the first pass, and actually outputs the formatted HTML
 file in the second.  If you're defining new macros, you might wish to
@@ -273,7 +273,7 @@ in the output.<p>
 
 <<defitem version {version}>>
 
-Returns the current Paxsim version, which is read from the PAX_VERSION
+Returns the current Mars version, which is read from the PAX_VERSION
 environment variable; if the environment variable is undefined, it
 returns "x.y.z".  <strong>TBD</strong>: This needs to be fixed.<p>
 
@@ -295,16 +295,16 @@ The valid cross-reference IDs are as follows:<p>
 
   <li> Any man page that exists in the same documentation tree.  Man
        page IDs look like "<i>name</i>(<i>section</i>)", e.g.,
-       "pax_doc(5)".  The HTML file for the man page is assumed to
+       "mars_doc(5)".  The HTML file for the man page is assumed to
        have the address<p>
 
        <i>root</i>/man<i>section</i>/<i>name</i>.html<p>
 
        where <i>root</i> is the root of the documentation tree.
        <i>root</i> is usually a relative path name, and defaults to
-       ".", the current working directory when <<xref pax_doc(1)>>
+       ".", the current working directory when <<xref mars_doc(1)>>
        is executed.  It can be specified explicitly using
-       <<xref pax_doc(1)>>'s <code>-docroot</code> option.<p>
+       <<xref mars_doc(1)>>'s <code>-docroot</code> option.<p>
 
   <li> Any ID registered using <<iref xrefset>>.  For example, the
        following macro registers a link to the Tcl linsert(n) man page:<p>
@@ -324,7 +324,7 @@ of the material.<p>
 
 <<section "DEFINING MACROS">>
 
-pax_doc(5) macros have Tcl syntax; in fact, a macro can contain
+mars_doc(5) macros have Tcl syntax; in fact, a macro can contain
 arbitrary Tcl 
 code.  In particular, the man page can define new
 macros using the standard Tcl <tt>proc</tt> command or the
@@ -344,7 +344,7 @@ using Tcl's <tt>clock</tt> command:<p>
 }<<rb>>
 </pre>
 
-When writing macros, remember that pax_doc(1) makes <b>two passes</b>
+When writing macros, remember that mars_doc(1) makes <b>two passes</b>
 over its input, and so every macro will be executed <b>twice</b>.
 This is usually only a problem when a macro is accumulating data into
 a Tcl variable in the first pass so that it can be used during the
@@ -360,9 +360,11 @@ Will Duquette<p>
 
 <<section HISTORY>>
 
-Originally written for JNEM as jnem_ehtml(5); migrated to Paxsim in
+Originally written for JNEM as jnem_ehtml(5); migrated to Mars in
 September 2008.
 
 <</manpage>>
+
+
 
 

@@ -47,7 +47,7 @@ all: $(TARGETS)
 # Target: man  -- Build man pages
 
 man:
-	$(MAN_TOOL) -version $(PAX_VERSION) -srcdir . -destdir . -section $(MANSECTION)
+	$(MAN_TOOL) -version $(MARS_VERSION) -srcdir . -destdir . -section $(MANSECTION)
 
 
 #---------------------------------------------------------------------

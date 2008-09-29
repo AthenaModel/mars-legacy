@@ -1,12 +1,12 @@
 #-----------------------------------------------------------------------
 # TITLE:
-#    paxutil.tcl
+#    marsutil.tcl
 #
 # AUTHOR:
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Paxsim: paxutil(n) Tcl Utilities
+#    Mars: marsutil(n) Tcl Utilities
 #
 #-----------------------------------------------------------------------
 
@@ -20,19 +20,19 @@ package require comm
 #-----------------------------------------------------------------------
 # Package Definition
 
-package provide paxutil 1.0
+package provide marsutil 1.0
 
 #-----------------------------------------------------------------------
 # Namespace definition
 
-namespace eval ::paxutil:: {
+namespace eval ::marsutil:: {
     variable library [file dirname [info script]]
 }
 
 #-------------------------------------------------------------------
 # Load binary extensions, if present.
 
-set binlib [file join $::paxutil::library libPaxutil.so]
+set binlib [file join $::marsutil::library libPaxutil.so]
 
 if {[file exists $binlib]} {
     load $binlib
@@ -44,4 +44,6 @@ if {[file exists $binlib]} {
 # Note: modules are listed in order of dependencies; be careful if you
 # change the order!
 
-source [file join $::paxutil::library template.tcl     ]
+source [file join $::marsutil::library template.tcl     ]
+
+

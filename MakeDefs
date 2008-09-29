@@ -7,20 +7,20 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    The following definitions are used in all Paxsim Makefiles.
+#    The following definitions are used in all Mars Makefiles.
 #
 #---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 # Settings
 
-# Set PAX_VERSION for development if it isn't set.
-ifndef PAX_VERSION
-    export PAX_VERSION = 1.x
+# Set MARS_VERSION for development if it isn't set.
+ifndef MARS_VERSION
+    export MARS_VERSION = 1.x
 endif
 
 # Tools
 
-MAN_TOOL = $(TOP_DIR)/bin/pax_man
-DOC_TOOL = $(TOP_DIR)/bin/pax_doc -docroot $(DOC_ROOT)
+MAN_TOOL = $(TOP_DIR)/bin/mars_man
+DOC_TOOL = $(TOP_DIR)/bin/mars_doc -docroot $(DOC_ROOT)
 

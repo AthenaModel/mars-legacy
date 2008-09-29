@@ -16,7 +16,7 @@
 #-----------------------------------------------------------------------
 # Export Public Commands
 
-namespace eval ::paxutil:: {
+namespace eval ::marsutil:: {
     namespace export tsubst
     namespace export template
     namespace export tforeach
@@ -49,7 +49,7 @@ namespace eval ::paxutil:: {
 #   from the beginning of each successive line.  Finally, subst is
 #   called on the modified template, and the result is returned.
 
-proc ::paxutil::tsubst {tstring} {
+proc ::marsutil::tsubst {tstring} {
     # If the string begins with the indent mark, process it.
     if {[regexp {^(\s*)\|<--[^\n]*\n(.*)$} $tstring dummy leader body]} {
 
@@ -88,7 +88,7 @@ proc ::paxutil::tsubst {tstring} {
 #   be used in the template string, including declaring
 #   global variables.
 
-proc ::paxutil::template {name arglist initbody {template ""}} {
+proc ::marsutil::template {name arglist initbody {template ""}} {
     # FIRST, have we an initbody?
     if {"" == $template} {
         set template $initbody
@@ -123,7 +123,7 @@ proc ::paxutil::template {name arglist initbody {template ""}} {
 #   result.  The subst is done in the caller's context; the index
 #   variables are available as well.
 
-proc ::paxutil::tforeach {vars items initbody {template ""}} {
+proc ::marsutil::tforeach {vars items initbody {template ""}} {
     # FIRST, have we an initbody?
     if {"" == $template} {
         set template $initbody
@@ -166,7 +166,7 @@ proc ::paxutil::tforeach {vars items initbody {template ""}} {
 #   Calls subst in the caller's context on either thenbody or
 #   elsebody, depending on whether condition is true or not.
 
-proc ::paxutil::tif {condition thenbody {"else" "else"} {elsebody ""}} {
+proc ::marsutil::tif {condition thenbody {"else" "else"} {elsebody ""}} {
     # FIRST, evaluate the condition
     set flag [uplevel 1 [list expr $condition]]
 
@@ -190,7 +190,7 @@ proc ::paxutil::tif {condition thenbody {"else" "else"} {elsebody ""}} {
 #   Evaluates its body in the caller's context, but always returns
 #   the empty string.
 
-proc ::paxutil::swallow {body} {
+proc ::marsutil::swallow {body} {
     uplevel 1 $body
     return
 }
@@ -211,7 +211,7 @@ proc ::paxutil::swallow {body} {
 #   If the string is not empty, returns it; otherwise, returns
 #   the default value.
 
-proc ::paxutil::defval {aString defaultValue} {
+proc ::marsutil::defval {aString defaultValue} {
     if {"" != $aString} {
         return $aString
     } else {
@@ -246,10 +246,11 @@ snit::macro template {proctype name arglist initbody {template ""}} {
 
     # NEXT, define the body of the new proc so that the initbody, 
     # if any, is executed and then the substitution is 
-    set body "$initbody\n    ::paxutil::tsubst [list $template]\n"
+    set body "$initbody\n    ::marsutil::tsubst [list $template]\n"
 
     # NEXT, define
     uplevel 1 [list $proctype $name $arglist $body]
 }
+
 
 

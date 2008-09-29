@@ -5,7 +5,7 @@ exec tclsh8.5 "$0" "$@"
 
 #-----------------------------------------------------------------------
 # TITLE:
-#	pax_replace
+#	mars_replace
 #
 # AUTHOR:
 #	Will Duquette
@@ -65,7 +65,7 @@ proc ReplaceString {target replacement file} {
         return
     }
 
-    puts "pax_replace: $file"
+    puts "mars_replace: $file"
 
     # NEXT, backup the file
     set backup "$file~"
@@ -88,7 +88,7 @@ proc ReplaceString {target replacement file} {
 # Display the usage syntax for the command.
 
 proc ShowUsage {} {
-    puts "Usage: pax_replace target replacement files..."
+    puts "Usage: mars_replace target replacement files..."
 }
 
 
@@ -98,6 +98,7 @@ proc ShowUsage {} {
 # Run the program
 
 main $argv
+
 
 
 
