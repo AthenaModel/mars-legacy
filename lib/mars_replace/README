@@ -1,0 +1,6 @@
+mars_replace(n)
+-----------------------------------------------------------------
+
+This directory contains the mars_replace(n) package, which
+implements the mars_replace(1) tool.
+

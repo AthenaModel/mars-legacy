@@ -59,7 +59,7 @@ proc cpop {cname}         { theExpander cpop $cname }
 proc cpush {cname}        { theExpander cpush $cname }
 proc cset {varname value} { theExpander cset $varname $value }
 
-# Process a file and return the expanded output.
+# Process a file and retaurn the expanded output.
 
 proc expandFile {name} {
     # Pass 1 -- for indexing

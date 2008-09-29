@@ -32,7 +32,7 @@ namespace eval ::marsutil:: {
 #-------------------------------------------------------------------
 # Load binary extensions, if present.
 
-set binlib [file join $::marsutil::library libPaxutil.so]
+set binlib [file join $::marsutil::library libMarsutil.so]
 
 if {[file exists $binlib]} {
     load $binlib
@@ -44,6 +44,7 @@ if {[file exists $binlib]} {
 # Note: modules are listed in order of dependencies; be careful if you
 # change the order!
 
-source [file join $::marsutil::library template.tcl     ]
+source [file join $::marsutil::library marsmisc.tcl ]
+source [file join $::marsutil::library template.tcl ]
 
 

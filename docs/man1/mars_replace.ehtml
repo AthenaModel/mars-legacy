@@ -1,4 +1,4 @@
-<<manpage {mars_replace(1)} "Global search-and-replace tool">>
+<<manpage {mars(1) mars_replace(1)} "Global search-and-replace tool">>
 
 <<section SYNOPSIS>>
 
@@ -8,7 +8,7 @@
 
 <<deflist program>>
 
-<<defitem mars_replace {mars_replace <i>target replacement files...</i>}>>
+<<defitem mars_replace {mars replace <i>target replacement files...</i>}>>
 
 <</deflist program>>
 
@@ -24,10 +24,7 @@ Files which do not contain the <i>target</i> are left untouched.<p>
 
 <<section ENVIRONMENT>>
 
-mars_replace(1) requires Tcl 8.5 or later.
-
-To execute mars_replace(1), the standard <tt>tclsh8.5(1)</tt> must be
-available on the <code>PATH</code>.<p>
+mars_replace(1) is a sub-module of <<xref mars(1)>>
 
 <<section AUTHOR>>
 

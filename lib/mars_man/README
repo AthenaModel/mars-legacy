@@ -1,0 +1,7 @@
+mars_man(n)
+-----------------------------------------------------------------
+
+This directory contains the mars_man(n) package, which
+implements the mars_man(1) tool.
+
+
