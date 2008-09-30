@@ -78,19 +78,19 @@ package require Tcl 8.5
 set metadata {
     doc {
         text     "Document Processor"
-        applib   mars_doc
+        applib   app_doc
         mode     cmdline
     }
 
     man {
         text     "Man Page Processor"
-        applib   mars_man
+        applib   app_man
         mode     cmdline
     }
 
     replace {
         text     "Global Search-and-Replace Tool"
-        applib   mars_replace
+        applib   app_replace
         mode     cmdline
     }
 }

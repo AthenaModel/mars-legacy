@@ -160,21 +160,21 @@ snit::type app {
                 default {
                     puts stderr "Unknown option: '$opt'."
 
-                    showhelp
+                    ShowUsage
                     exit 1
                 }
             }
         }
 
         if {[llength $argv] != 0} {
-            showhelp
+            ShowUsage
             exit 1
         }
 
         set files [glob -nocomplain $srcdir/*.ehtml]
 
         if {[llength $files] == 0} {
-            showhelp
+            ShowUsage
             exit
         }
 

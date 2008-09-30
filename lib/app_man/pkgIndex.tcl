@@ -7,10 +7,10 @@
 #	William H. Duquette
 #
 # DESCRIPTION:
-#	JNEM: mars_replace(n) package index file
+#	JNEM: app_man(n) package index file
 
-package ifneeded mars_replace 1.0 \
-    [list source [file join $dir mars_replace.tcl]]
+package ifneeded app_man 1.0 \
+    [list source [file join $dir mars_man.tcl]]
 
 
 
