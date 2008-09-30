@@ -1,12 +1,12 @@
 #-----------------------------------------------------------------------
 # TITLE:
-#	mars_man.tcl
+#	app_man.tcl
 #
 # AUTHOR:
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: mars_man(n) loader
+#       JNEM: app_man(n) loader
 #
 #-----------------------------------------------------------------------
 
@@ -16,12 +16,12 @@
 # Because this is an application package, the namespace is mostly
 # unused.
 
-namespace eval ::mars_man:: {
+namespace eval ::app_man:: {
     variable library [file dirname [info script]]
 }
 
 #-----------------------------------------------------------------------
-# Provide the mars_man(n) package
+# Provide the app_man(n) package
 
 package provide app_man 1.0
 
@@ -38,9 +38,10 @@ package require marsutil
 namespace import ::marsutil::*
 
 #-----------------------------------------------------------------------
-# Load mars_man(n) submodules
+# Load app_man(n) submodules
 
-source [file join $::mars_man::library app.tcl  ]
+source [file join $::app_man::library app.tcl  ]
+
 
 
 

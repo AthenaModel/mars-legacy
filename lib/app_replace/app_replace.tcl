@@ -1,12 +1,12 @@
 #-----------------------------------------------------------------------
 # TITLE:
-#	mars_replace.tcl
+#	app_replace.tcl
 #
 # AUTHOR:
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: mars_replace(n) loader
+#       JNEM: app_replace(n) loader
 #
 #-----------------------------------------------------------------------
 
@@ -16,12 +16,12 @@
 # Because this is an application package, the namespace is mostly
 # unused.
 
-namespace eval ::mars_replace:: {
+namespace eval ::app_replace:: {
     variable library [file dirname [info script]]
 }
 
 #-----------------------------------------------------------------------
-# Provide the mars_replace(n) package
+# Provide the app_replace(n) package
 
 package provide app_replace 1.0
 
@@ -37,9 +37,10 @@ package require marsutil
 namespace import ::marsutil::*
 
 #-----------------------------------------------------------------------
-# Load mars_replace(n) submodules
+# Load app_replace(n) submodules
 
-source [file join $::mars_replace::library app.tcl]
+source [file join $::app_replace::library app.tcl]
+
 
 
 

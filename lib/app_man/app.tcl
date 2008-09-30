@@ -10,11 +10,11 @@
 #
 #    This module defines app, the application ensemble.
 #
-#        package require mars_man
+#        package require app_man
 #        app init $argv
 #
-#    This program is a document processor for mars_man(5) man page
-#    format.  mars_man(5) man pages are written in "Extended HTML", 
+#    This program is a document processor for app_man(5) man page
+#    format.  app_man(5) man pages are written in "Extended HTML", 
 #    i.e., HTML extended with Tcl macros.  It automatically generates
 #    tables of contents, etc., and provides easy linking to other
 #    man pages.
@@ -532,7 +532,7 @@ current working directory.
         
         [tif {$mktreeFlag} {
             |<--
-            [readfile [file join $::mars_man::library mktree.js]]
+            [readfile [file join $::app_man::library mktree.js]]
         }]
 
         </head>
@@ -768,6 +768,9 @@ current working directory.
         </ul>
     }
 }
+
+
+
 
 
 

@@ -10,7 +10,8 @@
 #	JNEM: app_replace(n) package index file
 
 package ifneeded app_replace 1.0 \
-    [list source [file join $dir mars_replace.tcl]]
+    [list source [file join $dir app_replace.tcl]]
+
 
 
 

@@ -1,7 +1,9 @@
-mars_man(n)
+app_man(n)
 -----------------------------------------------------------------
 
-This directory contains the mars_man(n) package, which
+This directory contains the app_man(n) package, which
 implements the mars_man(1) tool.
+
+
 
 

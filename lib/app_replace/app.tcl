@@ -10,7 +10,7 @@
 #
 #    This module defines app, the application ensemble.
 #
-#        package require mars_replace
+#        package require app_replace
 #        app init $argv
 #
 #    This program is a bulk search-and-replace tool.  Given a pair
@@ -78,7 +78,7 @@ snit::type app {
             return
         }
 
-        puts "mars_replace: $file"
+        puts "app_replace: $file"
 
         # NEXT, backup the file
         set backup "$file~"
@@ -93,6 +93,9 @@ snit::type app {
         close $f
     }
 }
+
+
+
 
 
 
