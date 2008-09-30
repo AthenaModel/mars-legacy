@@ -69,7 +69,7 @@ snit::type app {
     #-------------------------------------------------------------------
     # Type Variables
 
-    ;# Which expansion pass we're on, pass 1 or pass 2
+    # Which expansion pass we're on, pass 1 or pass 2
     typevariable pass 1
 
     # Mars Version Number
