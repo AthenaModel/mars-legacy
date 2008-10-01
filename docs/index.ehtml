@@ -1,11 +1,13 @@
 <html>
 <head>
 <title>Mars <<version>>: Simulation Infrastructure Library</title>
+<style>
+<<standardstyle>>
+</style>
 </head>
 
-<body bgcolor="#F5F5F5" alink="Blue" link="Blue">
-<h1 style="background: red;">&nbsp;Mars <<version>>: Simulation
-Infrastructure Library</h1>
+<body>
+<<banner>>
 
 <h2>Man Pages</h2>
 

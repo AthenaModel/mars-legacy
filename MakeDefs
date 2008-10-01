@@ -22,7 +22,7 @@ endif
 # Directories
 DOC_ROOT = $(TOP_DIR)/docs
 
-# Tools
+# Toosl
 
 MAN_TOOL = $(TOP_DIR)/bin/mars man -version $(MARS_VERSION)
 DOC_TOOL = $(TOP_DIR)/bin/mars doc -docroot $(DOC_ROOT) -version $(MARS_VERSION)
