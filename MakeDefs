@@ -21,6 +21,6 @@ endif
 
 # Tools
 
-MAN_TOOL = $(TOP_DIR)/bin/mars_man
+MAN_TOOL = $(TOP_DIR)/bin/mars man
 DOC_TOOL = $(TOP_DIR)/bin/mars_doc -docroot $(DOC_ROOT)
 

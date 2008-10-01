@@ -25,7 +25,7 @@ Many macros occur in pairs; for example, every man page will begin
 with the <<iref manpage>> macro and end with the <<iref /manpage>> macro:<p>
 
 <pre>
-<<lb>>manpage somelib(n)<<rb>>
+<<lb>>manpage somelib(n) "Some Library Or Other"<<rb>>
     .
     .
     .
@@ -34,9 +34,11 @@ with the <<iref manpage>> macro and end with the <<iref /manpage>> macro:<p>
 
 <<section MACROS>>
 
-mars_man(5) man pages may use the following macros.  Note that these
-macros are simply Tcl commands; if you define your own macros
-(see <<xref "DEFINING MACROS">>) you can call them as such.<p>
+mars_man(5) man pages may use any of the following macros, as well
+as those defined in the <<xref mars_ehtml(5)>> man page.
+Note that these macros are simply Tcl commands; you can define
+your own macros as described in <<xref "DEFINING MACROS">>,
+and use them in your man pages.<p>
 
 <<deflist macros>>
 
@@ -288,18 +290,6 @@ because it returns nothing, it doesn't affect the output.<p>
 
 See <<xref "DEFINING MACROS">> for an example.<p>
 
-<<defitem exppass {exppass}>>
-
-The <<iref exppass>> command, which generally is never used as a real
-macro, just returns the pass number, "1" or "2".<p>
-
-As described in <<xref "DEFINING MACROS">>, mars_man(1) makes two
-passes over each man page.  It accumulates table-of-contents
-information in the first pass, and actually outputs the formatted man
-page in the second.  If you're defining new macros, you might wish to
-do the same; in this case, your macros will need to be able to
-distinguish between the passes.<p>
-
 <<defitem mktree {mktree}>>
 
 If included anywhere in the man page, this macro enables use of the
@@ -372,7 +362,7 @@ using Tcl's <tt>clock</tt> command:<p>
 
 <pre>
 <<lb>>swallow {
-    proc timestamp {} {
+    proc ::marsutil::ehtml::macro timestamp {} {
         return [clock format [clock seconds]]
     }
 }<<rb>>
@@ -385,8 +375,8 @@ a Tcl variable in the first pass so that it can be used during the
 second pass (e.g., to output an accumulated list, such as a table of
 contents).<p>
 
-In such a case, the macro can use <<iref exppass>> to find out which
-pass it is.<p>
+In such a case, the macro can use <<xref ehtml(n)>>'s
+<<xref ehtml(n) pass>> method to find out which pass it is.<p>
 
 <<section AUTHOR>>
 

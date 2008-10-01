@@ -14,6 +14,7 @@
 # Package Dependencies
 
 package require snit    2.2
+package require textutil::expander
 package require sqlite3 3.5
 package require comm
 
@@ -46,5 +47,6 @@ if {[file exists $binlib]} {
 
 source [file join $::marsutil::library marsmisc.tcl ]
 source [file join $::marsutil::library template.tcl ]
+source [file join $::marsutil::library ehtml.tcl    ]
 
 

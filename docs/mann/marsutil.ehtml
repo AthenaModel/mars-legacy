@@ -25,6 +25,7 @@ marsutil(n) includes the following submodules:<p>
   <li> <<xref cmdinfo(n)>> -- Tcl Command Introspection</li>
   <li> <<xref commclient(n)>> -- commserver(n) client</li>
   <li> <<xref commserver(n)>> -- comm(n) command server</li>
+  <li> <<xref ehtml(n)>> -- Extended HTML Processor</li>
   <li> <<xref enum(n)>> -- Enumerated value definition type</li>
   <li> <<xref eventq(n)>> -- Simulation Event Queue</li>
   <li> <<xref geometry(n)>> -- Geometry Utilities</li>

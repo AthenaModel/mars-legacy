@@ -29,7 +29,6 @@ package provide app_man 1.0
 # Require infrastructure packages
 
 # From Tcllib
-package require textutil::expander
 package require snit
 
 # Mars Packages
@@ -40,13 +39,4 @@ namespace import ::marsutil::*
 #-----------------------------------------------------------------------
 # Load app_man(n) submodules
 
-source [file join $::app_man::library app.tcl  ]
-
-
-
-
-
-
-
-
-
+source [file join $::app_man::library app.tcl   ]

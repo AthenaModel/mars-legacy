@@ -33,44 +33,24 @@ snit::type app {
     typeconstructor {
         # Export macros
         namespace export \
-            cget         \
-            contents     \
-            cpop         \
-            cpush        \
-            cset         \
             defitem      \
             deflist      \
             /deflist     \
             defopt       \
-            expand       \
-            expandFile   \
-            exppass      \
-            hrule        \
             indexfile    \
             indexlist    \
             iref         \
             itemlist     \
-            lb           \
-            link         \
             manpage      \
             /manpage     \
             manurl       \
             mktree       \
-            nbsp         \
-            rb           \
             section      \
-            subsection   \
-            textToID     \
-            xref         \
-            xrefset
-            
+            subsection
     }
 
     #-------------------------------------------------------------------
     # Type Variables
-
-    # Which expansion pass we're on, pass 1 or pass 2
-    typevariable pass 1
 
     # Mars Version Number
     typevariable version x.y.z 
@@ -86,9 +66,6 @@ snit::type app {
 
     # The relative URL for man pages.
     typevariable manurl ".."
-
-    # An array of additional xref links
-    array set xreflinks {}
 
     # An array: key is module name, value is list of submodules.
     # modules with no parent are under submodule().
@@ -122,14 +99,12 @@ snit::type app {
     # This the main program.
 
     typemethod init {argv} {
-        # FIRST, create and configure the expander
-        textutil::expander theExpander
-
-        theExpander lb "<<"
-        theExpander rb ">>"
+        # FIRST, initialize the ehtml processor.
+        ehtml init
+        ehtml xrefhook [mytypemethod XrefHook]
 
         # NEXT, import the macros
-        namespace eval :: { namespace import ::app::* }
+        ehtml import ::app::*
         
         while {[string match "-*" [lindex $argv 0]]} {
             set opt [lindex $argv 0]
@@ -182,7 +157,7 @@ snit::type app {
             set manfile [file tail [file root $infile]].html
             set outfile [file join $destdir $manfile]
 
-            if {[catch {expandFile $infile} output]} {
+            if {[catch {ehtml expandFile $infile} output]} {
                 puts stderr $output
                 exit 1
             }
@@ -198,6 +173,38 @@ snit::type app {
         puts $f [indexfile]
         close $f
     }
+
+    #-------------------------------------------------------------------
+    # Hooks and Handlers
+
+    # XrefHook id anchor
+    #
+    # id       The XREF id of the page to link to
+    # anchor   The anchor text, if different
+    #
+    # Returns links to a Links to a section or manpage.
+
+    typemethod XrefHook {id anchor} {
+        set url           ""
+        set defaultAnchor ""
+
+
+        # Is it a man page?  Or a section title?
+        if {[regexp {^([^()]+)\(([1-9in])\)$} $id dummy name section]} {
+            set url "[manurl]/man$section/$name.html"
+            
+            if {$anchor ne ""} {
+                append url "#[ehtml textToID $anchor]"
+            }
+
+            set defaultAnchor $id
+        } elseif {[lsearch -exact $sections $id] != -1} {
+            set url "#[ehtml textToID $id]"
+            set defaultAnchor $id
+        }
+
+        return [list $url $defaultAnchor]
+    } 
 
     #-------------------------------------------------------------------
     # Utility Routines
@@ -221,120 +228,8 @@ current working directory.
 }
     }
 
-    #-------------------------------------------------------------------
-    # Macros
-
-    # lb
-    #
-    # Return the left bracket sequence
-    proc lb {} { 
-        return "&lt;&lt;" 
-    }
-
-    # rb
-    #
-    # Return the right bracket sequence
-
-    proc rb {} { 
-        return "&gt;&gt;" 
-    }
-
-    # exppass
-    #
-    # Return the expansion pass number, 1 or 2
-
-    proc exppass {} { 
-        return $pass 
-    }
-
-    # cget varname
-    #
-    # varname    A cset variable name.
-    #
-    # Get the value of the expansion stack variable
-
-    proc cget {varname} { 
-        theExpander cget $varname 
-    }
-
-    # cpop cname
-    #
-    # cname    Name of a pushed expansion stack level
-    #
-    # Pop an expansion stack level
-
-    proc cpop {cname} { 
-        theExpander cpop $cname 
-    }
-
-    # cpush cname
-    #
-    # cname    Name of an expansion stack level
-    #
-    # Push a stack level; use cset and cget to associated variables
-    # with it.
-
-    proc cpush {cname} { 
-        theExpander cpush $cname 
-    }
-
-    # cset varname value
-    #
-    # varname    An expansion stack variable
-    # value      A value
-    #
-    # Assigns the value to the expansion stack level.
-
-    proc cset {varname value} { 
-        theExpander cset $varname $value 
-    }
-
-    # expandFile name
-    #
-    # name    An input file name
-    #
-    # Process a file and return the expanded output.
-
-    proc expandFile {name} {
-        # Pass 1 -- for indexing
-        set f [open $name]
-        set input [read $f]
-        close $f
-
-        set pass 1
-        theExpander expand $input
-
-        set pass 2
-        return [theExpander expand $input]
-    }
-
-    # Converts a generic string to an ID string.  Leading and trailing
-    # whitespace and internal punctuation is removed, internal whitespace
-    # is converted to "_", and the text is converted to lower case.
-    proc textToID {text} {
-        # First, trim any white space and convert to lower case
-        set text [string trim [string tolower $text]]
-        
-        # Next, substitute "_" for internal whitespace, and delete any
-        # non-alphanumeric characters (other than "_", of course)
-        regsub -all {[ ]+} $text "_" text
-        regsub -all {[^a-z0-9_/]} $text "" text
-        
-        return $text
-    }
-
     #-----------------------------------------------------------------------
     # Simple Macros
-
-    # expand text
-    #
-    # text   Input text
-    #
-    # Recursive expansion
-
-    proc expand {text} {
-        return [theExpander expand $text]
-    }
 
     # manurl
     #
@@ -344,93 +239,6 @@ current working directory.
         return $manurl
     }
 
-    # nbsp text
-    #
-    # text    A text string
-    #
-    # Makes a string nonbreaking, normalizing spaces.
-    proc nbsp {text} {
-        set text [string trim $text]
-        regsub {\s\s+} $text " " text
-
-        return [string map {" " &nbsp;} $text]
-    }
-
-    # hrule
-    #
-    # Horizontal rule
-
-    template proc hrule {} {<p><hr></p>}
-
-    # link url ?anchor?
-    #
-    # url     The URL to link to
-    # anchor  The text to display, if different
-    #
-    # Creates an HTML link
-
-    template proc link {url {anchor ""}} {
-        if {$anchor eq ""} {
-            set anchor $url
-        }
-    } {<a href="$url">$anchor</a>}
-
-
-    #-----------------------------------------------------------------------
-    # Cross-references
-
-    # xrefset id anchor url
-    #
-    # id        Name to be used in <<xref ...>> macro
-    # anchor    The text to be displayed as an anchor
-    # url       The URL to link to.
-    #
-    # Define an ad-hoc cross reference.
-    proc xrefset {id anchor url} {
-        set xreflinks($id) [list $anchor $url]
-        
-        # Return nothing, so that this can be used in macros.
-        return ""
-    }
-
-    # xref id ?anchor?
-    #
-    # id       The XREF id of the page to link to
-    # anchor   The anchor text, if different
-    #
-    # Links to a section or manpage.
-
-    proc xref {id {anchor ""}} {
-        if {[exppass] == 1} {
-            return
-        }
-
-        set subtopic {}
-
-        if {[info exists xreflinks($id)]} {
-            set url [lindex $xreflinks($id) 1]
-            set defaultAnchor [lindex $xreflinks($id) 0]
-        } elseif {[regexp {^([^()]+)\(([1-9in])\)$} $id dummy name section]} {
-            set url "[manurl]/man$section/$name.html"
-            set defaultAnchor $id
-            set subtopic "#[textToID $anchor]"
-        } elseif {[string match "http:*" $id]} {
-            set url $id
-            set defaultAnchor $id
-        } elseif {[lsearch -exact $sections $id] != -1} {
-            set url "#[textToID $id]"
-            set defaultAnchor $id
-        } else {
-            puts "Warning: xref: unknown id '$id'"
-            return "[lb]xref $id[rb]"
-        }
-        
-        if {$anchor eq ""} {
-            set anchor $defaultAnchor
-        }
-
-        return "<a href=\"$url$subtopic\">$anchor</a>"
-    } 
 
     #-------------------------------------------------------------------
     # Javascripts
@@ -457,7 +265,7 @@ current working directory.
 
         if {[llength $nameList] > 1} {
             set parent [lindex $nameList 0]
-            set parentRef ", submodule of [xref $parent]"
+            set parentRef ", submodule of [ehtml xref $parent]"
             set titleParentRef ", submodule of $parent"
         } else {
             set parent ""
@@ -465,7 +273,7 @@ current working directory.
             set titleParentRef ""
         }
 
-        if {[exppass] == 1} {
+        if {[ehtml pass] == 1} {
             set items {}
             array unset itemtext
             array unset optsfor
@@ -566,8 +374,8 @@ current working directory.
 
     template proc section {name} {
         set name [string toupper $name]
-        set id [textToID $name]
-        if {[exppass] == 1} {
+        set id [ehtml textToID $name]
+        if {[ehtml pass] == 1} {
             lappend sections $name 
         }
 
@@ -584,10 +392,10 @@ current working directory.
     # Begins a subsection of a major section
 
     template proc subsection {name} {
-        set id [textToID $name]
-        if {[exppass] == 1} {
+        set id [ehtml textToID $name]
+        if {[ehtml pass] == 1} {
             lappend subsections($curSection) $name 
-            xrefset $name $name "#$id"
+            ehtml xrefset $name $name "#$id"
         }
     } {
         |<--
@@ -602,12 +410,12 @@ current working directory.
         |<--
         <ul>
         [tforeach name $sections {
-            <li><a href="#[textToID $name]">$name</a></li>
+            <li><a href="#[ehtml textToID $name]">$name</a></li>
             [tif {[info exists subsections($name)]} {
                 |<--
                 <ul>
                 [tforeach subname $subsections($name) {
-                    <li><a href="#[textToID $subname]">$subname</a></li>
+                    <li><a href="#[ehtml textToID $subname]">$subname</a></li>
                 }]
                 </ul>
             }]
@@ -646,7 +454,7 @@ current working directory.
         set itemtext($item) $text
     } {
         |<--
-        <dt><b><tt><a name="[textToID $item]">$text</a></tt></b></dt>
+        <dt><b><tt><a name="[ehtml textToID $item]">$text</a></tt></b></dt>
         <dd>
     }
 
@@ -659,7 +467,7 @@ current working directory.
         |<--
         [tforeach tag $items {
             |<--
-            <tt><a href="#[textToID $tag]">$itemtext($tag)</a></tt><br>
+            <tt><a href="#[ehtml textToID $tag]">$itemtext($tag)</a></tt><br>
             [tif {[info exists optsfor($tag)]} {
                 |<--
                 [tforeach opt $optsfor($tag) {
@@ -680,12 +488,12 @@ current working directory.
     proc iref {args} {
         set tag $args
 
-        if {[exppass] == 1} {
+        if {[ehtml pass] == 1} {
             return
         }
 
         if {[lsearch -exact $items $tag] != -1} {
-            return "<tt><a href=\"#[textToID $tag]\">$tag</a></tt>"
+            return "<tt><a href=\"#[ehtml textToID $tag]\">$tag</a></tt>"
         } else {
             puts stderr "Warning, iref not found: '$tag'"
             return "<tt>$tag</tt>"
@@ -757,7 +565,7 @@ current working directory.
         [tforeach mod [lsort $modules] {
             |<--
             <li>
-            [xref $mod]: $module($mod)
+            [ehtml xref $mod]: $module($mod)
             [tif {[info exists submodule($mod)]} {
                 |<--
                 [indexlist $submodule($mod)]
