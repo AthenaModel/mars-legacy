@@ -53,7 +53,7 @@ snit::type app {
     # Type Variables
 
     # Mars Version Number
-    typevariable version x.y.z 
+    typevariable version 1.x
 
     # Source directory
     typevariable srcdir "."
@@ -299,6 +299,9 @@ current working directory.
             margin-left: 6%;
             margin-right: 6%;
         }
+        h1 {
+            margin-left: -5%;
+        }
         h2 {
             margin-left: -5%;
         }
@@ -346,11 +349,26 @@ current working directory.
         </head>
 
         <body>
+        [Banner]
+
         [section NAME]
 
-        $name -- $description$parentRef
+        <b>$name</b> -- $description$parentRef
         
         [contents]
+    }
+
+    # Banner
+    #
+    # Returns the current project banner.
+    #
+    # TBD: Should be settable by the caller
+
+    template proc Banner {} {
+        |<--
+        <h1 style="background: red;">
+        &nbsp;Mars $version: Simulation Infrastructure Library
+        </h1>
     }
 
     # /manpage
@@ -536,12 +554,13 @@ current working directory.
         body {
             color: black;
             background: white;
-            margin-left: 5%;
-            margin-right: 5%;
+            margin-left: 1%;
+            margin-right: 1%;
         }
         </style>
         </head>
         <body>
+        [Banner]
         <h2>$title</h2>
         <hr>
 
@@ -576,17 +595,5 @@ current working directory.
         </ul>
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
