@@ -765,69 +765,6 @@ snit::type app {
     }
 
     #-------------------------------------------------------------------
-    # Change Log
-
-    # changelog
-    #
-    # Begins a change log 
-    #
-    # TBD: Consider moving to ehtml(n).
-
-    template proc changelog {} {
-        |<--
-        <table border width="100%" cellpadding="2" cellspacing="0">
-        <tr>
-        <th align="left" width="10%">Status</th>
-        <th align="left" width="70%">Nature of Change</th>
-        <th align="left" width="10%">Date</th>
-        <th align="left" width="10%">Initiator</th>
-        </tr>
-    }
-
-    # /changelog
-    #
-    # Ends a change log
-
-    template proc /changelog {} {
-        |<--
-        </table><p>
-    }
-
-    # change date status initiator
-    #
-    # date       Date of change
-    # status     Kind of change
-    # initiator  Author of the change.
-    #
-    # Begins a change entry.  The description appears between
-    # <<change>> and <</change>>.
-
-    proc change {date status initiator} {
-        ehtml cpush change
-        ehtml cset date      [ehtml nbsp $date]
-        ehtml cset status    [ehtml nbsp $status]
-        ehtml cset initiator [ehtml nbsp $initiator]
-        return
-    }
-
-    # Ends a change entry
-    template proc /change {} {
-        set date      [ehtml cget date]
-        set status    [ehtml cget status]
-        set initiator [ehtml cget initiator]
-
-        set description [ehtml cpop change]
-    } {
-        |<--
-        <tr valign=top>
-        <td>$status</td>
-        <td>$description</td>
-        <td>$date</td>
-        <td>$initiator</td>
-        </tr>
-    }
-
-    #-------------------------------------------------------------------
     # Miscellaneous Macros
 
     # version
