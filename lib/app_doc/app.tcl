@@ -102,8 +102,8 @@ snit::type app {
         body {
             color: black;
             background: white;
-            margin-left: 2%;
-            margin-right: 2%;
+            margin-left: 1%;
+            margin-right: 1%;
         }
         pre {
             background:     #FFFF99 ;
