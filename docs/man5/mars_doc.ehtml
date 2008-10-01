@@ -7,39 +7,19 @@
 <<section DESCRIPTION>>
 
 This man page defines the mars_doc(5) format for writing HTML
-documents.  It is an "Extended HTML" format, i.e., it extends
-HTML with embedded macros.  It is similar to <<xref mars_man(5)>>, but
-is used for arbitrary documents.  <<xref mars_doc(1)>> translates
-mars_doc(5) files into standard HTML files.<p>
+documents.  It is an "Extended HTML" format, i.e., it extends HTML
+with embedded macros.  It is similar to <<xref mars_man(5)>>, but is
+used for arbitrary documents. The basic syntax and capabilities of
+Extended HTML are defined in the <<xref ehtml(5)>> man page.  This man
+page describes a number of extensions to the basic format.<p>
+
+<<xref mars_doc(1)>> translates mars_doc(5) files into standard HTML
+files.<p>
 
 mars_doc(5) documents can contain automatically numbered and linked
 tables, figures, and sections; sections can be nested arbitrarily
 deeply, and the table of contents and lists of figures and tables can
 be generated automatically.<p>
-
-<<section "BASIC SYNTAX">>
-
-The majority of the content of a mars_doc(5) document is standard HTML
-body text.  The author is responsible for the
-&lt;html&gt;, &lt;head&gt;, and &lt;body&gt; tags, and for any style
-sheet information; they are not added automatically.<p>
-
-Macros are entered in double angle brackets, like so:<p>
-
-<pre>
-<<lb>>section introduction "Introduction"<<rb>>
-</pre>
-
-Many macros occur in pairs; for example, tables begin with 
-the <<iref table>> macro and end with the <<iref /table>> macro:<p>
-
-<pre>
-<<lb>>table data "Important Data"<<rb>>
-    .
-    .
-    .
-<<lb>>/table<<rb>>
-</pre>
 
 <<section "DOCUMENT STRUCTURE">>
 
@@ -117,9 +97,10 @@ confused with section IDs.<p>
 <<section MACROS>>
 
 mars_doc(5) man pages may use the following macros, as well as all
-commands defined by the <<xref template(n)>>.  Note that these
-macros are simply Tcl commands; if you define your own macros
-(see <<xref "DEFINING MACROS">>) you can call them as such.<p>
+commands defined in the <<xref ehtml(5)>> man page.  Note
+that these macros are simply Tcl commands;  you can define
+your own macros, as described in <<xref ehtml(5)>>,
+and use them in your documents.<p>
 
 <<deflist macros>>
 
@@ -127,46 +108,11 @@ macros are simply Tcl commands; if you define your own macros
 
 Returns the banner for the top of the page.<p>
 
-<<defitem changelog {changelog}>>
-
-Begins a document change log.<p>
-
-<<defitem change {change <i>date status initiator</i>}>>
-
-Begins a change log entry within a <<iref changelog>>.  The
-<i>date</i> is the date at which the change was made; the
-<i>status</i> indicates the status of the document, e.g., "New",
-"Update", "Rewrite".  The <i>initiator</i> is the name of the person
-making the change.<p>
-
-The <<iref change>> tag is followed by a narrative description of the
-change, which is follows by a <<iref /change>> tag.<p>
-
-<<defitem /change {/change}>>
-
-Ends a change log entry within a <<iref changelog>>.<p>
-
-<<defitem /changelog {changelog}>>
-
-Ends a document change log.<p>
-
 <<defitem contents {contents}>>
 
 This macro is replaced with a complete table of contents;
 the table of contents is followed by lists of tables and
 figures if need be.<p>
-
-<<defitem exppass {exppass}>>
-
-The <<iref exppass>> command is seldom actually used as a
-macro; it returns the pass number, "1" or "2".<p>
-
-As described in <<xref "DEFINING MACROS">>, mars_doc(1) makes two
-passes over the document.  It accumulates table-of-contents
-information in the first pass, and actually outputs the formatted HTML
-file in the second.  If you're defining new macros, you might wish to
-do the same; in this case, your macros will need to be able to
-distinguish between the passes.<p>
 
 <<defitem figure {figure <i>id title filename</i>}>>
 
@@ -186,29 +132,6 @@ This macro will be replaced by a list of the figures found in the
 document.  Note that it is rarely necessary to use this macro
 explicitly, because the table of <<iref contents>> will include it
 automatically if there are any figures in the document.<p>
-
-<<defitem hrule {hrule}>>
-
-Adds an HTML horizontal rule to the output.<p>
-
-<<defitem lb {lb}>>
-
-Returns the string "<<lb>>".  Use this to include a literal "<<lb>>"
-in the output.<p>
-
-<<defitem link {link <i>url</i> ?<i>anchor</i>?}>>
-
-Adds a hyperlink to the output.  The address is <i>url</i>; the
-displayed text is <i>anchor</i>, which defaults to the <i>url</i>.<p>
-
-<<defitem manurl {manurl}>>
-
-Returns the relative URL for the root of the man page directory tree.<p>
-
-<<defitem nbsp {nbsp <i>text</i>}>>
-
-Normalizes whitespace in <i>text</i>, and then replaces all space
-characters with HTML non-breaking spaces.<p>
 
 <<defitem preface {preface <i>id title</i>}>>
 
@@ -237,12 +160,6 @@ the <i>id</i>.<p>
 Returns the standard list of CSS styles; include it in the
 &lt;style&gt;&lt;/style&gt; tag in the HTML header.<p>
 
-<<defitem swallow {swallow <i>body</i>}>>
-
-<<iref swallow>> allows your document to define new macros and
-otherwise interact with the Tcl interpreter while ensuring that
-nothing is added to the output.  See <<xref "DEFINING MACROS">>.<p>
-
 <<defitem table {table <i>id title</i>}>>
 
 Begins and captions an HTML table; the user is responsible for the
@@ -266,11 +183,6 @@ explicitly, because the table of <<iref contents>> will include it
 automatically if there are any tables in the document.<p>
 
 
-<<defitem rb {rb}>>
-
-Returns the string "<<rb>>".  Use this to include a literal "<<rb>>"
-in the output.<p>
-
 <<defitem version {version}>>
 
 Returns the current Mars version, which is read from the PAX_VERSION
@@ -291,8 +203,6 @@ The valid cross-reference IDs are as follows:<p>
        or "Table <i>num</i>".  For unnumbered sections, the default
        link text is the section title.<p>
 
-  <li> Any "http:" address.  The default link text is the address itself.<p>
-
   <li> Any man page that exists in the same documentation tree.  Man
        page IDs look like "<i>name</i>(<i>section</i>)", e.g.,
        "mars_doc(5)".  The HTML file for the man page is assumed to
@@ -306,53 +216,14 @@ The valid cross-reference IDs are as follows:<p>
        is executed.  It can be specified explicitly using
        <<xref mars_doc(1)>>'s <code>-docroot</code> option.<p>
 
-  <li> Any ID registered using <<iref xrefset>>.  For example, the
+  <li> Any ID registered using <<xref ehtml(5)>>'s
+       <<xref ehtml(5) xrefset>> macro.  For example, the
        following macro registers a link to the Tcl linsert(n) man page:<p>
 
        <pre><<lb>>xrefset linsert(n) http://www.tcl.tk/man/tcl8.4/TclCmd/linsert.htm<<rb>></pre>
 </ul><p>
 
-<<defitem xrefset {xrefset <i>id anchor url</i>}>>
-
-Defines an additional target for the <<iref xref>> macro.  The
-<i>id</i> identifies the cross-referenced material; it's the string
-that's passed to <<iref xref>> later on.  The <i>anchor</i> is the
-default link text, and the <i>url</i> is, of course, the web address
-of the material.<p>
-
 <</deflist>>
-
-<<section "DEFINING MACROS">>
-
-mars_doc(5) macros have Tcl syntax; in fact, a macro can contain
-arbitrary Tcl 
-code.  In particular, the man page can define new
-macros using the standard Tcl <tt>proc</tt> command or the
-<<xref template(n) template>> command.  This is usually done in
-conjunction with the <<iref swallow>> macro, to avoid including the
-output of <tt>proc</tt> or <<xref template(n) template>> in the
-finished man page.<p>
-
-For example, here's the definition of a macro that returns a timestamp
-using Tcl's <tt>clock</tt> command:<p>
-
-<pre>
-<<lb>>swallow {
-    proc timestamp {} {
-        return [clock format [clock seconds]]
-    }
-}<<rb>>
-</pre>
-
-When writing macros, remember that mars_doc(1) makes <b>two passes</b>
-over its input, and so every macro will be executed <b>twice</b>.
-This is usually only a problem when a macro is accumulating data into
-a Tcl variable in the first pass so that it can be used during the
-second pass (e.g., to output an accumulated list, such as a table of
-contents).<p>
-
-In such a case, the macro can use <<iref exppass>> to find out which
-pass it is.<p>
 
 <<section AUTHOR>>
 

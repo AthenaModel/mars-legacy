@@ -7,37 +7,20 @@
 <<section DESCRIPTION>>
 
 This man page defines the mars_man(5) man page format,
-a flavor of "Extended HTML", i.e., HTML extended with Tcl macros.
+a flavor of "Extended HTML", i.e., HTML extended with Tcl macros.  The
+basic syntax and capabilities of Extended HTML are defined in the
+<<xref ehtml(5)>> man page.  This man page describes a number of
+extensions to the basic format.<p>
+
 The <<xref mars_man(1)>> tool translates man pages in
 mars_man(5) format into HTML.<p>
-
-<<section "BASIC SYNTAX">>
-
-The majority of the content of a mars_man(5) man page is standard HTML
-body text; the HTML &lt;html&gt;, &lt;head&gt;, and &lt;body&gt; tags
-are omitted.  Macros are entered in double angle brackets, like so:<p>
-
-<pre>
-<<lb>>section DESCRIPTION<<rb>>
-</pre>
-
-Many macros occur in pairs; for example, every man page will begin
-with the <<iref manpage>> macro and end with the <<iref /manpage>> macro:<p>
-
-<pre>
-<<lb>>manpage somelib(n) "Some Library Or Other"<<rb>>
-    .
-    .
-    .
-<<lb>>/manpage<<rb>>
-</pre>
 
 <<section MACROS>>
 
 mars_man(5) man pages may use any of the following macros, as well
-as those defined in the <<xref mars_ehtml(5)>> man page.
+as those defined in the <<xref ehtml(5)>> man page.
 Note that these macros are simply Tcl commands; you can define
-your own macros as described in <<xref "DEFINING MACROS">>,
+your own macros, as described in <<xref ehtml(5)>>,
 and use them in your man pages.<p>
 
 <<deflist macros>>
@@ -217,7 +200,7 @@ expands to a link to <<iref defitem>>.<p>
 
 <<defitem xref {xref <i>id</i> ?<i>anchor</i>?}>>
 
-The <<iref xref>> macro creates hyperlinks. Generally speaking,
+The by <<xref mars_man(5)>>creates hyperlinks. Generally speaking,
 <i>id</i> identifies the page to link to; <i>anchor</i> is the
 link text.  If <i>anchor</i> isn't specified, then the <i>id</i> will
 be used as the link text.<p>
@@ -250,45 +233,9 @@ creates a link to the somelib(n) man page, and<p>
 creates a link to the definition of "somecommand" within that man
 page; the link text will be "somecommand".<p>
 
-If the <i>id</i> begins with "http:", it is assumed to be a standard
-URL; the link naturally links to the URL.<p>
-
-Finally, the <<iref xrefset>> macro can be used assign ID strings to
-frequently used URLs; if the <i>id</i> is one of these ID strings,
-then the specified URL is used.<p>
-
-<<defitem xrefset {xrefset <i>id anchor url</i>}>>
-
-This macro defines a cross-reference, which can be used by
-<<iref xref>> to create hyperlinks.<p>
-
-The <i>id</i> identifies the cross-reference to <<iref xref>>; it
-should be chosen so as not to conflict with other <<iref xref>>
-identifiers.<p>
-
-The <i>anchor</i> is the link text that will be used if no
-link text is specified in the <<iref xref>> macro.<p>
-
-The <i>url</i> is, of course, the URL to link to.<p>
-
-For example, the following macro defines "google" as a cross-reference
-ID.<p>
-
-<pre>
-<<lb>>xrefset google "Google" "http://www.google.com"<<rb>>
-    .
-    .
-    .
-To find something, use <<lb>>xref google<<rb>>....
-</pre>
-
-<<defitem swallow {swallow {<i>Tcl commands</i>}}>>
-
-This macro is mostly used when defining macros inline in a
-manpage.  It executes the <i>Tcl commands</i>, and returns nothing;
-because it returns nothing, it doesn't affect the output.<p>
-
-See <<xref "DEFINING MACROS">> for an example.<p>
+Finally, the <<xref ehtml(5)>> <<xref xhtml(5) xrefset>> macro can be
+used to assign ID strings to frequently used URLs; if the <i>id</i> is
+one of these ID strings.<p>
 
 <<defitem mktree {mktree}>>
 
@@ -346,37 +293,6 @@ as a replacement for <<lb>>xref soandsolib(n)<<rb>>...."&lt;p&gt;
 
 <<lb>>/manpage<<rb>>
 </pre>
-
-<<section "DEFINING MACROS">>
-
-mars_man(5) macros have Tcl syntax; in fact, a macro can contain arbitrary Tcl
-code.  In particular, the man page can define new
-macros using the standard Tcl <tt>proc</tt> command or the
-<<xref template(n) template>> command.  This is usually done in
-conjunction with the <<iref swallow>> macro, to avoid including the
-output of <tt>proc</tt> or <<xref template(n) template>> in the
-finished man page.<p>
-
-For example, here's the definition of a macro that returns a timestamp
-using Tcl's <tt>clock</tt> command:<p>
-
-<pre>
-<<lb>>swallow {
-    proc ::marsutil::ehtml::macro timestamp {} {
-        return [clock format [clock seconds]]
-    }
-}<<rb>>
-</pre>
-
-When writing macros, remember that mars_man(1) makes <b>two passes</b>
-over its input, and so every macro will be executed <b>twice</b>.
-This is usually only a problem when a macro is accumulating data into
-a Tcl variable in the first pass so that it can be used during the
-second pass (e.g., to output an accumulated list, such as a table of
-contents).<p>
-
-In such a case, the macro can use <<xref ehtml(n)>>'s
-<<xref ehtml(n) pass>> method to find out which pass it is.<p>
 
 <<section AUTHOR>>
 
