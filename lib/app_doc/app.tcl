@@ -57,9 +57,23 @@ snit::type app {
 
     typeconstructor {
         # Export macros
-        namespace export  \
-            banner        \
-            standardstyle \
+        namespace export    \
+            banner          \
+            changelog       \
+            /changelog      \
+            change          \
+            /change         \
+            contents        \
+            figure          \
+            /figure         \
+            figures         \
+            preface         \
+            section         \
+            sectioncontents \
+            standardstyle   \
+            table           \
+            /table          \
+            tables          \
             version
     }
 
@@ -88,8 +102,8 @@ snit::type app {
         body {
             color: black;
             background: white;
-            margin-left: 6%;
-            margin-right: 6%;
+            margin-left: 2%;
+            margin-right: 2%;
         }
         pre {
             background:     #FFFF99 ;
@@ -180,7 +194,7 @@ snit::type app {
     #                      "1.1 References".
     # link-$id             Link text for anchor $id e.g., "Section 1.1"
 
-    variable doc
+    typevariable doc
 
     #-------------------------------------------------------------------
     # Application Initializer
@@ -214,7 +228,7 @@ snit::type app {
                         error "-docroot doesn't exist: \"$val\""
                     }
 
-                    if {$[file isdirectory $val]} {
+                    if {![file isdirectory $val]} {
                         error "-docroot isn't a directory: \"$val\""
                     }
 
@@ -764,7 +778,7 @@ snit::type app {
         <table border width="100%" cellpadding="2" cellspacing="0">
         <tr>
         <th align="left" width="10%">Status</th>
-        <th width="70%">Nature of Change</th>
+        <th align="left" width="70%">Nature of Change</th>
         <th align="left" width="10%">Date</th>
         <th align="left" width="10%">Initiator</th>
         </tr>
@@ -802,7 +816,7 @@ snit::type app {
         set status    [ehtml cget status]
         set initiator [ehtml cget initiator]
 
-        set description [cpop change]
+        set description [ehtml cpop change]
     } {
         |<--
         <tr valign=top>
@@ -833,7 +847,7 @@ snit::type app {
     template proc banner {} {
         |<--
         <h1 style="background: red;">
-        &nbsp;Mars: Simulation Infrastructure Library
+        &nbsp;Mars [version]: Simulation Infrastructure Library
         </h1>
     }
 
@@ -842,24 +856,7 @@ snit::type app {
     # Returns the standard CSS styles.
 
     proc standardstyle {} {
-        global css
         return $css
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

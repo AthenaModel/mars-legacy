@@ -19,8 +19,11 @@ ifndef MARS_VERSION
     export MARS_VERSION = 1.x
 endif
 
+# Directories
+DOC_ROOT = $(TOP_DIR)/docs
+
 # Tools
 
 MAN_TOOL = $(TOP_DIR)/bin/mars man
-DOC_TOOL = $(TOP_DIR)/bin/mars_doc -docroot $(DOC_ROOT)
+DOC_TOOL = $(TOP_DIR)/bin/mars doc -docroot $(DOC_ROOT) -version $(MARS_VERSION)
 

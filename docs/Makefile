@@ -30,7 +30,6 @@ include $(TOP_DIR)/MakeDefs
 SUBS       = man1 man5 mann
 
 # Documents to build
-DOC_ROOT   = .
 EHTML_DOCS = $(wildcard *.ehtml)
 HTML_DOCS  = $(EHTML_DOCS:%.ehtml=%.html)
 
