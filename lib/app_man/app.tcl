@@ -198,9 +198,6 @@ snit::type app {
             }
 
             set defaultAnchor $id
-        } elseif {[lsearch -exact $sections $id] != -1} {
-            set url "#[ehtml textToID $id]"
-            set defaultAnchor $id
         }
 
         return [list $url $defaultAnchor]
@@ -395,6 +392,7 @@ current working directory.
         set id [ehtml textToID $name]
         if {[ehtml pass] == 1} {
             lappend sections $name 
+            ehtml xrefset $name $name "#$id"
         }
 
         set curSection $name
