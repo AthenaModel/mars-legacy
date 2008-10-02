@@ -17,6 +17,15 @@
   <li> <a href="mann/index.html">Section (n): Tcl Commands</a>
 </ul>
 
+<h2>Development Documents</h2>
+
+<ul>
+  <li> CM Plan
+       (<a href="dev/cm.doc">doc</a>),
+       (<a href="dev/cm.pdf">pdf</a>)</li>
+</ul><p>
+
+
 <h2>Copyright</h2>
 
 (C) 2008. California Institute of Technology.  ALL RIGHTS RESERVED.

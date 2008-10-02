@@ -260,6 +260,8 @@ snit::type ::marsutil::ehtml {
         }
 
         if {$url eq ""} {
+            # TBD: This is ugly; need a mechanism for this kind
+            # of reporting.
             puts "Warning: xref: unknown id '$id'"
             return "[$exp lb]xref $id[$exp rb]"
         }

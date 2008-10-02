@@ -135,11 +135,13 @@ snit::type app {
     #  docroot      Root of the documentation relative to this document.
     #  dumpAnchors  If 1, dump a list of sections, tables, and figures,
     #               with xref IDs, for each document.
+    #  debugFlag    If 1, dump additional debugging info
     
     typevariable info -array {
         version     "1.x"
         docroot     "."
         dumpAnchors 0
+        debugFlag   0
     }
 
     #-------------------------------------------------------------------
@@ -214,16 +216,16 @@ snit::type app {
         ehtml import ::app::*
         
         while {[string match "-*" [lindex $argv 0]]} {
-            set opt [lindex $argv 0]
-            set val [lindex $argv 1]
-            set argv [lrange $argv 2 end]
+            set opt [lshift argv]
             
             switch -exact -- $opt {
                 -version {
-                    set info(version) $val
+                    set info(version) [lshift argv]
                 }
                 
                 -docroot {
+                    set val [lshift argv]
+
                     if {![file exists $val]} {
                         error "-docroot doesn't exist: \"$val\""
                     }
@@ -237,6 +239,10 @@ snit::type app {
 
                 -anchors {
                     set info(dumpAnchors) 1
+                }
+
+                -debug {
+                    set info(debugFlag) 1
                 }
 
                 default {
@@ -260,6 +266,10 @@ snit::type app {
             
             if {[catch {ehtml expandFile $infile} output]} {
                 puts stderr $output
+
+                if {$info(debugFlag)} {
+                    puts stderr $::errorInfo
+                }
                 exit 1
             }
             
@@ -298,9 +308,6 @@ snit::type app {
                 append url "#[ehtml textToID $anchor]"
             }
 
-            set defaultAnchor $id
-        } elseif {[lsearch -exact $sections $id] != -1} {
-            set url "#[ehtml textToID $id]"
             set defaultAnchor $id
         }
 
