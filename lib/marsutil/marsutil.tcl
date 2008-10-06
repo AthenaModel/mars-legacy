@@ -45,8 +45,13 @@ if {[file exists $binlib]} {
 # Note: modules are listed in order of dependencies; be careful if you
 # change the order!
 
-source [file join $::marsutil::library marsmisc.tcl ]
-source [file join $::marsutil::library template.tcl ]
-source [file join $::marsutil::library ehtml.tcl    ]
+source [file join $::marsutil::library template.tcl  ]
+source [file join $::marsutil::library ehtml.tcl     ]
+source [file join $::marsutil::library logger.tcl    ]
+source [file join $::marsutil::library logreader.tcl ]
+source [file join $::marsutil::library marsmisc.tcl  ]
+source [file join $::marsutil::library simclock.tcl  ]
+source [file join $::marsutil::library zulu.tcl      ]
+
 
 
