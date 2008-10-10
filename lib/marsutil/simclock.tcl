@@ -425,7 +425,7 @@ snit::type ::marsutil::simclockType {
         # flag.
         $self SetSimTime $ticks
         set tm(advancePending) 0
-        $self Log debug3 "grant [$self asZulu] ($ticks)"
+        $self Log detail "grant [$self asZulu] ($ticks)"
 
         # NEXT, compute the actual game ratio, if we're in active
         # mode.
@@ -473,7 +473,7 @@ snit::type ::marsutil::simclockType {
                     # FIRST, compute the next time
 
                     set newTime [expr {$tsim + 1}]
-                    $self Log debug3 \
+                    $self Log detail \
               "time advance request [$self toZulu $newTime] ($newTime)"
                     
                     # NEXT, remember that we've asked for an advance.
@@ -862,3 +862,4 @@ snit::type ::marsutil::simclockType {
 # Global simclock instance
 
 ::marsutil::simclockType ::marsutil::simclock
+

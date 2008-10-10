@@ -63,7 +63,7 @@ namespace eval ::marsutil::test {
     test logger_levels-1.1 {list of levels} -body {
         # Make sure it's been converted from a string to a list.
         lrange [logger levels] 0 end
-    } -result {silent fatal warning normal debug1 debug2 debug3 never}
+    } -result {silent fatal error warning normal detail debug}
 
     #-------------------------------------------------------------------
     # typemethod modes
@@ -87,7 +87,7 @@ namespace eval ::marsutil::test {
         log cget -verbosity
     } -cleanup {
         cleanup
-    } -result {normal}
+    } -result {detail}
 
     test logger_verbosity-1.2 {configure/cget silent} -setup {
         setup
@@ -107,7 +107,16 @@ namespace eval ::marsutil::test {
         cleanup
     } -result {fatal}
 
-    test logger_verbosity-1.4 {configure/cget warning} -setup {
+    test logger_verbosity-1.4 {configure/cget error} -setup {
+        setup
+    } -body {
+        log configure -verbosity error
+        log cget -verbosity
+    } -cleanup {
+        cleanup
+    } -result {error}
+
+    test logger_verbosity-1.5 {configure/cget warning} -setup {
         setup
     } -body {
         log configure -verbosity warning
@@ -116,7 +125,7 @@ namespace eval ::marsutil::test {
         cleanup
     } -result {warning}
 
-    test logger_verbosity-1.5 {configure/cget normal} -setup {
+    test logger_verbosity-1.6 {configure/cget normal} -setup {
         setup
     } -body {
         log configure -verbosity normal
@@ -125,32 +134,23 @@ namespace eval ::marsutil::test {
         cleanup
     } -result {normal}
 
-    test logger_verbosity-1.6 {configure/cget debug1} -setup {
+    test logger_verbosity-1.7 {configure/cget detail} -setup {
         setup
     } -body {
-        log configure -verbosity debug1
+        log configure -verbosity detail
         log cget -verbosity
     } -cleanup {
         cleanup
-    } -result {debug1}
+    } -result {detail}
 
-    test logger_verbosity-1.7 {configure/cget debug2} -setup {
+    test logger_verbosity-1.8 {configure/cget debug} -setup {
         setup
     } -body {
-        log configure -verbosity debug2
+        log configure -verbosity debug
         log cget -verbosity
     } -cleanup {
         cleanup
-    } -result {debug2}
-
-    test logger_verbosity-1.8 {configure/cget debug3} -setup {
-        setup
-    } -body {
-        log configure -verbosity debug3
-        log cget -verbosity
-    } -cleanup {
-        cleanup
-    } -result {debug3}
+    } -result {debug}
 
     test logger_verbosity-2.1 {-verbosity silent, output} -setup {
         setup
@@ -159,10 +159,8 @@ namespace eval ::marsutil::test {
         log fatal   test 1
         log warning test 2
         log normal  test 3
-        log debug1  test 4
-        log debug2  test 5
-        log debug3  test 6
-        log never   test 7
+        log detail  test 4
+        log debug   test 6
     } -cleanup {
         cleanup
     } -match glob -output {}
@@ -174,10 +172,8 @@ namespace eval ::marsutil::test {
         log fatal   test 1
         log warning test 2
         log normal  test 3
-        log debug1  test 4
-        log debug2  test 5
-        log debug3  test 6
-        log never   test 7
+        log detail  test 4
+        log debug  test 6
     } -cleanup {
         cleanup
     } -match glob -output {* fatal test 1
@@ -190,10 +186,8 @@ namespace eval ::marsutil::test {
         log fatal   test 1
         log warning test 2
         log normal  test 3
-        log debug1  test 4
-        log debug2  test 5
-        log debug3  test 6
-        log never   test 7
+        log detail  test 4
+        log debug  test 6
     } -cleanup {
         cleanup
     } -match glob -output {* fatal test 1
@@ -207,10 +201,8 @@ namespace eval ::marsutil::test {
         log fatal   test 1
         log warning test 2
         log normal  test 3
-        log debug1  test 4
-        log debug2  test 5
-        log debug3  test 6
-        log never   test 7
+        log detail  test 4
+        log debug  test 6
     } -cleanup {
         cleanup
     } -match glob -output {* fatal test 1
@@ -218,64 +210,39 @@ namespace eval ::marsutil::test {
 * normal test 3
 }
 
-    test logger_verbosity-2.5 {-verbosity debug1, output} -setup {
+    test logger_verbosity-2.5 {-verbosity detail, output} -setup {
         setup
     } -body {
-        log configure -verbosity debug1
+        log configure -verbosity detail
         log fatal   test 1
         log warning test 2
         log normal  test 3
-        log debug1  test 4
-        log debug2  test 5
-        log debug3  test 6
-        log never   test 7
+        log detail  test 4
+        log debug   test 6
     } -cleanup {
         cleanup
     } -match glob -output {* fatal test 1
 * warning test 2
 * normal test 3
-* debug1 test 4
+* detail test 4
 }
 
-    test logger_verbosity-2.6 {-verbosity debug2, output} -setup {
+    test logger_verbosity-2.7 {-verbosity debug, output} -setup {
         setup
     } -body {
-        log configure -verbosity debug2
+        log configure -verbosity debug
         log fatal   test 1
         log warning test 2
         log normal  test 3
-        log debug1  test 4
-        log debug2  test 5
-        log debug3  test 6
-        log never   test 7
+        log detail  test 4
+        log debug   test 6
     } -cleanup {
         cleanup
     } -match glob -output {* fatal test 1
 * warning test 2
 * normal test 3
-* debug1 test 4
-* debug2 test 5
-}
-
-    test logger_verbosity-2.7 {-verbosity debug3, output} -setup {
-        setup
-    } -body {
-        log configure -verbosity debug3
-        log fatal   test 1
-        log warning test 2
-        log normal  test 3
-        log debug1  test 4
-        log debug2  test 5
-        log debug3  test 6
-        log never   test 7
-    } -cleanup {
-        cleanup
-    } -match glob -output {* fatal test 1
-* warning test 2
-* normal test 3
-* debug1 test 4
-* debug2 test 5
-* debug3 test 6
+* detail test 4
+* debug test 6
 }
 
     #-------------------------------------------------------------------
@@ -409,11 +376,11 @@ C}
     } -body {
         log fatal test 1
         log normal test 2
-        log debug3 test 3
+        log debug test 3
         list [log verbmode test] [log cget -verbosity]
     } -cleanup {
         cleanup
-    } -match glob -result {level normal} -output {* fatal test 1
+    } -match glob -result {level detail} -output {* fatal test 1
 * normal test 2
 }
 
@@ -423,11 +390,11 @@ C}
         log verbmode test silent
         log fatal test 1
         log normal test 2
-        log debug3 test 3
+        log debug test 3
         list [log verbmode test] [log cget -verbosity]
     } -cleanup {
         cleanup
-    } -result {silent normal} -output {}
+    } -result {silent detail} -output {}
 
     test logger_verbmode-1.3 {all means -verbosity is ignored.} -setup {
         setup
@@ -435,13 +402,13 @@ C}
         log verbmode test all
         log fatal test 1
         log normal test 2
-        log debug3 test 3
+        log debug test 3
         list [log verbmode test] [log cget -verbosity]
     } -cleanup {
         cleanup
-    } -match glob -result {all normal} -output {* fatal test 1
+    } -match glob -result {all detail} -output {* fatal test 1
 * normal test 2
-* debug3 test 3
+* debug test 3
 }
 
     test logger_verbmode-1.4 {all overrides -verbosity silent.} -setup {
@@ -451,13 +418,13 @@ C}
         log verbmode test all
         log fatal test 1
         log normal test 2
-        log debug3 test 3
+        log debug test 3
         list [log verbmode test] [log cget -verbosity]
     } -cleanup {
         cleanup
     } -match glob -result {all silent} -output {* fatal test 1
 * normal test 2
-* debug3 test 3
+* debug test 3
 }
 
     #-------------------------------------------------------------------

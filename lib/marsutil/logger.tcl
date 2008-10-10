@@ -19,12 +19,11 @@
 #
 #       silent:   -verbosity setting; means no entries are made
 #       fatal:    Used when the program is about to halt.
+#       error:    Used only for bgerrors.
 #       warning:  Used when a potential problem is noticed.
 #       normal:   Normal informational message.
-#       debug1:   Debugging message, low verbosity.
-#       debug2:   Debugging message, medium verbosity.
-#       debug3:   Debugging message, high verbosity.
-#       never:    Means message is *never* logged.
+#       detail:   Detailed informational message.
+#       debug:    Debugging message, low-level details.
 #
 #       The log object will have its own verbosity level; entries logged
 #       at that level and lower will be output, but entries at higher
@@ -85,15 +84,16 @@ snit::type ::marsutil::logger {
     # Look-up tables
 
     # Verbosity levels
+    # NOTE: Be sure to check the default value of the verbosity instance
+    # variable if this list changes.
     typevariable levels {
         silent
         fatal
+        error
         warning
         normal
-        debug1
-        debug2
-        debug3
-        never
+        detail
+        debug
     }
 
     # Component verbosity modes
@@ -120,22 +120,19 @@ snit::type ::marsutil::logger {
     #
     # Sets the verbosity level.  To disable logging entirely, set
     # -verbosity silent.
-    option -verbosity -default normal \
+    option -verbosity -default detail \
         -configuremethod CfgVerbosity \
         -cgetmethod CgetVerbosity
 
     method CfgVerbosity {option value} {
-        # FIRST, "never" isn't allows.
-        set allowedLevels [lrange $levels 0 end-1]
-        
-        # NEXT, what is it?
-        set ndx [lsearch -exact $allowedLevels $value]
+        # FIRST, what is it?
+        set ndx [lsearch -exact $levels $value]
 
         if {$ndx != -1} {
             set verbosity $ndx
             set options($option) $value
         } else {
-            set choices [join $allowedLevels ", "]
+            set choices [join $levels ", "]
 
             return -code error \
                 "-level: got \"$value\", should be one of: $choices"
@@ -242,7 +239,7 @@ snit::type ::marsutil::logger {
     # Instance variables
 
     variable channel  stdout   ;# Channel of open log file, or stdout.
-    variable verbosity 3       ;# Default verbosity level number
+    variable verbosity 5       ;# Default verbosity level number (detail).
     variable verbmode          ;# Array of component verbosity modes:
                                 # 0 = silent  (log no entries)
                                 # 1 = level   (log based on -verbosity)
@@ -348,31 +345,24 @@ snit::type ::marsutil::logger {
         $self LogEntry fatal 1 $component $message
     }
 
+    method error {component message} {
+        $self LogEntry error 2 $component $message
+    }
+
     method warning {component message} {
-        $self LogEntry warning 2 $component $message
+        $self LogEntry warning 3 $component $message
     }
 
     method normal {component message} {
-        $self LogEntry normal 3 $component $message
+        $self LogEntry normal 4 $component $message
     }
 
-    method debug1 {component message} {
-        $self LogEntry debug1 4 $component $message
+    method detail {component message} {
+        $self LogEntry detail 5 $component $message
     }
 
-    method debug2 {component message} {
-        $self LogEntry debug2 5 $component $message
-    }
-
-    method debug3 {component message} {
-        $self LogEntry debug3 6 $component $message
-    }
-
-    method never {component message} {
-        # Do nothing.  This method exists because a component can choose the
-        # verbosity level of a message based on variable; and setting the
-        # variable to "never" allows a particular message to be turned off 
-        # completely.
+    method debug {component message} {
+        $self LogEntry debug 6 $component $message
     }
 
     # LogEntry level component message
@@ -391,6 +381,9 @@ snit::type ::marsutil::logger {
         if {[catch {set verbmode($component)} vmode]} {
             set vmode 1
             set verbmode($component) $vmode
+
+            # puts "just set vmode to $vmode for $component"
+            # puts "v:$verbosity l:$level ln:$levelnum m:[Flatten $message]"
         }
 
         # NEXT, do nothing unless the message is enabled.
@@ -398,6 +391,12 @@ snit::type ::marsutil::logger {
             # FIRST, increment the entry count; if it exceeds the 
             # -maxentries, open a new log file.
             incr entryCount
+
+            
+            if {$entryCount == 1} {
+                # puts "First log: $level $levelnum $component [Flatten $message]"
+            }
+
             
             if {$options(-maxentries) != 0 &&
                 $entryCount > $options(-maxentries)} {
