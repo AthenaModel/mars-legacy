@@ -15,8 +15,9 @@
 # Settings
 
 # Set MARS_VERSION for development if it isn't set.
+export MARS_VERSION_DEFAULT = 1.x
 ifndef MARS_VERSION
-    export MARS_VERSION = 1.x
+    export MARS_VERSION = $(MARS_VERSION_DEFAULT)
 endif
 
 # Directories

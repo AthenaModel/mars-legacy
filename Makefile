@@ -14,31 +14,14 @@
 #    	clean        Deletes all build products
 #       build        Builds code and documentation from scratch,
 #                    and runs tests.
+#       tag          Tags the contents of the current work area;
+#                    requires MARS_VERSION=<tag>.  The <tag> is usually
+#                    a version number, x.y.
 #       cmbuild      Official build; requires MARS_VERSION=x.y
 #                    on make command line.  Builds code and 
-#                    documentation from scratch, and tags it with
-#                    the version number in the repository.
-#
-#    For normal development, this Makefile is usually executed as
-#    follows:
-#
-#        make
-#
-#    Optionally, this is followed by
-#
-#        make test
-#
-#    For official builds (whether development or release), this
-#    sequence is used:
-#
-#        make build                          
-#
-#    Resolve any problems until "make build" runs cleanly. Then,
-#
-#        make MARS_VERSION=x.y cmbuild
-#
-#    NOTE: Before doing the official build, docs/build.ehtml should be
-#    updated with the build notes for the current version.
+#                    documentation from scratch, using the version
+#                    number.  Should only be used after checking out
+#                    the tagged code.
 #
 #---------------------------------------------------------------------
 
@@ -110,6 +93,29 @@ clean: check_env
 	@ echo ""
 	cd $(TOP_DIR)/test ; make clean
 	cd $(TOP_DIR)/docs ; make clean
+
+#---------------------------------------------------------------------
+# Target: tag
+#
+# Tags the version in the current work area.
+
+BUILD_TAG = mars_$(MARS_VERSION)
+
+tag: check_env check_ver
+	@ echo ""
+	@ echo "*****************************************************"
+	@ echo "         Tagging: Mars $(MARS_VERSION)"
+	@ echo "*****************************************************"
+	@ echo ""
+	svn copy -m"Tagging Mars $(MARS_VERSION)" \
+		. https://oak.jpl.nasa.gov/svn/mars/tags/$(BUILD_TAG)
+
+check_ver:
+	@ if test ! -n "$(MARS_VERSION)" ; then \
+	    echo "Makefile variable MARS_VERSION is not set." ; exit 1 ; fi
+	@ if test "$(MARS_VERSION)" = "$(MARS_VERSION_DEFAULT)" ; then \
+	    echo "Makefile variable MARS_VERSION is not set." ; exit 1 ; fi
+
 
 #---------------------------------------------------------------------
 # Shared Rules
