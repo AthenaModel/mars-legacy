@@ -82,6 +82,12 @@ set metadata {
         mode     cmdline
     }
 
+    import {
+        text     "Imports Mars into client projects"
+        applib   app_import
+        mode     cmdline
+    }
+
     man {
         text     "Man Page Processor"
         applib   app_man
