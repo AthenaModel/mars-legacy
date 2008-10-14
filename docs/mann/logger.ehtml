@@ -60,9 +60,15 @@ state why.</td>
 </tr>
 
 <tr valign="top">
+<td><b>error</b></td>
+<td>Log entries of level <b>error</b> and below.</td>
+<td>Entry should record an erroneous but non-fatal condition.</td>
+</tr>
+
+<tr valign="top">
 <td><b>warning</b></td>
 <td>Log entries of level <b>warning</b> and below.</td>
-<td>Entry should record an anomalous but non-fatal condition.</td>
+<td>Entry should record an anomalous condition.</td>
 </tr>
 
 <tr valign="top">
@@ -247,6 +253,7 @@ Sets the logger's verbosity level, which defaults to
 <b>normal</b>; the allowed values are
 <b>silent</b>, 
 <b>fatal</b>, 
+<b>error</b>, 
 <b>warning</b>, 
 <b>normal</b>, 
 <b>detail</b>, and 
@@ -318,6 +325,7 @@ Returns the value of the specified <i>option</i>.<p>
 Sets the value of one or more of the object's options.<p>
 
 <<defitem fatal   {$logger fatal <i>component</i> <i>message</i>}>>
+<<defitem error   {$logger error <i>component</i> <i>message</i>}>>
 <<defitem warning {$logger warning <i>component</i> <i>message</i>}>>
 <<defitem normal  {$logger normal <i>component</i> <i>message</i>}>>
 <<defitem detail  {$logger detail <i>component</i> <i>message</i>}>>
