@@ -72,32 +72,19 @@ state why.</td>
 </tr>
 
 <tr valign="top">
-<td><b>debug1</b></td>
-<td>Log entries of level <b>debug1</b> and below.</td>
+<td><b>detail</b></td>
+<td>Log entries of level <b>detail</b> and below.</td>
 <td>Additional debugging trace; low verbosity.</td>
 </tr>
 
 <tr valign="top">
-<td><b>debug2</b></td>
-<td>Log entries of level <b>debug2</b> and below.</td>
-<td>Additional debugging trace; medium verbosity.</td>
-</tr>
-
-<tr valign="top">
-<td><b>debug3</b></td>
-<td>Log entries of level <b>debug3</b> and below.</td>
+<td><b>debug</b></td>
+<td>Log entries of level <b>debug</b> and below.</td>
 <td>Additional debugging trace; high verbosity.  Reserved for
 high-volume messages which are enabled only while validating a
 particular feature.</td>
 </tr>
 
-<tr valign="top">
-<td><b>never</b></td>
-<td>N/A</td>
-<td>The entry should never be logged.  It's sometime useful for a
-specific entry to have a variable verbosity; this level is used in
-such cases to suppress the entry altogether.</td>
-</tr>
 
 </table><p>
 
@@ -140,8 +127,7 @@ logger's <code>-verbosity</code> setting.</td>
 
 <tr valign="top">
 <td><b>all</b></td>
-<td>All of the component's entries (except those with level
-<b>never</b>) will be logged, indepedent of the
+<td>All of the component's entries will be logged, indepedent of the
 logger's <code>-verbosity</code> setting.</td>
 </tr>
 
@@ -153,9 +139,9 @@ set or retrieved using the logger's <<iref verbmode>> subcommand.<p>
 <<section "ENTRY FORMAT">>
 
 Each log entry is written as a single line of text, formatted as a Tcl
-dictionary:<p>
+string:<p>
 
-<pre>t &lt;timestamp&gt; v &lt;level&gt; c &lt;component&gt; m &lt;message&gt; ?zulu &lt;simtime&gt;? <i>others....</i></pre>
+<pre>&lt;timestamp&gt; &lt;level&gt; &lt;component&gt; &lt;message&gt; ?&lt;simtime&gt;?</pre>
 
 <dl>
   <dt> <code>&lt;timestamp&gt;</code>
@@ -178,10 +164,6 @@ dictionary:<p>
   <dd> The simulation time as a <<xref zulu(n)>> time string.  This is
        included only if the <code>-simclock</code> option is set.<p>
 
-  <dt> <code><i>others...</i></code>
-  <dd> The application can add additional fields to every log entry by
-       setting the <code>-contextcmd</code>.  See
-       <<xref "Application Context">> for more details.<p>
 </dl>
 
 <<subsection "Message Flattening">>
@@ -207,30 +189,6 @@ For convenience, the <<iref logger unflatten>> command does this
 transformation; otherwise, the following Tcl command will work:<p>
 
 <pre>string map [list \\\\ \\ \\n \n] $message</pre>
-
-<<subsection "Application Context">>
-
-A particular application might have additional data to add to each
-logged entry, data which is not available to all components in the
-application.  Consequently, the application can provide logger with a
-"context command".  This command is expected to return a dictionary of
-context values, e.g.,<p>
-
-<pre>datum1 "Some value" datum2 "Some other value"</pre>
-
-The context command is set using the logging's <code>-contextcmd</code>.
-Ideally, the context command should be set before any entries are
-logged; further, it should always return the same set of dictionary
-keys.
-
-The application context is concatenated to the end of the log entry;
-for example,
-
-<pre>t &lt;timestamp&gt; v &lt;level&gt; c &lt;component&gt; m &lt;message&gt; zulu &lt;simtime&gt; datum1 &lt;value&gt; datum2 &lt;value&gt;</pre>
-
-Note that this feature was originally added to support the addition
-of simulated time to log messages.  This is now handled by the
-<code>-simclock</code> option instead.<p>
 
 <<section COMMANDS>>
 
@@ -291,9 +249,8 @@ Sets the logger's verbosity level, which defaults to
 <b>fatal</b>, 
 <b>warning</b>, 
 <b>normal</b>, 
-<b>debug1</b>, 
-<b>debug2</b>, and
-<b>debug3</b>.<p>
+<b>detail</b>, and 
+<b>debug</b>.<p>
 
 See <<xref VERBOSITY>> for more information.<p>
 
@@ -314,15 +271,6 @@ simulation time will be included in every logged message (see
 any messages are logged (e.g., when the logger(n) object is
 created).<p>
 
-<<defopt {-contextcmd <i>cmd</i>}>>
-
-Specifies an application context command.  The command will be called
-at global scope with no additional arguments, and should return a
-dictionary of application context values.  It will be called each time
-an entry is logged; the context dictionary will be concatenated on the
-end of the entry.  See <<xref "Application Context">> for more
-information.<p>
-
 <<defopt {-entrycmd <i>cmd</i>}>>
 
 Specifies a command to be called whenever an entry is logged.  The
@@ -342,7 +290,7 @@ Note that the command should not write to the log.<p>
 <<defitem "logger levels" {logger levels}>>
 
 Returns a list of the valid verbosity levels, from <b>silent</b> to
-<b>never</b>.<p>
+<b>debug</b>.<p>
 
 <<defitem "logger modes" {logger modes}>>
 
@@ -372,10 +320,8 @@ Sets the value of one or more of the object's options.<p>
 <<defitem fatal   {$logger fatal <i>component</i> <i>message</i>}>>
 <<defitem warning {$logger warning <i>component</i> <i>message</i>}>>
 <<defitem normal  {$logger normal <i>component</i> <i>message</i>}>>
-<<defitem debug1  {$logger debug1 <i>component</i> <i>message</i>}>>
-<<defitem debug2  {$logger debug2 <i>component</i> <i>message</i>}>>
-<<defitem debug3  {$logger debug3 <i>component</i> <i>message</i>}>>
-<<defitem never   {$logger never <i>component</i> <i>message</i>}>>
+<<defitem detail  {$logger detail <i>component</i> <i>message</i>}>>
+<<defitem debug   {$logger debug <i>component</i> <i>message</i>}>>
 
 Logs an entry with the specified verbosity level, <i>component</i> name,
 and <i>message</i>.  Note that
@@ -396,9 +342,8 @@ See <<xref "Component Verbosity Modes">> for more information.<p>
 <<defitem components {$logger components}>>
 
 Returns a list of the names of all components known to the logger
-object--that is, all components for which entries (excluding <b>never</b>
-entries) have been logged or for which the component verbosity mode has
-been set or queried.<p>
+object--that is, all components for which entries have been logged or
+for which the component verbosity mode has been set or queried.<p>
 
 <<defitem newlog {$logger newlog ?<i>label</i>?}>>
 
