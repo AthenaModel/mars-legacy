@@ -40,7 +40,7 @@
 #       Log entries are written in the form of a proper Tcl list
 #       with these elements
 #
-#       t <systemTime> v <level> c <component> m <message> ?<key> <value>....?
+#       <systemTime> <level> <component> <message>
 #
 #       <systemTime>   The wall-clock time as yyyy-mm-ddThh:mm:ss.
 #                      This is sortable, and readable by [clock scan].
@@ -50,8 +50,6 @@
 #                      all newlines and "\\" substituted for all
 #                      pre-existing backslashes.  This guarantees that
 #                      each message is on a single line.
-#       <key>, <value> The application may specify a context command which
-#                      adds key/value pairs to the end of the message.
 #
 #       Support for Zulu Time
 #
@@ -199,21 +197,6 @@ snit::type ::marsutil::logger {
     # If specified, "zulu <zulutime>" will be included in each log message.
 
     option -simclock -default ""
-
-    # -contextcmd cmd
-    #
-    # cmd    A command which returns a context dictionary.
-    #
-    # Specifies a command which logger will call for each entry to
-    # retrieve the current application context.  The context must be
-    # returned in the form of a dictionary, which will be merged with
-    # the entry's context (if any).  
-    #
-    # If there are key-conflicts between the application context and 
-    # the entry's context, both will be included, with likely 
-    # confusing results; so don't do that.
-    
-    option -contextcmd -default {}
 
     # -entrycmd cmd
     #
@@ -428,15 +411,6 @@ snit::type ::marsutil::logger {
             # NEXT, if there's a simclock, add the zulu time.
             if {$options(-simclock) ne ""} {
                 lappend entry [$options(-simclock) asZulu]
-            }
-
-            # NEXT, if there's a context command, retrieve and append 
-            # the application context.
-            if {[llength $options(-contextcmd)] > 0} {
-                if {[catch {uplevel \#0 $options(-contextcmd)} result]} {
-                    return -code error "-contextcmd error: $result"
-                }
-                set entry [concat $entry $result]
             }
   
             # NEXT, output the log entry
