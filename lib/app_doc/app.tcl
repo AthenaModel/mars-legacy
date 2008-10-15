@@ -105,7 +105,7 @@ snit::type app {
             margin-left: 1%;
             margin-right: 1%;
         }
-        pre {
+        pre.box {
             background:     #FFFF99 ;
             border:         1px solid blue;
             padding-top:    2px;
