@@ -342,18 +342,6 @@ C}
     } -cleanup {
         cleanup
     } -match glob -result {{* normal test 1} {* warning test 2}}
-    #-------------------------------------------------------------------
-    # -contextcmd 
-
-    test logger_contextcmd-1.1 {command can add to context.} -setup {
-        setup
-    } -body {
-        log configure -contextcmd [namespace current]::context
-        log normal test 1
-    } -cleanup {
-        cleanup
-    } -match glob -output {* normal test 1 appkey appval
-}
 
     #-------------------------------------------------------------------
     # -simclock 
