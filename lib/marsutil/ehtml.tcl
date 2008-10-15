@@ -396,8 +396,74 @@ snit::type ::marsutil::ehtml {
         </tr>
     }
 
+    #-------------------------------------------------------------------
+    # Procedure Macros
+    #
+    # <<procedure>>
+    #
+    # <<step>> 
+    # Directions 
+    # <</step/>> 
+    # Example 
+    # <</step>>
+    #    ...
+    #
+    # <</procedure>>
 
+    # procedure
+    #
+    # Begins a procedure
 
+    template proc macro::procedure {} {
+        variable stepCounter
+        set stepCounter 0
+    } {
+        |<--
+        <table border="1" cellspacing="0" cellpadding="2">
+    }
+
+    # step
+    #
+    # Begins a step in a procedure.  The text following the tag
+    # should describe what is to be done.  Steps are numbered.
+    template proc macro::step {} {
+        variable stepCounter
+        incr stepCounter
+    } {
+        |<--
+        <tr valign="top">
+        <td><b>$stepCounter.</b></td>
+        <td>
+    }
+
+    # /step/
+    #
+    # Ends the description and begins the example.  The text
+    # following should give an example of the commands to enter.
+
+    template proc macro::/step/ {} {
+        |<--
+        </td><td>
+    }
+
+    # /step
+    #
+    # Ends the step.
+
+    template proc macro::/step {} {
+        |<--
+        </td>
+        </tr>
+    }
+
+    # /procedure
+    #
+    # Ends the procedure
+    
+    template proc macro::/procedure {} {
+        |<--
+        </table border="1" cellspacing="0" cellpadding="2">
+    }
     
 }
 

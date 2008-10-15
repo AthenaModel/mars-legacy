@@ -70,21 +70,21 @@ Initial draft.
 <<lb>>/changelog<<rb>>
 </pre>
 
-<<defitem ehtml {ehtml <i>subcommand</i> ?<i>args...</i>?}>>
+<<defitem ehtml {&lt;&lt;ehtml <i>subcommand</i> ?<i>args...</i>?&gt;&gt;}>>
 
 The <<xref ehtml(n)>> command itself is available as a macro.  See
 <<xref ehtml(n)>> for a description of its subcommands.<p>
 
-<<defitem hrule {hrule}>>
+<<defitem hrule {&lt;&lt;hrule&gt;&gt;}>>
 
 Produces a horizontal rule across the page.<p>
 
-<<defitem lb {lb}>>
+<<defitem lb {&lt;&lt;lb&gt;&gt;}>>
 
 Returns the left-hand macro brackets, e.g., "<code>&lt;&lt;</code>".<p>
 
 
-<<defitem link {link <i>url</i> ?<i>anchor</i>?}>>
+<<defitem link {&lt;&lt;link <i>url</i> ?<i>anchor</i>?&gt;&gt;}>>
 
 Creates a link to the specified <i>url</i>, displaying the specified
 <i>anchor</i> text.  If <i>anchor</i> is omitted, the <i>url</i>
@@ -93,17 +93,55 @@ itself is displayed.<p>
 If the page will be linked multiple times, it might be better to
 define a cross-reference using <<iref xrefset>>.<p>
 
-<<defitem nbsp {nbsp <i>text</i>}>>
+<<defitem nbsp {&lt;&lt;nbsp <i>text</i>&gt;&gt;}>>
 
 After trimming leading and trailing whitespace and normalizing
 internal whitespace to single blanks, <<iref nbsp>> replaces all
 remaining whitespace with non-breaking spaces.<p>
 
-<<defitem rb {rb}>>
+<<defitem procedure {&lt;&lt;procedure&gt;&gt;...&lt;&lt;/procedure&gt;&gt;}>>
+
+Defines a procedure: instructions for performing a set of commands at
+a command line.  Each step consists of a description of what is to be
+done, and of an example of the commands to enter.  The procedure is
+formatted as a table of numbered steps, with each step's description in the
+left-hand column and example in the right-hand column.<p>
+
+The content between the beginning and ending macros should consist of
+<<iref step>> entries.<p>
+
+<<defitem step {&lt;&lt;step&gt;&gt; <i>description</i> &lt;&lt;/step/&gt;&gt; <i>example</i> &lt;&lt;/step&gt;&gt;}>>
+
+Defines a single step within a <<iref procedure>>.  The
+<i>description</i> is Extended HTML text saying what is to be done,
+and the <i>example</i> is Extended HTML text giving an example of how
+to do it.<p>
+
+For example,
+
+<pre>
+<<lb>>procedure<<rb>>
+
+<<lb>>step<<rb>>
+Edit the document.
+<<lb>>/step/<<rb>>
+&lt;pre&gt;
+$ emacs mydoc.ehtml
+&lt;/pre&gt;
+<<lb>>/step<<rb>>
+    .
+    .
+    .
+
+<<lb>>/procedure<<rb>>
+</pre>
+
+
+<<defitem rb {&lt;&lt;rb&gt;&gt;}>>
 
 Returns the right-hand macro brackets, e.g., "<code>&gt;&gt;</code>".<p>
 
-<<defitem swallow {swallow {<i>Tcl commands</i>}}>>
+<<defitem swallow {&lt;&lt;swallow {<i>Tcl commands</i>&gt;&gt;}}>>
 
 This macro is mostly used when defining macros inline in a
 manpage.  It executes the <i>Tcl commands</i>, and returns nothing;
@@ -111,7 +149,7 @@ because it returns nothing, it doesn't affect the output.<p>
 
 See <<xref "DEFINING MACROS">> for an example.<p>
 
-<<defitem xref {xref <i>id</i> ?<i>anchor</i>?}>>
+<<defitem xref {&lt;&lt;xref <i>id</i> ?<i>anchor</i>?&gt;&gt;}>>
 
 The <<iref xref>> macro creates hyperlinks. Generally speaking,
 <i>id</i> identifies the page to link to; <i>anchor</i> is the
@@ -124,7 +162,7 @@ another tool, as by <<xref mars_man(n)>>, there will usually be
 variety of automatically defined cross-reference IDs.  In particular,
 man pages can usually be referred to by name.<p>
 
-<<defitem xrefset {xrefset <i>id anchor url</i>}>>
+<<defitem xrefset {&lt;&lt;xrefset <i>id anchor url</i>&gt;&gt;}>>
 
 This macro defines a cross-reference, which can be used by
 <<iref xref>> to create hyperlinks.  The <i>id</i> identifies the
