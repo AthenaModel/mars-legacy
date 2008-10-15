@@ -14,6 +14,8 @@
 #---------------------------------------------------------------------
 # Settings
 
+# TCLLIBPATH for code run during the build process (including tests!)
+export TCLLIBPATH = $(TOP_DIR)/lib
 
 # Set MARS_VERSION for development if it isn't set.
 export MARS_VERSION_DEFAULT = 1.x
@@ -23,7 +25,6 @@ endif
 
 # Directories
 DOC_ROOT = $(TOP_DIR)/docs
-MARS_TESTLIBPATH = $(TOP_DIR)/lib
 
 # Tools
 
