@@ -14,6 +14,7 @@
 #---------------------------------------------------------------------
 # Settings
 
+
 # Set MARS_VERSION for development if it isn't set.
 export MARS_VERSION_DEFAULT = 1.x
 ifndef MARS_VERSION
@@ -22,8 +23,9 @@ endif
 
 # Directories
 DOC_ROOT = $(TOP_DIR)/docs
+MARS_TESTLIBPATH = $(TOP_DIR)/lib
 
-# Toosl
+# Tools
 
 MAN_TOOL = $(TOP_DIR)/bin/mars man -version $(MARS_VERSION)
 DOC_TOOL = $(TOP_DIR)/bin/mars doc -docroot $(DOC_ROOT) -version $(MARS_VERSION)
