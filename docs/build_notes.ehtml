@@ -1,0 +1,17 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>Mars <<version>> Simulation Infrastructure Library</title>
+</head>
+
+<body bgcolor="#F5F5F5" alink="Blue" link="Blue">
+<h1 style="background: red;">&nbsp;Mars <<version>>: Simulation Infrastructure
+Library</h1>
+<h2>Build Notes</h2>
+
+<h3>Build 1.1, 15 October 2008</h3>
+This is the first Mars build. It introduces Mars as a separate library that can
+be used by multiple applications.
+
+</body>
+</html>
