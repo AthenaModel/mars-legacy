@@ -47,7 +47,19 @@ are subdirectories of the documentation root.<p>
 
 Specifies the version number for the project being documented.
 Defaults to the current Mars version number.  Drives the
-<<xref ehtml(5) version>> macro.<p>
+<<xref mars_doc(5) version>> macro.<p>
+
+<<defopt {-project <i>project</i>}>>
+
+Specifies the name of the project being documented. 
+Defaults to "Mars".  Drives the
+<<xref mars_doc(5) project>> macro.<p>
+
+<<defopt {-longproject <i>name</i>}>>
+
+Specifies the long name of the project being documented. 
+Defaults to "Simulation Infrastructure Library".  Drives the
+<<xref mars_doc(5) longproject>> macro.<p>
 
 <<defopt {-anchors}>>
 

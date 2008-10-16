@@ -67,7 +67,9 @@ snit::type app {
             figure          \
             /figure         \
             figures         \
+            longproject     \
             preface         \
+            project         \
             section         \
             sectioncontents \
             standardstyle   \
@@ -133,6 +135,8 @@ snit::type app {
     #
     #  version      The version of the software being documented
     #  docroot      Root of the documentation relative to this document.
+    #  project      The project name
+    #  longproject  The project title
     #  dumpAnchors  If 1, dump a list of sections, tables, and figures,
     #               with xref IDs, for each document.
     #  debugFlag    If 1, dump additional debugging info
@@ -140,6 +144,8 @@ snit::type app {
     typevariable info -array {
         version     "1.x"
         docroot     "."
+        project     "Mars"
+        longproject "Simulation Infrastructure Library"
         dumpAnchors 0
         debugFlag   0
     }
@@ -221,6 +227,14 @@ snit::type app {
             switch -exact -- $opt {
                 -version {
                     set info(version) [lshift argv]
+                }
+
+                -project {
+                    set info(project) [lshift argv]
+                }
+
+                -longproject {
+                    set info(longproject) [lshift argv]
                 }
                 
                 -docroot {
@@ -782,6 +796,22 @@ snit::type app {
         return $info(version)
     }
 
+    # project
+    #
+    # Returns the current project name
+
+    proc project {} {
+        return $info(project)
+    }
+
+    # longproject
+    #
+    # Returns the long project name
+
+    proc longproject {} {
+        return $info(longproject)
+    }
+
     # banner
     #
     # Returns the current project banner.
@@ -791,7 +821,7 @@ snit::type app {
     template proc banner {} {
         |<--
         <h1 style="background: red;">
-        &nbsp;Mars [version]: Simulation Infrastructure Library
+        &nbsp;[project] [version]: [longproject]
         </h1>
     }
 
