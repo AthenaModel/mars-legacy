@@ -305,7 +305,7 @@ current working directory.
         hr {
             margin-left: -5%;
         }
-        pre {
+        pre.box {
             background:     #FFFF99 ;
             border:         1px solid blue;
             padding-top:    2px;

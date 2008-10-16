@@ -82,9 +82,9 @@ set metadata {
         mode     cmdline
     }
 
-    import {
-        text     "Imports Mars into client projects"
-        applib   app_import
+    link {
+        text     "Link Mars into client projects"
+        applib   app_link
         mode     cmdline
     }
 

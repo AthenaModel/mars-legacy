@@ -1,12 +1,12 @@
 #-----------------------------------------------------------------------
 # TITLE:
-#	app_import.tcl
+#	app_link.tcl
 #
 # AUTHOR:
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: app_import(n) loader
+#       JNEM: app_link(n) loader
 #
 #-----------------------------------------------------------------------
 
@@ -16,14 +16,14 @@
 # Because this is an application package, the namespace is mostly
 # unused.
 
-namespace eval ::app_import:: {
+namespace eval ::app_link:: {
     variable library [file dirname [info script]]
 }
 
 #-----------------------------------------------------------------------
-# Provide the app_import(n) package
+# Provide the app_link(n) package
 
-package provide app_import 1.0
+package provide app_link 1.0
 
 #-----------------------------------------------------------------------
 # Require infrastructure packages
@@ -37,7 +37,8 @@ package require marsutil
 namespace import ::marsutil::*
 
 #-----------------------------------------------------------------------
-# Load app_import(n) submodules
+# Load app_link(n) submodules
 
-source [file join $::app_import::library app.tcl   ]
+source [file join $::app_link::library app.tcl   ]
+
 
