@@ -1,3 +1,10 @@
+<html> <head>
+<title>Mars <<version>>: Configuration Management Plan</title>
+<style>
+<<standardstyle>>
+</style>
+</head>
+
 <<swallow {
     # Macro Definitions
 
@@ -37,13 +44,6 @@
 
 
 }>>
-
-<html> <head>
-<title>Mars <<version>>: Configuration Management Plan</title>
-<style>
-<<standardstyle>>
-</style>
-</head>
 
 <body>
 <<banner>>
@@ -774,7 +774,7 @@ is thus embedded in the client working copy and can be referenced,
 built, and tested in place.<p>
 
 Once this external link is created, it persists.  The
-<<xref mars_import(1)>> tool can be used to create and manipulate this
+<<xref mars_link(1)>> tool can be used to create and manipulate this
 link.<p>
 
 It is possible to make code changes to the Mars trunk in this embedded
@@ -789,7 +789,7 @@ coupled with client development, we think that this is OK.<p>
 When a change is made that affects both Mars and a client, two bug
 reports are needed: one for the Mars change and one for the client
 change.  The Mars bug report provides a record of what's changed in
-Mars, and the client bug report goes through I&T with the client, thus
+Mars, and the client bug report goes through I&amp;T with the client, thus
 allow both the client change and the Mars change to be tested in the
 test lab.<p>
 
@@ -838,7 +838,7 @@ $ svn checkout <i>repository</i>/jnem/trunk jnem_4.0.9
 
 <<step>>
 The Mars trunk was checked out as <code>jnem_4.0.9/mars</code>.
-Switch the <i>mars</i> directory to point at the desired build of Mars.
+Temporarily link the working copy to point at the desired build of Mars.
 <</step/>>
 <pre>
 $ cd ~/jnem_pkgs/jnem_4.0.9
@@ -849,7 +849,7 @@ or<p>
 
 <pre>
 $ cd ~/jnem_pkgs/jnem_4.0.9
-$ mars import 1.6
+$ mars link 1.6
 </pre>
 <</step>>
 
@@ -877,12 +877,17 @@ $ svn switch <i>repository</i>/jnem/tags/jnem_4.0.9 .
 
 
 <<step>>
-Link the tagged version to the required version of Mars.  Here,
-<<xref mars_import(1)>> sets the <code>svn:externals</code> property
-to match the embedded working copy in <code>mars/</code>.
+Permanently link the tagged version to the required version of Mars.  Here,
+<<xref mars_link(1)>> sets the <code>svn:externals</code> property
+to match the embedded working copy in <code>mars/</code>.<p>
+
+<b>NOTE:</b> The <code>svn switch</code> in the previous step probably
+switched the working copy of Mars back to the Mars trunk.  That's
+why we recreate the link with 1.6.
 <</step/>>
 <pre>
 $ cd ~/jnem_pkgs/jnem_4.0.9
+$ svn switch <i>repository</i>/mars/tags/mars_1.6 mars
 $ svn propset svn:externals . \
     "mars <i>repository</i>/mars/tags/mars_1.6"
 </pre>
@@ -891,11 +896,11 @@ or<p>
 
 <pre>
 $ cd ~/jnem_pkgs/jnem_4.0.9
-$ mars import save
+$ mars link 1.6
+$ mars link save
 </pre>
 
 <</step>>
-
 
 <<step>>
 Proceed with the client build.
@@ -917,8 +922,8 @@ creating a client release branch the <code>svn:externals</code>
 property should be removed and <code>svn copy</code> should be used to
 pull the desired version of Mars into the release branch.<p>
 
-However, as we're still working out the CM procedures for normal
-development, we're going to leave this issue aside until later.<p>
+The <<xref mars_link(1)>> <code>save -ascopy</code> command will do
+this easily.<p>
 
 <hr>
 <address><a href="http://eis.jpl.nasa.gov/~will/">Will Duquette</a> / <a href="mailto:William.H.Duquette@jpl.nasa.gov">
