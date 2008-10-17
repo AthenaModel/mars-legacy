@@ -335,6 +335,19 @@ snit::type ::marsutil::ehtml {
         return [ehtml xref $id $anchor]
     }
 
+    # xrefset id anchor url
+    #
+    # id        Name to be used in <<xref ...>> macro
+    # anchor    The text to be displayed as an anchor
+    # url       The URL to link to.
+    #
+    # Define an ad-hoc cross reference.
+    proc macro::xrefset {id anchor url} {
+        ehtml xrefset $id $anchor $url
+        
+        return ""
+    }
+
     #-------------------------------------------------------------------
     # Change Log Macros
 

@@ -166,6 +166,11 @@ specified <i>id</i> and <i>title</i>.  See
 <<xref "Section Identifiers">> for a discussion of how to choose
 the <i>id</i>.<p>
 
+<<defitem sectioncontents {&lt;&lt;sectioncontents <i>id</i>&gt;&gt;}>>
+
+Returns a table of contents for section <i>id</i>, that is, a list of
+its subsections, with links.<p>
+
 <<defitem standardstyle {&lt;&lt;standardstyle&gt;&gt;}>>
 
 Returns the standard list of CSS styles; include it in the
