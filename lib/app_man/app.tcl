@@ -64,9 +64,6 @@ snit::type app {
     # Manpage section title
     typevariable sectionTitle ""
 
-    # The relative URL for man pages.
-    typevariable manurl ".."
-
     # An array: key is module name, value is list of submodules.
     # modules with no parent are under submodule().
     typevariable submodule
@@ -101,7 +98,6 @@ snit::type app {
     typemethod init {argv} {
         # FIRST, initialize the ehtml processor.
         ehtml init
-        ehtml xrefhook [mytypemethod XrefHook]
 
         # NEXT, import the macros
         ehtml import ::app::*
@@ -128,6 +124,12 @@ snit::type app {
                         exit 1
                     }
                     set ::srcdir $val
+                }
+                -manroots {
+                    if {[catch {ehtml manroots $val} result]} {
+                        puts "Error: Invalid -manroots: \"$val\"\n   $result"
+                        exit 1
+                    }
                 }
                 -section {
                     set ::sectionTitle $val
@@ -175,35 +177,6 @@ snit::type app {
     }
 
     #-------------------------------------------------------------------
-    # Hooks and Handlers
-
-    # XrefHook id anchor
-    #
-    # id       The XREF id of the page to link to
-    # anchor   The anchor text, if different
-    #
-    # Returns links to a Links to a section or manpage.
-
-    typemethod XrefHook {id anchor} {
-        set url           ""
-        set defaultAnchor ""
-
-
-        # Is it a man page?  Or a section title?
-        if {[regexp {^([^()]+)\(([1-9in])\)$} $id dummy name section]} {
-            set url "[manurl]/man$section/$name.html"
-            
-            if {$anchor ne ""} {
-                append url "#[ehtml textToID $anchor]"
-            }
-
-            set defaultAnchor $id
-        }
-
-        return [list $url $defaultAnchor]
-    } 
-
-    #-------------------------------------------------------------------
     # Utility Routines
 
     # ShowUsage
@@ -224,18 +197,6 @@ destination directory.  Both source and destination default to the
 current working directory.
 }
     }
-
-    #-----------------------------------------------------------------------
-    # Simple Macros
-
-    # manurl
-    #
-    # The relative URL for man pages
-
-    proc manurl {} {
-        return $manurl
-    }
-
 
     #-------------------------------------------------------------------
     # Javascripts

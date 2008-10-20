@@ -69,6 +69,15 @@ snit::type ::marsutil::ehtml {
 
     typevariable xreflinks
 
+    # manroots Array: Allows easy links to man pages via the "xref"
+    # macro.
+    #
+    # Keys are "<root>:<section>" and values are base URLs, e.g.,
+    #
+    #     mars:n --> mars/mann
+
+    typevariable manroots
+
     #-------------------------------------------------------------------
     # Application Initializer
 
@@ -252,10 +261,40 @@ snit::type ::marsutil::ehtml {
 
         set url ""
 
+        # FIRST, is it an explicit xrefset.
         if {[info exists xreflinks($id)]} {
             set url [dict get $xreflinks($id) url]
             set defaultAnchor [dict get $xreflinks($id) anchor]
-        } elseif {$info(xrefhook) ne ""} {
+        } 
+
+        # NEXT, is it a man page?
+        if {$url eq "" &&
+            [regexp {^([^:]+:)?([^()]+)\(([1-9in])\)$} $id \
+                 dummy root name section]
+        } {
+            set root [string trim $root ":"]
+
+            set pattern ""
+
+            if {[info exists manroots($root:$section)]} {
+                set pattern $manroots($root:$section)
+            } elseif {[info exists manroots($root:)]} {
+                set pattern $manroots($root:)
+            } 
+
+            if {$pattern ne ""} {
+                set url [string map [list %s $section %n $name] $pattern]
+
+                if {$anchor ne ""} {
+                    append url "#[ehtml textToID $anchor]"
+                }
+
+                set defaultAnchor "${name}($section)"
+            }
+        }
+
+        # NEXT, can the xrefhook look it up?
+        if {$url eq "" && $info(xrefhook) ne ""} {
             lassign [{*}$info(xrefhook) $id $anchor] url defaultAnchor
         }
 
@@ -273,7 +312,46 @@ snit::type ::marsutil::ehtml {
         return "<a href=\"$url\">$anchor</a>"
     }
 
+    #-------------------------------------------------------------------
+    # Man Page Access
+    #
+    # Man pages are accessed as "[<root>:]<name>(<section>)"
+    # If no <root> is specified, then the default root, "", is used.
+    # If no manroot command is called, then man page references are
+    # not looked up.
 
+    # manroots roots
+    #
+    # roots    A list of man page root names and URL patterns.
+    #
+    # Adds the roots to the set of manpage roots.  Each root is
+    # specified as follows:
+    #
+    #    [<root>]:[<section>] <pattern>
+    #
+    # The pattern is a URL into which the following substitutions 
+    # can be made:
+    #
+    #    %s   The section, e.g., "n"
+    #    %n   The man page name, e.g., "ehtml".
+    #
+    # If <root> is omitted, then the patternUrl is for the default root,
+    # i.e., for man page references in which no root is specified.
+    #
+    # If <section> is omitted, then the pattern is for any section.
+
+    typemethod manroots {roots} {
+        foreach {spec pattern} $roots {
+            if {![string match "*:*" $spec]} {
+                error "Invalid root specification: \"$spec\""
+            }
+
+            lassign [split $spec :] root section
+
+            set manroots($root:$section) $pattern
+        }
+    }
+    
     #-------------------------------------------------------------------
     # Basic Macros
 

@@ -134,7 +134,6 @@ snit::type app {
     # Info array: scalars
     #
     #  version      The version of the software being documented
-    #  docroot      Root of the documentation relative to this document.
     #  project      The project name
     #  longproject  The project title
     #  dumpAnchors  If 1, dump a list of sections, tables, and figures,
@@ -143,7 +142,6 @@ snit::type app {
     
     typevariable info -array {
         version     "1.x"
-        docroot     "."
         project     "Mars"
         longproject "Simulation Infrastructure Library"
         dumpAnchors 0
@@ -216,7 +214,6 @@ snit::type app {
     typemethod init {argv} {
         # FIRST, initialize the ehtml processor.
         ehtml init
-        ehtml xrefhook [mytypemethod XrefHook]
 
         # NEXT, import the macros
         ehtml import ::app::*
@@ -237,18 +234,13 @@ snit::type app {
                     set info(longproject) [lshift argv]
                 }
                 
-                -docroot {
+                -manroots {
                     set val [lshift argv]
 
-                    if {![file exists $val]} {
-                        error "-docroot doesn't exist: \"$val\""
+                    if {[catch {ehtml manroots $val} result]} {
+                        puts "Invalid -manroots: \"$val\"\n   $result"
+                        exit 1
                     }
-
-                    if {![file isdirectory $val]} {
-                        error "-docroot isn't a directory: \"$val\""
-                    }
-
-                    set info(docroot) $val
                 }
 
                 -anchors {
@@ -302,32 +294,6 @@ snit::type app {
         }
     }
 
-    # XrefHook id anchor
-    #
-    # id       The xref ID of the page to link to
-    # anchor   The anchor text, if different
-    #
-    # Returns links to manpages.
-
-    typemethod XrefHook {id anchor} {
-        set url           ""
-        set defaultAnchor ""
-
-
-        # Is it a man page?  Or a section title?
-        if {[regexp {^([^()]+)\(([1-9in])\)$} $id dummy name section]} {
-            set url "$info(docroot)/man$section/$name.html"
-            
-            if {$anchor ne ""} {
-                append url "#[ehtml textToID $anchor]"
-            }
-
-            set defaultAnchor $id
-        }
-
-        return [list $url $defaultAnchor]
-    } 
-
     # ShowUsage
     #
     # Display command line syntax.
@@ -336,9 +302,9 @@ snit::type app {
         puts "Usage: mars_doc \[options\] file.ehtml..."
         puts ""
         puts "Options:"
-        puts "    -docroot <relpath>    Top docs directory relative to file.ehtml"
-        puts "    -version <version>    Version of documented software"
-        puts "    -anchors              Appends list of anchors as HTML comment."
+        puts "    -manroots <roots>   Man page directories; see mars_docs(1)."
+        puts "    -version <version>  Version of documented software"
+        puts "    -anchors            Appends list of anchors as HTML comment."
         puts ""
         puts "Given file.ehtml, produces file.html in the same directory."
     }

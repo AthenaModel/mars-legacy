@@ -32,6 +32,10 @@ This is a sample <code>preface</code> section to a document
 processed by <<xref mars_doc(1)>>.  It's written in
 <<xref mars_doc(5)>> format.<p>
 
+We can look up man pages in a variety of places.  Here's
+the Tcl <<xref tcl:regexp(n)>> man page, and the
+Tk <<xref tk:canvas(n)>> man page.<p>
+
 <<section sec "Sample Numbered Section">>
 
 This is a sample numbered section.<p>

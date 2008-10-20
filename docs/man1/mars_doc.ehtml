@@ -32,16 +32,12 @@ addition, individual documents can define their own macros.<p>
 
 <<deflist options>>
 
-<<defopt {-docroot <i>relpath</i>}>>
+<<defopt {-manroots <i>roots</i>}>>
 
-Specifies the name of the documentation root directory; 
-this is used to create the relative URL for
-links to man pages and other documents.  Generally, the <i>relpath</i>
-is a path relative to the directory containing the documents being
-processed.<p>
-
-It is assumed that the man page directories (e.g., <code>man1</code>)
-are subdirectories of the documentation root.<p>
+Specifies the mapping from man page names to URLs to be used
+when processing cross-references in documents.  See
+<<xref ehtml(n) manroots>> in <<xref ehtml(n)>> for the syntax
+of <i>roots</i>.<p>
 
 <<defopt {-version <i>version</i>}>>
 

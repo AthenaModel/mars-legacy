@@ -75,22 +75,82 @@ Reads the contents of the text file called <i>name</i>, expands it in
 two passes, and returns the expansion.  Use <<iref pass>> to write
 macros which are pass-sensitive.<p>
 
+<<defitem hrule {ehtml hrule}>>
+
+Returns an HTML horizontal rule.<p>
+
 <<defitem import {ehtml import ?pattern...?}>>
 
 Imports the exported commands indicated by one or <i>pattern</i>s into
 the macro namespace.<p>
 
-<<defitem pass {ehtml pass}>>
+<<defitem link {ehtml link <i>url</i> ?<i>anchor</i>?}>>
 
-Returns the expansion pass when expanding files using
-<i>expandFile</i>.  It's common to build up indices during the first
-pass and generate tables of links in the second.<p>
+Creates an HTML link given the <i>url</i> of the linked page.  If
+specified, <i>anchor</i> is used is used as the displayed anchor text;
+otherwise, the <i>url</i> is displayed explicitly.<p>
 
-<<defitem textToId {ehtml textToId <i>text</i>}>>
+<<defitem manroots {ehtml manroots <i>roots</i>}>>
 
-Converts a general string to an identifier string.  Leading and trailing
-whitespace and internal punctuation are removed, internal whitespace
-is converted to "_", and the text is converted to lower case.<p>
+Defines a mapping from man page names to URLs, so that
+<<xref ehtml(5)>> text can use <<iref xref>> to link to
+HTML man pages.<p>
+
+When <<iref xref>> is used in this way, the <i>id</i> is the name of
+the man page in the following form:<p>
+
+<pre>  ?<i>root</i>:?<i>name</i>(<i>section</i>)</pre>
+
+For example, this man page is called "<code>ehtml(n)</code>".  When
+Mars is used by a client, that client's man pages might refer to this
+one as "<code>mars:ehtml(n)</code>".<p>
+
+The <i>roots</i> argument is a list of root definitions and URL
+patterns:
+
+<pre>  <i>rootDefinition</i> <i>pattern</i> ...</pre>
+
+Each <i>rootDefinition</i> has the following form:<p>
+
+<pre>  ?<i>root</i>?:?<i>section</i>?</pre>
+
+If the <i>root</i> is omitted, then the <i>pattern</i> that follows is for
+the case when no root is specified in the <<iref xref>>.<p>
+
+If the <i>section</i> is given, then the <i>pattern</i> that follows
+is only for man pages in the given section.<p>
+
+The <i>pattern</i> may be an absolute or relative URL, and may contain
+the following %-conversions:<p>
+
+<ul>
+  <li> <code><strong>%n</strong></code> : The bare man page name, e.g., the
+       bare name of this man page is "ehtml".<p>
+
+  <li> <code><strong>%s</strong></code> : The man page section, e.g., "n".<p>
+</ul><p>
+
+As an example, Mars uses the following set of roots when building its
+own documentation.  The variable <code>TOP_DIR</code> is set by the
+Mars Makefiles; it's always the relative path to the toplevel Mars
+directory.  (It's often important to use relative paths, so that the
+links continue to work no matter where the documentation tree is
+installed.)
+
+<pre>
+  :       ${TOP_DIR}/docs/man%s/%n.html
+  tcl:n   http://www.tcl.tk/man/tcl8.5/TclCmd/%n.htm
+  tk:n    http://www.tcl.tk/man/tcl8.5/TkCmd/%n.htm
+</pre>
+
+Thus, this man page is referred to "<code>ehtml(n)</code>", which
+translates to:
+
+    .../mars/docs/mann/ehtml.html
+
+In addition, Mars documentation can reference Tcl and Tk man pages
+in section "n", e.g., <<xref tcl:regexp(n)>> is referenced as
+"<code>tcl:regexp(n)</code>".<p>
 
 <<defitem nbsp {ehtml nbsp <i>text</i>}>>
 
@@ -104,16 +164,17 @@ Converts ampersand, less than, and greater than characters in
 <i>text</i> to HTML entities (e.g., <code>&amp;lt;</code>) and returns
 the result.<p>
 
-<<defitem hrule {ehtml hrule}>>
+<<defitem pass {ehtml pass}>>
 
-Returns an HTML horizontal rule.<p>
+Returns the expansion pass when expanding files using
+<i>expandFile</i>.  It's common to build up indices during the first
+pass and generate tables of links in the second.<p>
 
-<<defitem link {ehtml link <i>url</i> ?<i>anchor</i>?}>>
+<<defitem textToId {ehtml textToId <i>text</i>}>>
 
-Creates an HTML link given the <i>url</i> of the linked page.  If
-specified, <i>anchor</i> is used is used as the displayed anchor text;
-otherwise, the <i>url</i> is displayed explicitly.<p>
-
+Converts a general string to an identifier string.  Leading and trailing
+whitespace and internal punctuation are removed, internal whitespace
+is converted to "_", and the text is converted to lower case.<p>
 
 <<defitem xrefhook {ehtml xrefhook ?<i>hook</i>?}>>
 
@@ -140,6 +201,24 @@ Creates a link to the cross-referenced page with the specified
 <i>id</i>.  If specified, <i>anchor</i> will be the displayed text;
 otherwise, the default anchor text associated with the <i>id</i> will
 be used.<p>
+
+By default, only ids defined using <<iref xrefset>> can be linked
+in this way.  If <<iref manroots>> are defined, then the <i>id</i>
+can be the name of an external man page.  Man pages are specified
+as follows:<p>
+
+<pre>  ?<i>root</i>:?<i>name</i>(<i>section</i>)</pre>
+
+If a user of <<xref ehtml(n)>> specifies any <<iref manroots>>,
+usually one is defined as default, which means that <i>root</i> can be
+omitted.  The <i>root</i> is used as a symbolic name for other
+collections of man pages, e.g., the Tcl man pages.<p>
+
+The default anchor text for man page references is
+
+<pre>  <i>name</i>(<i>section</i>)</pre>
+
+even when the <i>root</i> is specified.<p>
 
 <</deflist ehtml>>
 

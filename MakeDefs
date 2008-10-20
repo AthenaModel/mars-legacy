@@ -27,7 +27,10 @@ endif
 DOC_ROOT = $(TOP_DIR)/docs
 
 # Tools
+MAN_ROOTS = :     $(TOP_DIR)/docs/man%s/%n.html \
+            tcl:n http://www.tcl.tk/man/tcl8.5/TclCmd/%n.htm \
+            tk:n  http://www.tcl.tk/man/tcl8.5/TkCmd/%n.htm
 
-MAN_TOOL = $(TOP_DIR)/bin/mars man -version $(MARS_VERSION)
-DOC_TOOL = $(TOP_DIR)/bin/mars doc -docroot $(DOC_ROOT) -version $(MARS_VERSION)
+MAN_TOOL = $(TOP_DIR)/bin/mars man -manroots "$(MAN_ROOTS)" -version $(MARS_VERSION)
+DOC_TOOL = $(TOP_DIR)/bin/mars doc -manroots "$(MAN_ROOTS)" -version $(MARS_VERSION)
 
