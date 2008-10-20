@@ -26,9 +26,6 @@ in <<xref mars_man(5)>>.<p>
 
 <<section OPTIONS>>
 
-TBD: This list of options needs to be extended now that mars_man(1) is
-used by client projects.<p>
-
 <<deflist options>>
 
 <<defopt {-manroots <i>roots</i>}>>
@@ -42,6 +39,18 @@ of <i>roots</i>.<p>
 
 Specifies the client project's version number, for inclusion in the
 generated man pages.  Defaults to "x.y.z", as a placeholder.<p>
+
+<<defopt {-project <i>project</i>}>>
+
+Specifies the name of the project being documented. 
+Defaults to "Mars".  This string appears in the headers
+and footers of the generated pages.<p>
+
+<<defopt {-longproject <i>name</i>}>>
+
+Specifies the long name of the project being documented. 
+Defaults to "Simulation Infrastructure Library".  This string
+appears in the headers of the generated pages..<p>
 
 <<defopt {-srcdir <i>path</i>}>>
 
