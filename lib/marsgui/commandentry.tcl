@@ -7,7 +7,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM marsgui(n) package: Command entry widget.
+#   Mars marsgui(n) package: Command entry widget.
 # 
 #   This widget implements a general purpose customization of the
 #   Tk entry with a bash/tcsh-style command history accessible
@@ -368,6 +368,7 @@ snit::widget ::marsgui::commandentry {
         return
     }
 }
+
 
 
 

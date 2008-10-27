@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM marsgui(n) package: Debugging Console
+#    Mars marsgui(n) package: Debugging Console
 #
 #    This widget provides a "terminal" window for interacting
 #    with the main Tcl interpreter; it might add additional features
@@ -238,6 +238,7 @@ snit::widget ::marsgui::debugger {
         $type create .%AUTO% {*}$args
     }
 }
+
 
 
 

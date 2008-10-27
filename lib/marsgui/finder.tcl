@@ -7,7 +7,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM marsgui(n) package: Finder widget.
+#   Mars marsgui(n) package: Finder widget.
 # 
 #   This widget provides a text search control for doing incremental, 
 #   wildcard, and regular expression searches of a rotext(n) widget
@@ -444,6 +444,7 @@ snit::widget ::marsgui::finder {
         }
     }
 }
+
 
 
 

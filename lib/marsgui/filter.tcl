@@ -7,7 +7,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM marsgui(n) package: Filter widget.
+#   Mars marsgui(n) package: Filter widget.
 # 
 #   This widget provides a text filter control for doing exact, wildcard,
 #   regular expression filtering, both inclusive and exclusive, of
@@ -238,6 +238,7 @@ snit::widget ::marsgui::filter {
         # return 1
     }
 }
+
 
 
 

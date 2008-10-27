@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM marsgui(n) package: Scrolling Log Browser widget.
+#    Mars marsgui(n) package: Scrolling Log Browser widget.
 #
 #    This widget displays an application's current log file;
 #    it allows scrolling, filtering, and searching.
@@ -307,6 +307,7 @@ snit::widget ::marsgui::scrollinglog {
     delegate method field to log
     delegate method load  to log
 }
+
 
 
 

@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM marsgui(n) -- Global Definitions
+#    Mars marsgui(n) -- Global Definitions
 #
 #-----------------------------------------------------------------------
 
@@ -189,5 +189,6 @@ option add *ComboBox*selectBorderWidth 0
 
 #BWidget dynamic help (tool tip) defaults
 DynamicHelp::configure -background #FFFF99
+
 
 

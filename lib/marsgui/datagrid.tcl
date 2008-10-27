@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM marsgui(n) package: Data Display Frame
+#    Mars marsgui(n) package: Data Display Frame
 #
 #    This widget provides a modified Tk frame customized for
 #    displaying labels and data values in a grid.
@@ -120,6 +120,7 @@ snit::widget ::marsgui::datagrid {
         $self Position $w $r $c
     }
 }
+
 
 
 

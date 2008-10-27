@@ -7,13 +7,13 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM marsgui(n) package: Loglist widget.
+#   Mars marsgui(n) package: Loglist widget.
 # 
-#   This widget displays the JNEM logs available for browsing.  At the
+#   This widget displays the Mars logs available for browsing.  At the
 #   top is a list of applications which produce logs; at the bottom is
 #   the list of logs for the currently selected application.
 #
-#   A JNEM log file name has this structure
+#   A Mars log file name has this structure
 #
 #   <rootdir>/<appdir>/log<nnnn>.log
 #
@@ -615,6 +615,7 @@ snit::widget ::marsgui::loglist {
         set stopFlag 1
     }
 }
+
 
 
 

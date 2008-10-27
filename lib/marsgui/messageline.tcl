@@ -8,7 +8,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM marsgui(n) package: Messageline widget.
+#   Mars marsgui(n) package: Messageline widget.
 # 
 #   This widget provides a message line to be used at the bottom of
 #   application windows.  The messageline will usually be blank.
@@ -114,6 +114,7 @@ snit::widget ::marsgui::messageline {
         $blanker schedule
     }
 }
+
 
 
 

@@ -6,7 +6,7 @@
 #       William H. Duquette
 #
 # DESCRIPTION:
-#       JNEM marsgui(n) Package: Generic GUI Code
+#       Mars marsgui(n) Package: Generic GUI Code
 #
 #-----------------------------------------------------------------------
 
@@ -52,4 +52,5 @@ source [file join $::marsgui::library paner.tcl]
 source [file join $::marsgui::library rotext.tcl]
 source [file join $::marsgui::library datagrid.tcl]
 source [file join $::marsgui::library scrollinglog.tcl]
+
 

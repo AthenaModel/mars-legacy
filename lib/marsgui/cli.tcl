@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM marsgui(n) package: Command-Line Interface (CLI) widget.
+#    Mars marsgui(n) package: Command-Line Interface (CLI) widget.
 #
 #    This widget provides a "terminal" window for entering
 #    typed commands and displaying the result.
@@ -819,6 +819,7 @@ snit::widget ::marsgui::cli {
 
 
 }
+
 
 
 

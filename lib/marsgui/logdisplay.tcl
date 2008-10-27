@@ -7,7 +7,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM marsgui(n) package: Logdisplay widget.
+#   Mars marsgui(n) package: Logdisplay widget.
 # 
 #   This widget provides a widget for displaying the content of
 #   generic log files.
@@ -528,6 +528,7 @@ snit::widget ::marsgui::logdisplay {
     }
     
 }
+
 
 
 

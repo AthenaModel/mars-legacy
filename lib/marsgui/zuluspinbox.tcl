@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM marsgui(n) package: Zulu-Time Spinbox widget
+#    Mars marsgui(n) package: Zulu-Time Spinbox widget
 #
 #    A Zulu-Time spinbox is a spinbox customized for the entry of
 #    of zulu-time strings.
@@ -212,6 +212,7 @@ snit::widget ::marsgui::zuluspinbox {
 
     delegate method * to spinbox
 }
+
 
 
 

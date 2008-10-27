@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM marsgui(n) package: Simple Text Editor
+#    Mars marsgui(n) package: Simple Text Editor
 #
 #    This widget provides a simple text editor window for editing
 #    text files within a larger application.
@@ -360,6 +360,7 @@ snit::widget ::marsgui::texteditor {
         $win load $filename
     }
 }
+
 
 
 
