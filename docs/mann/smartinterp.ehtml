@@ -1,10 +1,10 @@
-<<manpage {util(n) smartinterp(n)} "Smart Tcl Interpreter">>
+<<manpage {marsutil(n) smartinterp(n)} "Smart Tcl Interpreter">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 1.0
-namespace import ::util::smartinterp
+namespace import ::marsutil::smartinterp
 </pre>
 
 <<itemlist>>
@@ -214,4 +214,7 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
 

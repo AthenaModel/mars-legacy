@@ -1,10 +1,10 @@
-<<manpage {util(n) enum(n)} "Enumerated value definition type">>
+<<manpage {marsutil(n) enum(n)} "Enumerated value definition type">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 1.0
-namespace import ::util::*
+namespace import ::marsutil::*
 </pre>
 
 <<itemlist>>
@@ -141,7 +141,7 @@ long names.<p>
 enum(n) requires Tcl 8.5 or later.
 
 To use enum(n) in a Tcl script, the environment variable
-<code>TCLLIBPATH</code> must include the parent of the util(n)
+<code>TCLLIBPATH</code> must include the parent of the marsutil(n)
 library directory.
 
 <<section AUTHOR>>
@@ -153,4 +153,8 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
+
 

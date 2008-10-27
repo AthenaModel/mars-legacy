@@ -1,10 +1,10 @@
-<<manpage {util(n) range(n)} "Bounded value definition type">>
+<<manpage {marsutil(n) range(n)} "Bounded value definition type">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 0.1
-namespace import ::util::*
+namespace import ::marsutil::*
 </pre>
 
 <<itemlist>>
@@ -115,7 +115,7 @@ Clamps the arbitrary <i>value</i> within the range's
 range(n) requires Tcl 8.5 or later.
 
 To use range(n) in a Tcl script, the environment variable
-<code>TCLLIBPATH</code> must include the parent of the util(n)
+<code>TCLLIBPATH</code> must include the parent of the marsutil(n)
 library directory.
 
 <<section AUTHOR>>
@@ -127,4 +127,8 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
+
 

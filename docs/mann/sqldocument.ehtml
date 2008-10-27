@@ -1,10 +1,10 @@
-<<manpage {util(n) sqldocument(n)} "SQL Document Management">>
+<<manpage {marsutil(n) sqldocument(n)} "SQL Document Management">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 1.0
-namespace import ::util::*
+namespace import ::marsutil::*
 </pre>
 
 <<itemlist>>
@@ -40,7 +40,7 @@ sqldocument(n) adds the following definitions to the database
 schema:<p>
 
 <pre>
-<<::util::sqldocument sqlsection schema>>
+<<::marsutil::sqldocument sqlsection schema>>
 </pre>
 
 <<section "SQL FUNCTIONS">>
@@ -253,6 +253,9 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
 
 
 

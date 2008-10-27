@@ -1,10 +1,10 @@
-<<manpage {util(n) sqlib(n)} "SQLite Utilities">>
+<<manpage {marsutil(n) sqlib(n)} "SQLite Utilities">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 0.1
-namespace import ::util::*
+namespace import ::marsutil::*
 </pre>
 
 <<itemlist>>
@@ -183,7 +183,7 @@ might otherwise be obscure.<p>
 sqlib(n) requires Tcl 8.5 or later, and SQLite 3.2 or later.<p>
 
 To use sqlib(n) in a Tcl script, the environment variable
-<code>TCLLIBPATH</code> must include the parent of the util(n)
+<code>TCLLIBPATH</code> must include the parent of the marsutil(n)
 library directory.
 
 <<section AUTHOR>>
@@ -195,4 +195,8 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
+
 

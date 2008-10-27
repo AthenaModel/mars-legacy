@@ -1,10 +1,10 @@
-<<manpage {util(n) commserver(n)} "comm(n) Command Server">>
+<<manpage {marsutil(n) commserver(n)} "comm(n) Command Server">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 0.1
-namespace import ::util::commserver
+namespace import ::marsutil::commserver
 </pre>
 
 <<itemlist>>
@@ -242,4 +242,7 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
 

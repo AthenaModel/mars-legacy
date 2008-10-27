@@ -1,10 +1,10 @@
-<<manpage {util(n) eventq(n)} "Discrete Event Queue Manager">>
+<<manpage {marsutil(n) eventq(n)} "Discrete Event Queue Manager">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 1.0
-namespace import ::util::*
+namespace import ::marsutil::*
 </pre>
 
 <<itemlist>>
@@ -47,7 +47,7 @@ procs.<p>
 
 <<swallow {
     # Define a dummy event
-    ::util::eventq define dummy {a b} { ... }
+    ::marsutil::eventq define dummy {a b} { ... }
 }>>
 
 eventq(n) stores the queued events in an <<xref sqldocument(n)>>;
@@ -254,7 +254,7 @@ The following enhancements are foreseen:<p>
 eventq(n) requires Tcl 8.5 or later.
 
 To use eventq(n) in a Tcl script, the environment variable
-<code>TCLLIBPATH</code> must include the parent of the util(n)
+<code>TCLLIBPATH</code> must include the parent of the marsutil(n)
 library directory.
 
 <<section AUTHOR>>
@@ -266,4 +266,8 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
+
 

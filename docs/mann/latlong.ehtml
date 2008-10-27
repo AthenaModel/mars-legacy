@@ -1,10 +1,10 @@
-<<manpage {util(n) latlong(n)} "Latitude/Longitude Operations">>
+<<manpage {marsutil(n) latlong(n)} "Latitude/Longitude Operations">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 0.1
-namespace import ::util::*
+namespace import ::marsutil::*
 </pre>
 
 <<itemlist>>
@@ -13,8 +13,8 @@ namespace import ::util::*
 
 latlong(n) defines a number of operations on locations expressed as
 a latitude/longitude pair in decimal degrees.  Some of these
-operations are implemented in C and have no pure-Tcl version;
-these are marked <b>shark(1)/orca(1) only.</b><p>
+operations are implemented in C and are available only in the
+optional libMarsutil.so extension.</b><p>
 
 <<section COMMANDS>>
 
@@ -66,7 +66,7 @@ lat/long pair.  Otherwise, <i>loc</i> is returned unchanged.<p>
 
 <<defitem "latlong tomgrs" {latlong tomgrs <i>loc</i> ?<i>precision</i>?}>>
 
-<b>shark(1)/orca(1) only.</b> Converts location <i>loc</i> from
+<b>Binary Extension only.</b> Converts location <i>loc</i> from
 latitude/longitude to an MGRS 
 coordinate string, colloquially known as a "UTM string".  The
 <i>precision</i> indicates the number of digits to shown for each
@@ -78,7 +78,7 @@ choice of <<iref latlong spheroid>>.
 
 <<defitem "latlong frommgrs" {latlong frommgrs <i>utm</i>}>>
 
-<b>shark(1)/orca(1) only.</b> Converts an an MGRS coordinate string,
+<b>Binary Extension only.</b> Converts an an MGRS coordinate string,
 colloquially known as a "UTM string", into a pair of
 latitude/longitude coordinates in decimal degrees.<p>
 
@@ -91,7 +91,7 @@ Also, note that due to the limited precision of the MGRS format,
 
 <<defitem "latlong togcc" {latlong togcc <i>loc</i>}>>
 
-<b>shark(1)/orca(1) only.</b> Converts location <i>loc</i> from
+<b>Binary Extension only.</b> Converts location <i>loc</i> from
 latitude/longitude to a set of GCC (Geocentric Coordinate) values.
 The elevation value at <i>loc</i> is assumed to be zero.  The three
 GCC values returned are in deciman meters.<p>
@@ -101,7 +101,7 @@ choice of <<iref latlong spheroid>>.
 
 <<defitem "latlong fromgcc" {latlong fromgcc <i>xyz</i>}>>
 
-<b>shark(1)/orca(1) only.</b> Converts a geocentric (GCC) location
+<b>Binary Extension only.</b> Converts a geocentric (GCC) location
 <i>xyz</i> to a geodetic lat/lon location. The three input
 GCC values are in deciman meters.  The returned lat/lon values are in
 decimal degreees.<p>
@@ -111,7 +111,7 @@ choice of <<iref latlong spheroid>>.
 
 <<defitem "latlong spheroid" {latlong spheroid ?<i>name</i>?}>>
 
-<b>shark(1)/orca(1) only.</b> Sets/returns the name of the spheroid to use in
+<b>Binary Extension only.</b> Sets/returns the name of the spheroid to use in
 all coordinate conversions.  Defaults to "WE", otherwise known as "WGS
 84".<p> 
 
@@ -130,7 +130,7 @@ The list of supported spheroids is as follows:<p>
 <tr><td><b>E2</b></td> <td>Everest (Sabah Sarawak)  </td></tr>
 <tr><td><b>E3</b></td> <td>Everest (India 1956) </td></tr>
 <tr><td><b>E4</b></td> <td>Everest (Malaysia 1969) </td></tr>
-<tr><td><b>E5</b></td> <td>Everest (Malay. & Sing)  </td></tr>
+<tr><td><b>E5</b></td> <td>Everest (Malay. &amp; Sing)  </td></tr>
 <tr><td><b>E6</b></td> <td>Everest (Pakistan)</td></tr>
 <tr><td><b>MF</b></td> <td>Modified Fischer 1960 </td></tr>
 <tr><td><b>HM</b></td> <td>Helmert 1906</td></tr>
@@ -147,11 +147,11 @@ The list of supported spheroids is as follows:<p>
 
 <<section ENVIRONMENT>>
 
-latlong(n) requires <<xref shark(1)>> or <<xref orca(1)>>
-for certain operations; the remainder require only Tcl 8.5 or later.
+latlong(n) requires the libMarsutil.so extension for
+certain operations; the remainder require only Tcl 8.5 or later.<p>
 
 To use latlong(n) in a Tcl script, the environment variable
-<code>TCLLIBPATH</code> must include the parent of the util(n)
+<code>TCLLIBPATH</code> must include the parent of the marsutil(n)
 library directory.
 
 <<section AUTHOR>>
@@ -163,4 +163,8 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
+
 

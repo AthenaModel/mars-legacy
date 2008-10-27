@@ -1,10 +1,10 @@
-<<manpage {util(n) quality(n)} "Qualitative value definition type">>
+<<manpage {marsutil(n) quality(n)} "Qualitative value definition type">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 0.1
-namespace import ::util::*
+namespace import ::marsutil::*
 </pre>
 
 <<itemlist>>
@@ -232,7 +232,7 @@ bounds.<p>
 quality(n) requires Tcl 8.5 or later.
 
 To use quality(n) in a Tcl script, the environment variable
-<code>TCLLIBPATH</code> must include the parent of the util(n)
+<code>TCLLIBPATH</code> must include the parent of the marsutil(n)
 library directory.
 
 <<section AUTHOR>>
@@ -244,4 +244,8 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
+
 

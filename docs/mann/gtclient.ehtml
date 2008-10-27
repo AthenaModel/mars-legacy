@@ -1,10 +1,10 @@
-<<manpage {util(n) gtclient(n)} "Game Truth Client">>
+<<manpage {marsutil(n) gtclient(n)} "Game Truth Client">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 1.0
-namespace import ::util::gtclient
+namespace import ::marsutil::gtclient
 </pre>
 
 <<itemlist>>
@@ -243,4 +243,7 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
 

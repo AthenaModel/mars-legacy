@@ -1,10 +1,10 @@
-<<manpage {util(n) notifier(n)} "Event Notification Manager">>
+<<manpage {marsutil(n) notifier(n)} "Event Notification Manager">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 1.0
-namespace import ::util::notifier
+namespace import ::marsutil::notifier
 </pre>
 
 <<itemlist>>
@@ -173,4 +173,7 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
 

@@ -1,10 +1,10 @@
-<<manpage {util(n) cmdinfo(n)} "Tcl Command Introspection">>
+<<manpage {marsutil(n) cmdinfo(n)} "Tcl Command Introspection">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 1.0
-namespace import ::util::*
+namespace import ::marsutil::*
 </pre>
 
 <<itemlist>>
@@ -97,6 +97,9 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
 
 
 

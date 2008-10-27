@@ -1,10 +1,10 @@
-<<manpage {util(n) zcurve(n)} "Z-curve Function">>
+<<manpage {marsutil(n) zcurve(n)} "Z-curve Function">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 0.1
-namespace import ::util::*
+namespace import ::marsutil::*
 </pre>
 
 <<itemlist>>
@@ -64,7 +64,7 @@ by <i>curve</i>, which is a list {<i>lo a b hi</i>}.<p>
 zcurve(n) requires Tcl 8.5 or later.
 
 To use zcurve(n) in a Tcl script, the environment variable
-<code>TCLLIBPATH</code> must include the parent of the util(n)
+<code>TCLLIBPATH</code> must include the parent of the marsutil(n)
 library directory.
 
 <<section AUTHOR>>
@@ -76,4 +76,8 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
+
 

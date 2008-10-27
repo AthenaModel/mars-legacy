@@ -1,10 +1,10 @@
-<<manpage {util(n) geoset(n)} "Set of Geometric Figures">>
+<<manpage {marsutil(n) geoset(n)} "Set of Geometric Figures">>
 
 <<section SYNOPSIS>>
 
 <pre>
 package require util 1.0
-namespace import ::util::geoset
+namespace import ::marsutil::geoset
 </pre>
 
 <<itemlist>>
@@ -177,5 +177,8 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
+
+
 
 
