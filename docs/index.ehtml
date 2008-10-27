@@ -15,6 +15,7 @@
   <li> <a href="man1/index.html">Section (1): Executables</a>
   <li> <a href="man5/index.html">Section (5): File Formats</a>
   <li> <a href="mann/index.html">Section (n): Tcl Commands</a>
+  <li> <a href="mani/index.html">Section (i): Tcl Interface</a>
 </ul>
 
 <h2>Development Documents</h2>

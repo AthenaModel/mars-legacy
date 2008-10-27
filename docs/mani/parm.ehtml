@@ -10,8 +10,8 @@
 modules which define a <<xref parmset(n)>> of configuration
 parameters.  It is not required that such modules use precisely this
 interface, but if they do it makes it easy to include their parameters
-in a larger project-wide or application-wide <<xref parmset(n)>> file,
-such as <<xref parmdb(5)>>.<p>
+in a larger project-wide or application-wide <<xref parmset(n)>> file.<p>
+
 
 <<subsection "Parameter Names">>
 

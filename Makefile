@@ -8,7 +8,8 @@
 # DESCRIPTION:
 #    This Makefile defines the following targets:
 #
-#    	all          Builds Mars code and documentation.
+#    	all          Builds Mars code and documentation.	
+# 	src          Builds Mars C code
 #    	docs         Builds Mars documentation
 #    	test         Runs Mars unit tests.
 #    	clean        Deletes all build products
@@ -31,7 +32,7 @@
 # Set the root of the directory tree.
 TOP_DIR = .
 
-.PHONY: all docs test build cmbuild clean
+.PHONY: all src docs test build cmbuild clean
 
 #---------------------------------------------------------------------
 # Shared Definitions
@@ -43,7 +44,20 @@ include MakeDefs
 #
 # Build code and documentation.
 
-all: docs
+all: src docs
+
+#---------------------------------------------------------------------
+# Target: src
+#
+# Build compiled modules.
+
+src: check_env
+	@ echo ""
+	@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	@ echo "+          Building Binaries From Source            +"
+	@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	@ echo ""
+	cd $(TOP_DIR)/src ; make
 
 #---------------------------------------------------------------------
 # Target: docs
@@ -78,7 +92,7 @@ test: check_env
 #
 # Build code and documentation from scratch, and run tests.
 
-build: clean docs test
+build: clean src docs test
 
 #---------------------------------------------------------------------
 # Target: clean
@@ -91,6 +105,7 @@ clean: check_env
 	@ echo "+                     Cleaning                      +"
 	@ echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	@ echo ""
+	cd $(TOP_DIR)/src  ; make clean
 	cd $(TOP_DIR)/test ; make clean
 	cd $(TOP_DIR)/docs ; make clean
 
