@@ -42,20 +42,20 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export sqldocument
 }
 
 #-----------------------------------------------------------------------
 # sqldocument
 
-snit::type ::util::sqldocument {
+snit::type ::marsutil::sqldocument {
     #-------------------------------------------------------------------
     # Type Constructor
 
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*
+        namespace import ::marsutil::*
 
         # Register self as an sqlsection(i) module
         $type register $type
@@ -138,7 +138,7 @@ snit::type ::util::sqldocument {
         lappend functions error     [list ::error]
         lappend functions format    [list ::format]
         lappend functions joinlist  [list ::join]
-        lappend functions percent   [list ::util::percent]
+        lappend functions percent   [list ::marsutil::percent]
         lappend functions wallclock [list ::clock seconds]
 
         return $functions
@@ -443,11 +443,11 @@ snit::type ::util::sqldocument {
     # Public Methods: General database queries
 
     # Delegated methods
-    delegate method saveas to db using {::util::sqlib %m %c}
-    delegate method query  to db using {::util::sqlib %m %c} 
-    delegate method tables to db using {::util::sqlib %m %c} 
-    delegate method schema to db using {::util::sqlib %m %c} 
-    delegate method mat    to db using {::util::sqlib %m %c} 
+    delegate method saveas to db using {::marsutil::sqlib %m %c}
+    delegate method query  to db using {::marsutil::sqlib %m %c} 
+    delegate method tables to db using {::marsutil::sqlib %m %c} 
+    delegate method schema to db using {::marsutil::sqlib %m %c} 
+    delegate method mat    to db using {::marsutil::sqlib %m %c} 
     delegate method *      to db
 
     # dbfile
@@ -482,6 +482,7 @@ snit::type ::util::sqldocument {
         return -code error "database is not open"
     }
 }
+
 
 
 

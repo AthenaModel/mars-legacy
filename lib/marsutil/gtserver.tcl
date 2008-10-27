@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    util(n) Game Truth Server
+#    marsutil(n) Game Truth Server
 #
 #    This object allows the application to publish game truth to clients
 #    via a commserver(n) object.  Game truth comes in two forms: scalars, 
@@ -23,14 +23,14 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export gtserver
 }
 
 #-----------------------------------------------------------------------
 # gtserver
 
-snit::type ::util::gtserver {
+snit::type ::marsutil::gtserver {
     #-------------------------------------------------------------------
     # Creation Options
 
@@ -318,5 +318,7 @@ snit::type ::util::gtserver {
     }
     
 }
+
+
 
 

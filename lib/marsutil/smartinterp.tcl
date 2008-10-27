@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    util(n) module: smartinterp(n), Smart Interps
+#    marsutil(n) module: smartinterp(n), Smart Interps
 #
 #    A smart interp is a standard Tcl interp wrapped in a Snit object,
 #    with added features for defining aliases.  The biggest of these
@@ -16,20 +16,20 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export smartinterp
 }
 
 #-----------------------------------------------------------------------
 # smartinterp
 
-snit::type ::util::smartinterp {
+snit::type ::marsutil::smartinterp {
     #-------------------------------------------------------------------
     # Type Constructor
 
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*
+        namespace import ::marsutil::*
     }
 
 
@@ -340,5 +340,7 @@ snit::type ::util::smartinterp {
     }
 
 }
+
+
 
 

@@ -7,7 +7,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM util(n) package: logreader type.
+#   Mars marsutil(n) package: logreader type.
 # 
 #   A logreader reads and parses a log file given a user-defined parsing 
 #   function.  There are two ways to use a logreader:
@@ -33,14 +33,14 @@ package require snit
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export logreader
 }
 
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::type ::util::logreader {
+snit::type ::marsutil::logreader {
     #-------------------------------------------------------------------
     # Options
 
@@ -172,6 +172,9 @@ snit::type ::util::logreader {
         }
     }
 }
+
+
+
 
 
 

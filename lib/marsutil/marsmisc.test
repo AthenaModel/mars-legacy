@@ -30,7 +30,7 @@ package require marsutil 1.0
 # The tests run in a namespace so as not to interfere with other
 # test suites.
 
-namespace eval ::util::test {
+namespace eval ::marsutil::test {
     #-------------------------------------------------------------------
     # Set up the test environment
 
@@ -505,7 +505,8 @@ look a lot nicer.}
     cleanupTests
 }
 
-namespace delete ::util::test
+namespace delete ::marsutil::test
+
 
 
 

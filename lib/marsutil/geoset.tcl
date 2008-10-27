@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: util(n) geometry collection data type
+#       Mars: marsutil(n) geometry collection data type
 #
 #       The geoset type manages a collection of polygons, polylines,
 #       point objects.
@@ -16,20 +16,20 @@
 #-----------------------------------------------------------------------
 # Exported commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export geoset
 }
 
 #-----------------------------------------------------------------------
 # Polymap Type
 
-snit::type ::util::geoset {
+snit::type ::marsutil::geoset {
     #-------------------------------------------------------------------
     # Type Constructor
 
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*
+        namespace import ::marsutil::*
 
         # Enumeration of item types supported in the map
         enum itemtype {
@@ -324,6 +324,9 @@ snit::type ::util::geoset {
         ValidateCoordinates $point 1
     }
 }
+
+
+
 
 
 

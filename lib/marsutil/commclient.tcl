@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    util(n) Comm Client
+#    marsutil(n) Comm Client
 #
 #    This object connects to a commserver(n).  It can send commands
 #    and receive responses to them, and it can receive and process
@@ -20,11 +20,11 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export commclient
 }
 
-snit::type ::util::commclient {
+snit::type ::marsutil::commclient {
     #-------------------------------------------------------------------
     # Components
 
@@ -425,6 +425,8 @@ snit::type ::util::commclient {
         }
     }
 }
+
+
 
 
 

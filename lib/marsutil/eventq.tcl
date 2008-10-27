@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    util(n) simulation event queue manager.
+#    marsutil(n) simulation event queue manager.
 #
 #    The event queue is implemented as a single table in an SQLite3
 #    run-time database, with an additional table for each type of event.  
@@ -35,7 +35,7 @@
 #    a simclock(n).
 #
 # NICE TO HAVE:
-#    * Move lfilter to util(n).
+#    * Move lfilter to marsutil(n).
 #    * Save pretty-printed args in the eventq_queue table, for browsing.
 #      * Use a trigger to set them.
 #    * Events should allow full proc argument list syntax.
@@ -45,14 +45,14 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export eventq
 }
 
 #-----------------------------------------------------------------------
 # Event Queue
 
-snit::type ::util::eventq {
+snit::type ::marsutil::eventq {
     pragma -hasinstances no -hastypeinfo no -hastypedestroy no
 
     #-------------------------------------------------------------------
@@ -67,7 +67,7 @@ snit::type ::util::eventq {
 
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*             ;# Unneeded in Tcl 8.5
+        namespace import ::marsutil::*             ;# Unneeded in Tcl 8.5
 
         # FIRST, Define data types
         snit::stringtype eqidentifier -regexp {^[[:alpha:]]+\w*$}
@@ -348,7 +348,7 @@ snit::type ::util::eventq {
         proc $etypes(handler-$etype) {id} [tsubst {
             |<--
             # Retrieve the event data
-            $::util::eventq::rdb eval {
+            $::marsutil::eventq::rdb eval {
                 SELECT * FROM eventq_queue_${etype}
                 WHERE id=\$id
             } {}
@@ -392,7 +392,7 @@ snit::type ::util::eventq {
             proc $etypes(schedule-$etype) [concat id $etypes(eargs-$etype)] \
                 [tsubst {
                 |<--
-                $::util::eventq::rdb eval {
+                $::marsutil::eventq::rdb eval {
                     INSERT INTO eventq_etype_${etype}(id
                     [tif {[llength $etypes(eargs-$etype)] > 0} {
                         ,[join $etypes(eargs-$etype) ,]
@@ -611,7 +611,7 @@ snit::type ::util::eventq {
     # Returns a list of the values that match the pattern, preserving
     # order.
     #
-    # TBD: Add this to util(n)!
+    # TBD: Add this to marsutil(n)!
 
     proc lfilter {list pattern} {
         set out [list]
@@ -627,4 +627,6 @@ snit::type ::util::eventq {
 
 
 }
+
+
 

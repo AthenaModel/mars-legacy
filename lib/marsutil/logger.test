@@ -7,7 +7,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Tcltest test suite for util(n) logger(n)
+#    Tcltest test suite for marsutil(n) logger(n)
 #
 #-----------------------------------------------------------------------
 
@@ -511,3 +511,4 @@ C}
 }
 
 namespace delete ::marsutil::test
+

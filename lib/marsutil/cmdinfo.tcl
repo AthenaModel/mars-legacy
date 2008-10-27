@@ -6,21 +6,21 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    util(n) Tcl Command Introspector
+#    marsutil(n) Tcl Command Introspector
 #
 #    cmdinfo(n) is an ensemble command whose subcommands are used for
 #    introspection of Tcl commands and namespaces.
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export cmdinfo
 }
 
 #-----------------------------------------------------------------------
 # cmdinfo
 
-snit::type ::util::cmdinfo {
+snit::type ::marsutil::cmdinfo {
     # Make it an ensemble
     pragma -hasinstances no -hastypeinfo no -hastypedestroy no
 
@@ -201,6 +201,8 @@ snit::type ::util::cmdinfo {
     }
 
 }
+
+
 
 
 

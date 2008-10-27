@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM: marsutil(n) Tcl Utilities: Simulation Clock Module
+#    Mars: marsutil(n) Tcl Utilities: Simulation Clock Module
 #
 #    This module defines a generic Simulation Clock type,
 #    simclockType, and also an instance of that type, simclock.
@@ -862,4 +862,5 @@ snit::type ::marsutil::simclockType {
 # Global simclock instance
 
 ::marsutil::simclockType ::marsutil::simclock
+
 

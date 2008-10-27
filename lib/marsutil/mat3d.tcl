@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: util(n) Tcl Utilities
+#       Mars: marsutil(n) Tcl Utilities
 #
 #	3-D Matrix commands.  
 #
@@ -20,20 +20,20 @@
 #-----------------------------------------------------------------------
 # Exported commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export mat3d
 }
 
 #-----------------------------------------------------------------------
 # Matrix Ensemble
 
-snit::type ::util::mat3d {
+snit::type ::marsutil::mat3d {
     # Make it an ensemble
     pragma -hastypeinfo 0 -hastypedestroy 0 -hasinstances 0
 
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*
+        namespace import ::marsutil::*
     }
 
     #-------------------------------------------------------------------
@@ -297,5 +297,8 @@ snit::type ::util::mat3d {
         return $slabels
     }
 }
+
+
+
 
 

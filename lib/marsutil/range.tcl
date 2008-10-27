@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: util(n) module: range types
+#       Mars: marsutil(n) module: range types
 #
 #	A range type is a range of numeric values, min to max.
 #       A particular value belongs to the type if it is
@@ -20,17 +20,17 @@
 #-----------------------------------------------------------------------
 # Export Public Commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export range
 }
 
 #-----------------------------------------------------------------------
 # range ADT
 
-snit::type ::util::range {
+snit::type ::marsutil::range {
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*
+        namespace import ::marsutil::*
     }
 
     #-------------------------------------------------------------------
@@ -115,3 +115,6 @@ snit::type ::util::range {
         return 1
     }
 }
+
+
+

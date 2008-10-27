@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: util(n) module: zcurve function
+#       Mars: marsutil(n) module: zcurve function
 #
 #	A zcurve is a piecewise-linear function with three segments; 
 #       it's called a Z-curve because of its shape.  Here's a 
@@ -56,14 +56,14 @@
 #-----------------------------------------------------------------------
 # Export Public Commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export zcurve
 }
 
 #-----------------------------------------------------------------------
 # zcurve type-definition ensemble
 
-snit::type ::util::zcurve {
+snit::type ::marsutil::zcurve {
     # Make it an ensemble
     pragma -hastypeinfo 0 -hastypedestroy 0 -hasinstances 0
 
@@ -139,5 +139,8 @@ snit::type ::util::zcurve {
         }
     }
 }
+
+
+
 
 

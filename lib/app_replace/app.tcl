@@ -78,7 +78,9 @@ snit::type app {
             return
         }
 
-        puts "app_replace: $file"
+        # TBD: apploader(n), when implemented, should provide a command
+        # that returns the actual app name.
+        puts "mars_replace: $file"
 
         # NEXT, backup the file
         set backup "$file~"

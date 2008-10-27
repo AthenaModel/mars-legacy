@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    util(n) Comm Server
+#    marsutil(n) Comm Server
 #
 #    This object allows clients to connect via comm(n) and a known
 #    port and send commands to a command executive for processing.
@@ -20,14 +20,14 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export commserver
 }
 
 #-----------------------------------------------------------------------
 # commserver
 
-snit::type ::util::commserver {
+snit::type ::marsutil::commserver {
     #-------------------------------------------------------------------
     # Creation Options
 
@@ -416,6 +416,8 @@ snit::type ::util::commserver {
         }
     }
 }
+
+
 
 
 

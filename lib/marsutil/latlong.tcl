@@ -6,19 +6,19 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: util(n) Tcl Utilities
+#       Mars: marsutil(n) Tcl Utilities
 #
 #	Latitude/Longitude Operations
 #
 #       These are pure-Tcl equivalents of commands implemented as
-#       part of util(n) in shark(1).
+#       part of marsutil(n) in shark(1).
 #
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
 # Exported commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export latlong
 }
 
@@ -26,10 +26,10 @@ namespace eval ::util:: {
 #-----------------------------------------------------------------------
 # Latlong Ensemble
 
-# Include this code only if ::util::latlong isn't defined in C++.
-if {[llength [info commands ::util::latlong]] == 0} {
+# Include this code only if ::marsutil::latlong isn't defined in C++.
+if {[llength [info commands ::marsutil::latlong]] == 0} {
 
-snit::type ::util::latlong {
+snit::type ::marsutil::latlong {
     # Make it an ensemble
     pragma -hastypeinfo 0 -hastypedestroy 0 -hasinstances 0
 
@@ -43,7 +43,7 @@ snit::type ::util::latlong {
 
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*
+        namespace import ::marsutil::*
 
         # Pi
         set pi [expr {acos(-1.0)}]
@@ -247,13 +247,16 @@ snit::type ::util::latlong {
     delegate typemethod fromgcc  to UnimplementedSubcommand
 
     typemethod UnimplementedSubcommand {args} {
-        error "subcommand requires shark(1)"
+        error "subcommand requires libMarsUtil.so"
     }
 
 }
 
 # End of Conditional Inclusion
 }
+
+
+
 
 
 

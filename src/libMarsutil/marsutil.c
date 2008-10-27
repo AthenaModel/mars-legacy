@@ -1,13 +1,13 @@
 /***********************************************************************
  *
  * TITLE:
- *	paxutil.c
+ *	marsutil.c
  *
  * AUTHOR:
  *	Will Duquette
  *
  * DESCRIPTION:
- *	JNEM: libPaxutil Tcl Commands
+ *	Mars: libMarsutil Tcl Commands
  *
  ***********************************************************************/
 
@@ -21,7 +21,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 
-#include "paxutil.h"
+#include "marsutil.h"
 
 #include <geotrans/geotrans.h>
 #include <geostars/geoStars.h>
@@ -98,33 +98,33 @@ typedef struct LatlongInfo {
  */
 
 /* Command Prototypes */
-static int util_hexdumpCmd      (ClientData, Tcl_Interp*, int, 
+static int marsutil_hexdumpCmd      (ClientData, Tcl_Interp*, int, 
                                  Tcl_Obj* CONST argv[]);
 
-/* util(n) command prototypes */
+/* marsutil(n) command prototypes */
 
-static int util_getnetifCmd     (ClientData, Tcl_Interp*, int, 
+static int marsutil_getnetifCmd     (ClientData, Tcl_Interp*, int, 
                                  Tcl_Obj* CONST argv[]);
 
-static int util_gettimeofdayCmd (ClientData, Tcl_Interp*, int, 
+static int marsutil_gettimeofdayCmd (ClientData, Tcl_Interp*, int, 
                                  Tcl_Obj* CONST argv[]);
 
-static int util_letCmd          (ClientData, Tcl_Interp*, int, 
+static int marsutil_letCmd          (ClientData, Tcl_Interp*, int, 
                                  Tcl_Obj* CONST argv[]);
 
-static int util_bboxCmd         (ClientData, Tcl_Interp*, int, 
+static int marsutil_bboxCmd         (ClientData, Tcl_Interp*, int, 
                                   Tcl_Obj* CONST argv[]);
 
-static int util_ccwCmd          (ClientData, Tcl_Interp*, int, 
+static int marsutil_ccwCmd          (ClientData, Tcl_Interp*, int, 
                                   Tcl_Obj* CONST argv[]);
 
-static int util_intersectCmd    (ClientData, Tcl_Interp*, int, 
+static int marsutil_intersectCmd    (ClientData, Tcl_Interp*, int, 
                                   Tcl_Obj* CONST argv[]);
 
-static int util_ptinpolyCmd     (ClientData, Tcl_Interp*, int, 
+static int marsutil_ptinpolyCmd     (ClientData, Tcl_Interp*, int, 
                                   Tcl_Obj* CONST argv[]);
 
-static int util_latlongCmd      (ClientData, Tcl_Interp*, int, 
+static int marsutil_latlongCmd      (ClientData, Tcl_Interp*, int, 
                                  Tcl_Obj* CONST argv[]);
 
 /* latlong Subcommands */
@@ -243,7 +243,7 @@ static EllipsoidData ellipsoidData;
 /***********************************************************************
  *
  * FUNCTION:
- *	Paxutil_Init()
+ *	Marsutil_Init()
  *
  * INPUTS:
  *	interp		A Tcl interpreter
@@ -256,39 +256,39 @@ static EllipsoidData ellipsoidData;
  */
 
 int
-Paxutil_Init(Tcl_Interp *interp)
+Marsutil_Init(Tcl_Interp *interp)
 {
     LatlongInfo* info;
 
     /* Define the commands. */
-    Tcl_CreateObjCommand(interp, "::util::hexdump", 
-                         util_hexdumpCmd, NULL, NULL);
+    Tcl_CreateObjCommand(interp, "::marsutil::hexdump", 
+                         marsutil_hexdumpCmd, NULL, NULL);
 
-    Tcl_CreateObjCommand(interp, "::util::getnetif", 
-                         util_getnetifCmd, NULL, NULL);
+    Tcl_CreateObjCommand(interp, "::marsutil::getnetif", 
+                         marsutil_getnetifCmd, NULL, NULL);
 
-    Tcl_CreateObjCommand(interp, "::util::gettimeofday", 
-                         util_gettimeofdayCmd, NULL, NULL);
+    Tcl_CreateObjCommand(interp, "::marsutil::gettimeofday", 
+                         marsutil_gettimeofdayCmd, NULL, NULL);
 
-    Tcl_CreateObjCommand(interp, "::util::let", 
-                         util_letCmd, NULL, NULL);
+    Tcl_CreateObjCommand(interp, "::marsutil::let", 
+                         marsutil_letCmd, NULL, NULL);
 
-    Tcl_CreateObjCommand(interp, "::util::bbox", 
-                         util_bboxCmd, newPoints(), 
+    Tcl_CreateObjCommand(interp, "::marsutil::bbox", 
+                         marsutil_bboxCmd, newPoints(), 
                          (Tcl_CmdDeleteProc*)deletePoints);
 
-    Tcl_CreateObjCommand(interp, "::util::ccw", 
-                         util_ccwCmd, NULL, NULL);
+    Tcl_CreateObjCommand(interp, "::marsutil::ccw", 
+                         marsutil_ccwCmd, NULL, NULL);
 
-    Tcl_CreateObjCommand(interp, "::util::intersect", 
-                         util_intersectCmd, NULL, NULL);
+    Tcl_CreateObjCommand(interp, "::marsutil::intersect", 
+                         marsutil_intersectCmd, NULL, NULL);
 
-    Tcl_CreateObjCommand(interp, "::util::ptinpoly", 
-                         util_ptinpolyCmd, newPoints(), 
+    Tcl_CreateObjCommand(interp, "::marsutil::ptinpoly", 
+                         marsutil_ptinpolyCmd, newPoints(), 
                          (Tcl_CmdDeleteProc*)deletePoints);
 
-    Tcl_CreateObjCommand(interp, "::util::latlong",
-                         util_latlongCmd, newLatlongInfo(), 
+    Tcl_CreateObjCommand(interp, "::marsutil::latlong",
+                         marsutil_latlongCmd, newLatlongInfo(), 
                          (Tcl_CmdDeleteProc*)deleteLatlongInfo);
 
     return TCL_OK;
@@ -322,7 +322,7 @@ Paxutil_Init(Tcl_Interp *interp)
  */
 
 static int 
-util_hexdumpCmd(ClientData cd, Tcl_Interp *interp, 
+marsutil_hexdumpCmd(ClientData cd, Tcl_Interp *interp, 
                 int objc, Tcl_Obj* CONST objv[])
 {
     int      count;
@@ -350,11 +350,11 @@ util_hexdumpCmd(ClientData cd, Tcl_Interp *interp,
 }
 
 /***********************************************************************
- * util(n) optimizations
+ * marsutil(n) optimizations
  *
  * The following commands are fast implementations of commands defined
- * in util(n).  The Tcl version is defined only if the C version is
- * not present.  All of these commands are defined in the ::util::
+ * in marsutil(n).  The Tcl version is defined only if the C version is
+ * not present.  All of these commands are defined in the ::marsutil::
  * namespace.
  */
 
@@ -375,7 +375,7 @@ util_hexdumpCmd(ClientData cd, Tcl_Interp *interp,
  */
 
 static int 
-util_getnetifCmd(ClientData cd, Tcl_Interp *interp, 
+marsutil_getnetifCmd(ClientData cd, Tcl_Interp *interp, 
                      int objc, Tcl_Obj* CONST objv[])
 {
     if (objc != 1) {
@@ -486,11 +486,11 @@ util_getnetifCmd(ClientData cd, Tcl_Interp *interp,
  *	Uses gettimeofday(2) to compute the time of day in decimal
  *      seconds at microsecond resolution.
  *
- *      This function is documented in util(n).
+ *      This function is documented in marsutil(n).
  */
 
 static int 
-util_gettimeofdayCmd(ClientData cd, Tcl_Interp *interp, 
+marsutil_gettimeofdayCmd(ClientData cd, Tcl_Interp *interp, 
                      int objc, Tcl_Obj* CONST objv[])
 {
     if (objc != 1) {
@@ -534,11 +534,11 @@ util_gettimeofdayCmd(ClientData cd, Tcl_Interp *interp,
  *	Evaluates the expression in the caller's context, assigns the
  *      result to the named variable, and returns the result.
  *
- *      This function is documented in util(n).
+ *      This function is documented in marsutil(n).
  */
 
 static int 
-util_letCmd(ClientData cd, Tcl_Interp *interp, 
+marsutil_letCmd(ClientData cd, Tcl_Interp *interp, 
             int objc, Tcl_Obj* CONST objv[])
 {
     if (objc != 3) {
@@ -574,7 +574,7 @@ util_letCmd(ClientData cd, Tcl_Interp *interp,
  */
 
 static int 
-util_bboxCmd(ClientData cd, Tcl_Interp *interp, 
+marsutil_bboxCmd(ClientData cd, Tcl_Interp *interp, 
              int objc, Tcl_Obj* CONST objv[])
 {
     Points* pointsBuffer = (Points*)cd;
@@ -618,7 +618,7 @@ util_bboxCmd(ClientData cd, Tcl_Interp *interp,
  */
 
 static int 
-util_ccwCmd(ClientData cd, Tcl_Interp *interp, 
+marsutil_ccwCmd(ClientData cd, Tcl_Interp *interp, 
             int objc, Tcl_Obj* CONST objv[])
 {
     if (objc != 4) {
@@ -681,7 +681,7 @@ util_ccwCmd(ClientData cd, Tcl_Interp *interp,
  */
 
 static int 
-util_intersectCmd(ClientData cd, Tcl_Interp *interp, 
+marsutil_intersectCmd(ClientData cd, Tcl_Interp *interp, 
                   int objc, Tcl_Obj* CONST objv[])
 {
     if (objc != 5) {
@@ -739,7 +739,7 @@ util_intersectCmd(ClientData cd, Tcl_Interp *interp,
  */
 
 static int 
-util_ptinpolyCmd(ClientData cd, Tcl_Interp *interp, 
+marsutil_ptinpolyCmd(ClientData cd, Tcl_Interp *interp, 
                  int objc, Tcl_Obj* CONST objv[])
 {
     Points* pointsBuffer = (Points*)cd;
@@ -793,7 +793,7 @@ util_ptinpolyCmd(ClientData cd, Tcl_Interp *interp,
 /***********************************************************************
  *
  * FUNCTION:
- *	util_latlongCmd()
+ *	marsutil_latlongCmd()
  *
  * INPUTS:
  *	subcommand		The subcommand name
@@ -809,7 +809,7 @@ util_ptinpolyCmd(ClientData cd, Tcl_Interp *interp,
  */
 
 static int 
-util_latlongCmd(ClientData cd, Tcl_Interp* interp, 
+marsutil_latlongCmd(ClientData cd, Tcl_Interp* interp, 
                    int objc, Tcl_Obj* CONST objv[])
 {
     if (objc < 2) 
@@ -852,7 +852,7 @@ util_latlongCmd(ClientData cd, Tcl_Interp* interp,
  *      an answer in kilometers.  The algorithm is equivalent to
  *      that used in CBS.
  *
- *      This function is documented in util(n).
+ *      This function is documented in marsutil(n).
  */
 
 static int 
@@ -909,7 +909,7 @@ latlong_dist(ClientData cd, Tcl_Interp *interp,
  *      an answer in kilometers.  The algorithm is equivalent to
  *      that used in CBS.
  *
- *      This function is documented in util(n).
+ *      This function is documented in marsutil(n).
  */
 
 static int 
@@ -2538,3 +2538,8 @@ validateLatLong(Tcl_Interp* interp, double lat, double lon)
 
     return TCL_OK;
 }
+
+
+
+
+

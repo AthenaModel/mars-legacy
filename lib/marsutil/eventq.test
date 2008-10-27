@@ -7,7 +7,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Tcltest test suite for util(n) eventq(n)
+#    Tcltest test suite for marsutil(n) eventq(n)
 #
 #-----------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 #-----------------------------------------------------------------------
 # Load the package to be tested
 
-package require util 1.0
+package require marsutil 1.0
 
 #-----------------------------------------------------------------------
 # Test Suite
@@ -30,7 +30,7 @@ package require util 1.0
 # The tests run in a namespace so as not to interfere with other
 # test suites.
 
-namespace eval ::util::test {
+namespace eval ::marsutil::test {
     #-------------------------------------------------------------------
     # Set up the test environment
 
@@ -38,7 +38,7 @@ namespace eval ::util::test {
     namespace import ::tcltest::*
 
     # Import the code to be tested
-    namespace import ::util::*
+    namespace import ::marsutil::*
 
     # Create the RDB
     sqldocument rdb
@@ -53,7 +53,7 @@ namespace eval ::util::test {
 
     # bgerror: set trace to error
     proc ::bgerror {msg} {
-        set ::util::test::trace "$msg\n$::errorInfo"
+        set ::marsutil::test::trace "$msg\n$::errorInfo"
     }
 
     # Allow for cleanup
@@ -73,7 +73,7 @@ namespace eval ::util::test {
     # Returns a list of the values that match the pattern, preserving
     # order.
     #
-    # TBD: Add this to util(n)!
+    # TBD: Add this to marsutil(n)!
 
     proc lfilter {list pattern} {
         set out [list]
@@ -263,17 +263,17 @@ namespace eval ::util::test {
         }
 
         list \
-            [info command "::util::test::eventq_handler_arrival"]  \
-            [info command "::util::test::eventq_schedule_arrival"]
+            [info command "::marsutil::test::eventq_handler_arrival"]  \
+            [info command "::marsutil::test::eventq_schedule_arrival"]
     } -cleanup {
         cleanup
-    } -result {::util::test::eventq_handler_arrival ::util::test::eventq_schedule_arrival}
+    } -result {::marsutil::test::eventq_handler_arrival ::marsutil::test::eventq_schedule_arrival}
 
     test define-3.1 {Can redefine an event body} -body {
         eventq define arrival {} {+body1+}
         eventq define arrival {} {+body2+}
         
-        string trim [info body ::util::test::eventq_handler_arrival]
+        string trim [info body ::marsutil::test::eventq_handler_arrival]
     } -cleanup {
         cleanup
     } -match glob -result {*+body2+*}
@@ -286,20 +286,20 @@ namespace eval ::util::test {
 
         set a [list]
         lappend a [eventq etypes]
-        lappend a [info command "::util::test::eventq_handler_arrival"]
-        lappend a [info command "::util::test::eventq_schedule_arrival"]
+        lappend a [info command "::marsutil::test::eventq_handler_arrival"]
+        lappend a [info command "::marsutil::test::eventq_schedule_arrival"]
 
         eventq destroy arrival
         
         set b [list]
         lappend b [eventq etypes]
-        lappend b [info command "::util::test::eventq_handler_arrival"]
-        lappend b [info command "::util::test::eventq_schedule_arrival"]
+        lappend b [info command "::marsutil::test::eventq_handler_arrival"]
+        lappend b [info command "::marsutil::test::eventq_schedule_arrival"]
             
         list $a $b
     } -cleanup {
         cleanup
-    } -result {{arrival ::util::test::eventq_handler_arrival ::util::test::eventq_schedule_arrival} {{} {} {}}}
+    } -result {{arrival ::marsutil::test::eventq_handler_arrival ::marsutil::test::eventq_schedule_arrival} {{} {} {}}}
 
     test destroy-1.2 {Event types are destroyed by glob match} -body {
         eventq define arrival1  {dummy} { }
@@ -768,7 +768,7 @@ Error: Simulated Error
 Simulated Error
     while executing
 'error 'Simulated Error''
-    (procedure '::util::test::eventq_handler_arrival' line 9)
+    (procedure '::marsutil::test::eventq_handler_arrival' line 9)
     invoked from within
 '$etypes(handler-$etype) $id'
     }
@@ -781,4 +781,7 @@ Simulated Error
     cleanupTests
 }
 
-namespace delete ::util::test
+namespace delete ::marsutil::test
+
+
+

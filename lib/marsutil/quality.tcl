@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: util(n) module: quality objects
+#       Mars: marsutil(n) module: quality objects
 #
 #	A quality is a rating scale that relates names to specific 
 #	numeric values.  Each value in fact has two names: a long name
@@ -22,17 +22,17 @@
 #-----------------------------------------------------------------------
 # Export Public Commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export quality
 }
 
 #-----------------------------------------------------------------------
 # quality ADT
 
-snit::type ::util::quality {
+snit::type ::marsutil::quality {
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*
+        namespace import ::marsutil::*
     }
 
     #-------------------------------------------------------------------
@@ -372,3 +372,6 @@ snit::type ::util::quality {
         }
    }
 }
+
+
+

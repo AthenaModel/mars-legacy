@@ -7,7 +7,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Tcltest test suite for util(n) parmset(n)
+#    Tcltest test suite for marsutil(n) parmset(n)
 #
 #-----------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 #-----------------------------------------------------------------------
 # Load the package to be tested
 
-package require util 1.0
+package require marsutil 1.0
 
 #-----------------------------------------------------------------------
 # Test Suite
@@ -30,7 +30,7 @@ package require util 1.0
 # The tests run in a namespace so as not to interfere with other
 # test suites.
 
-namespace eval ::util::test {
+namespace eval ::marsutil::test {
     #-------------------------------------------------------------------
     # Set up the test environment
 
@@ -38,7 +38,7 @@ namespace eval ::util::test {
     namespace import ::tcltest::*
 
     # Import the code to be tested
-    namespace import ::util::*
+    namespace import ::marsutil::*
 
     # Variable of notification arguments
     variable notifyList {}
@@ -46,7 +46,7 @@ namespace eval ::util::test {
     #-------------------------------------------------------------------
     # Setup
 
-    snit::integer ::util::test::intRange  -min 0 -max 10
+    snit::integer ::marsutil::test::intRange  -min 0 -max 10
 
     proc Setup {} {
         variable notifyList
@@ -72,18 +72,18 @@ namespace eval ::util::test {
         variable notifyList
         set notifyList {}
 
-        parmset A -notifycmd [list ::util::test::NotifyABCs A]
-        parmset B -notifycmd [list ::util::test::NotifyABCs B]
+        parmset A -notifycmd [list ::marsutil::test::NotifyABCs A]
+        parmset B -notifycmd [list ::marsutil::test::NotifyABCs B]
 
-        parmset C1 -notifycmd [list ::util::test::NotifyABCs C1]
+        parmset C1 -notifycmd [list ::marsutil::test::NotifyABCs C1]
         C1 define thisOne snit::integer 0 ""
 
-        parmset C2 -notifycmd [list ::util::test::NotifyABCs C2]
+        parmset C2 -notifycmd [list ::marsutil::test::NotifyABCs C2]
         C2 define thatOne snit::integer 1 ""
 
-        B slave add ::util::test::C1
-        B slave add ::util::test::C2
-        A slave add ::util::test::B
+        B slave add ::marsutil::test::C1
+        B slave add ::marsutil::test::C2
+        A slave add ::marsutil::test::B
     }
 
     proc CleanUpABCs {} {
@@ -257,7 +257,7 @@ namespace eval ::util::test {
     test parmset-3.7 {set validition check} -setup {
         Setup
     } -body {
-        ps define p1 ::util::test::intRange 0 ""
+        ps define p1 ::marsutil::test::intRange 0 ""
 
         ps set p1 -1
     } -returnCodes {
@@ -696,7 +696,7 @@ parm pBool   true
 
     test notify-1.1 {set notifies with parm} -setup {
         Setup
-        ps configure -notifycmd ::util::test::NotifyCB
+        ps configure -notifycmd ::marsutil::test::NotifyCB
         ps define thisOne snit::integer 0 ""
     } -body {
         ps set thisOne 2
@@ -708,7 +708,7 @@ parm pBool   true
 
     test notify-1.2 {set doesn't notify on error} -setup {
         Setup
-        ps configure -notifycmd ::util::test::NotifyCB
+        ps configure -notifycmd ::marsutil::test::NotifyCB
         ps define thisOne snit::integer 0 ""
     } -body {
         catch {ps set thisOne BadValue}
@@ -720,7 +720,7 @@ parm pBool   true
 
     test notify-1.3 {setdefault notifies with parm} -setup {
         Setup
-        ps configure -notifycmd ::util::test::NotifyCB
+        ps configure -notifycmd ::marsutil::test::NotifyCB
         ps define thisOne snit::integer 0 ""
     } -body {
         ps setdefault thisOne 1
@@ -731,7 +731,7 @@ parm pBool   true
 
     test notify-1.4 {setdefault doesn't notify on error} -setup {
         Setup
-        ps configure -notifycmd ::util::test::NotifyCB
+        ps configure -notifycmd ::marsutil::test::NotifyCB
         ps define thisOne snit::integer 0 ""
     } -body {
         catch {ps setdefault thisOne BadValue}
@@ -742,7 +742,7 @@ parm pBool   true
 
     test notify-1.5 {reset notifies only once with ""} -setup {
         Setup
-        ps configure -notifycmd ::util::test::NotifyCB
+        ps configure -notifycmd ::marsutil::test::NotifyCB
         ps define thisOne snit::integer 0 ""
     } -body {
         ps reset
@@ -752,7 +752,7 @@ parm pBool   true
 
     test notify-1.6 {restore notifies only once with ""} -setup {
         Setup
-        ps configure -notifycmd ::util::test::NotifyCB
+        ps configure -notifycmd ::marsutil::test::NotifyCB
         ps define thisOne snit::integer 0 ""
     } -body {
         ps restore [ps checkpoint]
@@ -762,7 +762,7 @@ parm pBool   true
 
     test notify-1.7 {load notifies only once with ""} -setup {
         Setup
-        ps configure -notifycmd ::util::test::NotifyCB
+        ps configure -notifycmd ::marsutil::test::NotifyCB
         ps define thisOne snit::integer 0 ""
         set filename parmset.test.1.6.save
         ps save $filename
@@ -776,7 +776,7 @@ parm pBool   true
 
     test notify-1.8 {load doesn't notify on error} -setup {
         Setup
-        ps configure -notifycmd ::util::test::NotifyCB
+        ps configure -notifycmd ::marsutil::test::NotifyCB
         ps define thisOne snit::integer 0 ""
         
         set filename parmset.test.1.6.save
@@ -822,7 +822,7 @@ parm pBool   true
         parmset slave
         slave define thisOne snit::integer 0 ""
     } -body {
-        master slave add ::util::test::slave
+        master slave add ::marsutil::test::slave
         list [slave names] [master names]
     } -cleanup {
         master destroy
@@ -834,14 +834,14 @@ parm pBool   true
         parmset slave
         slave define thisOne snit::integer 0 ""
     } -body {
-        master slave add ::util::test::slave
-        master slave add ::util::test::slave
+        master slave add ::marsutil::test::slave
+        master slave add ::marsutil::test::slave
     } -returnCodes {
         error
     } -cleanup {
         master destroy
         slave destroy
-    } -result {parmset(n) ::util::test::slave already has a master: "::util::test::master"}
+    } -result {parmset(n) ::marsutil::test::slave already has a master: "::marsutil::test::master"}
 
     # Error: parameter name collision
     test slave-1.3 {Error: parameter name collision} -setup {
@@ -851,7 +851,7 @@ parm pBool   true
         parmset slave
         slave define thisOne snit::integer 0 ""
     } -body {
-        master slave add ::util::test::slave
+        master slave add ::marsutil::test::slave
     } -returnCodes {
         error
     } -cleanup {
@@ -865,8 +865,8 @@ parm pBool   true
         parmset C
         C define thisOne snit::integer 0 ""
     } -body {
-        B slave add ::util::test::C
-        A slave add ::util::test::B
+        B slave add ::marsutil::test::C
+        A slave add ::marsutil::test::B
         A names
     } -cleanup {
         A destroy
@@ -883,8 +883,8 @@ parm pBool   true
         parmset slave2
         slave2 define thatOne snit::integer 0 ""
     } -body {
-        master slave add ::util::test::slave1
-        master slave add ::util::test::slave2
+        master slave add ::marsutil::test::slave1
+        master slave add ::marsutil::test::slave2
         master names
     } -cleanup {
         master destroy
@@ -897,42 +897,42 @@ parm pBool   true
         parmset slave
         slave define thisOne snit::integer 0 ""
     } -body {
-        master slave add ::util::test::slave
+        master slave add ::marsutil::test::slave
         slave subset nocando ""
     } -returnCodes {
         error
     } -cleanup {
         master destroy
         slave destroy
-    } -result {can't add subset, parmset is slave of "::util::test::master"}
+    } -result {can't add subset, parmset is slave of "::marsutil::test::master"}
 
     test slave-1.7 {Can't define parm if slave} -setup {
         parmset master
         parmset slave
         slave define thisOne snit::integer 0 ""
     } -body {
-        master slave add ::util::test::slave
+        master slave add ::marsutil::test::slave
         slave define thatOne snit::integer 0 ""
     } -returnCodes {
         error
     } -cleanup {
         master destroy
         slave destroy
-    } -result {can't define parm, parmset is slave of "::util::test::master"}
+    } -result {can't define parm, parmset is slave of "::marsutil::test::master"}
 
     test slave-1.8 {Can't slave add if slave} -setup {
         parmset master
         parmset slave
         slave define thisOne snit::integer 0 ""
     } -body {
-        master slave add ::util::test::slave
+        master slave add ::marsutil::test::slave
         slave slave add master
     } -returnCodes {
         error
     } -cleanup {
         master destroy
         slave destroy
-    } -result {can't add slave, parmset is slave of "::util::test::master"}
+    } -result {can't add slave, parmset is slave of "::marsutil::test::master"}
 
     test slave-1.9 {Both default and value are grafted} -setup {
         parmset master
@@ -940,7 +940,7 @@ parm pBool   true
         slave define thisOne snit::integer 0 ""
         slave set thisOne 5
     } -body {
-        master slave add ::util::test::slave
+        master slave add ::marsutil::test::slave
         list [master getdefault thisOne] [master get thisOne]
     } -cleanup {
         master destroy
@@ -953,7 +953,7 @@ parm pBool   true
         slave define thisOne snit::integer 0 ""
         slave lock thisOne
     } -body {
-        master slave add ::util::test::slave
+        master slave add ::marsutil::test::slave
         master islocked thisOne
     } -cleanup {
         master destroy
@@ -1166,9 +1166,9 @@ parm pBool   true
         parmset master
         parmset slave
         slave define thisOne snit::integer 0 ""
-        master slave add ::util::test::slave
+        master slave add ::marsutil::test::slave
     } -body {
-        master slave free ::util::test::slave
+        master slave free ::marsutil::test::slave
 
         # Show that the link is broken
         master set thisOne 5
@@ -1248,7 +1248,7 @@ parm pBool   true
         snit::type slaveowner {
             typecomponent parm -public parm
             typeconstructor {
-                ::util::parmset ${type}::parm
+                ::marsutil::parmset ${type}::parm
                 parm define thisOne snit::integer 0 ""
 
                 set parm ${type}::parm
@@ -1262,7 +1262,7 @@ parm pBool   true
         parmset master
     } -body {
         # The point of this test is that no errors are thrown.
-        master slave add {::util::test::slaveowner parm}
+        master slave add {::marsutil::test::slaveowner parm}
         master set thisOne 5
         master setdefault thisOne 10
         master lock thisOne
@@ -1270,7 +1270,7 @@ parm pBool   true
         master reset
         master restore [master checkpoint]
         master load testfile.dat
-        master slave free {::util::test::slaveowner parm}
+        master slave free {::marsutil::test::slaveowner parm}
     } -cleanup {
         master destroy
         slaveowner destroy
@@ -1282,7 +1282,10 @@ parm pBool   true
     cleanupTests
 }
 
-namespace delete ::util::test
+namespace delete ::marsutil::test
+
+
+
 
 
 

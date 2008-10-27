@@ -7,7 +7,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Tcltest test suite for util(n) smartinterp(n)
+#    Tcltest test suite for marsutil(n) smartinterp(n)
 #
 #-----------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 #-----------------------------------------------------------------------
 # Load the package to be tested
 
-package require util 1.0
+package require marsutil 1.0
 
 #-----------------------------------------------------------------------
 # Test Suite
@@ -30,7 +30,7 @@ package require util 1.0
 # The tests run in a namespace so as not to interfere with other
 # test suites.
 
-namespace eval ::util::test {
+namespace eval ::marsutil::test {
     #-------------------------------------------------------------------
     # Set up the test environment
 
@@ -38,7 +38,7 @@ namespace eval ::util::test {
     namespace import ::tcltest::*
 
     # Import the code to be tested
-    namespace import ::util::*
+    namespace import ::marsutil::*
 
     #-------------------------------------------------------------------
     # Setup
@@ -108,7 +108,7 @@ namespace eval ::util::test {
     test alias-1.1 {Can evaluate commands in interp} -setup {
         set interp [smartinterp %AUTO%]
     } -body {
-        $interp alias foo  ::util::test::echo foo
+        $interp alias foo  ::marsutil::test::echo foo
         
         $interp eval {foo a b c}
 
@@ -140,7 +140,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 0 0 {} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo}
     } -cleanup {        
@@ -151,7 +151,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 2 2 {this that} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo a b}
     } -cleanup {        
@@ -162,7 +162,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 0 2 {?this? ?that?} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo}
     } -cleanup {        
@@ -173,7 +173,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 0 2 {?this? ?that?} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo a b}
     } -cleanup {        
@@ -184,7 +184,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 1 - {?this? ?options...?} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo a}
     } -cleanup {        
@@ -195,7 +195,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 1 - {?this? ?options...?} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo a b c d e}
     } -cleanup {        
@@ -207,7 +207,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 0 0 {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub}
     } -cleanup {        
@@ -219,7 +219,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 2 2 {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub a b}
     } -cleanup {        
@@ -231,7 +231,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 0 2 {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub}
     } -cleanup {        
@@ -243,7 +243,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 0 2 {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub a b}
     } -cleanup {        
@@ -255,7 +255,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 1 - {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub a}
     } -cleanup {        
@@ -267,7 +267,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 1 - {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub a b c d e}
     } -cleanup {        
@@ -280,7 +280,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 0 0 {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub}
     } -cleanup {        
@@ -293,7 +293,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 2 2 {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub a b}
     } -cleanup {        
@@ -306,7 +306,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 0 2 {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub}
     } -cleanup {        
@@ -319,7 +319,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 0 2 {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub a b}
     } -cleanup {        
@@ -332,7 +332,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 1 - {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub a}
     } -cleanup {        
@@ -345,7 +345,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 1 - {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub a b c d e}
     } -cleanup {        
@@ -356,7 +356,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 0 0 {} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo a}
     } -returnCodes {
@@ -369,7 +369,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 2 2 {this that} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo a}
     } -returnCodes {
@@ -382,7 +382,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 2 2 {this that} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo a b c}
     } -returnCodes {
@@ -395,7 +395,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 1 2 {this ?that?} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo}
     } -returnCodes {
@@ -408,7 +408,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO%]
     } -body {
         $interp smartalias foo 1 2 {this ?that?} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo a b c}
     } -returnCodes {
@@ -422,7 +422,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 0 0 {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub a}
     } -returnCodes {
@@ -436,7 +436,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 2 2 {this that} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub a}
     } -returnCodes {
@@ -450,7 +450,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 2 2 {this that} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub a b c}
     } -returnCodes {
@@ -464,7 +464,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 1 2 {this ?that?} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub}
     } -returnCodes {
@@ -478,7 +478,7 @@ namespace eval ::util::test {
     } -body {
         $interp ensemble en
         $interp smartalias {en sub} 1 2 {this ?that?} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en sub a b c}
     } -returnCodes {
@@ -493,7 +493,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 0 0 {} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub a}
     } -returnCodes {
@@ -508,7 +508,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 2 2 {this that} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub a}
     } -returnCodes {
@@ -523,7 +523,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 2 2 {this that} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub a b c}
     } -returnCodes {
@@ -538,7 +538,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 1 2 {this ?that?} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub}
     } -returnCodes {
@@ -553,7 +553,7 @@ namespace eval ::util::test {
         $interp ensemble en1
         $interp ensemble {en1 en2}
         $interp smartalias {en1 en2 sub} 1 2 {this ?that?} \
-            [list ::util::test::echo ensub]
+            [list ::marsutil::test::echo ensub]
         
         $interp eval {en1 en2 sub a b c}
     } -returnCodes {
@@ -713,7 +713,7 @@ namespace eval ::util::test {
         set interp [smartinterp %AUTO% -cli yes]
     } -body {
         $interp smartalias foo 1 2 {this ?that?} \
-            [list ::util::test::echo foo]
+            [list ::marsutil::test::echo foo]
         
         $interp eval {foo}
     } -returnCodes {
@@ -765,7 +765,10 @@ Valid subcommands: en2, sub1}
     cleanupTests
 }
 
-namespace delete ::util::test
+namespace delete ::marsutil::test
+
+
+
 
 
 

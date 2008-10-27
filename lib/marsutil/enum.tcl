@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: util(n) module: enum objects
+#       Mars: marsutil(n) module: enum objects
 #
 #	A enum is an object that defines an enumerated type.  Each
 #       value in the enum has two names, a longname and a shortname.
@@ -21,17 +21,17 @@
 #-----------------------------------------------------------------------
 # Export Public Commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export enum
 }
 
 #-----------------------------------------------------------------------
 # enum ADT
 
-snit::type ::util::enum {
+snit::type ::marsutil::enum {
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*
+        namespace import ::marsutil::*
     }
 
     #-------------------------------------------------------------------
@@ -270,3 +270,6 @@ snit::type ::util::enum {
         return -1
     }
 }
+
+
+

@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: util(n) Tcl Utilities
+#       Mars: marsutil(n) Tcl Utilities
 #
 #	Matrix commands.  
 #
@@ -18,20 +18,20 @@
 #-----------------------------------------------------------------------
 # Exported commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export mat
 }
 
 #-----------------------------------------------------------------------
 # Matrix Ensemble
 
-snit::type ::util::mat {
+snit::type ::marsutil::mat {
     # Make it an ensemble
     pragma -hastypeinfo 0 -hastypedestroy 0 -hasinstances 0
 
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*
+        namespace import ::marsutil::*
     }
 
     #-------------------------------------------------------------------
@@ -314,7 +314,7 @@ snit::type ::util::mat {
     # pprintq matrix quality ?rlabels? ?clabels? 
     #
     # matrix      A matrix.
-    # quality     A ::util::quality object
+    # quality     A ::marsutil::quality object
     # rlabels     Row labels
     # clabels     Column labels
     #
@@ -425,5 +425,8 @@ snit::type ::util::mat {
         return $labels
     }
 }
+
+
+
 
 

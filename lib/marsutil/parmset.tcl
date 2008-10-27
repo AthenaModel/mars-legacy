@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM util(n) Module: Parameter Set Framework
+#    Mars marsutil(n) Module: Parameter Set Framework
 #
 #    A parameter set is a vector of typed parameters which may be
 #    loaded from a file, edited, and saved back to the file.  Parameter
@@ -44,20 +44,20 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export parmset
 }
 
 #-----------------------------------------------------------------------
 # parmset
 
-snit::type ::util::parmset {
+snit::type ::marsutil::parmset {
     #-------------------------------------------------------------------
     # Type Constructor
 
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::util::*
+        namespace import ::marsutil::*
     }
 
     #-------------------------------------------------------------------
@@ -138,7 +138,7 @@ snit::type ::util::parmset {
             "can't add subset, parmset is slave of \"$info(master)\""
 
         # FIRST, is the name valid?
-        ::util::parmname validate $name
+        ::marsutil::parmname validate $name
 
         # NEXT, get the ID.
         set id [string tolower $name]
@@ -1028,9 +1028,12 @@ snit::type ::util::parmset {
 # * Letters, numbers, underscores, and hyphens.
 # * "." as a separator.
 
-snit::stringtype ::util::parmname \
+snit::stringtype ::marsutil::parmname \
     -regexp {^[[:alpha:]][[:alnum:]_-]*(\.[[:alnum:]_-]+)*$}
 
 # We should probably have a module for these.
+
+
+
 
 

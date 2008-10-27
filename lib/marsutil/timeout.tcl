@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    util(n) timeout manager
+#    marsutil(n) timeout manager
 #
 #    This object encapsulates most of the logic associated with
 #    implementing a cancellable timeout with Tcl's "after" command.
@@ -14,11 +14,11 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export timeout
 }
 
-snit::type ::util::timeout {
+snit::type ::marsutil::timeout {
     #-------------------------------------------------------------------
     # Options
 
@@ -88,7 +88,7 @@ snit::type ::util::timeout {
 
         # NEXT, call the user's callback using bgcatch.
         if {$options(-command) ne ""} {
-            ::util::bgcatch {
+            ::marsutil::bgcatch {
                 uplevel \#0 $options(-command)
             }
         }
@@ -162,5 +162,7 @@ snit::type ::util::timeout {
         expr {$afterID ne ""}
     }
 }
+
+
 
 

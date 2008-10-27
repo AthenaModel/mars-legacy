@@ -7,7 +7,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Tcltest test suite for util(n) sqldocument.tcl
+#    Tcltest test suite for marsutil(n) sqldocument.tcl
 #
 #-----------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 # Load the package to be tested
 
 package require sqlite3
-package require util 1.0
+package require marsutil 1.0
 
 #-----------------------------------------------------------------------
 # Test Suite
@@ -31,7 +31,7 @@ package require util 1.0
 # The tests run in a namespace so as not to interfere with other
 # test suites.
 
-namespace eval ::util::test {
+namespace eval ::marsutil::test {
     #-------------------------------------------------------------------
     # Set up the test environment
 
@@ -39,7 +39,7 @@ namespace eval ::util::test {
     namespace import ::tcltest::*
 
     # Import the code to be tested
-    namespace import ::util::*
+    namespace import ::marsutil::*
 
     #-------------------------------------------------------------------
     # Test harness
@@ -64,7 +64,7 @@ namespace eval ::util::test {
     
     proc cleanup {} {
         # FIRST, reset the registry back to just sqldocument itself
-        set ::util::sqldocument::registry ::util::sqldocument
+        set ::marsutil::sqldocument::registry ::marsutil::sqldocument
 
         # NEXT, destroy all open database objects
         foreach instance [sqldocument info instances] {
@@ -76,7 +76,7 @@ namespace eval ::util::test {
     #
     # A test sqlsection(i) module
 
-    snit::type ::util::test::testsection {
+    snit::type ::marsutil::test::testsection {
         typevariable schema {
             CREATE TABLE perm(a,b,c);
         }
@@ -86,11 +86,11 @@ namespace eval ::util::test {
         }
 
         typemethod {sqlsection schema} {} {
-            return [::util::outdent $schema]
+            return [::marsutil::outdent $schema]
         }
 
         typemethod {sqlsection tempschema} {} {
-            return [::util::outdent $tempschema]
+            return [::marsutil::outdent $tempschema]
         }
 
         typemethod {sqlsection functions} {} {
@@ -106,13 +106,13 @@ namespace eval ::util::test {
     #
     # A test sqlsection(i) module with a bad schema
 
-    snit::type ::util::test::badsection {
+    snit::type ::marsutil::test::badsection {
         typevariable schema {
             CREATE TABLE (a b c);
         }
 
         typemethod {sqlsection schema} {} {
-            return [::util::outdent $schema]
+            return [::marsutil::outdent $schema]
         }
 
         typemethod {sqlsection tempschema} {} {
@@ -125,7 +125,7 @@ namespace eval ::util::test {
     }
 
     # By default, sqldocument's registry will include all sqlsection(i) 
-    # modules in util(n).  This means that its contents will change as
+    # modules in marsutil(n).  This means that its contents will change as
     # as new modules are declared.  For testing, consequently, we want
     # to start with a clean registry--then, we'll register things 
     # ourselves.  So call cleanup to kick things off.
@@ -158,26 +158,26 @@ CREATE TABLE sqldocument_master <
 
     test sqlsection_functions-1.1 {Standard functions are defined} -body {
         sqldocument sqlsection functions
-    } -result {error ::error format ::format joinlist ::join percent ::util::percent wallclock {::clock seconds}}
+    } -result {error ::error format ::format joinlist ::join percent ::marsutil::percent wallclock {::clock seconds}}
 
     #-------------------------------------------------------------------
     # register
 
     test register-1.1 {Adds sqlsection to registry} -body {
         sqldocument register ::foo
-        set ::util::sqldocument::registry
+        set ::marsutil::sqldocument::registry
     } -cleanup {
         cleanup
-    } -result {::util::sqldocument ::foo}
+    } -result {::marsutil::sqldocument ::foo}
 
     test register-1.2 {Duplicate sections are ignored} -body {
         sqldocument register ::foo
         sqldocument register ::foo
         sqldocument register ::foo
-        set ::util::sqldocument::registry
+        set ::marsutil::sqldocument::registry
     } -cleanup {
         cleanup
-    } -result {::util::sqldocument ::foo}
+    } -result {::marsutil::sqldocument ::foo}
 
     #-------------------------------------------------------------------
     # sections
@@ -186,14 +186,14 @@ CREATE TABLE sqldocument_master <
         sqldocument sections
     } -cleanup {
         cleanup
-    } -result {::util::sqldocument}
+    } -result {::marsutil::sqldocument}
 
     test sections-1.2 {All registered sections are included} -body {
         sqldocument register ::foo
         sqldocument sections
     } -cleanup {
         cleanup
-    } -result {::util::sqldocument ::foo}
+    } -result {::marsutil::sqldocument ::foo}
 
     #-------------------------------------------------------------------
     # Constructor
@@ -327,7 +327,7 @@ CREATE TABLE sqldocument_master <
     # open-3.x: Temp Schema and Functions from other sections
     test open-3.1 {Temp schema defined} -body {
         # FIRST, register an sqlsection with a temp schema
-        sqldocument register ::util::test::testsection
+        sqldocument register ::marsutil::test::testsection
 
         # NEXT, open a document
         sqldocument db
@@ -340,7 +340,7 @@ CREATE TABLE sqldocument_master <
 
     test open-3.2 {Functions defined} -body {
         # FIRST, register an additional sqlsection with functions
-        sqldocument register ::util::test::testsection
+        sqldocument register ::marsutil::test::testsection
 
         # NEXT, open a document
         sqldocument db
@@ -381,7 +381,7 @@ CREATE TABLE sqldocument_master <
     } -result {database is locked}
 
     test clear-1.3 {Error: could not initialize database} -body {
-        sqldocument register ::util::test::badsection
+        sqldocument register ::marsutil::test::badsection
         sqldocument db
         db open :memory:
         db clear
@@ -402,7 +402,7 @@ CREATE TABLE sqldocument_master <
     } -result {sqldocument_master sqlite_autoindex_sqldocument_master_1}
 
     test clear-1.5 {Section schema is defined} -body {
-        sqldocument register ::util::test::testsection
+        sqldocument register ::marsutil::test::testsection
         sqldocument db
         db open :memory:
         db clear
@@ -413,7 +413,7 @@ CREATE TABLE sqldocument_master <
     } -result {sqldocument_master sqlite_autoindex_sqldocument_master_1 perm}
 
     test clear-1.6 {Temp schema is still defined} -body {
-        sqldocument register ::util::test::testsection
+        sqldocument register ::marsutil::test::testsection
         sqldocument db
         db open :memory:
         db clear
@@ -424,7 +424,7 @@ CREATE TABLE sqldocument_master <
     } -result {temp}
 
     test clear-1.7 {sqldocument_master is populated with all sections} -body {
-        sqldocument register ::util::test::testsection
+        sqldocument register ::marsutil::test::testsection
         sqldocument db
         db open :memory:
         db clear
@@ -432,7 +432,7 @@ CREATE TABLE sqldocument_master <
         db eval {SELECT section FROM sqldocument_master}
     } -cleanup {
         cleanup
-    } -result {::util::sqldocument ::util::test::testsection}
+    } -result {::marsutil::sqldocument ::marsutil::test::testsection}
 
     test clear-1.8 {functions remain defined} -body {
         sqldocument db
@@ -461,7 +461,7 @@ CREATE TABLE sqldocument_master <
     } -result {foo {sqldocument_master sqlite_autoindex_sqldocument_master_1}}
 
     test clear-1.10 {Schema tables are emptied} -body {
-        sqldocument register ::util::test::testsection
+        sqldocument register ::marsutil::test::testsection
         sqldocument db
         db open :memory:
         db clear
@@ -797,7 +797,10 @@ CREATE TABLE sqldocument_master <
     cleanupTests
 }
 
-namespace delete ::util::test
+namespace delete ::marsutil::test
+
+
+
 
 
 

@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: util(n) Tcl Utilities
+#       Mars: marsutil(n) Tcl Utilities
 #
 #	Vector commands.  
 #
@@ -19,7 +19,7 @@
 #-----------------------------------------------------------------------
 # Exported commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export vec
 }
 
@@ -27,13 +27,13 @@ namespace eval ::util:: {
 #-----------------------------------------------------------------------
 # Vector Ensemble
 
-snit::type ::util::vec {
+snit::type ::marsutil::vec {
     # Make it an ensemble
     pragma -hastypeinfo 0 -hastypedestroy 0 -hasinstances 0
 
     typeconstructor {
         namespace import ::marsutil::*
-        namespace import ::util::*
+        namespace import ::marsutil::*
     }
 
     #-------------------------------------------------------------------
@@ -259,7 +259,7 @@ snit::type ::util::vec {
     #
     # vector      A vector.
     # labels      Labels
-    # quality     A ::util::quality object
+    # quality     A ::marsutil::quality object
     #
     # Pretty-prints the contents of a "quality" vector.  The entries 
     # are formatted as "quality=value".  
@@ -284,6 +284,9 @@ snit::type ::util::vec {
         vec pprint $vector $labels
     }
 }
+
+
+
 
 
 

@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    util(n) callbacklist manager
+#    marsutil(n) callbacklist manager
 #
 #    This object encapsulates the logic associated with managing
 #    a list of callbacks.  Clients can register and cancel their callbacks
@@ -14,11 +14,11 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export callbacklist
 }
 
-snit::type ::util::callbacklist {
+snit::type ::marsutil::callbacklist {
     #-------------------------------------------------------------------
     # Instance Variables
 
@@ -79,5 +79,7 @@ snit::type ::util::callbacklist {
         return
     }
 }
+
+
 
 

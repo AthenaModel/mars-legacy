@@ -7,7 +7,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Tcltest test suite for util(n) simclock(n)
+#    Tcltest test suite for marsutil(n) simclock(n)
 #
 #-----------------------------------------------------------------------
 
@@ -1676,6 +1676,7 @@ normal clock stop
 }
 
 namespace delete ::marsutil::test
+
 
 
 

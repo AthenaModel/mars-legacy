@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: util(n) Tcl Utilities
+#       Mars: marsutil(n) Tcl Utilities
 #
 #	SQLite utilities
 #
@@ -19,14 +19,14 @@
 #-----------------------------------------------------------------------
 # Exported commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export sqlib
 }
 
 #-----------------------------------------------------------------------
 # sqlib Ensemble
 
-snit::type ::util::sqlib {
+snit::type ::marsutil::sqlib {
     # Make it an ensemble
     pragma -hastypeinfo 0 -hastypedestroy 0 -hasinstances 0
 
@@ -388,7 +388,7 @@ snit::type ::util::sqlib {
                 if {$opts(-maxcolwidth) > 0} {
                     if {$len > $opts(-maxcolwidth)} {
                         # At least three characters
-                        set len [::util::max $opts(-maxcolwidth) 3]
+                        set len [::marsutil::max $opts(-maxcolwidth) 3]
                         set end [expr {$len - 4}]
                         set row($name) \
                             "[string range $row($name) 0 $end]..."
@@ -540,5 +540,8 @@ snit::type ::util::sqlib {
         }
     }
 }
+
+
+
 
 

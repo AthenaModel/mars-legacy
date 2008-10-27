@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: marsutil(n) Tcl Utilities
+#       Mars: marsutil(n) Tcl Utilities
 #
 #	Logger type.
 #
@@ -60,7 +60,7 @@
 #
 #       Merging Log Files
 #
-#       If the JNEM simulation is split into multiple executables,
+#       If the Mars simulation is split into multiple executables,
 #       and hence multiple log files, it would be desirable for log 
 #       files to be strictly sortable for easier merging.  In Uplink, we 
 #       did this by logging time to the ten-thousandth of a second.
@@ -568,5 +568,6 @@ snit::type ::marsutil::logger {
         string map [list \\\\ \\ \\n \n] $message
     }
 }
+
 
 

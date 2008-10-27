@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    util(n) Game Truth Client
+#    marsutil(n) Game Truth Client
 #
 #    This object allows the application to receive game truth published
 #    via gtserver(n)/commserver(n) via a commclient(n).  As such, it 
@@ -23,7 +23,7 @@
 #    
 #-----------------------------------------------------------------------
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export gtclient
 }
 
@@ -373,5 +373,7 @@ snit::type gtclient {
         "
     }       
 }
+
+
 
 

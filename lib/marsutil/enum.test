@@ -7,7 +7,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Tcltest test suite for util(n) enum(n)
+#    Tcltest test suite for marsutil(n) enum(n)
 #
 #-----------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 #-----------------------------------------------------------------------
 # Load the package to be tested
 
-package require util 1.0
+package require marsutil 1.0
 
 #-----------------------------------------------------------------------
 # Test Suite
@@ -30,7 +30,7 @@ package require util 1.0
 # The tests run in a namespace so as not to interfere with other
 # test suites.
 
-namespace eval ::util::test {
+namespace eval ::marsutil::test {
     #-------------------------------------------------------------------
     # Set up the test environment
 
@@ -38,7 +38,7 @@ namespace eval ::util::test {
     namespace import ::tcltest::*
 
     # Import the code to be tested
-    namespace import ::util::*
+    namespace import ::marsutil::*
 
     #-------------------------------------------------------------------
     # Setup
@@ -291,7 +291,10 @@ namespace eval ::util::test {
     cleanupTests
 }
 
-namespace delete ::util::test
+namespace delete ::marsutil::test
+
+
+
 
 
 

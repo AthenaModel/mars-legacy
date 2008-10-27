@@ -1,23 +1,26 @@
 /***********************************************************************
  *
  * TITLE:
- *	paxutil.h
+ *	marsutil.h
  *
  * AUTHOR:
  *	Will Duquette
  *
  * DESCRIPTION:
- *	JNEM: libPaxutil header file
+ *	Mars: libMarsutil header file
  *
  ***********************************************************************/
 
-#ifndef paxutil_h
-#define paxutil_h
+#ifndef marsutil_h
+#define marsutil_h
 
 #include <stdlib.h>
 #include <tcl.h>
 
-extern int Paxutil_Init(Tcl_Interp*);
+extern int Marsutil_Init(Tcl_Interp*);
 
 #endif
+
+
+
 

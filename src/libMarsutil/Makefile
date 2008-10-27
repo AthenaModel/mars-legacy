@@ -1,12 +1,12 @@
 #---------------------------------------------------------------------
 # TITLE:
-#    Makefile -- libPaxBin Makefile
+#    Makefile -- libMarsutil Makefile
 #
 # AUTHOR:
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Builds the libPaxBin extension
+#    Builds the libMarsutil extension
 #---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
@@ -23,8 +23,8 @@ LDFLAGS += -g ${LIB_PATH}
 CC = gcc
 
 # TCL Paths
-TCL_LIB_DIR  = $(JNEM_TCL_HOME)/lib
-TCL_INC_DIR  = $(JNEM_TCL_HOME)/include
+TCL_LIB_DIR  = $(MARS_TCL_HOME)/lib
+TCL_INC_DIR  = $(MARS_TCL_HOME)/include
 
 DEFINES  = \
 	-DUSE_TCL_STUBS
@@ -41,10 +41,10 @@ INCLPATH = \
 	-I$(TCL_INC_DIR) 
 
 
-TARGET = $(TOP_DIR)/lib/util/libPaxutil.so
+TARGET = $(TOP_DIR)/lib/marsutil/libMarsutil.so
 
 OBJS = \
-	paxutil.o
+	marsutil.o
 
 LIBS = \
 	-lGeotrans -lGeostars -lm -ltclstub8.5
@@ -84,4 +84,8 @@ include MakeDepends
 # Standard MakeRules
 
 include $(TOP_DIR)/MakeRules
+
+
+
+
 

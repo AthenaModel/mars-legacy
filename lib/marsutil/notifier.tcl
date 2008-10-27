@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    util(n) module: Notifier object
+#    marsutil(n) module: Notifier object
 #
 #    The notifier allows objects to bind callbacks to events sent by 
 #    subjects. Each object can bind only once to a particular subject 
@@ -18,14 +18,14 @@
 #-----------------------------------------------------------------------
 # Exported Commands
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export notifier
 }
 
 #-----------------------------------------------------------------------
 # notifier
 
-snit::type ::util::notifier {
+snit::type ::marsutil::notifier {
     # Make it a singleton
     pragma -hasinstances no
 
@@ -230,3 +230,5 @@ snit::type ::util::notifier {
         string map [list %s [list $subject] %o [list $object]] $binding
     }
 }
+
+

@@ -1,6 +1,6 @@
 #---------------------------------------------------------------------
 # TITLE:
-#    Makefile -- JNEM Binary Code Makefile
+#    Makefile -- Mars Binary Code Makefile
 #
 # AUTHOR:
 #    Will Duquette
@@ -27,7 +27,7 @@ include $(TOP_DIR)/MakeDefs
 SRCLIBDIR = $(TOP_DIR)/src/lib
 
 # Subdirectories to build
-SUBS = libGeotrans libGeostars libPaxutil libTclRti libVersion shark
+SUBS = libGeotrans libGeostars libMarsutil
 
 .PHONY: all
 

@@ -1,8 +1,11 @@
-Paxutil: JNEM util(n) Binary Tcl Extensions
+Marsutil: Mars marsutil(n) Binary Tcl Extensions
 -----------------------------------------------------------------
 
-libPaxutil is a binary Tcl extension component of the util(n) 
+libMarsutil is a binary Tcl extension component of the marsutil(n) 
 package.  Some few of the commands are provided only in binary
 form; most are efficient binary implementations of commands
 otherwise implemented in Tcl.
+
+
+
 

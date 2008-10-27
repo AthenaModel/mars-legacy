@@ -6,7 +6,7 @@
 #	Will Duquette
 #
 # DESCRIPTION:
-#       JNEM: marsutil(n) Tcl Utilities
+#       Mars: marsutil(n) Tcl Utilities
 #
 #	Zulu-Time Translation
 #
@@ -89,6 +89,7 @@ snit::type ::marsutil::zulu {
         return $result
     }
 }
+
 
 
 

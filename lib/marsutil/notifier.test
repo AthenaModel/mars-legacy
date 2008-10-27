@@ -7,7 +7,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Tcltest test suite for util(n) notifier.tcl
+#    Tcltest test suite for marsutil(n) notifier.tcl
 #
 #-----------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 # Load the package to be tested
 
 package require sqlite3
-package require util 1.0
+package require marsutil 1.0
 
 #-----------------------------------------------------------------------
 # Test Suite
@@ -31,7 +31,7 @@ package require util 1.0
 # The tests run in a namespace so as not to interfere with other
 # test suites.
 
-namespace eval ::util::test {
+namespace eval ::marsutil::test {
     #-------------------------------------------------------------------
     # Set up the test environment
 
@@ -39,7 +39,7 @@ namespace eval ::util::test {
     namespace import ::tcltest::*
 
     # Import the code to be tested
-    namespace import ::util::*
+    namespace import ::marsutil::*
 
     # List of called objects
     variable callbacks {}
@@ -58,7 +58,7 @@ namespace eval ::util::test {
         set callbacks {}
         set errors    {}
 
-        ::util::notifier::db eval {
+        ::marsutil::notifier::db eval {
             DELETE FROM bindings;
         }
     }
@@ -78,10 +78,10 @@ namespace eval ::util::test {
     # bgerror msg
     
     proc ::bgerror {msg} {
-        lappend ::util::test::errors $msg
+        lappend ::marsutil::test::errors $msg
     }
 
-    # Delete any bindings made by util(n) at load time, if any.
+    # Delete any bindings made by marsutil(n) at load time, if any.
     Cleanup
 
     #-------------------------------------------------------------------
@@ -96,7 +96,7 @@ namespace eval ::util::test {
         error
     } -cleanup {
         Cleanup
-    } -result "wrong # args: should be \"::util::notifier bind subject ?event ?object ?binding???\""
+    } -result "wrong # args: should be \"::marsutil::notifier bind subject ?event ?object ?binding???\""
 
     test bind-1.2 {initially, no subjects bound.} -body {
         notifier bind
@@ -187,7 +187,7 @@ namespace eval ::util::test {
     } -result {%s %o}
 
     test bind-4.2 {%s and %o are substituted in a binding call} -body {
-        notifier bind Subject <Event> Object [list ::util::test::CB %s %o]
+        notifier bind Subject <Event> Object [list ::marsutil::test::CB %s %o]
         notifier send Subject <Event>
 
         list $callbacks $errors
@@ -228,7 +228,7 @@ namespace eval ::util::test {
     # send
 
     test send-1.1 {send with no arguments} -body {
-        notifier bind Subject <Event> A [list ::util::test::CB A]
+        notifier bind Subject <Event> A [list ::marsutil::test::CB A]
 
         notifier send Subject <Event>
         set callbacks
@@ -237,7 +237,7 @@ namespace eval ::util::test {
     } -result {A}
 
     test send-1.2 {send with one arguments} -body {
-        notifier bind Subject <Event> A [list ::util::test::CB A]
+        notifier bind Subject <Event> A [list ::marsutil::test::CB A]
 
         notifier send Subject <Event> a
         set callbacks
@@ -246,7 +246,7 @@ namespace eval ::util::test {
     } -result {{A a}}
 
     test send-1.3 {send with two arguments} -body {
-        notifier bind Subject <Event> A [list ::util::test::CB A]
+        notifier bind Subject <Event> A [list ::marsutil::test::CB A]
 
         notifier send Subject <Event> a b
         set callbacks
@@ -255,8 +255,8 @@ namespace eval ::util::test {
     } -result {{A a b}}
 
     test send-2.1 {send calls all relevant bindings} -body {
-        notifier bind Subject <Event> A1 [list ::util::test::CB A1]
-        notifier bind Subject <Event> A2 [list ::util::test::CB A2]
+        notifier bind Subject <Event> A1 [list ::marsutil::test::CB A1]
+        notifier bind Subject <Event> A2 [list ::marsutil::test::CB A2]
 
         notifier send Subject <Event> a b c
         set callbacks
@@ -265,8 +265,8 @@ namespace eval ::util::test {
     } -result {{A1 a b c} {A2 a b c}}
 
     test send-2.2 {send calls only relevant bindings} -body {
-        notifier bind Subject <Event1> A [list ::util::test::CB E1]
-        notifier bind Subject <Event2> A [list ::util::test::CB E2]
+        notifier bind Subject <Event1> A [list ::marsutil::test::CB E1]
+        notifier bind Subject <Event2> A [list ::marsutil::test::CB E2]
 
         notifier send Subject <Event1> a b c
         set callbacks
@@ -284,9 +284,9 @@ namespace eval ::util::test {
     } -result {{invalid command name "::nonesuch"}}
 
     test send-3.2 {on send error, other bindings are still called} -body {
-        notifier bind Subject <Event> A1 [list ::util::test::CB A1]
+        notifier bind Subject <Event> A1 [list ::marsutil::test::CB A1]
         notifier bind Subject <Event> A2 ::nonesuch
-        notifier bind Subject <Event> A3 [list ::util::test::CB A3]
+        notifier bind Subject <Event> A3 [list ::marsutil::test::CB A3]
 
         notifier send Subject <Event> a b c
 
@@ -296,10 +296,10 @@ namespace eval ::util::test {
     } -result {{{A1 a b c} {A3 a b c}} {{invalid command name "::nonesuch"}}}
 
     test send-4.1 {can unbind previous binding in callback} -body {
-        notifier bind Subject <Event> A1 [list ::util::test::CB A1]
+        notifier bind Subject <Event> A1 [list ::marsutil::test::CB A1]
         notifier bind Subject <Event> A2 \
-            [list ::util::notifier bind Subject <Event> A1 ""]
-        notifier bind Subject <Event> A3 [list ::util::test::CB A3]
+            [list ::marsutil::notifier bind Subject <Event> A1 ""]
+        notifier bind Subject <Event> A3 [list ::marsutil::test::CB A3]
 
         notifier send Subject <Event>
 
@@ -309,10 +309,10 @@ namespace eval ::util::test {
     } -result {{A1 A3} {A2 A3} {}}
 
     test send-4.2 {can unbind own binding in callback} -body {
-        notifier bind Subject <Event> A1 [list ::util::test::CB A1]
+        notifier bind Subject <Event> A1 [list ::marsutil::test::CB A1]
         notifier bind Subject <Event> A2 \
-            [list ::util::notifier bind Subject <Event> A2 ""]
-        notifier bind Subject <Event> A3 [list ::util::test::CB A3]
+            [list ::marsutil::notifier bind Subject <Event> A2 ""]
+        notifier bind Subject <Event> A3 [list ::marsutil::test::CB A3]
 
         notifier send Subject <Event>
 
@@ -322,10 +322,10 @@ namespace eval ::util::test {
     } -result {{A1 A3} {A1 A3} {}}
 
     test send-4.3 {can unbind subsequent binding in callback} -body {
-        notifier bind Subject <Event> A1 [list ::util::test::CB A1]
+        notifier bind Subject <Event> A1 [list ::marsutil::test::CB A1]
         notifier bind Subject <Event> A2 \
-            [list ::util::notifier bind Subject <Event> A3 ""]
-        notifier bind Subject <Event> A3 [list ::util::test::CB A3]
+            [list ::marsutil::notifier bind Subject <Event> A3 ""]
+        notifier bind Subject <Event> A3 [list ::marsutil::test::CB A3]
 
         notifier send Subject <Event>
 
@@ -335,10 +335,10 @@ namespace eval ::util::test {
     } -result {A1 {A1 A2} {}}
 
     test send-5.1 {can forget subject in callback} -body {
-        notifier bind Subject <Event> A1 [list ::util::test::CB A1]
+        notifier bind Subject <Event> A1 [list ::marsutil::test::CB A1]
         notifier bind Subject <Event> A2 \
-            [list ::util::notifier forget Subject]
-        notifier bind Subject <Event> A3 [list ::util::test::CB A3]
+            [list ::marsutil::notifier forget Subject]
+        notifier bind Subject <Event> A3 [list ::marsutil::test::CB A3]
 
         notifier send Subject <Event>
 
@@ -348,10 +348,10 @@ namespace eval ::util::test {
     } -result {A1 {} {}}
 
     test send-5.2 {can forget object in callback} -body {
-        notifier bind Subject <Event> A1 [list ::util::test::CB A1]
+        notifier bind Subject <Event> A1 [list ::marsutil::test::CB A1]
         notifier bind Subject <Event> A2 \
-            [list ::util::notifier forget A3]
-        notifier bind Subject <Event> A3 [list ::util::test::CB A3]
+            [list ::marsutil::notifier forget A3]
+        notifier bind Subject <Event> A3 [list ::marsutil::test::CB A3]
 
         notifier send Subject <Event>
 
@@ -394,7 +394,7 @@ namespace eval ::util::test {
 
         notifier rename SubjectA Fred
 
-        ::util::notifier::db eval {
+        ::marsutil::notifier::db eval {
             SELECT binding FROM bindings
             WHERE subject='Fred'
         }
@@ -408,7 +408,7 @@ namespace eval ::util::test {
 
         notifier rename Object Fred
 
-        ::util::notifier::db eval {
+        ::marsutil::notifier::db eval {
             SELECT binding FROM bindings
             WHERE object='Fred'
         }
@@ -422,7 +422,10 @@ namespace eval ::util::test {
     cleanupTests
 }
 
-namespace delete ::util::test
+namespace delete ::marsutil::test
+
+
+
 
 
 

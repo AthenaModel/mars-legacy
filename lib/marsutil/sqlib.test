@@ -7,7 +7,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Tcltest test suite for util(n) sqlib.tcl
+#    Tcltest test suite for marsutil(n) sqlib.tcl
 #
 #-----------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 # Load the package to be tested
 
 package require sqlite3
-package require util 1.0
+package require marsutil 1.0
 
 #-----------------------------------------------------------------------
 # Test Suite
@@ -31,7 +31,7 @@ package require util 1.0
 # The tests run in a namespace so as not to interfere with other
 # test suites.
 
-namespace eval ::util::test {
+namespace eval ::marsutil::test {
     #-------------------------------------------------------------------
     # Set up the test environment
 
@@ -39,11 +39,11 @@ namespace eval ::util::test {
     namespace import ::tcltest::*
 
     # Import the code to be tested
-    namespace import ::util::*
+    namespace import ::marsutil::*
 
     # Define variables
-    set db  ::util::test::db
-    set db2 ::util::test::db2
+    set db  ::marsutil::test::db
+    set db2 ::marsutil::test::db2
 
     #-------------------------------------------------------------------
     # tables
@@ -248,7 +248,10 @@ CREATE TABLE third(g,h,i)}
     cleanupTests
 }
 
-namespace delete ::util::test
+namespace delete ::marsutil::test
+
+
+
 
 
 

@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM: util(n), geometry(n), miscellaneous geometry utilities
+#    Mars: marsutil(n), geometry(n), miscellaneous geometry utilities
 #
 #    Computational geometry routines.  The code in this module
 #    derives from Sedgewick's _Algorithms in C_, 1990, Addison-Wesley,
@@ -23,7 +23,7 @@
 #-----------------------------------------------------------------------
 # Exported Routines
 
-namespace eval ::util:: {
+namespace eval ::marsutil:: {
     namespace export \
         bbox         \
         ccw          \
@@ -61,7 +61,7 @@ namespace eval ::util:: {
 #
 # Creates a point given the coordinates
 
-proc ::util::point {x y} {
+proc ::marsutil::point {x y} {
     list $x $y
 }
 
@@ -71,7 +71,7 @@ proc ::util::point {x y} {
 #
 # Returns a point's X coordinate
 
-proc ::util::px {point} {
+proc ::marsutil::px {point} {
     lindex $point 0
 }
 
@@ -81,11 +81,11 @@ proc ::util::px {point} {
 #
 # Returns a point's Y coordinate
 
-proc ::util::py {point} {
+proc ::marsutil::py {point} {
     lindex $point 1
 }
 
-if {[llength [info commands ::util::ccw]] == 0} {
+if {[llength [info commands ::marsutil::ccw]] == 0} {
     # ccw a b c
     #
     # a     A point
@@ -110,7 +110,7 @@ if {[llength [info commands ::util::ccw]] == 0} {
     # code.  Explicitly handles the case where a == b, which Sedgewick's
     # code doesn't.
 
-    proc ::util::ccw {a b c} {
+    proc ::marsutil::ccw {a b c} {
         # FIRST, Compute the deltas from a-b and from a-c
         let dx1 {[px $b] - [px $a]}
         let dy1 {[py $b] - [py $a]}
@@ -168,8 +168,8 @@ if {[llength [info commands ::util::ccw]] == 0} {
 # From Sedgewick, Algorithms in C, 1990, Addison-Wesley, page 351.
 # The comments include material from the CBS Simscript implementation.
 
-if {[llength [info commands ::util::intersect]] == 0} {
-    proc ::util::intersect {p1 p2 q1 q2} {
+if {[llength [info commands ::marsutil::intersect]] == 0} {
+    proc ::marsutil::intersect {p1 p2 q1 q2} {
         expr {
               (([ccw $p1 $p2 $q1] * [ccw $p1 $p2 $q2]) <= 0) &&
               (([ccw $q1 $q2 $p1] * [ccw $q1 $q2 $p2]) <= 0)
@@ -193,7 +193,7 @@ if {[llength [info commands ::util::intersect]] == 0} {
 #
 # Returns the ith coordinate pair
 
-proc ::util::cindex {coords i} {
+proc ::marsutil::cindex {coords i} {
     set xindex [expr {2*$i % [llength $coords]}]
     set yindex [expr {$xindex + 1}]
 
@@ -206,7 +206,7 @@ proc ::util::cindex {coords i} {
 #
 # Returns the number of coordinate pairs
 
-proc ::util::clength {coords} {
+proc ::marsutil::clength {coords} {
     return [expr {[llength $coords] / 2}]
 }
 
@@ -236,8 +236,8 @@ proc creverse {coords} {
 # Return the coordinates of the bounding box of the coords as
 # a list {xmin ymin xmax ymax}.
 
-if {[llength [info commands ::util::bbox]] == 0} {
-    proc ::util::bbox {coords} {
+if {[llength [info commands ::marsutil::bbox]] == 0} {
+    proc ::marsutil::bbox {coords} {
         set xmin [lindex $coords 0]
         set ymin [lindex $coords 1]
         set xmax $xmin
@@ -302,9 +302,9 @@ if {[llength [info commands ::util::bbox]] == 0} {
 #
 # Returns 1 if p is inside (or on the border) and 0 if p is outside.
 
-if {[llength [info commands ::util::ptinpoly]] == 0} {
+if {[llength [info commands ::marsutil::ptinpoly]] == 0} {
 
-    proc ::util::ptinpoly {poly p {bbox ""}} {
+    proc ::marsutil::ptinpoly {poly p {bbox ""}} {
         # FIRST, get the coordinates of the point and the bounding box
         # of the polygon.
         set x [px $p]
@@ -373,3 +373,6 @@ if {[llength [info commands ::util::ptinpoly]] == 0} {
     }
 
 }
+
+
+
