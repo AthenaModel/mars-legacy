@@ -1,0 +1,79 @@
+<<manpage {util(n) zcurve(n)} "Z-curve Function">>
+
+<<section SYNOPSIS>>
+
+<pre>
+package require util 0.1
+namespace import ::util::*
+</pre>
+
+<<itemlist>>
+
+<<section DESCRIPTION>>
+
+A zcurve is a piecewise-linear function with three segments, called a
+Z-curve because of its shape.  Here's a stereotypical 
+example, Z(x):<p>
+
+<pre>
+        |            a                    |
+     lo |------------+                    |     
+        |             \                   |
+        |              \                  |
+        |               \                 |
+        |                \                |
+        |                 \               |
+        |                  \              |
+        |                   \             |
+        |                    +------------| hi
+        |                    b            |
+        +----------------+----------------+
+       -x                0               +x
+</pre>
+
+The function is defined for all values of <i>x</i>; the only real
+constraint is that <i>a</i> &lt;= <i>b</i>.  Note that the name "lo"
+signifies the Y-value at the low end of the X-axis, and "hi"
+signifies the Y-value at the high end of the X-axis.  If 
+<i>lo</i> &lt; <i>hi</i> the curve that slopes up from
+left to right instead of down.<p>
+
+If <i>a</i> equals <i>b</i> (within an epsilon)
+then Z(<i>a</i>) equals Z(<i>b</i>) equals the average of <i>lo</i>
+and <i>hi</i>.<p>
+
+<<section COMMANDS>>
+
+<<deflist>>
+
+<<defitem "zcurve validate" {zcurve validate <i>curve</i>}>>
+
+Validates that <i>curve</i> defines a valid Z-curve, a list
+{<i>lo a b hi</i>}, where all four elements are numbers and <i>a</i>
+&lt;= <i>b</i>.<p>
+
+<<defitem "zcurve eval" {zcurve eval <i>curve x</i>}>>
+
+Computes and returns the value of Z(<i>x</i>) for the Z-curve defined
+by <i>curve</i>, which is a list {<i>lo a b hi</i>}.<p>
+
+<</deflist>>
+
+<<section ENVIRONMENT>>
+
+zcurve(n) requires Tcl 8.5 or later.
+
+To use zcurve(n) in a Tcl script, the environment variable
+<code>TCLLIBPATH</code> must include the parent of the util(n)
+library directory.
+
+<<section AUTHOR>>
+
+Will Duquette<p>
+
+<<section HISTORY>>
+
+Original package.
+
+<</manpage>>
+
