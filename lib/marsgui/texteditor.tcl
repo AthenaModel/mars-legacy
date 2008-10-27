@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM gui(n) package: Simple Text Editor
+#    JNEM marsgui(n) package: Simple Text Editor
 #
 #    This widget provides a simple text editor window for editing
 #    text files within a larger application.
@@ -16,7 +16,7 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export texteditor
 }
 
@@ -24,7 +24,7 @@ namespace eval ::gui:: {
 #-----------------------------------------------------------------------
 # The Texteditor Widget Type
 
-snit::widget ::gui::texteditor {
+snit::widget ::marsgui::texteditor {
     hulltype toplevel
     widgetclass TextEditor
 
@@ -194,7 +194,7 @@ snit::widget ::gui::texteditor {
 
         # NEXT, set the hull's background to the default, so that
         # the lower-right corner is properly colored.
-        $hull configure -background $::gui::defaultBackground
+        $hull configure -background $::marsgui::defaultBackground
         
         # NEXT, set the default window title.
         set options(-title) "[wm title .] Text Editor"
@@ -360,4 +360,6 @@ snit::widget ::gui::texteditor {
         $win load $filename
     }
 }
+
+
 

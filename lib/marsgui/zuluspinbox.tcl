@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM gui(n) package: Zulu-Time Spinbox widget
+#    JNEM marsgui(n) package: Zulu-Time Spinbox widget
 #
 #    A Zulu-Time spinbox is a spinbox customized for the entry of
 #    of zulu-time strings.
@@ -16,7 +16,7 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export zuluspinbox
 }
 
@@ -24,7 +24,7 @@ namespace eval ::gui:: {
 #-----------------------------------------------------------------------
 # The zuluspinbox Widget Type
 
-snit::widget ::gui::zuluspinbox {
+snit::widget ::marsgui::zuluspinbox {
     widgetclass ZuluSpinbox
 
     #-------------------------------------------------------------------
@@ -212,5 +212,7 @@ snit::widget ::gui::zuluspinbox {
 
     delegate method * to spinbox
 }
+
+
 
 

@@ -3,7 +3,7 @@ source gradient.tcl
 
 
 proc test {} {
-    set grad [::gui::gradient %AUTO%  \
+    set grad [::marsgui::gradient %AUTO%  \
                   -mincolor \#FFCC99  \
                   -maxcolor \#663300  \
                   -minlevel 0         \
@@ -20,4 +20,5 @@ proc test {} {
 }
 
 test
+
 

@@ -4,7 +4,7 @@
 exec tclsh8.4 "$0" "$@"
 
 package require Tk 8.4
-package require gui
+package require marsgui
 
 wm title . "Test"
 
@@ -15,12 +15,14 @@ label .lab \
 pack .lab
 
 if {[llength $argv] == 0} {
-    ::gui::texteditor .%AUTO% -title "Test Editor"
+    ::marsgui::texteditor .%AUTO% -title "Test Editor"
 } else {
-    set win [::gui::texteditor .%AUTO% -title "Test Editor"]
+    set win [::marsgui::texteditor .%AUTO% -title "Test Editor"]
 
     $win open [lindex $argv 0]
 }
+
+
 
 
 

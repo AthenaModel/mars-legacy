@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM gui(n) -- Global Definitions
+#    JNEM marsgui(n) -- Global Definitions
 #
 #-----------------------------------------------------------------------
 
@@ -64,8 +64,8 @@ font create reportfont     -family Helvetica -size -14 -weight bold
 #
 # The standard icon size is 16x16
 
-foreach fileName [glob [file join $::gui::library *.xbm]] {
-    set imageName "::gui::[file rootname [file tail $fileName]]_icon"
+foreach fileName [glob [file join $::marsgui::library *.xbm]] {
+    set imageName "::marsgui::[file rootname [file tail $fileName]]_icon"
     image create bitmap $imageName -file $fileName
 }
 
@@ -96,13 +96,13 @@ bind Entry <<Paste>> {
 # This section redefines a number of option database settings to give
 # a better default appearance.
 
-set ::gui::defaultBackground [. cget -background]
+set ::marsgui::defaultBackground [. cget -background]
 
 # Tile Theme Settings
 ttk::style theme settings alt {
     # Set the alt theme to use the same background as Tk.  This makes
     # Tile at least minimally useable
-    ttk::style configure . -background $::gui::defaultBackground
+    ttk::style configure . -background $::marsgui::defaultBackground
 }
 
 # Now, use the alt theme for tile widgets.
@@ -127,7 +127,7 @@ option add *Frame.relief       raised
 option add *Label.font                    TkDefaultFont
 
 # button widget
-option add *Button.activeBackground       $::gui::defaultBackground
+option add *Button.activeBackground       $::marsgui::defaultBackground
 option add *Button.borderWidth            1
 option add *Button.font                   TkDefaultFont
 
@@ -135,19 +135,19 @@ option add *Button.font                   TkDefaultFont
 option add *Menubutton.font               TkDefaultFont
 
 # checkbutton widget
-option add *Checkbutton.activeBackground  $::gui::defaultBackground
-option add *Checkbutton.selectColor       $::gui::defaultBackground
+option add *Checkbutton.activeBackground  $::marsgui::defaultBackground
+option add *Checkbutton.selectColor       $::marsgui::defaultBackground
 option add *Checkbutton.borderWidth       1
 option add *Checkbutton.font              TkDefaultFont
 
 # radiobutton widget
-option add *Radiobutton.activeBackground  $::gui::defaultBackground
-option add *Radiobutton.selectColor       $::gui::defaultBackground
+option add *Radiobutton.activeBackground  $::marsgui::defaultBackground
+option add *Radiobutton.selectColor       $::marsgui::defaultBackground
 option add *Radiobutton.borderWidth       1
 option add *Radiobutton.font              TkDefaultFont
 
 # scrollbar widget
-option add *Scrollbar.activeBackground    $::gui::defaultBackground
+option add *Scrollbar.activeBackground    $::marsgui::defaultBackground
 option add *Scrollbar.elementBorderWidth  1
 option add *Scrollbar.borderWidth         1
 option add *Scrollbar.width               10
@@ -189,3 +189,5 @@ option add *ComboBox*selectBorderWidth 0
 
 #BWidget dynamic help (tool tip) defaults
 DynamicHelp::configure -background #FFFF99
+
+

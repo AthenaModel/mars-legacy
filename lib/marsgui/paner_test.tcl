@@ -1,5 +1,5 @@
 package require snit
-package require gui
+package require marsgui
 
 paner .pv -orient vertical
 
@@ -37,3 +37,4 @@ grid rowconfigure . 0 -weight 1
 grid .pv -sticky nsew
 
 update idletasks
+

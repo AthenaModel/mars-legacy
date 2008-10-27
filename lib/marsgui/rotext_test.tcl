@@ -3,9 +3,9 @@
 # The next line restarts using wish \
 exec wish8.4 "$0" "$@"
 
-package require gui
+package require marsgui
 
-namespace import ::marsutil::* ::marsutil::* ::gui::*
+namespace import ::marsutil::* ::marsutil::* ::marsgui::*
 
 # FIRST, create a CLI and pack it on the bottom.
 
@@ -52,4 +52,6 @@ set f [open ../../docs/man1/jnem_sim.ehtml]
 close $f
 
 .rotext see 1.0
+
+
 

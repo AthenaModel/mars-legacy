@@ -7,7 +7,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM gui(n) package: Finder widget.
+#   JNEM marsgui(n) package: Finder widget.
 # 
 #   This widget provides a text search control for doing incremental, 
 #   wildcard, and regular expression searches of a rotext(n) widget
@@ -27,14 +27,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export finder
 }
 
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::gui::finder {
+snit::widget ::marsgui::finder {
     #-------------------------------------------------------------------
     # Components
 
@@ -95,11 +95,11 @@ snit::widget ::gui::finder {
             -highlightthickness 1
 
         # NEXT, Create the entry, options are delegated to it.
-        install entry using ::gui::commandentry $win.entry    \
+        install entry using ::marsgui::commandentry $win.entry    \
             -clearbtn           yes                           \
             -changecmd          [mymethod TargetChanged]      \
             -returncmd          [mymethod DoSearch]           \
-            -background         $::gui::defaultBackground     \
+            -background         $::marsgui::defaultBackground     \
             -highlightthickness 0                             \
             -borderwidth        0
 
@@ -110,8 +110,8 @@ snit::widget ::gui::finder {
         menubutton $win.type                            \
             -relief           flat                      \
             -borderwidth      0                         \
-            -activebackground $::gui::defaultBackground \
-            -image            ::gui::search_icon        \
+            -activebackground $::marsgui::defaultBackground \
+            -image            ::marsgui::search_icon        \
             -menu             $win.type.menu
         
         menu $win.type.menu   \
@@ -145,28 +145,28 @@ snit::widget ::gui::finder {
         button $win.first                                       \
             -relief         flat                                \
             -borderwidth    0                                   \
-            -bitmap         @$::gui::library/button_first.xbm   \
+            -bitmap         @$::marsgui::library/button_first.xbm   \
             -state          disabled                            \
             -command        [mymethod GoToFirst]
 
         button $win.prev                                        \
             -relief         flat                                \
             -borderwidth    0                                   \
-            -bitmap         @$::gui::library/button_prev.xbm    \
+            -bitmap         @$::marsgui::library/button_prev.xbm    \
             -state          disabled                            \
             -command        [mymethod GoToPrev]
 
         button $win.next                                        \
             -relief         flat                                \
             -borderwidth    0                                   \
-            -bitmap         @$::gui::library/button_next.xbm    \
+            -bitmap         @$::marsgui::library/button_next.xbm    \
             -state          disabled                            \
             -command        [mymethod GoToNext]
 
         button $win.last                                        \
             -relief         flat                                \
             -borderwidth    0                                   \
-            -bitmap         @$::gui::library/button_last.xbm    \
+            -bitmap         @$::marsgui::library/button_last.xbm    \
             -state          disabled                            \
             -command        [mymethod GoToLast]
                                     
@@ -181,21 +181,21 @@ snit::widget ::gui::finder {
             button $win.prevlog                                     \
                 -relief         flat                                \
                 -borderwidth    0                                   \
-                -bitmap         @$::gui::library/button_2up.xbm     \
+                -bitmap         @$::marsgui::library/button_2up.xbm     \
                 -state          disabled                            \
                 -command        [mymethod SearchLogs earlier]
 
             button $win.stop                                        \
                 -relief         flat                                \
                 -borderwidth    0                                   \
-                -bitmap         @$::gui::library/button_stop.xbm    \
+                -bitmap         @$::marsgui::library/button_stop.xbm    \
                 -state          disabled                            \
                 -command        [mymethod StopSearch]
 
             button $win.nextlog                                     \
                 -relief         flat                                \
                 -borderwidth    0                                   \
-                -bitmap         @$::gui::library/button_2down.xbm   \
+                -bitmap         @$::marsgui::library/button_2down.xbm   \
                 -state          disabled                            \
                 -command        [mymethod SearchLogs later]           
         }     
@@ -444,6 +444,8 @@ snit::widget ::gui::finder {
         }
     }
 }
+
+
 
 
 

@@ -8,7 +8,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM gui(n) package: Messageline widget.
+#   JNEM marsgui(n) package: Messageline widget.
 # 
 #   This widget provides a message line to be used at the bottom of
 #   application windows.  The messageline will usually be blank.
@@ -20,7 +20,7 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export messageline
 }
 
@@ -28,7 +28,7 @@ namespace eval ::gui:: {
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::gui::messageline {
+snit::widget ::marsgui::messageline {
 
     #-------------------------------------------------------------------
     # Components
@@ -50,7 +50,7 @@ snit::widget ::gui::messageline {
         # FIRST, Create the text widget
         install display using text $win.display             \
             -height             1                           \
-            -background         $::gui::defaultBackground   \
+            -background         $::marsgui::defaultBackground   \
             -wrap               none                        \
             -font               messagefont                 \
             -state              disabled
@@ -114,6 +114,8 @@ snit::widget ::gui::messageline {
         $blanker schedule
     }
 }
+
+
 
 
 

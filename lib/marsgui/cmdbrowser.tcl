@@ -22,19 +22,19 @@
 #-----------------------------------------------------------------------
 # Exported Commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export cmdbrowser
 }
 
 #-----------------------------------------------------------------------
 # cmdbrowser
 
-snit::widget ::gui::cmdbrowser {
+snit::widget ::marsgui::cmdbrowser {
     #-------------------------------------------------------------------
     # Typeconstructor
 
     typeconstructor {
-        namespace import ::marsutil::* ::gui::*
+        namespace import ::marsutil::* ::marsgui::*
     }
 
     #-------------------------------------------------------------------
@@ -95,7 +95,7 @@ snit::widget ::gui::cmdbrowser {
 
     constructor {args} {
         # FIRST, create the widgets
-        ::gui::paner $win.paner \
+        ::marsgui::paner $win.paner \
             -orient     horizontal \
             -showhandle 1
 
@@ -454,6 +454,7 @@ snit::widget ::gui::cmdbrowser {
         $pages($page) see 1.0
     }
 }
+
 
 
 

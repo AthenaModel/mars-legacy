@@ -7,7 +7,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM gui(n) package: Command entry widget.
+#   JNEM marsgui(n) package: Command entry widget.
 # 
 #   This widget implements a general purpose customization of the
 #   Tk entry with a bash/tcsh-style command history accessible
@@ -22,7 +22,7 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export commandentry
 }
 
@@ -30,7 +30,7 @@ namespace eval ::gui:: {
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::gui::commandentry {
+snit::widget ::marsgui::commandentry {
     #-------------------------------------------------------------------
     # Type Constructor
 
@@ -125,7 +125,7 @@ snit::widget ::gui::commandentry {
         # NEXT, create the clear button
         if {$options(-clearbtn)} {
             install clearbtn using button $win.clear      \
-                -bitmap       @$::gui::library/clear.xbm  \
+                -bitmap       @$::marsgui::library/clear.xbm  \
                 -command      [mymethod ClearEntry]       \
                 -relief       flat                        \
                 -borderwidth  0                           \
@@ -368,4 +368,6 @@ snit::widget ::gui::commandentry {
         return
     }
 }
+
+
 

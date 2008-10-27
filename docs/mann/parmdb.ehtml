@@ -1,0 +1,57 @@
+<<manpage {simlib(n) parmdb(n)} "parmdb(5) Parser">>
+
+<<section SYNOPSIS>>
+
+<pre>
+package require simlib 1.0
+namespace import ::simlib::*
+</pre>
+
+<<itemlist>>
+
+<<section DESCRIPTION>>
+
+parmdb(n) defines a parser for <<xref parmdb(5)>> files.  parmdb(n)
+loads <<xref parmdb(5)>> parameter files into memory, and allows it to be
+queried, edited, and saved back to disk.  parmdb(n) is implemented as a
+wrapper around a <<xref parmset(n)>> object.<p>
+
+<<section COMMANDS>>
+
+This module provides all of the methods of <<xref parmset(n)>>;
+in addition, it defines the following command:<p>
+
+<<deflist commands>>
+
+<<defitem init {parmdb init}>>
+
+Initializes the parmdb(n) module, and loads it with default parameter
+values.<p>
+
+<</deflist commands>>
+
+<<section ENVIRONMENT>>
+
+This package requires Tcl 8.5 or later.
+
+To use this package in a Tcl script, the environment variable
+<code>TCLLIBPATH</code> must include the parent of the package
+directory.
+
+<<section AUTHOR>>
+
+Will Duquette<p>
+
+<<section HISTORY>>
+
+Original package.
+
+<</manpage>>
+
+
+
+
+
+
+
+

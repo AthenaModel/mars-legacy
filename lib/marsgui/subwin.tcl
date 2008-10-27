@@ -34,14 +34,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export subwin
 }
 
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::gui::subwin {
+snit::widget ::marsgui::subwin {
     hulltype toplevel
 
     #-------------------------------------------------------------------
@@ -167,6 +167,7 @@ snit::widget ::gui::subwin {
         # By default, do nothing.
     }
 }
+
 
 
 

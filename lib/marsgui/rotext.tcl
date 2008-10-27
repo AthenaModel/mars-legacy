@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM gui(n) package: Read-only Text Widget
+#    JNEM marsgui(n) package: Read-only Text Widget
 #
 #    This widget provides a read-only text widget for displaying
 #    arbitrary text.  The API is identical to the standard text
@@ -25,14 +25,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export rotext
 }
 
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widgetadaptor ::gui::rotext {
+snit::widgetadaptor ::marsgui::rotext {
     #-------------------------------------------------------------------
     # Inherit text behavior
 
@@ -483,6 +483,8 @@ snit::widgetadaptor ::gui::rotext {
         $self find show [expr {$found(instance) - 1}]
     }
 }
+
+
 
 
 

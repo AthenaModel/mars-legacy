@@ -1,5 +1,5 @@
-package require gui
-namespace import ::gui::*
+package require marsgui
+namespace import ::marsgui::*
 
 proc returncmd {text} {
     puts "-returncmd <$text>"
@@ -25,7 +25,7 @@ button .clear \
     -command [list .ce clear]
 
 commandentry .ce \
-    -background $::gui::defaultBackground \
+    -background $::marsgui::defaultBackground \
     -clearbtn 1 \
     -keycmd keycmd \
     -returncmd returncmd \
@@ -34,4 +34,6 @@ commandentry .ce \
 pack .set -side left
 pack .clear -side right
 pack .ce
+
+
 

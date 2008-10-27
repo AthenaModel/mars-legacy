@@ -7,7 +7,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM gui(n) package: Filter widget.
+#   JNEM marsgui(n) package: Filter widget.
 # 
 #   This widget provides a text filter control for doing exact, wildcard,
 #   regular expression filtering, both inclusive and exclusive, of
@@ -26,14 +26,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export filter
 }
 
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::gui::filter {
+snit::widget ::marsgui::filter {
     #-------------------------------------------------------------------
     # Components
 
@@ -79,8 +79,8 @@ snit::widget ::gui::filter {
         menubutton $win.type                            \
             -relief           flat                      \
             -borderwidth      0                         \
-            -activebackground $::gui::defaultBackground \
-            -image            ::gui::filter_icon        \
+            -activebackground $::marsgui::defaultBackground \
+            -image            ::marsgui::filter_icon        \
             -menu             $win.type.menu
         
         menu $win.type.menu  \
@@ -121,8 +121,8 @@ snit::widget ::gui::filter {
             -command  [mymethod FilterNow]
             
         # Install the filter field.
-        install entry using ::gui::commandentry $win.entry  \
-            -background         $::gui::defaultBackground   \
+        install entry using ::marsgui::commandentry $win.entry  \
+            -background         $::marsgui::defaultBackground   \
             -highlightthickness 0                           \
             -borderwidth        0                           \
             -clearbtn           1                           \
@@ -238,4 +238,6 @@ snit::widget ::gui::filter {
         # return 1
     }
 }
+
+
 

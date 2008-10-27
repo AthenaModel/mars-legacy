@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM gui(n) package: Command-Line Interface (CLI) widget.
+#    JNEM marsgui(n) package: Command-Line Interface (CLI) widget.
 #
 #    This widget provides a "terminal" window for entering
 #    typed commands and displaying the result.
@@ -28,14 +28,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export cli
 }
 
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::gui::cli {
+snit::widget ::marsgui::cli {
     #-------------------------------------------------------------------
     # Type Constructor
 
@@ -50,7 +50,7 @@ snit::widget ::gui::cli {
         option add *Cli.height             24
         option add *Cli.errorForeground    red
         option add *Cli.errorBackground    black
-        option add *Cli.hullbackground     $::gui::defaultBackground
+        option add *Cli.hullbackground     $::marsgui::defaultBackground
     }
 
     #-------------------------------------------------------------------
@@ -819,6 +819,8 @@ snit::widget ::gui::cli {
 
 
 }
+
+
 
 
 

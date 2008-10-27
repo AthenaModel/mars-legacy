@@ -7,7 +7,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM gui(n) package: Logdisplay widget.
+#   JNEM marsgui(n) package: Logdisplay widget.
 # 
 #   This widget provides a widget for displaying the content of
 #   generic log files.
@@ -18,7 +18,7 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export logdisplay
 }
 
@@ -26,7 +26,7 @@ namespace eval ::gui:: {
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::gui::logdisplay {
+snit::widget ::marsgui::logdisplay {
     #-------------------------------------------------------------------
     # Components
 
@@ -134,7 +134,7 @@ snit::widget ::gui::logdisplay {
             -repetition yes
         
         # NEXT, Install the rotext widget.
-        install rotext using ::gui::rotext $win.text \
+        install rotext using ::marsgui::rotext $win.text \
             -wrap               none                 \
             -setgrid            1                    \
             -selectborderwidth  0                    \
@@ -528,6 +528,8 @@ snit::widget ::gui::logdisplay {
     }
     
 }
+
+
 
 
 

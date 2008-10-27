@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM gui(n) package: Debugging Console
+#    JNEM marsgui(n) package: Debugging Console
 #
 #    This widget provides a "terminal" window for interacting
 #    with the main Tcl interpreter; it might add additional features
@@ -21,7 +21,7 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export debugger
 }
 
@@ -29,7 +29,7 @@ namespace eval ::gui:: {
 #-----------------------------------------------------------------------
 # The Debugger Widget Type
 
-snit::widget ::gui::debugger {
+snit::widget ::marsgui::debugger {
     hulltype toplevel
 
     #-------------------------------------------------------------------
@@ -128,7 +128,7 @@ snit::widget ::gui::debugger {
 
 
         # NEXT, create the paner
-        ::gui::paner $win.paner \
+        ::marsgui::paner $win.paner \
             -orient     vertical \
             -showhandle 1
 
@@ -140,7 +140,7 @@ snit::widget ::gui::debugger {
         $win.paner add $tnb -sticky nsew -minsize 60
 
         # NEXT, create the cmdbrowser
-        install cb using ::gui::cmdbrowser $tnb.cb
+        install cb using ::marsgui::cmdbrowser $tnb.cb
 
         $tnb add $cb \
             -sticky  nsew      \
@@ -148,7 +148,7 @@ snit::widget ::gui::debugger {
             -text    "Commands"
 
         # NEXT, create the winbrowser
-        install wb using ::gui::winbrowser $tnb.wb
+        install wb using ::marsgui::winbrowser $tnb.wb
 
         $tnb add $wb \
             -sticky  nsew      \
@@ -156,7 +156,7 @@ snit::widget ::gui::debugger {
             -text    "Widgets"
 
         # NEXT, create the CLI
-        install cli using ::gui::cli $win.paner.cli \
+        install cli using ::marsgui::cli $win.paner.cli \
             -height    15                   \
             -promptcmd [mymethod GetPrompt] \
             -commandlist [info commands]
@@ -238,4 +238,6 @@ snit::widget ::gui::debugger {
         $type create .%AUTO% {*}$args
     }
 }
+
+
 

@@ -7,7 +7,7 @@
 #   Will Duquette
 # 
 # DESCRIPTION:
-#   JNEM gui(n) package: Loglist widget.
+#   JNEM marsgui(n) package: Loglist widget.
 # 
 #   This widget displays the JNEM logs available for browsing.  At the
 #   top is a list of applications which produce logs; at the bottom is
@@ -26,7 +26,7 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export loglist
 }
 
@@ -34,7 +34,7 @@ namespace eval ::gui:: {
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::gui::loglist {
+snit::widget ::marsgui::loglist {
 
     #-------------------------------------------------------------------
     # Components
@@ -615,6 +615,8 @@ snit::widget ::gui::loglist {
         set stopFlag 1
     }
 }
+
+
 
 
 

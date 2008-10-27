@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM gui(n) package: Scrolling Log Browser widget.
+#    JNEM marsgui(n) package: Scrolling Log Browser widget.
 #
 #    This widget displays an application's current log file;
 #    it allows scrolling, filtering, and searching.
@@ -16,14 +16,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export scrollinglog
 }
 
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::gui::scrollinglog {
+snit::widget ::marsgui::scrollinglog {
     #-------------------------------------------------------------------
     # Type Constructor
 
@@ -37,7 +37,7 @@ snit::widget ::gui::scrollinglog {
         option add *Scrollinglog.width              80
         option add *Scrollinglog.height             24
         option add *Scrollinglog.insertWidth        0
-        option add *Scrollinglog.hullbackground     $::gui::defaultBackground
+        option add *Scrollinglog.hullbackground     $::marsgui::defaultBackground
 
         namespace import ::marsutil::logger  ;# need log levels
     }
@@ -154,7 +154,7 @@ snit::widget ::gui::scrollinglog {
             -editable     0           
 
         checkbutton $bar.scrollback \
-            -bitmap @$::gui::library/autoscroll_on.xbm \
+            -bitmap @$::marsgui::library/autoscroll_on.xbm \
             -indicatoron 0 \
             -offrelief flat \
             -variable [myvar scrollbackFlag] \
@@ -229,12 +229,12 @@ snit::widget ::gui::scrollinglog {
         if {$scrollbackFlag} {
     
             $bar.scrollback configure \
-                                -bitmap @$::gui::library/autoscroll_on.xbm
+                                -bitmap @$::marsgui::library/autoscroll_on.xbm
             
         } else {
     
             $bar.scrollback configure \
-                                -bitmap @$::gui::library/autoscroll_off.xbm
+                                -bitmap @$::marsgui::library/autoscroll_off.xbm
         }
     }
 
@@ -307,6 +307,8 @@ snit::widget ::gui::scrollinglog {
     delegate method field to log
     delegate method load  to log
 }
+
+
 
 
 

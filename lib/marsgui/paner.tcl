@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    gui(n) paner widget
+#    marsgui(n) paner widget
 #
 #    This widget manages two widgets, one on top and one on the bottom,
 #    or one to the left and one to the right, and allows their relative 
@@ -18,14 +18,14 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export paner
 }
 
 #-----------------------------------------------------------------------
 # paner
 
-snit::widgetadaptor ::gui::paner {
+snit::widgetadaptor ::marsgui::paner {
     #-------------------------------------------------------------------
     # Inheritance
 
@@ -98,4 +98,6 @@ snit::widgetadaptor ::gui::paner {
         }
     }
 }
+
+
 

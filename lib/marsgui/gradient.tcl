@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    gui(n) Module: Color Gradient Computer
+#    marsgui(n) Module: Color Gradient Computer
 #
 #    This module defines the "gradient" type, which is used to compute
 #    color gradients, linear interpolations between two colors.  
@@ -17,14 +17,14 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export gradient
 }
 
 #-----------------------------------------------------------------------
 # gradient
 
-snit::type ::gui::gradient {
+snit::type ::marsgui::gradient {
     #-------------------------------------------------------------------
     # Options
 
@@ -112,6 +112,8 @@ snit::type ::gui::gradient {
         return [format "#%06X" $hexrgb]
     }
 }
+
+
 
 
 

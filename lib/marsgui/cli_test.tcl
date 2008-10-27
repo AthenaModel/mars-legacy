@@ -3,7 +3,7 @@
 # The next line restarts using wish \
 exec wish8.4 "$0" "$@"
 
-package require gui
+package require marsgui
 
 wm title . "CLI Test Window"
 
@@ -17,9 +17,11 @@ button .injector \
     -text "info patchlevel" \
     -command [list .cli inject {info patchlevel}]
 
-::gui::cli .cli \
+::marsgui::cli .cli \
     -promptcmd [list timePrompt "%H:%M:%S"] \
     -commandlist [info commands]
 
 pack .injector -side top -fill x
 pack .cli -fill both -expand 1
+
+

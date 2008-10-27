@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    JNEM gui(n) package: Data Display Frame
+#    JNEM marsgui(n) package: Data Display Frame
 #
 #    This widget provides a modified Tk frame customized for
 #    displaying labels and data values in a grid.
@@ -17,14 +17,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::gui:: {
+namespace eval ::marsgui:: {
     namespace export datagrid
 }
 
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::gui::datagrid {
+snit::widget ::marsgui::datagrid {
     #-------------------------------------------------------------------
     # Inherit frame behavior
 
@@ -120,6 +120,8 @@ snit::widget ::gui::datagrid {
         $self Position $w $r $c
     }
 }
+
+
 
 
 

@@ -103,7 +103,7 @@ the man page in the following form:<p>
 
 For example, this man page is called "<code>ehtml(n)</code>".  When
 Mars is used by a client, that client's man pages might refer to this
-one as "<code>mars:ehtml(n)</code>".<p>
+one as "<code>ehtml(n)</code>".<p>
 
 The <i>roots</i> argument is a list of root definitions and URL
 patterns:
@@ -244,4 +244,5 @@ Will Duquette<p>
 Original package, based on code in the JNEM jnem_man(1) tool.
 
 <</manpage>>
+
 
