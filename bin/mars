@@ -272,9 +272,9 @@ proc ShowUsage {} {
     puts "---------------  ------------------  ------------------------------------"
 
     foreach app [dict keys $metadata] {
-        puts [format "mars %-10s  %-15s(1)  %s"    \
-                  $app                             \
-                  [dict get $metadata $app applib] \
+        puts [format "mars %-10s  %-18s  %s"      \
+                  $app                            \
+                  mars_${app}(1)                  \
                   [dict get $metadata $app text]]
     }
 }
