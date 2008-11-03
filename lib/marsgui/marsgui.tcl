@@ -34,6 +34,7 @@ namespace eval ::marsgui:: {
 }
 
 source [file join $::marsgui::library global.tcl]
+source [file join $::marsgui::library mkicon.tcl]
 source [file join $::marsgui::library gradient.tcl]
 source [file join $::marsgui::library cli.tcl]
 source [file join $::marsgui::library cmdbrowser.tcl]
