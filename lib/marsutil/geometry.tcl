@@ -27,6 +27,7 @@ namespace eval ::marsutil:: {
     namespace export \
         bbox         \
         ccw          \
+        cedge        \
         cindex       \
         clength      \
         creverse     \
@@ -185,6 +186,20 @@ if {[llength [info commands ::marsutil::intersect]] == 0} {
 #
 #   {x1 y1 x2 y2 ...}
 #
+
+# cedge coords i
+#
+# coords   A list of x,y coordinates
+# i        An integer index
+#
+# Returns the ith edge as a list {x1 y1 x2 y2}.  Indices wrap around.
+
+proc ::marsutil::cedge {coords i} {
+    set ndx [expr {2*$i % [llength $coords]}]
+
+    lrange [concat $coords [lrange $coords 0 1]] $ndx $ndx+3
+}
+
 
 # cindex coords i
 #

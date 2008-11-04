@@ -106,6 +106,14 @@ The degenerate cases are handled as follows:<p>
 The binary extension includes a fast C implementation of
 <<iref ccw>>.<p>
 
+<<defitem cedge {cedge <i>coords i</i>}>>
+
+Retrieves the <i>i</i>th edge from a polygon represented as a flat
+list of X,Y coordinates.  Edges are indexed from 0 to N-1; however,
+indices less than zero or greater than N-1 wrap around appropriately.<p>
+
+The edge is returned as a list of four coordinates, {<i>x1 y1 x2 y2</i>}.<p>
+
 <<defitem cindex {cindex <i>coords i</i>}>>
 
 Retrieves the <i>i</i>th point from a flat list of X,Y coordinates.
