@@ -41,6 +41,10 @@ file with that name already exists.<p>
 Temporary tables and databases attached to <i>db</i> using the "DATABASE
 ATTACH" SQL statement are ignored.<p>
 
+<b>Warning:</b> if the <i>db</i> is in the middle of a transaction,
+the transaction will be committed before the copy is saved, and a new
+transaction will begin.<p>
+
 <<defitem "sqlib compare" {sqlib compare <i>db1 db2</i>}>>
 
 Compares the persistent contents of <i>db1</i> and <i>db2</i>, both of

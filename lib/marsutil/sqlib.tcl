@@ -100,8 +100,12 @@ snit::type ::marsutil::sqlib {
         }
 
         # NEXT, close the saveas database, and attach it to
-        # db temporarily so we can copy tables.
+        # db temporarily so we can copy tables.  If db is
+        # in a transaction, we need to commit it. (Sigh!)
+
         sadb close
+
+        set code [catch {$db eval {COMMIT TRANSACTION;}}]
 
         $db eval "ATTACH DATABASE '$filename' AS saveas"
 
@@ -120,6 +124,11 @@ snit::type ::marsutil::sqlib {
 
         # NEXT, detach the saveas database.
         $db eval {DETACH DATABASE saveas}
+
+        # NEXT, if a transaction had been open, open a new one.
+        if {!$code} {
+            $db eval {BEGIN IMMEDIATE TRANSACTION}
+        }
     }
 
     # compare db1 db2
