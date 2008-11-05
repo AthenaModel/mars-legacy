@@ -241,6 +241,14 @@ This functionality is provided by the underlying <<xref rotext(n)>>
 widget; see <<xref rotext(n)>> for further information on the
 <<iref find>> method.<p>
 
+<<defitem format {$logdisplay format <i>text</i>}>>
+
+Returns the formated version of the raw log entry contained in <i>text</i>.
+All active filtering mechanisms are considered when performing the
+formatting.  This command is useful to any client that needs a
+formatted version of <i>text</i> but doesn't have a need to display
+it.<p>
+
 <<defitem load {$logdisplay load <i>filename</i>}>>
 
 Loads the specified log file into the widget.  If <i>filename</i>

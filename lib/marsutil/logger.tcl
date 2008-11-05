@@ -364,9 +364,6 @@ snit::type ::marsutil::logger {
         if {[catch {set verbmode($component)} vmode]} {
             set vmode 1
             set verbmode($component) $vmode
-
-            # puts "just set vmode to $vmode for $component"
-            # puts "v:$verbosity l:$level ln:$levelnum m:[Flatten $message]"
         }
 
         # NEXT, do nothing unless the message is enabled.
@@ -374,12 +371,6 @@ snit::type ::marsutil::logger {
             # FIRST, increment the entry count; if it exceeds the 
             # -maxentries, open a new log file.
             incr entryCount
-
-            
-            if {$entryCount == 1} {
-                # puts "First log: $level $levelnum $component [Flatten $message]"
-            }
-
             
             if {$options(-maxentries) != 0 &&
                 $entryCount > $options(-maxentries)} {

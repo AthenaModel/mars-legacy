@@ -103,6 +103,28 @@ Defaults to 1000 (one second).<p>
 Sets the default application name; that application's subdirectory
 will be selected automatically when the loglist is first updated.<p>
 
+<<defopt {-formattext <i>val</i>}>>
+
+A boolean option that indicates whether or not log entries should be
+formatted during a call to <<iref searchlogs>>.  This only makes sense
+if -parsecmd and -formatcmd are also defined.  Searching with this
+option active will generally be much slower than without it.<p>
+
+<<defopt {-parsecmd <i>cmd</i>}>>
+
+A parsing command used to parse the contents of a log file into the
+proper format.  The <i>parsecmd</i> will be passed a single argument,
+the text string to be parsed; this string will represent a block of
+zero or more log entries. This option only matters when -formattext is
+true.<p>
+
+<<defopt {-formatcmd <i>cmd</i>}>>
+
+A formatting command to convert a list of parsed log entries into a
+list of formatted log entries just as they would be displayed
+currently.  It's up to client to define what formatted means.  This
+option only matters when -formattext is true. <p>
+
 <</deflist loglist options>>
 
 <</deflist commands>>

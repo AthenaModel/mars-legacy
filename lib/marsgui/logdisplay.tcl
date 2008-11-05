@@ -266,86 +266,17 @@ snit::widget ::marsgui::logdisplay {
         foreach entry $newEntries {
             # Reset the entry variables.
             set newlineOffset 0
-            set entryStr      ""
-            
-            # The entry tag is the last item in the entry.
-            set entryTag [lindex $entry end]
-                
-            # Loop over the fields.  Concatenate each field in the entry 
-            # onto the entryStr.  If a filterable field fails its filter, 
-            # skip to the next entry.
-            for {set f 0} {$f < $numFields} {incr f} {
-                # Skip fields whose display flag is unset.
-                if {![lindex $fieldDisplayFlags $f]} {
-                    continue
-                }
-                
-                # Extract the field width for convenience.
-                set width [lindex $fieldWidths $f]
-                
-                # Extract the raw field string.
-                set fieldStr [lindex $entry $f]
-                
-                # The last field gets handled differently to deal with 
-                # newline characters.
-                if {$f == [expr $numFields - 1]} {
-                
-                    # Split the raw field string into lines.
-                    set lines [split [::marsutil::logger unflatten $fieldStr] "\n"]
-                
-                    # Reset the field string.
-                    set fieldStr ""
-                
-                    # Process each line.
-                    foreach line $lines {
-                        # Trim each line to width if width != 0.
-                        if {$width} {
-                            set line [format "%-.${width}s" $line]
-                        }
-                        
-                        # Append the line to the field string with the
-                        # proper newline and offset spacing.
-                        set line "$line\n [string repeat " " $newlineOffset]"
-                        
-                        set fieldStr "$fieldStr$line"
-                    }
-                    
-                    # Remove the last newline and offset spacing.
-                    set fieldStr \
-                       [string range $fieldStr 0 "end-[expr $newlineOffset+2]"]
-                } elseif {$width} {
-                    # Format the field to width.
-                    set fieldStr [format "%-${width}.${width}s" $fieldStr]
-                }
-                                
-                # Append the formatted fieldStr to entryStr.
-                set entryStr "$entryStr $fieldStr"                
-                
-                # Increment the newline offset by the field width plus one
-                # extra for the space between fields.
-                incr newlineOffset [expr $width + 1]
-            }
+            set entryStr      [$self format $entry]
             
             # Ignore blank entries.
             if {$entryStr eq ""} {
+                incr numDisplayed -1
                 continue
             }
-            
-            # Filter the entry if a filter exists.
-            if {$options(-filtercmd) ne ""} {
-                # Setup the entry filter command.
-                set filterCmd $options(-filtercmd) 
-                lappend filterCmd $entry
-                
-                # Skip to next entry if the entry fails the filter.
-                if {![uplevel \#0 $filterCmd]} {
-                    incr numDisplayed -1
-                    continue
-                }
-            }
 
-            # Insert the entry.
-            $rotext ins end "$entryStr\n" $entryTag
+            # Insert the entry and add the tag.
+            # The entry tag is the last item in the entry.
+            $rotext ins end "$entryStr\n" [lindex $entry end]
         }
         
         # If the display is empty, determine and log the reason.
@@ -454,6 +385,90 @@ snit::widget ::marsgui::logdisplay {
 
         return [lindex $fieldDisplayFlags $i]
     }
+
+    # format entry
+    #
+    # entry    A raw log entry to format
+    #
+    # Filter and format the log entry.  Allows an external client
+    # to get a formated version of a log entry without knowing the
+    # details itself.  This is especially useful for loglist(n) when doing
+    # searchlogs. 
+    method format {entry} {
+        
+        # Reset the entry variables.
+        set newlineOffset 0
+        set entryStr      ""
+
+        # Filter the entry if a filter exists.
+        if {$options(-filtercmd) ne ""} {
+            # Setup the entry filter command.
+            set filterCmd $options(-filtercmd)
+            lappend filterCmd $entry
+            
+            # Don't bother formatting if the entry is filtered out
+            if {![uplevel \#0 $filterCmd]} {
+                return ""
+            }
+        }
+        
+        # Loop over the fields.  Concatenate each field in the entry 
+        # onto the entryStr.  If a filterable field fails its filter, 
+        # skip to the next entry.
+        for {set f 0} {$f < $numFields} {incr f} {
+            # Skip fields whose display flag is unset.
+            if {![lindex $fieldDisplayFlags $f]} {
+                continue
+            }
+            
+            # Extract the field width for convenience.
+            set width [lindex $fieldWidths $f]
+            
+            # Extract the raw field string.
+            set fieldStr [lindex $entry $f]
+            
+            # The last field gets handled differently to deal with 
+            # newline characters.
+            if {$f == [expr $numFields - 1]} {
+                
+                # Split the raw field string into lines.
+                set lines [split [::marsutil::logger unflatten $fieldStr] "\n"]
+                
+                # Reset the field string.
+                set fieldStr ""
+                
+                # Process each line.
+                foreach line $lines {
+                    # Trim each line to width if width != 0.
+                    if {$width} {
+                        set line [format "%-.${width}s" $line]
+                    }
+                    
+                    # Append the line to the field string with the
+                    # proper newline and offset spacing.
+                    set line "$line\n [string repeat " " $newlineOffset]"
+                    
+                    set fieldStr "$fieldStr$line"
+                }
+                
+                # Remove the last newline and offset spacing.
+                set fieldStr \
+                    [string range $fieldStr 0 "end-[expr $newlineOffset+2]"]
+            } elseif {$width} {
+                # Format the field to width.
+                set fieldStr [format "%-${width}.${width}s" $fieldStr]
+            }
+            
+            # Append the formatted fieldStr to entryStr.
+            set entryStr "$entryStr $fieldStr"                
+            
+            # Increment the newline offset by the field width plus one
+            # extra for the space between fields.
+            incr newlineOffset [expr $width + 1]
+        }
+
+        return $entryStr
+    }    
         
     # load  filename
     #

@@ -70,6 +70,13 @@ include buttons for searching through the logs displayed in the
 loglist(n) using that widget's  <<xref loglist(n) searchlogs>>
 and <<xref loglist(n) stopsearch>> methods.<p>
 
+<<defopt {-multicol <i>val</i>}>>
+
+A boolean option indicating whether or not the search string spans
+multiple columns.  The intdended receiver of this will be the declared
+<i>-loglist</i> if it exists.  If <i>-loglist</i> is not
+specified, this option has no use.<p>
+
 <</deflist finder options>>
 
 <</deflist commands>>

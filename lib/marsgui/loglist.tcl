@@ -107,6 +107,33 @@ snit::widget ::marsgui::loglist {
     # the -selectcmd will be called and passed the empty string.
     option -selectcmd -default ""
 
+    # -formattext
+    # 
+    # When set true searchlogs will parse and format the text of a log 
+    # file prior to searching.  This parse/format will be done according
+    # to -parsecmd and -formatcmd.  Setting this to true will generally 
+    # be a big performance hit so it should be used sparingly.  The
+    # intended purpose is to enable accurate search results when the 
+    # search string spans multiple columns.
+    option -formattext -type snit::boolean -default "no"
+
+    # -parsecmd cmd
+    # 
+    # cmd
+    # 
+    # The command used to parse the contents of a log file.
+    # This will be used only if -formattext is true.
+    option  -parsecmd
+
+    # -formatcmd cmd
+    # 
+    # cmd
+    # 
+    # The command used to format the parsed contents of a log file.  
+    # This will be used only if -formattext is true and a -parsecmd has 
+    # been specified.
+    option  -formatcmd
+
     # -title title
     # 
     # Specifies the text displayed on the update button displayed 
@@ -566,10 +593,14 @@ snit::widget ::marsgui::loglist {
             set log [lindex $logFiles [expr {$i - 1}]]
             
             # Do the grep search.
-            set f [open $log]
             set hits 0
-            catch {set hits [regexp -line $pattern [read $f]]}
-            catch {close $f}
+            if {!$options(-formattext)} {
+                set f [open $log]
+                catch {set hits [regexp -line $pattern [read $f]]}
+                catch {close $f}
+            } else {
+                catch {set hits [regexp $pattern [$self Format $log]]}
+            }
 
             if {$hits > 0} {
                 # Got hits.
@@ -614,6 +645,61 @@ snit::widget ::marsgui::loglist {
     method stopsearch {} {
         set stopFlag 1
     }
+
+    # Format file
+    #
+    # file    The name of the file to format
+    #
+    # Returns the raw, parsed or formatted contents based on what
+    # options have been provided.
+
+    method Format {file} {
+
+        # Open the file, and configure it explicitly for "lf" mode.
+        # This way, carriage returns in the data don't cause trouble.
+        if {[catch {set handle [open $file]}]} {
+            return ""
+        }
+        fconfigure $handle -translation lf
+        
+        # Read the file contents. 
+        if {[catch {set contents [read -nonewline $handle]}]} {
+            return ""
+        }
+        
+        # Close the file.
+        catch {close $handle}
+
+        # Without a parser return the raw contents
+        if {$options(-parsecmd) eq ""} {
+            return $contents
+        } 
+        
+        # Parse the contents
+        set cmd $options(-parsecmd)
+        lappend cmd $contents
+        set parsed [uplevel \#0 $cmd]
+        
+        # Without a formatter return the parsed contents
+        if {$options(-formatcmd) eq ""} {
+            return $parsed
+        } 
+
+        # Format the parsed contents
+        set formated [list]
+        foreach entry $parsed {
+            set cmd $options(-formatcmd)
+            lappend cmd $entry
+            set entry [uplevel \#0 $cmd]
+
+            if {$entry ne ""} {
+                lappend formated $entry
+            }
+        }
+
+        return $formated
+    }
+
 }
 
 

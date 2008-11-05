@@ -72,6 +72,14 @@ snit::widget ::marsgui::finder {
     # A command for reporting messages, usually to the application's
     # message line.  It should take one additional argument.
     option -msgcmd -default ""
+
+    # -multicol
+    #     
+    # When enabled, indicates that the target of searchback spans multiple
+    # columns.  This is used to control -loglist's -formattext option.
+    # This option has no effect if -loglist is not specified.
+    option -multicol -type snit::boolean -default 0 \
+        -configuremethod MultiColChanged
     
     # Delegate all other options to the hull
     delegate option -width to entry
@@ -141,6 +149,16 @@ snit::widget ::marsgui::finder {
             -variable   [myvar options(-targettype)] \
             -value      "regexp"                     \
             -command    [mymethod TargetTypeChanged]
+
+        # If searchback will be enabled, provide the multi-column option
+        if {$options(-loglist) ne ""} {
+            $win.type.menu add separator
+
+            $win.type.menu add checkbutton             \
+                -label      "Multi-column Searchback"  \
+                -variable   [myvar options(-multicol)] \
+                -command    [mymethod MultiColChanged] 
+        }
 
         button $win.first                                       \
             -relief         flat                                \
@@ -227,6 +245,18 @@ snit::widget ::marsgui::finder {
     #-------------------------------------------------------------------
     # Private Methods
 
+    # MultiColChanged
+    #
+    # Called when the -multicol is changed via the icon menu or via
+    # configure.  Informs the -loglist of the change if -loglist is
+    # defined.
+
+    method MultiColChanged {} {
+        if {$options(-loglist) ne ""} {
+            $options(-loglist) configure -formattext $options(-multicol)
+        }
+    }
+
     # TargetTypeChanged
     #
     # Called when the -targettype is changed via the icon menu or via
@@ -252,11 +282,11 @@ snit::widget ::marsgui::finder {
         # NEXT, Enable/disable the clear button and file search buttons.
         if {$options(-loglist) ne ""} {
             if {$text eq ""} {
-                $win.prevlog configure -state disabled
-                $win.nextlog configure -state disabled
+                $win.prevlog  configure -state disabled
+                $win.nextlog  configure -state disabled
             } else {
-                $win.prevlog configure -state normal
-                $win.nextlog configure -state normal
+                $win.prevlog  configure -state normal
+                $win.nextlog  configure -state normal
             }
         }
 
