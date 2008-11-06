@@ -105,8 +105,6 @@ snit::type ::marsutil::sqlib {
 
         sadb close
 
-        set code [catch {$db eval {COMMIT TRANSACTION;}}]
-
         $db eval "ATTACH DATABASE '$filename' AS saveas"
 
         # NEXT, copy the tables
@@ -124,11 +122,6 @@ snit::type ::marsutil::sqlib {
 
         # NEXT, detach the saveas database.
         $db eval {DETACH DATABASE saveas}
-
-        # NEXT, if a transaction had been open, open a new one.
-        if {!$code} {
-            $db eval {BEGIN IMMEDIATE TRANSACTION}
-        }
     }
 
     # compare db1 db2

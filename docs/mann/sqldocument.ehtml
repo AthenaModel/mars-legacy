@@ -16,11 +16,18 @@ objects.  It provides access to all features of an SQLite3 database
 object; in addition:<p>
 
 <ul>
-  <li> The sqldocument(n) object implements a commit-on-demand policy.
+  <li> By default, sqldocument(n) implements a commit-on-demand policy.
        That is, updates to the database are accumulated until an
        explicit commit is requested, instead of being committed
-       immediately.  This results in much faster database access, at
-       the expense of concurrent access (which JNEM does not need).<p>
+       immediately.  This improves performance when many independent
+       transactions are done in rapid succession, at the expense of
+       concurrent access (which JNEM does not need).  This behavior
+       is controlled by the <code>-autotrans</code> option.<p>
+
+  <li> By default, sqldocument(n) disables SQLite3's rollback
+       capability, resulting in a performance gain.  If the ability to
+       roll back transactions is required, set <code>-rollback</code>
+       to "on".<p>
 
   <li> Modules which adhere to the <<xref sqlsection(i)>> interface
        can register themselves, thus including their schema and
@@ -97,7 +104,7 @@ This module defines the following command:<p>
 
 <<deflist commands>>
 
-<<defitem sqldocument {sqldocument <i>name</i>}>>
+<<defitem sqldocument {sqldocument <i>name</i> ?<i>option value...</i>?}>>
 
 Creates a new <<iref sqldocument>> object named <i>name</i>. The object is
 represented as a new Tcl command in the caller's scope;
@@ -107,6 +114,24 @@ represented as a new Tcl command in the caller's scope;
 After the object is created, a database file must still
 be <<iref open>>ed, and (if so desired) it must also be
 <<iref clear>>ed.<p>
+
+The object may be created with the following options:<p>
+
+<<deflist options>>
+
+<<defopt {-autotrans <i>boolean</i>}>>
+
+If <b>on</b>, the default, the sqldocument(n) always has an open
+transaction; changes are not committed until <<iref commit>> is
+called.  If <b>off</b>, the application can batch queries into
+transactions as it chooses, and <<iref commit>> has no effect.<p>
+
+<<defopt {-rollback <i>boolean</i>}>>
+
+If <b>on</b>, transactions can be rolled back instead of committed.
+If <b>off</b>, the default, they cannot.<p>
+
+<</deflist options>>
 
 <<defitem {sqldocument register} {sqldocument register <i>section</i>}>>
 
@@ -150,7 +175,8 @@ explicitly.<p>
 
 <<defitem commit {$db commit}>>
 
-Saves all pending updates.<p>
+Saves all pending updates.  If <code>-autotrans</code> is off, this
+command has no effect.<p>
 
 <<defitem dbfile {$db dbfile}>>
 
@@ -238,11 +264,7 @@ simply remains unlocked.<p>
 
 <<section ENVIRONMENT>>
 
-This package requires Tcl 8.5 or later.
-
-To use the package in a Tcl script, the environment variable
-<code>TCLLIBPATH</code> must include the parent of the package
-directory.
+This package requires Tcl 8.5 or later.<p>
 
 <<section AUTHOR>>
 

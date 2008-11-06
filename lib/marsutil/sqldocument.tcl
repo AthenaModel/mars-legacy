@@ -19,7 +19,7 @@
 #    that any given database file has but one writer at a time, and
 #    arbitrarily many writes are batched into a single transaction.
 #    (Otherwise, each write would be a single transaction, and the necessary
-#    locking and unlocking would cause a major performance hit.)
+#    locking and unlocking would cause a performance hit.)
 #
 #    sqldocument(n) can be used to open and query any kind of SQL 
 #    database file.  It addition, it can also create databases with
@@ -54,9 +54,6 @@ snit::type ::marsutil::sqldocument {
     # Type Constructor
 
     typeconstructor {
-        namespace import ::marsutil::* 
-        namespace import ::marsutil::*
-
         # Register self as an sqlsection(i) module
         $type register $type
     }
@@ -153,7 +150,25 @@ snit::type ::marsutil::sqldocument {
     #-------------------------------------------------------------------
     # Options
 
-    # TBD
+    # -rollback
+    #
+    # If on, sqldocument(n) supports rollbacks.  Default is off.
+
+    option -rollback        \
+        -default off        \
+        -readonly yes       \
+        -type snit::boolean
+
+    # -autotrans
+    #
+    # If on, a transaction is always open; data isn't saved until the
+    # application calls "commit".  If off, the user is responsible for
+    # transactions, and "commit" is a no-op.
+
+    option -autotrans       \
+        -default on         \
+        -readonly yes       \
+        -type snit::boolean
 
     #-------------------------------------------------------------------
     # Instance variables
@@ -172,9 +187,12 @@ snit::type ::marsutil::sqldocument {
     #-------------------------------------------------------------------
     # Constructor
     
-    constructor {} {
+    constructor {args} {
         # FIRST, we have no database; set the db component accordingly.
         set db [myproc NullDatabase]
+
+        # NEXT, process options
+        $self configurelist $args
     }
 
 
@@ -220,6 +238,13 @@ snit::type ::marsutil::sqldocument {
             PRAGMA temp_store=MEMORY;
         }
 
+        # NEXT, if -rollback is off, turn off journaling.
+        if {!$options(-rollback)} {
+            $db eval {
+                PRAGMA journal_mode=OFF;
+            }
+        }
+
         # NEXT, define the temporary tables
         $self DefineTempSchema
 
@@ -230,9 +255,10 @@ snit::type ::marsutil::sqldocument {
         set info(dbFile)   $filename
         set info(dbIsOpen) 1
 
-        # NEXT, open the initial transaction.
-        $db eval {BEGIN IMMEDIATE TRANSACTION;}        
-
+        # NEXT, if -autotrans then open the initial transaction.
+        if {$options(-autotrans)} {
+            $db eval {BEGIN IMMEDIATE TRANSACTION;}
+        }
     }
 
     # clear
@@ -262,8 +288,8 @@ snit::type ::marsutil::sqldocument {
     # Deletes old data from the database, and defines the proper schema.
 
     method DefineSchema {} {
-        # FIRST, commit any open transaction.  If it fails, that's no
-        # big deal.
+        # FIRST, commit any open transaction.  If the commit fails, that's
+        # no big deal.
         catch {$db eval {COMMIT TRANSACTION;}}
 
         # NEXT, open an exclusive transaction; if there's another
@@ -298,10 +324,13 @@ snit::type ::marsutil::sqldocument {
         # NEXT, commit the schema changes
         $db eval {COMMIT TRANSACTION;}
 
-        # NEXT, begin an immediate transaction; we want there to be a
-        # transaction open at all times.  We'll commit the data to
-        # disk from time to time.
-        $db eval {BEGIN IMMEDIATE TRANSACTION;}
+        # NEXT, if -autotrans then begin an immediate transaction; we want 
+        # there to be a transaction open at all times.  We'll commit the 
+        # data to disk from time to time.
+
+        if {$options(-autotrans)} {
+            $db eval {BEGIN IMMEDIATE TRANSACTION;}
+        }
     }
 
     # DefineTempSchema
@@ -411,14 +440,16 @@ snit::type ::marsutil::sqldocument {
     # commit
     #
     # Commits all database changes to the db, and opens a new 
-    # transaction.
+    # transaction.  If -autotrans is off, this is a no-op.
 
     method commit {} {
         require {$info(dbIsOpen)} "database is not open"
 
-        $db eval {
-            COMMIT TRANSACTION;
-            BEGIN IMMEDIATE TRANSACTION;
+        if {$options(-autotrans)} {
+            $db eval {
+                COMMIT TRANSACTION;
+                BEGIN IMMEDIATE TRANSACTION;
+            }
         }
     }
 
@@ -443,7 +474,6 @@ snit::type ::marsutil::sqldocument {
     # Public Methods: General database queries
 
     # Delegated methods
-    delegate method saveas to db using {::marsutil::sqlib %m %c}
     delegate method query  to db using {::marsutil::sqlib %m %c} 
     delegate method tables to db using {::marsutil::sqlib %m %c} 
     delegate method schema to db using {::marsutil::sqlib %m %c} 
@@ -464,6 +494,44 @@ snit::type ::marsutil::sqldocument {
     
     method isopen {} {
         return $info(dbIsOpen)
+    }
+
+    # saveas filename
+    #
+    # filename   A file name
+    #
+    # Saves a copy of the db to the specified file name.
+
+    method saveas {filename} {
+        # FIRST, if we have locked tables they need to be unlocked.
+        set lockedTables [list]
+
+        foreach table [$self tables] {
+            if {[$self islocked $table]} {
+                lappend lockedTables $table
+                $self unlock $table
+            }
+        }
+
+        # NEXT, there can't be any open transaction, so commit.
+        catch {
+            $db eval {COMMIT TRANSACTION;}
+        }
+
+        # NEXT, try to save the data.
+        try {
+            sqlib saveas $db $filename
+        } finally {
+            # And now, make sure we lock the tables and open
+            # transaction (if need be)
+            $self lock $lockedTables
+            
+            if {$options(-autotrans)} {
+                $db eval {BEGIN IMMEDIATE TRANSACTION;}
+            }
+        }
+
+        return
     }
 
 
