@@ -269,7 +269,7 @@ snit::type ::marsutil::ehtml {
 
         # NEXT, is it a man page?
         if {$url eq "" &&
-            [regexp {^([^:]+:)?([^()]+)\(([1-9in])\)$} $id \
+            [regexp {^([^:]+:)?([^()]+)\(([1-9a-z]+)\)$} $id \
                  dummy root name section]
         } {
             set root [string trim $root ":"]

@@ -520,7 +520,7 @@ current working directory.
     # man pages.
 
     template proc indexfile {} {
-        set title "$info(project) $info(version) Man Pages: $sectionTitle"
+        set title "Man Page Section $::sectionTitle"
     } {
         |<--
         <head>
