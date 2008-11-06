@@ -9,6 +9,23 @@
 Library</h1>
 <h2>Build Notes</h2>
 
+<h3>Build 1.2, 06 November 2008</h3>
+This build includes more migration from JNEM to Mars. There is also the 
+introduction of a couple of new commands.
+The following packages are included in this build:
+<ul>
+  <li>Bug 1727: JNEM uses Martian infrastructure, Part II
+  <li>Bug 1728: mars_link(1): replacement for mars_import(1)
+  <li>Bug 1731: ehtml(n) supports "root:name(section)" syntax for man pages.
+  <li>Bug 1734: Update JNEM to use mars_man(1) to process man pages.
+  <li>Bug 1741: Migrate util(n) to marsutil(n)
+  <li>Bug 1742: Migrate gui(n) to Mars as marsgui(n)
+  <li>Bug 1753: mars(1): Error in application list output
+  <li>Bug 1756: mkicon(n): Tk Icon Creation Utility
+  <li>Bug 1759: geometry(n): cedge
+  <li>Bug 1765: sqlib(n): saveas now commits changes to the database being saved
+</ul>
+
 <h3>Build 1.1, 15 October 2008</h3>
 This is the first Mars build. It introduces Mars as a separate library that can
 be used by multiple applications.
