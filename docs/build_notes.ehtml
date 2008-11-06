@@ -10,8 +10,8 @@ Library</h1>
 <h2>Build Notes</h2>
 
 <h3>Build 1.2, 06 November 2008</h3>
-This build includes more migration from JNEM to Mars. There is also the 
-introduction of a couple of new commands.
+This build includes more migration from JNEM to Mars and a few bug fixes. 
+There is also the introduction of a couple of new commands.
 The following packages are included in this build:
 <ul>
   <li>Bug 1727: JNEM uses Martian infrastructure, Part II
@@ -24,6 +24,7 @@ The following packages are included in this build:
   <li>Bug 1756: mkicon(n): Tk Icon Creation Utility
   <li>Bug 1759: geometry(n): cedge
   <li>Bug 1765: sqlib(n): saveas now commits changes to the database being saved
+  <li>Bug 1766: Log level fine-tuning
 </ul>
 
 <h3>Build 1.1, 15 October 2008</h3>
