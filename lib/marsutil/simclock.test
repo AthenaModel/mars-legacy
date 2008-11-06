@@ -458,7 +458,7 @@ namespace eval ::marsutil::test {
     } -cleanup {
         cleanup
     } -result {
-detail clock {grant 010001ZJAN70 (1)}
+normal clock {grant 010001ZJAN70 (1)}
 advance
     }
 
@@ -1473,35 +1473,35 @@ advance
     } -result {
 normal clock {started 010000ZJAN70 (0)}
 normal clock {ratio auto}
-detail clock {time advance request 010001ZJAN70 (1)}
-detail clock {grant 010001ZJAN70 (1)}
+normal clock {time advance request 010001ZJAN70 (1)}
+normal clock {grant 010001ZJAN70 (1)}
 normal app {advance 1}
-detail clock {time advance request 010002ZJAN70 (2)}
-detail clock {grant 010002ZJAN70 (2)}
+normal clock {time advance request 010002ZJAN70 (2)}
+normal clock {grant 010002ZJAN70 (2)}
 normal app {advance 2}
-detail clock {time advance request 010003ZJAN70 (3)}
-detail clock {grant 010003ZJAN70 (3)}
+normal clock {time advance request 010003ZJAN70 (3)}
+normal clock {grant 010003ZJAN70 (3)}
 normal app {advance 3}
-detail clock {time advance request 010004ZJAN70 (4)}
-detail clock {grant 010004ZJAN70 (4)}
+normal clock {time advance request 010004ZJAN70 (4)}
+normal clock {grant 010004ZJAN70 (4)}
 normal app {advance 4}
-detail clock {time advance request 010005ZJAN70 (5)}
-detail clock {grant 010005ZJAN70 (5)}
+normal clock {time advance request 010005ZJAN70 (5)}
+normal clock {grant 010005ZJAN70 (5)}
 normal app {advance 5}
-detail clock {time advance request 010006ZJAN70 (6)}
-detail clock {grant 010006ZJAN70 (6)}
+normal clock {time advance request 010006ZJAN70 (6)}
+normal clock {grant 010006ZJAN70 (6)}
 normal app {advance 6}
-detail clock {time advance request 010007ZJAN70 (7)}
-detail clock {grant 010007ZJAN70 (7)}
+normal clock {time advance request 010007ZJAN70 (7)}
+normal clock {grant 010007ZJAN70 (7)}
 normal app {advance 7}
-detail clock {time advance request 010008ZJAN70 (8)}
-detail clock {grant 010008ZJAN70 (8)}
+normal clock {time advance request 010008ZJAN70 (8)}
+normal clock {grant 010008ZJAN70 (8)}
 normal app {advance 8}
-detail clock {time advance request 010009ZJAN70 (9)}
-detail clock {grant 010009ZJAN70 (9)}
+normal clock {time advance request 010009ZJAN70 (9)}
+normal clock {grant 010009ZJAN70 (9)}
 normal app {advance 9}
-detail clock {time advance request 010010ZJAN70 (10)}
-detail clock {grant 010010ZJAN70 (10)}
+normal clock {time advance request 010010ZJAN70 (10)}
+normal clock {grant 010010ZJAN70 (10)}
 normal app {advance 10}
 normal clock stop
     }
@@ -1521,35 +1521,35 @@ normal clock stop
     } -result {
 normal clock {started 010000ZJAN70 (0)}
 normal clock {ratio auto}
-detail clock {time advance request 010001ZJAN70 (1)}
-detail clock {grant 010001ZJAN70 (1)}
+normal clock {time advance request 010001ZJAN70 (1)}
+normal clock {grant 010001ZJAN70 (1)}
 normal app {advance 1}
-detail clock {time advance request 010002ZJAN70 (2)}
-detail clock {grant 010002ZJAN70 (2)}
+normal clock {time advance request 010002ZJAN70 (2)}
+normal clock {grant 010002ZJAN70 (2)}
 normal app {advance 2}
-detail clock {time advance request 010003ZJAN70 (3)}
-detail clock {grant 010003ZJAN70 (3)}
+normal clock {time advance request 010003ZJAN70 (3)}
+normal clock {grant 010003ZJAN70 (3)}
 normal app {advance 3}
-detail clock {time advance request 010004ZJAN70 (4)}
-detail clock {grant 010004ZJAN70 (4)}
+normal clock {time advance request 010004ZJAN70 (4)}
+normal clock {grant 010004ZJAN70 (4)}
 normal app {advance 4}
-detail clock {time advance request 010005ZJAN70 (5)}
-detail clock {grant 010005ZJAN70 (5)}
+normal clock {time advance request 010005ZJAN70 (5)}
+normal clock {grant 010005ZJAN70 (5)}
 normal app {advance 5}
-detail clock {time advance request 010006ZJAN70 (6)}
-detail clock {grant 010006ZJAN70 (6)}
+normal clock {time advance request 010006ZJAN70 (6)}
+normal clock {grant 010006ZJAN70 (6)}
 normal app {advance 6}
-detail clock {time advance request 010007ZJAN70 (7)}
-detail clock {grant 010007ZJAN70 (7)}
+normal clock {time advance request 010007ZJAN70 (7)}
+normal clock {grant 010007ZJAN70 (7)}
 normal app {advance 7}
-detail clock {time advance request 010008ZJAN70 (8)}
-detail clock {grant 010008ZJAN70 (8)}
+normal clock {time advance request 010008ZJAN70 (8)}
+normal clock {grant 010008ZJAN70 (8)}
 normal app {advance 8}
-detail clock {time advance request 010009ZJAN70 (9)}
-detail clock {grant 010009ZJAN70 (9)}
+normal clock {time advance request 010009ZJAN70 (9)}
+normal clock {grant 010009ZJAN70 (9)}
 normal app {advance 9}
-detail clock {time advance request 010010ZJAN70 (10)}
-detail clock {grant 010010ZJAN70 (10)}
+normal clock {time advance request 010010ZJAN70 (10)}
+normal clock {grant 010010ZJAN70 (10)}
 normal app {advance 10}
 normal clock stop
     }
@@ -1573,26 +1573,26 @@ normal clock stop
     } -result {
 normal clock {started 010000ZJAN70 (0)}
 normal clock {ratio auto}
-detail clock {time advance request 010001ZJAN70 (1)}
-detail clock {grant 010001ZJAN70 (1)}
+normal clock {time advance request 010001ZJAN70 (1)}
+normal clock {grant 010001ZJAN70 (1)}
 normal app {advance 1}
-detail clock {time advance request 010002ZJAN70 (2)}
-detail clock {grant 010002ZJAN70 (2)}
+normal clock {time advance request 010002ZJAN70 (2)}
+normal clock {grant 010002ZJAN70 (2)}
 normal app {advance 2}
-detail clock {time advance request 010003ZJAN70 (3)}
-detail clock {grant 010003ZJAN70 (3)}
+normal clock {time advance request 010003ZJAN70 (3)}
+normal clock {grant 010003ZJAN70 (3)}
 normal app {advance 3}
 normal clock stop
 normal clock {started 010003ZJAN70 (3)}
 normal clock {ratio auto}
-detail clock {time advance request 010004ZJAN70 (4)}
-detail clock {grant 010004ZJAN70 (4)}
+normal clock {time advance request 010004ZJAN70 (4)}
+normal clock {grant 010004ZJAN70 (4)}
 normal app {advance 4}
-detail clock {time advance request 010005ZJAN70 (5)}
-detail clock {grant 010005ZJAN70 (5)}
+normal clock {time advance request 010005ZJAN70 (5)}
+normal clock {grant 010005ZJAN70 (5)}
 normal app {advance 5}
-detail clock {time advance request 010006ZJAN70 (6)}
-detail clock {grant 010006ZJAN70 (6)}
+normal clock {time advance request 010006ZJAN70 (6)}
+normal clock {grant 010006ZJAN70 (6)}
 normal app {advance 6}
 normal clock stop
     }
@@ -1609,20 +1609,20 @@ normal clock stop
     } -result {
 normal clock {started 010005ZJAN70 (5)}
 normal clock {ratio auto}
-detail clock {time advance request 010006ZJAN70 (6)}
-detail clock {grant 010006ZJAN70 (6)}
+normal clock {time advance request 010006ZJAN70 (6)}
+normal clock {grant 010006ZJAN70 (6)}
 normal app {advance 6}
-detail clock {time advance request 010007ZJAN70 (7)}
-detail clock {grant 010007ZJAN70 (7)}
+normal clock {time advance request 010007ZJAN70 (7)}
+normal clock {grant 010007ZJAN70 (7)}
 normal app {advance 7}
-detail clock {time advance request 010008ZJAN70 (8)}
-detail clock {grant 010008ZJAN70 (8)}
+normal clock {time advance request 010008ZJAN70 (8)}
+normal clock {grant 010008ZJAN70 (8)}
 normal app {advance 8}
-detail clock {time advance request 010009ZJAN70 (9)}
-detail clock {grant 010009ZJAN70 (9)}
+normal clock {time advance request 010009ZJAN70 (9)}
+normal clock {grant 010009ZJAN70 (9)}
 normal app {advance 9}
-detail clock {time advance request 010010ZJAN70 (10)}
-detail clock {grant 010010ZJAN70 (10)}
+normal clock {time advance request 010010ZJAN70 (10)}
+normal clock {grant 010010ZJAN70 (10)}
 normal app {advance 10}
 normal clock stop
     }
@@ -1642,29 +1642,29 @@ normal clock stop
     } -result {
 normal clock {started 010000ZJAN70 (0)}
 normal clock {ratio auto}
-detail clock {time advance request 010001ZJAN70 (1)}
+normal clock {time advance request 010001ZJAN70 (1)}
 normal app {Advance to 1 requested}
 normal app {Deferring request: 3}
-detail clock {time advance request 010001ZJAN70 (1)}
+normal clock {time advance request 010001ZJAN70 (1)}
 normal app {Advance to 1 requested}
 normal app {Deferring request: 2}
-detail clock {time advance request 010001ZJAN70 (1)}
+normal clock {time advance request 010001ZJAN70 (1)}
 normal app {Advance to 1 requested}
 normal app {Deferring request: 1}
-detail clock {time advance request 010001ZJAN70 (1)}
+normal clock {time advance request 010001ZJAN70 (1)}
 normal app {Advance to 1 requested}
 normal app {Advance granted}
-detail clock {grant 010001ZJAN70 (1)}
+normal clock {grant 010001ZJAN70 (1)}
 normal app {advance 1}
-detail clock {time advance request 010002ZJAN70 (2)}
+normal clock {time advance request 010002ZJAN70 (2)}
 normal app {Advance to 2 requested}
 normal app {Advance granted}
-detail clock {grant 010002ZJAN70 (2)}
+normal clock {grant 010002ZJAN70 (2)}
 normal app {advance 2}
-detail clock {time advance request 010003ZJAN70 (3)}
+normal clock {time advance request 010003ZJAN70 (3)}
 normal app {Advance to 3 requested}
 normal app {Advance granted}
-detail clock {grant 010003ZJAN70 (3)}
+normal clock {grant 010003ZJAN70 (3)}
 normal app {advance 3}
 normal clock stop
     }
