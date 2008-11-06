@@ -88,8 +88,12 @@ snit::type ::marsutil::sqlib {
         # an error if the database cannot be opened.
         sqlite3 sadb $filename
 
-        # NEXT, copy the schema
+        # NEXT, copy the schema and the user_version
         sadb transaction {
+            set ver [$db eval {PRAGMA user_version}]
+
+            sadb eval "PRAGMA user_version=$ver"
+
             $db eval {
                 SELECT sql FROM sqlite_master 
                 WHERE sql NOT NULL
