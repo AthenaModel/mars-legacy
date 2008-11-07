@@ -18,7 +18,6 @@ package require marsutil
    
 package require Tk 8.5
 package require BWidget  1.8
-package require Img      1.3
 
 #-----------------------------------------------------------------------
 # Package Definition
