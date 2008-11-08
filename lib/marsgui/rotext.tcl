@@ -311,25 +311,29 @@ snit::widgetadaptor ::marsgui::rotext {
         $self FindTarget
     }
 
-    # find update
+    # find update ?force?
+    #
+    # ?force?    If true, will force the last match to be highlighted.
     #
     # Use this after modifying the text in the widget; it will update
     # the search
     
-    method {find update} {} {
+    method {find update} {{force 0}} {
         if {$found(target) ne ""} {
-            $self FindTarget
+            $self FindTarget $force
         }
     }
 
-    # FindTarget
+    # FindTarget ?force?
     #
+    # ?force?    If true, will force the last match to be highlighted.
+    # 
     # Finds instances of the target.  Called when a new target is specified,
     # and when text is added or deleted.  In the latter case, the 
     # highlighted line will not change (unless the instance of the
     # target is deleted).
 
-    method FindTarget {} {
+    method FindTarget {{force 0}} {
         # FIRST, is this a new search?
         if {$found(count) == 0} {
             set newSearch 1
@@ -386,7 +390,7 @@ snit::widgetadaptor ::marsgui::rotext {
 
         # NEXT, if this is an old search, see if the highlighted line
         # still has a match; if so, show it again.
-        if {!$newSearch} {
+        if {!$newSearch  && !$force} {
             set range [$hull tag nextrange SHOWN 1.0]
             if {$range ne ""} {
                 set index [lindex $range 0]

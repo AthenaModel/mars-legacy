@@ -94,6 +94,7 @@ snit::widget ::marsgui::scrollinglog {
     #-------------------------------------------------------------------
     # Instance variables
 
+    variable logfile        ""     ;# Name of the log file being displayed
     variable scrollbackFlag 1      ;# Var for $bar.scrollback
     variable verbosities -array {} ;# Controls which levels to display
 
@@ -219,22 +220,33 @@ snit::widget ::marsgui::scrollinglog {
 
     # SetScrollback
     #
-    # Sets the logdisplay's -autoupdate based on the scrollback flag
+    # Updates the logdisplay's -autoscroll and sets -autoupdate based on 
+    # the scrollback flag updating the icon as well.
 
     method SetScrollback {} {
     
         $log configure -autoscroll $scrollbackFlag
         
-        # Set the scrollback button's bitmap to match.
+        # Set the scrollback button's bitmap to match and set -autoupdate.
         if {$scrollbackFlag} {
     
             $bar.scrollback configure \
                                 -bitmap @$::marsgui::library/autoscroll_on.xbm
             
+            $log configure -autoupdate on
+
+            # During the time scrollback was disabled either the log contents
+            # or the most recent file may have changed.  Load again to
+            # handle either case.
+            if {$logfile ne ""} {
+                $log load $logfile
+            }
         } else {
     
             $bar.scrollback configure \
                                 -bitmap @$::marsgui::library/autoscroll_off.xbm
+            
+            $log configure -autoupdate off
         }
     }
 
@@ -305,7 +317,20 @@ snit::widget ::marsgui::scrollinglog {
     # Public Methods
 
     delegate method field to log
-    delegate method load  to log
+
+    # load  filename
+    #
+    # filename  A logfile to load
+    #
+    # Insructs the logdisplay to load the new file if autoscroll is on.
+    method load {filename} {
+        set logfile $filename
+        
+        if {$scrollbackFlag} {
+            $log load $logfile
+        }
+    }
+
 }
 
 

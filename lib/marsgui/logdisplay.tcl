@@ -118,6 +118,7 @@ snit::widget ::marsgui::logdisplay {
     variable fieldNames              ;# List of field names
     variable fieldWidths             ;# List of corresponding field widths.
     variable fieldDisplayFlags       ;# List of corresponding display flags.
+    variable findCount           0   ;# Number of find hits.
     
     #-------------------------------------------------------------------
     # Constructor & Destructor
@@ -151,7 +152,7 @@ snit::widget ::marsgui::logdisplay {
             button $win.title                   \
                 -borderwidth  1                 \
                 -textvariable [myvar title]     \
-                -command      [mymethod GetNewEntries]
+                -command      [mymethod GetNewEntries 1]
         }
 
         scrollbar $win.xbar                   \
@@ -220,11 +221,13 @@ snit::widget ::marsgui::logdisplay {
         $rotext del 1.0 end
     }
  
-    # GetNewEntries
+    # GetNewEntries ?showend?
+    #
+    # ?showend?     Forces display of last log entry.
     #
     # Gets a list of new log entries from the reader and appends them into
     # the display.
-    method GetNewEntries {} {
+    method GetNewEntries {{showend 0}} {
         # Check that a log file has been specified.
         if {$logFile eq ""} {
             return
@@ -242,15 +245,16 @@ snit::widget ::marsgui::logdisplay {
         set logEntries [concat $logEntries $newEntries]
         
         # Update the display with the new entries stored in $result.
-        $self Append $newEntries
+        $self Append $newEntries $showend
     }
     
-    # Append newEntries
+    # Append newEntries ?showend?
     #
     # newEntries    List of new log entries.
+    # ?showend?     Forces display of last log entry.
     #
     # Filter and append into the display the new log entries.
-    method Append {newEntries} {
+    method Append {newEntries {showend 0}} {
         ::marsutil::assert {$logFile ne ""}
 
         # If we aren't displaying any entries at present, clear the
@@ -287,18 +291,25 @@ snit::widget ::marsgui::logdisplay {
             $self ClearDisplay
             $rotext ins end "All entries filtered out."
         }
-        
-        # Any new entries?
-        if {[llength $newEntries] > 0} {
-            # Notify the rotext to update its search.
-            # TBD: might be a conflict with the following.
-            $rotext find update
-                    
-            # Show the new entries, if -autoscroll set and nothing found
-            if {$options(-autoscroll) && ![$rotext find count]
-            } {
-                $rotext see end
-            }
+                
+        set oldCount $findCount
+
+        # Force highlighting of the last match if autoscrolling.
+        # Otherwise just update the count
+        if {$options(-autoscroll)} {
+            $rotext find update 1
+        } else {
+            $rotext find update 0
+        }
+        set findCount [$rotext find count]
+
+        # If nothing was found go to the end if appropriate.
+        # Otherwise highlight the most recent match if the count changed 
+        # or we're being told explicitly to do so.
+        if {$findCount == 0 && ($options(-autoscroll) || $showend)} {
+            $rotext see end
+        } elseif {$findCount != $oldCount || $showend} {
+            $rotext find update 1
         }
     }    
     
@@ -470,16 +481,17 @@ snit::widget ::marsgui::logdisplay {
         return $entryStr
     }    
         
-    # load  filename
+    # load  filename  ?showend?
     #
-    # filename  A logfile to load
-    #
+    # filename    A logfile to load
+    # ?showend?   Force display of most recent content
+    # 
     # Loads the specified file in the most efficient manner.  If "filename"  
     # matches the current logfile, and the current logfile is open, only the 
     # new entries are parsed and appended into the display.  Otherwise the 
     # display is cleared and the new data parsed and displayed entirely.
     # If "filename" is "", the logdisplay is cleared.
-    method load {filename} {
+    method load {filename {showend 0}} {
         # FIRST, clear the log if there's no file name.  Then return.
         if {$filename eq ""} {
             # FIRST, Clear the GUI.
@@ -501,7 +513,7 @@ snit::widget ::marsgui::logdisplay {
         # NEXT, if we've already loaded this file, just get new entries.
         if {$filename eq $logFile} {
             # Just get any new entries of the current log.
-            $self GetNewEntries
+            $self GetNewEntries $showend
             
             return        
         }
@@ -521,7 +533,8 @@ snit::widget ::marsgui::logdisplay {
         $self GetNewEntries
 
         # Display the end unless there's an active find.
-        if {[$rotext find count] == 0} {
+        set findCount [$rotext find count]
+        if {$findCount == 0} {
             $rotext see end
         }
     }

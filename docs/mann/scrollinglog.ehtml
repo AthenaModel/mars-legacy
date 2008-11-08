@@ -23,6 +23,16 @@ scrollinglog(n) combines the display capabilities of the
 capabilities of the <<xref finder(n)>> and <<xref filter(n)>> widgets
 in one convenient package.<p>
 
+A combobox is provided to filter based on log level.  The select log
+level and higher levels will be displayed.  The levels provided are in
+accordance with those supported by <<xref logger(n)>>.<p>
+
+An auto-scroll/scroll-lock selection button is provided in
+the upper right-hand corner.  In the scroll-lock position, the
+contents will remain fixed and under the user's control.  In addition,
+an enabled scroll-lock will prohibit <<iref load>> from loading
+the file contents.<p>
+
 <<section COMMANDS>>
 
 This module defines the following command:<p>
@@ -116,7 +126,9 @@ Returns the value of the specified <i>option</i>.<p>
 
 <<defitem load {$scrollinglog load <i>filename</i>}>>
 
-Tells <<iref scrollinglog>> to display the named file.<p>
+Tells <<iref scrollinglog>> to display the named file unless
+scroll-lock is currently enabled.  In this case, the file name is
+cached for later use.<p>
 
 <</deflist>>
 

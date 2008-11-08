@@ -249,12 +249,14 @@ formatting.  This command is useful to any client that needs a
 formatted version of <i>text</i> but doesn't have a need to display
 it.<p>
 
-<<defitem load {$logdisplay load <i>filename</i>}>>
+<<defitem load {$logdisplay load <i>filename</i> <i>?showend?</i>}>>
 
 Loads the specified log file into the widget.  If <i>filename</i>
 matches the name of the current logfile then the widget will read and
 display any new entries from the file.  If <i>filename</i> is "" then
-the display is cleared.<p>
+the display is cleared.  When the optional <i>showend</i> is true, the
+most recent contents or acitve match will be displayed regardless of
+the -autoscroll option.<p>
 
 <<defitem redisplay {$logdisplay redisplay}>>
 

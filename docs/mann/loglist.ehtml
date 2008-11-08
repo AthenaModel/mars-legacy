@@ -76,15 +76,25 @@ to the <i>cmd</i> as a single string argument.  Defaults to "".<p>
 
 <<defopt {-selectcmd <i>cmd</i>}>>
 
-A command to execute whenever a log file is selected.
-The file's full pathname is appended as an argument.  When there is no
-currently-selected log file, it will be passed the empty string, "".<p>
+A command to execute whenever a log file is selected.  Two arguments
+will be appended: The file's full pathname followed by a boolean flag
+indicating if the file changed or not.  When there is no
+currently-selected log file, the filename will be passed the empty
+string, "".  Note that a true value for the changed flag might be
+set true even if there was no change.  This should be treated as a
+hint that the user is requesting an update.<p>
 
 <<defopt {-title <i>title</i>}>>
 
 Specifies the <i>title</i> which appears on the update button at the top of
 the widget.  Pressing the button updates the contents of the widget.
 Defaults to "Applications:".<p>
+
+<<defopt {-autoload <i>boolean</i>}>>
+
+If enabled, specifies that the most recent file should be loaded during
+an update.  An update in this context refers to either a manual or
+automatic update.  The default is true.<p>
 
 <<defopt {-autoupdate <i>boolean</i>}>>
 

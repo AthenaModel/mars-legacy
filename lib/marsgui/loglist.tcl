@@ -140,10 +140,22 @@ snit::widget ::marsgui::loglist {
     # at the top of the widget.
     option -title -default "Applications:"
     
+    # -autoload boolean
+    #
+    # This indicates whether or not to automatically load the most 
+    # recent log file in the list.
+    option -autoload -default "true" -type snit::boolean \
+        -configuremethod ConfigureAutoLoad
+
+    method ConfigureAutoLoad {option value} {
+        set options(-autoload) $value
+    }
+
     # -autoupdate boolean
     #
     # Automatically refresh the loglist every few seconds.
-    option -autoupdate -default "off" -configuremethod ConfigureAutoUpdate
+    option -autoupdate -default "off" -type snit::boolean \
+        -configuremethod ConfigureAutoUpdate
 
     method ConfigureAutoUpdate {option value} {
         set options(-autoupdate) $value
@@ -318,16 +330,17 @@ snit::widget ::marsgui::loglist {
             return
         }
 
-        $self SelectApp [lindex $appDirs $appNum]
+        $self SelectApp [lindex $appDirs $appNum] 1
     }
 
-    # SelectApp name
+    # SelectApp name ?showend?
     #
-    # name      An application directory name from appDirs
+    # name        An application directory name from appDirs
+    # ?showend?   Force most recent content to be displayed
     #
     # Selects the named application, and displays the relevant log files.
 
-    method SelectApp {name} {
+    method SelectApp {name {showend 0}} {
         set num [lsearch -exact $appDirs $name]
 
         if {$num == -1} {
@@ -344,9 +357,12 @@ snit::widget ::marsgui::loglist {
         $applist tag add    SELECTED \
             "$index linestart" "$index+1 lines linestart"
         $applist see $index
+
+        # Clear our memory of the selected log since it's no longer valid.
+        set selectedLog -1
      
         # Load the logslist with the application directory.
-        $self LoadFiles
+        $self LoadFiles $showend
     }
 
     # SelectLogCB index
@@ -367,15 +383,16 @@ snit::widget ::marsgui::loglist {
         $self SelectLog $lognum
     }
 
-    # SelectLog num
+    # SelectLog num ?changed?
     #
-    # num     Number of the entry to select, 1 to numLogs
+    # num      Number of the entry to select, 1 to numLogs
+    # changed  True if num changed, false otherwise
     #
     # Interpret the given coordinates, highlight the selected list entry, and
     # return the pathname of the selected file.  Invoke the appropriate button
     # command if specified.
     
-    method SelectLog {num} {
+    method SelectLog {num {changed 1}} {
         if {$num < 1 || $num > $numLogs} {
             error "invalid log number: \"$num\""
         }
@@ -384,86 +401,113 @@ snit::widget ::marsgui::loglist {
         set logIndex "$num.0"
 
         # Save the selected log number.
-        set selectedLog $num 
+        set selectedLog $num
 
         set logFile [lindex $logFiles [expr {$num - 1}]]
         
         # Configure tags to highlight the selection.  Set the SELECTED tag
         # background to grey indicating the start of the select command.
-        $loglist tag configure SELECTED -background grey
-        $loglist tag remove    SELECTED 1.0 end
-        $loglist see $logIndex
-        $loglist tag add       SELECTED \
-                            "$logIndex linestart" "$logIndex+1 lines linestart"
+        if {$changed} {
         
-        update idletasks
+            $loglist tag configure SELECTED -background grey
+            $loglist tag remove    SELECTED 1.0 end
+
+            $loglist see $logIndex
         
-        # Invoke the -selectcmd, if defined
-        $self CallSelectCmd $logFile
-        
-        # Configure the SELECTED tag background to black, indicating the
-        # completion of the button command.
-        $loglist tag configure SELECTED -background black
+            $loglist tag add       SELECTED \
+                "$logIndex linestart" "$logIndex+1 lines linestart"
+
+            update idletasks
+           
+            # Invoke the -selectcmd, if defined and if a new log was selected.
+            $self CallSelectCmd $logFile $changed
+
+            # Configure the SELECTED tag background to black, indicating the
+            # completion of the button command.
+            $loglist tag configure SELECTED -background black
+        }
         
         # Return the selected entry.
         return $logFile
     }
 
 
-    # LoadFiles
+    # LoadFiles ?showend?
     #
+    # ?showend?    Force most recent content to be displayed
+    # 
     # Load the logslist with all logs matching -logpattern in the current
     # app directory.  Select the last if appropriate.
-    method LoadFiles {} {
+    method LoadFiles {{showend 0}} {
         # FIRST, get the full path of the app directory
         set dir [file join $options(-rootdir) $currentAppDir]
 
         # FIRST, Enable and clear the loglist.
         $loglist   configure -state normal
-        $loglist   delete 1.0 end
 
         # NEXT, no log is selected.
+        set prevSelectedLog $selectedLog
         set selectedLog -1
             
         # NEXT, Get a sorted list of all logs matching the -logpattern.
         set logFiles \
             [lsort [glob -nocomplain -directory $dir $options(-logpattern)]]
+
+        set prevNumLogs $numLogs
+        set numLogs     [llength $logFiles]
         
-        set numLogs [llength $logFiles]
-        
-        # NEXT, Insert each bare file name into the loglist;
+        # NEXT, Keep the loglist updated;
         # if there are no entries just note the fact.
         if {$numLogs == 0} {
+            $loglist   delete 1.0 end
             $loglist insert end "No log files found\n"
             
             # Notify clients that no log is selected.
             $self CallSelectCmd ""
         } else {
-            foreach filepath $logFiles {
-                set file [file tail $filepath]
-        
-                $loglist insert end "$file\n"
-            }
+            # Rebuild the list and show the latest if requested or this is
+            # the first time for the current app.
+            if {$options(-autoload) || $showend || $prevSelectedLog == -1 } {
+                $loglist   delete 1.0 end
 
-            # Select the last log.
-            $self SelectLog $numLogs
+                foreach filepath $logFiles {
+                    set file [file tail $filepath]
+                    $loglist insert end "$file\n"
+                }
+
+                $self SelectLog $numLogs
+            } else {
+                # Otherwise keep the list updated with new entries and
+                # tell SelectLog that nothing changed.  This will be the
+                # case if the user has taken control of logdisplay(n) 
+                # by enabling scroll-lock.
+                if {$numLogs > $prevNumLogs} {
+                    foreach filepath [lrange $logFiles $prevNumLogs end] {
+                        set file [file tail $filepath]
+                        $loglist insert end "$file\n"
+                    }
+                }
+
+                $self SelectLog $prevSelectedLog 0
+            }
         }
         
         # NEXT, Disable the loglist again
         $loglist configure -state disabled
     }
 
-    # CallSelectCmd logfile
+    # CallSelectCmd logfile ?changed?
     #
     # logfile    Selected log file, or ""
+    # ?changed?  Indicates the file changed or desire to pretend so
     #
     # Calls the -selectcmd, passing it the selected log file, or
     # passing it "" to indicate that no log is selected.
 
-    method CallSelectCmd {logfile} {
+    method CallSelectCmd {logfile {changed 0}} {
         if {$options(-selectcmd) ne ""} {
             set cmd $options(-selectcmd)
-            lappend cmd $logfile
+            lappend cmd $logfile $changed
             uplevel \#0 $cmd
         }
     }
@@ -516,7 +560,7 @@ snit::widget ::marsgui::loglist {
             }
 
             # Select the appropriate app
-            if {[lsearch -exact $appDirs $currentAppDir] != -1} {
+            if {$currentAppDir in $appDirs} {
                 $self SelectApp $currentAppDir
             } else {
                 $self SelectApp [lindex $appDirs 0]

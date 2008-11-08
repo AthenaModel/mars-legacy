@@ -137,11 +137,11 @@ Finally, the <code>-foundcmd</code>, if any, is called.<p>
 
 To clear the search, call this method with a <i>target</i> of "".<p>
 
-<<defitem {find update} {$rotext find update}>>
+<<defitem {find update} {$rotext find update <i>?force?</i>}>>
 
 This method causes the widget to redo the current search.
 If a line was highlighted before <<iref find update>> it
-will still be highlighted after.<p>
+will still be highlighted after unless <i>force</i> is set true.<p>
 
 Call this method after changing the contents of the widget.<p>
 
