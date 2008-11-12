@@ -167,7 +167,15 @@ Injects a command into the widget following the prompt as though the
 user had typed it, replacing any previous user input, and executes the
 command as though the user had pressed Return.  This subcommand is
 intended to be used by menu items and other GUI elements; it should
-not be called while ::marsgui::cli is executing a user's command.
+not be called while ::marsgui::cli is executing a user's command.<p>
+
+<<defitem saveable {$cli saveable <i>subcommand</i> ?<i>args...</i>?}>>
+
+cli(n) implements the <<xref saveable(i)>> interface as subcommands of
+this method.  When checkpointed, it saves its complete command history.
+When restored, it <<iref clear>>s itself, and restore the command
+history.  The cli(n) never indicates that it needs to be saved, as
+saving the command history is a convenience rather than a requirement.<p>
 
 <</deflist>>
 

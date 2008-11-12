@@ -795,6 +795,38 @@ snit::widget ::marsgui::cli {
     }
 
     #-------------------------------------------------------------------
+    # saveable(i) interface
+
+    # saveable checkpoint
+    #
+    # Returns the CLI's history stack
+
+    method {saveable checkpoint} {} {
+        return $history
+    }
+
+    # saveable restore checkpoint
+    #
+    # checkpoint    The return value of "saveable checkpoint"
+    #
+    # Restores the history data.
+
+    method {saveable restore} {checkpoint} {
+        $self clear
+        set history $checkpoint
+        set hp -1
+    }
+
+    # saveable changed
+    #
+    # Always returns 0: saving the history is a convenience, not a
+    # necessity.
+
+    method {saveable changed} {} {
+        return 0
+    }
+
+    #-------------------------------------------------------------------
     # Utility Procs
 
     # LongestCommonPrefix strings
