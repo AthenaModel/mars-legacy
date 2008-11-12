@@ -218,6 +218,14 @@ snit::type ::marsutil::logger {
 
     option -overflowcmd -default {}
 
+    # -newlogcmd cmd
+    #
+    # cmd   A command which is called whenever a new log file is opened.
+    #
+    # This is called on overflow, but also on newlog.
+
+    option -newlogcmd -default {}
+
     #-------------------------------------------------------------------
     # Instance variables
 
@@ -494,6 +502,14 @@ snit::type ::marsutil::logger {
         # NEXT, make the channel be line-buffering, so that it's
         # written to disk after each line.
         fconfigure $channel -buffering line
+
+        # Notify the app.
+        if {$options(-newlogcmd) ne ""} {
+            set cmd $options(-newlogcmd)
+            
+            lappend cmd $name
+            uplevel \#0 $cmd
+        }
     }
 
     # CloseFile

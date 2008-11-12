@@ -284,14 +284,25 @@ Specifies a command to be called whenever an entry is logged.  The
 command will be called at global scope with one additional argument,
 the entry dictionary.  The command's return value is ignored.<p>
 
+<<defopt {-newlogcmd <i>cmd</i>}>>
+
+Specifies a command to be called whenever a new log file is opened,
+for whatever reason.  The command will be called
+at global scope with one additional argument, the new log file name.
+The command's return value is ignored.<p>
+
+Note that the command should not write to the log.<p>
+
 <<defopt {-overflowcmd <i>cmd</i>}>>
 
-Specifies a command to be called whenever <code>-maxentries</code>
+<b>Deprecated.</b>  Specifies a command to be called whenever
+<code>-maxentries</code> 
 is exceeded and a new log file is created.  The command will be called
 at global scope with one additional argument, the new log file name.
 The command's return value is ignored.<p>
 
 Note that the command should not write to the log.<p>
+
 <</deflist logger options>>
 
 <<defitem "logger levels" {logger levels}>>
