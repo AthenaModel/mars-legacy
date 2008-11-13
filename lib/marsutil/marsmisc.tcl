@@ -50,6 +50,7 @@ namespace eval ::marsutil:: {
         readfile        \
         require         \
         stringToRegexp  \
+        try             \
         wildToRegexp
 
     variable pi      [expr {acos(-1.0)}]
