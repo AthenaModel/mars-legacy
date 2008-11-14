@@ -407,25 +407,22 @@ snit::widget ::marsgui::loglist {
         
         # Configure tags to highlight the selection.  Set the SELECTED tag
         # background to grey indicating the start of the select command.
-        if {$changed} {
+        $loglist tag configure SELECTED -background grey
+        $loglist tag remove    SELECTED 1.0 end
+
+        $loglist see $logIndex
         
-            $loglist tag configure SELECTED -background grey
-            $loglist tag remove    SELECTED 1.0 end
+        $loglist tag add       SELECTED \
+            "$logIndex linestart" "$logIndex+1 lines linestart"
 
-            $loglist see $logIndex
+        update idletasks
         
-            $loglist tag add       SELECTED \
-                "$logIndex linestart" "$logIndex+1 lines linestart"
+        # Invoke the -selectcmd and indicate if this is a change.
+        $self CallSelectCmd $logFile $changed
 
-            update idletasks
-           
-            # Invoke the -selectcmd, if defined and if a new log was selected.
-            $self CallSelectCmd $logFile $changed
-
-            # Configure the SELECTED tag background to black, indicating the
-            # completion of the button command.
-            $loglist tag configure SELECTED -background black
-        }
+        # Configure the SELECTED tag background to black, indicating the
+        # completion of the button command.
+        $loglist tag configure SELECTED -background black
         
         # Return the selected entry.
         return $logFile
@@ -467,7 +464,7 @@ snit::widget ::marsgui::loglist {
         } else {
             # Rebuild the list and show the latest if requested or this is
             # the first time for the current app.
-            if {$options(-autoload) || $showend || $prevSelectedLog == -1 } {
+            if {$options(-autoload) || $showend || $prevSelectedLog == -1} {
                 $loglist   delete 1.0 end
 
                 foreach filepath $logFiles {
@@ -475,12 +472,19 @@ snit::widget ::marsgui::loglist {
                     $loglist insert end "$file\n"
                 }
 
-                $self SelectLog $numLogs
+                # If this is a user request or the first time indicate that
+                # this is a change.  Otherwise indicate that this is a
+                # change only if the log count really changed and we've 
+                # selected the latest as a result.
+                if {$showend || $prevSelectedLog == -1} {
+                    $self SelectLog $numLogs 1
+                } else {
+                    $self SelectLog $numLogs [expr {$numLogs > $prevNumLogs}]
+                }
             } else {
-                # Otherwise keep the list updated with new entries and
-                # tell SelectLog that nothing changed.  This will be the
-                # case if the user has taken control of logdisplay(n) 
-                # by enabling scroll-lock.
+                # Otherwise just keep the list updated with new entries.
+                # This will be the case if the user has taken control 
+                # of logdisplay(n) by enabling scroll-lock.
                 if {$numLogs > $prevNumLogs} {
                     foreach filepath [lrange $logFiles $prevNumLogs end] {
                         set file [file tail $filepath]
@@ -488,7 +492,8 @@ snit::widget ::marsgui::loglist {
                     }
                 }
 
-                $self SelectLog $prevSelectedLog 0
+                # Remember the selected log
+                set selectedLog $prevSelectedLog
             }
         }
         

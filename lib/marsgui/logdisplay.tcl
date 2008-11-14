@@ -291,6 +291,12 @@ snit::widget ::marsgui::logdisplay {
             $self ClearDisplay
             $rotext ins end "All entries filtered out."
         }
+
+        # If nothing new and we're not being forced to show the latest
+        # simply return.  We're done.
+        if {[llength $newEntries] == 0 && !$showend} {
+            return
+        }
                 
         set oldCount $findCount
 
