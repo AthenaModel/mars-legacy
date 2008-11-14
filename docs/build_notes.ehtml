@@ -9,6 +9,23 @@
 Library</h1>
 <h2>Build Notes</h2>
 
+<h3>Build 1.3, 14 November 2008</h3>
+This build includes some updates to sqldocument to make it more flexible. It
+also introduces the saveable(i) interface, which is used by cli(n). Some bug
+fixes and man pages are also part of this build. The following packages are
+included:
+<ul>
+  <li>Bug 1439:	sqldocument(n) saveas fails when called for jnem_sim(1)'s RDB
+  <li>Bug 1697:	sqldocument(n): need a read-only option to open the database
+  <li>Bug 1765:	sqldocument(n): -autotrans, -rollback, saveas
+  <li>Bug 1767:	mars_man(5): Man page sections
+  <li>Bug 1768:	marsgui(n): Remove dependency on Img
+  <li>Bug 1770:	jnem_log(1): Disabling scroll lock doesn't update the log.
+  <li>Bug 1774:	saveable(i), cli(n): Saveable Interface
+  <li>Bug 1775:	logger(n): -newlogcmd
+  <li>Bug 1778:	marsmisc(n): "try" not exported
+</ul>
+
 <h3>Build 1.2, 06 November 2008</h3>
 This build includes more migration from JNEM to Mars and a few bug fixes. 
 There is also the introduction of a couple of new commands.
