@@ -47,6 +47,7 @@ if {[file exists $binlib]} {
 
 source [file join $::marsutil::library marsmisc.tcl    ]
 source [file join $::marsutil::library template.tcl    ]
+source [file join $::marsutil::library sequence.tcl    ]
 source [file join $::marsutil::library ehtml.tcl       ]
 source [file join $::marsutil::library logger.tcl      ]
 source [file join $::marsutil::library logreader.tcl   ]

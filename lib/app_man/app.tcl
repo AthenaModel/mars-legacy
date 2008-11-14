@@ -46,6 +46,7 @@ snit::type app {
             manurl       \
             mktree       \
             section      \
+            sequence     \
             subsection
     }
 
@@ -57,11 +58,14 @@ snit::type app {
     #  version      The version of the software being documented
     #  project      The project name
     #  longproject  The project title
+    #  imgcount     Count of images produced for this man page;
+    #               used to generate file names.
 
     typevariable info -array {
         version     "1.x"
         project     "Mars"
         longproject "Simulation Infrastructure Library"
+        imgcount    0
     }
 
     # Source directory
@@ -84,6 +88,8 @@ snit::type app {
     typevariable mktreeFlag 0
 
     # Man Page variables
+
+    typevariable currentManpage  ;# Name of the current man page
 
     typevariable items {}        ;# List of item tags, in order of definition 
     typevariable itemtext        ;# Array, item text by tag
@@ -236,6 +242,9 @@ current working directory.
 
     template proc manpage {nameList description} {
         set name [lindex $nameList end]
+
+        set currentManpage $name
+        set info(imgcount) 0
 
         if {[llength $nameList] > 1} {
             set parent [lindex $nameList 0]
@@ -568,6 +577,68 @@ current working directory.
             
         }]
         </ul>
+    }
+
+    # sequence ?options? sequence
+    #
+    # sequence     sequence(5) sequence diagram text
+    #
+    # -narration
+    #    Include narrative text in the output, following the diagram.
+
+    proc sequence {args} {
+        # FIRST, get the options
+        if {[llength $args] < 1} {
+            error "wrong \# args: should be \"sequence ?options...? sequence\""
+        }
+
+        set sequence [lindex $args end]
+        set args [lrange $args 0 end-1]
+
+        set opts(-narration) 0
+
+        while {[llength $args] > 0} {
+            set opt [lshift args]
+            
+            switch -exact -- $opt {
+                -narration { set opts(-narration) 1 }
+                default    { error "Unknown option: \"$opt\""}
+            }
+        }
+
+        # NEXT, if this is pass 1 there's nothing more to do.
+        if {[ehtml pass] == 1} {
+            return
+        }
+
+        # NEXT, get the image file name
+        set ndx [string first "(" $currentManpage]
+        set root [string range $currentManpage 0 $ndx-1]
+
+        set filename [file join $destdir "${root}_[incr info(imgcount)].gif"]
+
+        # NEXT, render the sequence to a file
+        ::marsutil::sequence renderas $filename $sequence
+
+        # NEXT, begin to build up the output
+        set output "<img src=\"[file tail $filename]\"><p>\n\n"
+
+        # NEXT, output the narration if required.
+        if {$opts(-narration)} {
+            array set nar [::marsutil::sequence narration]
+
+            if {[info exists nar(diagram)]} {
+                append output "$nar(diagram)<p>\n\n"
+                unset nar(diagram)
+            }
+
+            foreach index [lsort -integer [array names nar]] {
+                append output "<b>Step $index</b>: $nar($index)<p>\n\n"
+            }
+        }
+
+        # NEXT, return the output
+        return $output
     }
 }
 

@@ -237,6 +237,13 @@ Finally, the <<xref ehtml(5)>> <<xref xhtml(5) xrefset>> macro can be
 used to assign ID strings to frequently used URLs; if the <i>id</i> is
 one of these ID strings.<p>
 
+<<defitem sequence {sequence ?-narration? <i>sequence</i>}>>
+
+Includes input for a <<xref sequence(5)>> diagram in-line in the man
+page.  The macro will be replaced by an image containing the diagram.
+If <strong>-narration</strong> is included, the image will be followed
+by the narration found in the <<xref sequence(5)>> input, if any.<p>
+
 <<defitem mktree {mktree}>>
 
 If included anywhere in the man page, this macro enables use of the
