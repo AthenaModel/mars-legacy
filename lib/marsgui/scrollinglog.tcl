@@ -174,11 +174,11 @@ snit::widget ::marsgui::scrollinglog {
             -msgcmd    [mymethod LogCmd]        \
             -width     20
 
+        pack $bar.title      -side left  -padx 1
+        pack $bar.loglevel   -side left  -padx 1
         pack $bar.scrollback -side right -padx 1
         pack $bar.finder     -side right -padx 1
         pack $bar.filter     -side right -padx 1
-        pack $bar.title      -side left  -padx 1
-        pack $bar.loglevel   -side left  -padx 1
 
         # Pack it up
         pack $bar -side top -fill x
