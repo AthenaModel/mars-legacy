@@ -65,13 +65,13 @@ snit::type app {
             /change         \
             contents        \
             figure          \
-            /figure         \
             figures         \
             longproject     \
             preface         \
             project         \
             section         \
             sectioncontents \
+            sequence        \
             standardstyle   \
             table           \
             /table          \
@@ -139,6 +139,7 @@ snit::type app {
     #  dumpAnchors  If 1, dump a list of sections, tables, and figures,
     #               with xref IDs, for each document.
     #  debugFlag    If 1, dump additional debugging info
+    #  fileroot     Root of the current input file's name
     
     typevariable info -array {
         version     "1.x"
@@ -146,6 +147,7 @@ snit::type app {
         longproject "Simulation Infrastructure Library"
         dumpAnchors 0
         debugFlag   0
+        fileroot    ""
     }
 
     #-------------------------------------------------------------------
@@ -192,6 +194,9 @@ snit::type app {
     #
     # tablecounter         Number of last table in this major section
     # figurecounter        Number of last figure in this major section
+    #
+    # imagecounter         Number of last generated image in this document
+    #                      Used for creating file names.
     #
     # children-$id         A list of the xref IDs of the children of
     #                      section $id.
@@ -268,7 +273,8 @@ snit::type app {
         foreach infile $argv {
             ResetForNextDocument
 
-            set outfile [file rootname $infile].html
+            set info(fileroot) [file rootname $infile]
+            set outfile $info(fileroot).html
             
             if {[catch {ehtml expandFile $infile} output]} {
                 puts stderr $output
@@ -657,6 +663,68 @@ snit::type app {
         <p><a name="$id" href="#toc.$id"><center><img src="./$filename"><br/>
         <b>$doc(title-$id)</b></center></a></p>
     }
+
+    # sequence id title ?options? sequence
+    #
+    # id        Xref ID
+    # title     Figure title
+    # sequence     sequence(5) sequence diagram text
+    #
+    # -narration
+    #    Include narrative text in the output, following the diagram.
+
+    proc sequence {id title args} {
+        # FIRST, get the options
+        if {[llength $args] < 1} {
+            error "wrong \# args: should be \"sequence id title ?options...? sequence\""
+        }
+
+        set sequence [lindex $args end]
+        set args [lrange $args 0 end-1]
+
+        set opts(-narration) 0
+
+        while {[llength $args] > 0} {
+            set opt [lshift args]
+            
+            switch -exact -- $opt {
+                -narration { set opts(-narration) 1 }
+                default    { error "Unknown option: \"$opt\""}
+            }
+        }
+
+        # NEXT, get the image file name
+        set filename "$info(fileroot)_img[incr doc(imagecount)].gif"
+
+        # NEXT, begin to build up the output
+        set output [figure $id $title $filename]
+
+        # NEXT, if this is pass 1 there's nothing more to do.
+        if {[ehtml pass] == 1} {
+            return
+        }
+
+        # NEXT, render the sequence to a file
+        ::marsutil::sequence renderas $filename $sequence
+
+        # NEXT, output the narration if required.
+        if {$opts(-narration)} {
+            array set nar [::marsutil::sequence narration]
+
+            if {[info exists nar(diagram)]} {
+                append output "$nar(diagram)<p>\n\n"
+                unset nar(diagram)
+            }
+
+            foreach index [lsort -integer [array names nar]] {
+                append output "<b>Step $index</b>: $nar($index)<p>\n\n"
+            }
+        }
+
+        # NEXT, return the output
+        return $output
+    }
+
 
     #-------------------------------------------------------------------
     # Tables of Contents, Tables, and Figures

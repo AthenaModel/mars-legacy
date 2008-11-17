@@ -171,6 +171,25 @@ the <i>id</i>.<p>
 Returns a table of contents for section <i>id</i>, that is, a list of
 its subsections, with links.<p>
 
+<<defitem sequence {&lt;&lt;sequence <i>id title</i> ?-narration? <i>sequence</i></i>&gt;&gt;}>>
+
+Adds a sequence diagram to the document as a numbered figure.  The
+figure is identified by <i>id</i>, which must have the form
+<code>fig.<i>name</i></code>; the <i>title</i> will be included in the
+caption.  The figure itself is an image file containing a
+diagram defined by the <<xref sequence(5)>> in <i>sequence</i>.<p>
+
+If the <strong>-narration</strong> option is included, any narration
+will be included in the output of the macro, directly following the
+diagram itself.<p>
+
+Because display of the title is managed by mars_doc(5) directly, the
+<<xref sequence(5)>> input itself will generally not include an
+explicit title.<p>
+
+Figures will be auto-numbered, and included in the list of
+<<iref figures>>.<p>
+
 <<defitem standardstyle {&lt;&lt;standardstyle&gt;&gt;}>>
 
 Returns the standard list of CSS styles; include it in the

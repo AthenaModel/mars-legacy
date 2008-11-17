@@ -64,8 +64,10 @@ set libdir [file normalize [file join $appdir .. lib]]
 
 set ndx [lsearch -glob $auto_path "*/mars*"]
 
-if {$ndx > -1} {
+while {$ndx > -1} {
     set auto_path [lreplace $auto_path $ndx $ndx]
+
+    set ndx [lsearch -glob $auto_path "*/mars*"]
 }
 
 lappend auto_path $libdir
@@ -97,6 +99,12 @@ set metadata {
     replace {
         text     "Global Search-and-Replace Tool"
         applib   app_replace
+        mode     cmdline
+    }
+
+    sequence {
+        text     "Sequence Diagram Processor"
+        applib   app_sequence
         mode     cmdline
     }
 }
