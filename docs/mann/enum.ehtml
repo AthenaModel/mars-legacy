@@ -61,7 +61,8 @@ subcommands:<p>
 
 Validates that <i>input</i> belongs to the enumeration.  If it does,
 the input is translated to a short name, and returned.
-If it does not, an error is thrown.<p>
+If it does not, an error is thrown with an <code>-errorcode</code>
+of <b>INVALID</b>.<p>
 
 <<defitem size {$enum size}>>
 

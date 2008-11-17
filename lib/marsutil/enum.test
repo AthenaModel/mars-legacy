@@ -79,6 +79,11 @@ namespace eval ::marsutil::test {
         error
     } -result {invalid value, "VVG"}
 
+    test enum_validate-2.1 {invalid input yields -errorcode INVALID} -body {
+        catch {goodness validate VVG} result opts
+        dict get $opts -errorcode
+    } -result {INVALID}
+
     #-------------------------------------------------------------------
     # name
 

@@ -73,15 +73,29 @@ namespace eval ::marsutil::test {
         setup
     } -body {
         goodness validate VG
+    } -cleanup {
+        cleanup
     } -result {VG}
 
-    test quality_validate-1.2 {invalid input} -body {
+    test quality_validate-1.2 {invalid input} -setup {
+        setup
+    } -body {
         goodness validate VVG
     } -cleanup {
         cleanup
     } -returnCodes {
         error
     } -result {invalid value, "VVG"}
+
+    test quality_validate-2.1 {error code is INVALID} -setup {
+        setup
+    } -body {
+        catch { goodness validate VVG } result opts
+        dict get $opts -errorcode
+    } -cleanup {
+        cleanup
+    } -result {INVALID}
+
 
     #-------------------------------------------------------------------
     # value

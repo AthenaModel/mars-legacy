@@ -164,7 +164,8 @@ snit::type ::marsutil::quality {
         set ndx  [$self index $input]
 
         if {$ndx == -1} {
-            error "invalid value, \"$input\""
+            return -code error -errorcode INVALID \
+                "invalid value, \"$input\""
         }
 
         return $input
