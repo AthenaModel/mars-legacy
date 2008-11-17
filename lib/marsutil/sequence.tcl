@@ -102,7 +102,7 @@ snit::type ::marsutil::sequence {
         font         sansserif
         fontsize     12
         titlesize    16
-        linespacing  7
+        linespacing  4
         fg           black
         bg           white
         arrow        6
@@ -125,6 +125,9 @@ snit::type ::marsutil::sequence {
     #
     #  page(textheight):
     #      Height of one line of text given default font.
+    #
+    #  page(textasc)
+    #      Distance from top of line to baseline given default font.
     #
     #  page(titleheight):
     #      Height of one line of text given title font.
@@ -165,7 +168,7 @@ snit::type ::marsutil::sequence {
     #  data(actor-$name): Dictionary of actor data
     #      name:      (P) The actor's name
     #      box:       (L) (x1,y1,x2,y2) of the actor's box
-    #      y:         (L) Text is drawn at x,y (center,top), where
+    #      y:         (L) Text is drawn at x,y (center,baseline), where
     #                 x is data(x-$name).
     #
     #  data(count):   (P) Count of body elements
@@ -180,7 +183,8 @@ snit::type ::marsutil::sequence {
     #     from:       (P) The from actor
     #     to:         (P) The list of to actors
     #     text:       (P) The message text
-    #     x,ytext     (L) Text is drawn at x,ytext (center,top)
+    #     x,ytext     (L) Text is drawn at x,ytext (center,baseline)
+    #     y1,y2       (L) Y coordinates for white background.
     #     yarrow      (L) y-coordinate for errors.
     #     
     #  comment:
@@ -377,6 +381,8 @@ snit::type ::marsutil::sequence {
                                text   $text   \
                                x      {}      \
                                ytext  {}      \
+                               y1     {}      \
+                               y2     {}      \
                                yarrow {}      ]
 
         # NEXT, save the narrative
@@ -500,6 +506,9 @@ snit::type ::marsutil::sequence {
 
         # textheight
         let page(textheight) [TextHeight $parms(fontsize)]
+
+        # textasc
+        let page(textasc)   [TextAscent $parms(fontsize)]
         
         # titleheight
         let page(titleheight) [TextHeight $parms(titlesize)]
@@ -585,10 +594,10 @@ snit::type ::marsutil::sequence {
     proc LayoutActors {} {
         # FIRST, compute the y1 and y2 of the actor box
         set y1 $page(y)
-        let y2 {$y1 + $page(textheight) + 2*$parms(padding)}
+        let y2 {$y1 + $page(textasc) + 2*$parms(padding)}
 
         # NEXT, compute the y of the actor text
-        let ytext {$page(y) + $parms(padding)}
+        let ytext {$page(y) + $parms(padding) + $page(textasc)}
             
         # NEXT, save this for each actor
         foreach name $data(actors) {
@@ -622,11 +631,15 @@ snit::type ::marsutil::sequence {
             
             let x {($xmin + $xmax)/2}
 
-            # y-coordinate of top of message text
-            set ytext $page(y)
+            # y-coordinate of baseline of message text
+            let ytext {$page(y) + $page(textasc) + $parms(padding)}
 
             # y-coordinate of arrow(s)
-            let yarrow {$ytext + $page(textheight) + $parms(linespacing)}
+            let yarrow {$page(y) + $page(textheight) + $parms(padding) + $parms(arrow)}
+
+            # Box of white for under the text.
+            let y1 {$page(y)}
+            let y2 {$page(y) + $page(textasc) + 2*$parms(padding)}
 
             # Leave space
             let page(y) {$yarrow + $parms(ystep)}
@@ -652,7 +665,7 @@ snit::type ::marsutil::sequence {
             # NEXT, determine the height of the text:
             set n [llength $text]
 
-            let height {$n*$page(textheight) + ($n-1)*$parms(linespacing)}
+            let height {($n-1)*($page(textheight) + $parms(linespacing)) + $page(textasc)}
             
             # NEXT, save the box
             set x1 $page(xmin)
@@ -709,7 +722,7 @@ snit::type ::marsutil::sequence {
             # NEXT, determine the height of the text:
             set n [llength $text]
 
-            let height {$n*$page(textheight) + ($n-1)*$parms(linespacing)}
+            let height {($n-1)*($page(textheight) + $parms(linespacing)) + $page(textasc)}
             
             # NEXT, save the box
             set y1 $page(y)
@@ -747,12 +760,25 @@ snit::type ::marsutil::sequence {
     # the font size.
 
     proc TextHeight {size} {
-        lassign [pixfont measure $page(hfont) $size "M"] \
+        lassign [pixfont measure $page(hfont) $size "Mg"] \
                 wid asc desc
 
         return [expr {$asc + $desc}]
     }
 
+    # TextAscent size
+    #
+    # size      A font size
+    #
+    # Returns the distance from the top of a line of text to its
+    # baseline.
+
+    proc TextAscent {size} {
+        lassign [pixfont measure $page(hfont) $size "Mg"] \
+                wid asc desc
+
+        return $asc
+    }
 
     #-------------------------------------------------------------------
     # Phase: Rendering
@@ -793,7 +819,7 @@ snit::type ::marsutil::sequence {
                     -font   $page(hfont)           \
                     -size   $parms(fontsize)       \
                     -align  center                 \
-                    -valign top
+                    -valign baseline
                 
                 set y2 [lindex $box 3]
 
@@ -828,12 +854,9 @@ snit::type ::marsutil::sequence {
             # Draw a white rectangle under the text
             set wid [TextWid $text]
             let x1 {$x - $wid/2}
-            set y1 $ytext
-            let ht {$page(textheight) + $parms(linespacing)}
+            let x2 {$x + $wid/2}
 
-            pixane color $pix $parms(bg)
-            pixane rectangle $pix $x1 $y1 $wid $ht
-            pixane color $pix $parms(fg)
+            DrawBackground $pix $x1 $y1 $x2 $y2
 
             # Render the text
             pixane text $pix $x $ytext     \
@@ -841,9 +864,7 @@ snit::type ::marsutil::sequence {
                 -font    $page(hfont)      \
                 -size    $parms(fontsize)  \
                 -align   center            \
-                -valign  top
-
-
+                -valign  baseline
             
             # Render the arrows
             set xfrom $data(x-$from)
@@ -878,19 +899,7 @@ snit::type ::marsutil::sequence {
             DrawBox $pix {*}$box
 
             # Write each line of text
-            set yline $y
-
-            foreach line $text {
-                # Render the text
-                pixane text $pix $x $yline     \
-                    -text    $line             \
-                    -font    $page(hfont)      \
-                    -size    $parms(fontsize)  \
-                    -align   left              \
-                    -valign  top
-            
-                let yline {$yline + $page(textheight) + $parms(linespacing)}
-            }
+            DrawTextBlock $pix $x $y $text
         }
     }
 
@@ -913,19 +922,7 @@ snit::type ::marsutil::sequence {
             DrawBox $pix {*}$box
 
             # Write each line of text
-            set yline $y
-
-            foreach line $text {
-                # Render the text
-                pixane text $pix $x $yline     \
-                    -text    $line             \
-                    -font    $page(hfont)      \
-                    -size    $parms(fontsize)  \
-                    -align   left              \
-                    -valign  top
-            
-                let yline {$yline + $page(textheight) + $parms(linespacing)}
-            }
+            DrawTextBlock $pix $x $y $text
         }
     }
 
@@ -943,6 +940,46 @@ snit::type ::marsutil::sequence {
 
         pixane color $pix $parms(fg)
         pixane line  $pix $x1 $y1   $x1 $y2   $x2 $y2   $x2 $y1   $x1 $y1
+    }
+
+    # DrawBackground pix x1 y1 x2 y2
+    #
+    # Draws a rectangle in the background color
+
+    proc DrawBackground {pix x1 y1 x2 y2} {
+        let wid {$x2 - $x1}
+        let ht  {$y2 - $y1}
+
+        pixane color     $pix $parms(bg)
+        pixane rectangle $pix $x1 $y1 $wid $ht
+        pixane color $pix $parms(fg)
+    }
+
+    # DrawTextBlock pix x y lines
+    #
+    # pix   The pix image
+    # x,y   Upper left corner of the block
+    # lines List of lines of text.
+    #
+    # Draws the text block going down from y.
+
+    proc DrawTextBlock {pix x y lines} {
+        set yline $y
+
+        foreach line $lines {
+            # Get the baseline
+            let ybase {$yline + $page(textasc)}
+
+            # Render the text
+            pixane text $pix $x $ybase     \
+                -text    $line             \
+                -font    $page(hfont)      \
+                -size    $parms(fontsize)  \
+                -align   left              \
+                -valign  baseline
+            
+            let yline {$yline + $page(textheight) + $parms(linespacing)}
+        }
     }
 
 
