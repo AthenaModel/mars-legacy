@@ -216,6 +216,13 @@ namespace eval ::marsutil::test {
     } -result {2.0 2.0 2.0 2.0}
 
     #-------------------------------------------------------------------
+    # boxaround
+
+    test boxaround-1.1 {normal case} -body {
+        boxaround 5.0 10.0 20.0
+    } -result {5.0 15.0 15.0 25.0}
+
+    #-------------------------------------------------------------------
     # cindex
 
     test cindex-1.1 {0th point} -body {

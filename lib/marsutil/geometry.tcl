@@ -26,6 +26,7 @@
 namespace eval ::marsutil:: {
     namespace export \
         bbox         \
+        boxaround    \
         ccw          \
         cedge        \
         cindex       \
@@ -274,6 +275,21 @@ if {[llength [info commands ::marsutil::bbox]] == 0} {
     
         return [list $xmin $ymin $xmax $ymax]
     }
+}
+
+# boxaround radius x y
+#
+# radius   A distance
+# x,y      A point
+#
+# Returns a box {x1 y1 x2 y2} = {x-radius y-radius x+radius y+radius}
+
+proc ::marsutil::boxaround {radius x y} {
+    list \
+        [expr {$x - $radius}] \
+        [expr {$y - $radius}] \
+        [expr {$x + $radius}] \
+        [expr {$y + $radius}]
 }
 
 #-----------------------------------------------------------------------

@@ -70,6 +70,12 @@ elements: <i>xMin yMin xMax yMax</i>.<p>
 The binary extension includes a fast C implementation of
 <<iref bbox>>.<p>
 
+<<defitem boxaround {boxaround <i>radius x y</i>}>>
+
+Returns a box a <i>x1 y1 x2 y2</i> with radius <i>radius</i>
+centered at <i>x</i>, <i>y</i>.<p>
+
+
 <<defitem ccw {ccw <i>a b c</i>}>>
 
 This function is the "counterclockwise" primitive, as defined
