@@ -287,6 +287,23 @@ namespace eval ::marsutil::test {
     } -result {invalid coordinate value: "A"}
 
     #-------------------------------------------------------------------
+    # clear
+
+    test clear-1.1 {clear existing elements} -setup {
+        setup
+    } -body {
+        gs create point P1 {1.0 1.0}
+        gs create line L1 {1.0 2.0 2.0 1.0}
+        gs create polygon N1 {1.0 1.0 2.0 2.0 1.0 2.0}
+
+        gs clear
+
+        gs list
+    } -cleanup {
+        cleanup
+    } -result {}
+
+    #-------------------------------------------------------------------
     # bbox
 
     test bbox-1.1 {bounding box of point.} -setup {

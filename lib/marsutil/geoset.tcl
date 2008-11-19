@@ -297,6 +297,19 @@ snit::type ::marsutil::geoset {
         return ""
     }
 
+    # clear
+    #
+    # Deletes all content
+
+    method clear {} {
+        array unset itemtype
+        array unset itemcoords
+        array unset bbox
+        array unset info
+
+        set info(ids) {}
+    }
+
     #-------------------------------------------------------------------
     # Utility procedures
 

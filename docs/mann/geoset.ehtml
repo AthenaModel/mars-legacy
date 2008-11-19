@@ -81,6 +81,10 @@ all items in the geoset(n).<p>
 See <<xref geometry(n) bbox>> in <<xref geometry(n)>> for more on
 bounding boxes.<p>
 
+<<defitem clear {$gs clear}>>
+
+Deletes all items from the geoset(n).<p>
+
 <<defitem coords {$gs coords <i>id</i>}>>
 
 Returns the list of coordinates associated with item <i>id</i>.<p>
