@@ -436,6 +436,13 @@ should be "$xyz" or "{xyz}" or "xyz(...)" or ...}
     } -result {1}
 
     #-------------------------------------------------------------------
+    # normalize
+
+    test normalize-1.1 {strips whitespace} -body {
+        normalize "   abc   def \n ghi \t "
+    } -result {abc def ghi}
+
+    #-------------------------------------------------------------------
     # outdent
 
     test outdent-1.1 {outdent: empty block} -body {

@@ -217,6 +217,11 @@ with "\x00".  This allows strings containing binary data to be
 printed normally.  The original string can be retrieved using
 the standard Tcl <code>subst</code> command.<p>
 
+<<defitem normalize {normalize <i>text</i>}>>
+
+Given a text string, trims leading and trailing whitespace, and
+reduces all internal whitespace to single spaces.<p>
+
 <<defitem outdent {outdent <i>block</i>}>>
 
 Given a block of text, "outdent" deletes any leading blank line or trailing

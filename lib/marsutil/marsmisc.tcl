@@ -42,6 +42,7 @@ namespace eval ::marsutil:: {
         lshift          \
         max             \
         min             \
+        normalize       \
         optval          \
 	outdent         \
         percent         \
@@ -621,6 +622,21 @@ proc ::marsutil::optval {argvar option {defvalue ""}} {
     set argv [lreplace $argv $ioption $ivalue] 
 
     return $value
+}
+
+# normalize text
+#
+# text    A block of text
+#
+# Strips leading and trailing whitespace, converts newlines to spaces,
+# and replaces all multiple internal spaces with single spaces.
+
+proc ::marsutil::normalize {text} {
+    set text [string trim $text]
+    regsub -all "\n" $text " " text
+    regsub -all { +} $text " " text
+    
+    return $text
 }
 
 #-------------------------------------------------------------------
