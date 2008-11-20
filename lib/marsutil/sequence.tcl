@@ -91,7 +91,10 @@ snit::type ::marsutil::sequence {
     #        The foreground and background colors
     #
     #    parms(arrow):
-    #        The x/y extent of each blade of the arrowhead on message lines
+    #        The x/y extent of each blade of the arrowhead on message arrows.
+    #
+    #    parms(dotradius):
+    #        The radius of a dot drawn at the tail of each message arrow.
 
     typevariable parms -array {
         margin       5
@@ -106,6 +109,7 @@ snit::type ::marsutil::sequence {
         fg           black
         bg           white
         arrow        6
+        dotradius    2
     }
 
     #-------------------------------------------------------------------
@@ -639,7 +643,7 @@ snit::type ::marsutil::sequence {
 
             # Box of white for under the text.
             let y1 {$page(y)}
-            let y2 {$page(y) + $page(textasc) + 2*$parms(padding)}
+            let y2 {$page(y) + 2*$parms(padding) + $page(textasc)}
 
             # Leave space
             let page(y) {$yarrow + $parms(ystep)}
@@ -868,6 +872,12 @@ snit::type ::marsutil::sequence {
             
             # Render the arrows
             set xfrom $data(x-$from)
+
+            pixane rectangle $pix \
+                [expr {$xfrom  - $parms(dotradius)}] \
+                [expr {$yarrow - $parms(dotradius)}] \
+                [expr {1 + 2*$parms(dotradius)}]         \
+                [expr {1 + 2*$parms(dotradius)}]
 
             foreach name $to {
                 set xto $data(x-$name)
