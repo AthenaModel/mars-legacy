@@ -78,6 +78,11 @@ package require Tcl 8.5
 # Application Metadata
 
 set metadata {
+    commit {
+        text     "Bugfix Commit Tool"
+        applib   app_commit
+        mode     gui
+    }
     doc {
         text     "Document Processor"
         applib   app_doc
