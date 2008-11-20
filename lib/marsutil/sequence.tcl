@@ -71,6 +71,10 @@ snit::type ::marsutil::sequence {
     #        The separation between the text in a box and the border 
     #        of the box.
     #
+    #    parms(opaquepadding):
+    #        For text with an opaque background, the padding around
+    #        the text.
+    #
     #    parms(mincolwidth):
     #        The minimum width of an actor's column, i.e., the minimum 
     #        width of the box containing the actor's name.
@@ -97,19 +101,20 @@ snit::type ::marsutil::sequence {
     #        The radius of a dot drawn at the tail of each message arrow.
 
     typevariable parms -array {
-        margin       5
-        xstep        10
-        ystep        15
-        padding      7
-        mincolwidth  90
-        font         sansserif
-        fontsize     12
-        titlesize    16
-        linespacing  4
-        fg           black
-        bg           white
-        arrow        6
-        dotradius    2
+        margin        5
+        xstep         10
+        ystep         15
+        padding       7
+        opaquepadding 3
+        mincolwidth   90
+        font          sansserif
+        fontsize      12
+        titlesize     16
+        linespacing   4
+        fg            black
+        bg            white
+        arrow         6
+        dotradius     2
     }
 
     #-------------------------------------------------------------------
@@ -120,6 +125,11 @@ snit::type ::marsutil::sequence {
     #
     #  page(xmin), page(ymin), page(xmax), page(ymax):
     #      Minimum and maximum x and y values for data pixels.
+    #
+    #  page(colleft), page(colright):
+    #      colleft is the x coordinate of the left edge of the leftmost
+    #      column; colright is the x coordinate of the right edge of
+    #      the rightmost column.
     #
     #  page(width), page(height):
     #      Dimensions of the finished diagram.
@@ -142,8 +152,8 @@ snit::type ::marsutil::sequence {
     #  Note that:
     #      page(xmin)   = parms(margin)
     #      page(ymin)   = parms(margin)
-    #      page(width)  = parms(xmax) + parms(margin)
-    #      page(height) = parms(ymax) + parms(margin)
+    #      page(width)  = page(xmax) + parms(margin)
+    #      page(height) = page(ymax) + parms(margin)
 
     typevariable page -array { }
 
@@ -187,8 +197,8 @@ snit::type ::marsutil::sequence {
     #     from:       (P) The from actor
     #     to:         (P) The list of to actors
     #     text:       (P) The message text
-    #     x,ytext     (L) Text is drawn at x,ytext (center,baseline)
-    #     y1,y2       (L) Y coordinates for white background.
+    #     align:      (L) left, right, center
+    #     x,ytext     (L) Text is drawn at x,ytext ($align,baseline)
     #     yarrow      (L) y-coordinate for errors.
     #     
     #  comment:
@@ -383,10 +393,9 @@ snit::type ::marsutil::sequence {
                                from   $from   \
                                to     $to     \
                                text   $text   \
+                               align  {}      \
                                x      {}      \
                                ytext  {}      \
-                               y1     {}      \
-                               y2     {}      \
                                yarrow {}      ]
 
         # NEXT, save the narrative
@@ -462,15 +471,22 @@ snit::type ::marsutil::sequence {
         # index numbers
         LayoutIndexWidth
 
+        # NEXT, set the left bound for the actor columns
+        let page(colleft) {$page(xindex) + $parms(xstep)}
+
         # NEXT, Compute the x coordinates for the actor columns
         foreach name $data(actors) {
             LayoutActorWidth $name
         }
 
-        # NEXT, determine the total width of the diagram.  Note that
-        # we've gone an xstep too far.
-        let page(xmax)  {$page(x) - $parms(xstep)}
-        let page(width) {$page(xmax) + $parms(margin)}
+        # NEXT, determine the maximum extent of the diagram's data.
+        # Note that we've gone an xstep too far.
+        #
+        # xmax might be increased during subsequent
+        # layout.
+        let page(colright) {$page(x) - $parms(xstep)}
+        set page(xmax)     $page(colright)
+
         unset page(x)
 
         # NOTE: At this point, we know the width allocations.  It's
@@ -489,7 +505,9 @@ snit::type ::marsutil::sequence {
             Layout_[dict get $data(body-$i) etype] $i
         }
 
-        # NEXT, determine the total height of the diagram.
+        # NEXT, determine the total width and height of the diagram.
+        let page(width) {$page(xmax) + $parms(margin)}
+
         let page(ymax)   $page(y)
         let page(height) {$page(ymax) + $parms(margin)}
         unset page(y)
@@ -624,7 +642,7 @@ snit::type ::marsutil::sequence {
 
     proc Layout_message {i} {
         dict with data(body-$i) {
-            # center x coordinate of message text
+            # Determine the min and max bounds of the message arrows.
             set xmin $data(x-$from)
             set xmax $data(x-$from)
 
@@ -633,17 +651,54 @@ snit::type ::marsutil::sequence {
                 let xmax {max($data(x-$name),$xmax)}
             }
             
-            let x {($xmin + $xmax)/2}
+            set x $data(x-$from)
+
+            # Determine the x coordinate and alignment of message
+            # text.  Slide the text to right or left as need be to
+            # stay within bounds.
+
+            set wid [TextWid $text]
+
+            if {$xmin == $data(x-$from)} {
+                incr x $parms(padding)
+                set align left
+
+                set x1 $x
+                let x2 {$x + $wid}
+            } elseif {$xmax == $data(x-$from)} {
+                incr x -$parms(padding)
+                set align right
+
+                set x2 $x
+                let x1 {$x2 - $wid}
+
+            } else {
+                set align center
+
+                let x1 {$x - $wid/2}
+                let x2 {$x + $wid/2}
+            }
+
+            # Are we over at the left?  If so, shift it over.
+            let delta {$page(colleft) - $x1}
+
+            if {$delta > 0} {
+                incr x $delta
+                incr x2 $delta
+            }
+
+            # NEXT, are we over at the right?  If so, extend the page
+            if {$x2 > $page(xmax)} {
+                set page(xmax) $x2
+            }
 
             # y-coordinate of baseline of message text
             let ytext {$page(y) + $page(textasc) + $parms(padding)}
 
             # y-coordinate of arrow(s)
-            let yarrow {$page(y) + $page(textheight) + $parms(padding) + $parms(arrow)}
-
-            # Box of white for under the text.
-            let y1 {$page(y)}
-            let y2 {$page(y) + 2*$parms(padding) + $page(textasc)}
+            let yarrow {
+                $page(y) + $page(textheight) + $parms(padding) + $parms(arrow)
+            }
 
             # Leave space
             let page(y) {$yarrow + $parms(ystep)}
@@ -660,7 +715,7 @@ snit::type ::marsutil::sequence {
         dict with data(body-$i) {
             # FIRST, determine the maximum text width: the diagram
             # data width less twice the padding.
-            let maxwid {$page(xmax) - $page(xmin) - 2*$parms(padding)}
+            let maxwid {$page(colright) - $page(colleft) - 2*$parms(padding)}
 
             # NEXT, wrap the text to that width.  The result is
             # a list of lines.
@@ -672,16 +727,16 @@ snit::type ::marsutil::sequence {
             let height {($n-1)*($page(textheight) + $parms(linespacing)) + $page(textasc)}
             
             # NEXT, save the box
-            set x1 $page(xmin)
+            set x1 $page(colleft)
             set y1 $page(y)
-            set x2 $page(xmax)
+            set x2 $page(colright)
             let y2 {$y1 + $height + 2*$parms(padding)}
 
             set box [list $x1 $y1 $x2 $y2]
 
             # NEXT, save x and y
-            let x {$page(xmin) + $parms(padding)}
-            let y {$page(y)    + $parms(padding)}
+            let x {$page(colleft) + $parms(padding)}
+            let y {$page(y)       + $parms(padding)}
 
             # NEXT, leave space
             let page(y) {$y2 + $parms(ystep)}
@@ -705,13 +760,13 @@ snit::type ::marsutil::sequence {
             set after  [lindex $data(actors) $ndx+1]
 
             if {$before eq ""} {
-                let x1 {$page(xindex) + $parms(xstep)}
+                let x1 {$page(colleft)}
             } else {
                 let x1 {$data(x-$before) + $parms(xstep)}
             }
 
             if {$after eq ""} {
-                set x2 $page(xmax)
+                set x2 $page(colright)
             } else {
                 let x2 {$data(x-$after) - $parms(xstep)}
             }
@@ -855,20 +910,8 @@ snit::type ::marsutil::sequence {
                 -align   right                     \
                 -valign  baseline
 
-            # Draw a white rectangle under the text
-            set wid [TextWid $text]
-            let x1 {$x - $wid/2}
-            let x2 {$x + $wid/2}
-
-            DrawBackground $pix $x1 $y1 $x2 $y2
-
             # Render the text
-            pixane text $pix $x $ytext     \
-                -text    $text             \
-                -font    $page(hfont)      \
-                -size    $parms(fontsize)  \
-                -align   center            \
-                -valign  baseline
+            DrawOpaqueText $pix $x $ytext $align $text
             
             # Render the arrows
             set xfrom $data(x-$from)
@@ -990,6 +1033,50 @@ snit::type ::marsutil::sequence {
             
             let yline {$yline + $page(textheight) + $parms(linespacing)}
         }
+    }
+
+    # DrawOpaqueText pix x y align padding text
+    #
+    # pix      Pixane image
+    # x,y      x,y at which the text will be drawn
+    # align    left,right,center
+    # text     text string (one line)
+    #
+    # Determines the region covered by the text, and fills it with
+    # the background color before drawing the text. Leaves $padding
+    # pixels blank above the top and below the baseline.
+
+    proc DrawOpaqueText {pix x y align text} {
+        # FIRST, measure the text
+        lassign [pixfont measure $page(hfont) $parms(fontsize) $text] \
+            twid asc desc
+
+        # NEXT, determine the x extent
+        let wid {$twid + 2*$parms(opaquepadding)}
+
+        switch -exact -- $align {
+            left   { let x1 {$x - $parms(opaquepadding)}           }
+            right  { let x1 {$x - $twid - $parms(opaquepadding)}   }
+            center { let x1 {$x - $parms(opaquepadding) - $twid/2} }
+        }
+
+        # NEXT, determine the y extent.  Remember that the "y" is
+        # the y of the baseline.
+        let y1 { $y - $asc - $parms(opaquepadding)   }
+        let ht { $asc + 2*$parms(opaquepadding)      }
+
+        # NEXT, draw the rectangle
+        pixane color     $pix $parms(bg)
+        pixane rectangle $pix $x1 $y1 $wid $ht
+        pixane color     $pix $parms(fg)
+
+        # NEXT, draw the text
+        pixane text $pix $x $y        \
+            -text    $text            \
+            -font    $page(hfont)     \
+            -size    $parms(fontsize) \
+            -align   $align           \
+            -valign  baseline
     }
 
 
