@@ -85,6 +85,13 @@ It's useful for formatting list-valued database columns.  For example,
   }
 </pre><p>
 
+<<defitem nonempty {nonempty(<i>arg</i>,...)}>>
+
+Returns the value of the first argument which is neither NULL nor the
+empty string, or the empty string if no argument is non-empty.  This
+is a Tcl-friendly equivalent to COALESCE() which treats empty strings
+like NULLs.<p>
+
 <<defitem percent {percent(<i>frac</i>)}>>
 Displays the fraction as a percentage.  If the fraction
 is at least 0.005, displays it as an integer percentage, e.g.,

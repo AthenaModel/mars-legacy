@@ -135,6 +135,7 @@ snit::type ::marsutil::sqldocument {
         lappend functions error     [list ::error]
         lappend functions format    [list ::format]
         lappend functions joinlist  [list ::join]
+        lappend functions nonempty  [myproc NonEmpty]
         lappend functions percent   [list ::marsutil::percent]
         lappend functions wallclock [list ::clock seconds]
 
@@ -534,6 +535,25 @@ snit::type ::marsutil::sqldocument {
         return
     }
 
+    #-------------------------------------------------------------------
+    # SQL Functions
+
+    # NonEmpty args...
+    #
+    # args...    A list of one or more arguments
+    #
+    # Returns the first argument that isn't "".  Like COALESCE(),
+    # but treats "" like NULL.
+
+    proc NonEmpty {args} {
+        foreach arg $args {
+            if {$arg ne ""} {
+                return $arg
+            }
+        }
+
+        return ""
+    }
 
     #-------------------------------------------------------------------
     # Utility Procs
