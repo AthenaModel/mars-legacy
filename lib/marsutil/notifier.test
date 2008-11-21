@@ -47,6 +47,9 @@ namespace eval ::marsutil::test {
     # List of error messages
     variable errors {}
 
+    # List of trace
+    variable trace {}
+
     # Cleanup
     #
     # Initialize the notifier to an empty state.
@@ -57,10 +60,13 @@ namespace eval ::marsutil::test {
 
         set callbacks {}
         set errors    {}
+        set trace     {}
 
         ::marsutil::notifier::db eval {
             DELETE FROM bindings;
         }
+
+        notifier trace ""
     }
 
     # CB args
@@ -73,6 +79,16 @@ namespace eval ::marsutil::test {
         variable callbacks
 
         lappend callbacks $args
+    }
+
+    # Trace args
+    #
+    # Lappends the args to the trace list
+
+    proc Trace {args} {
+        variable trace
+
+        lappend trace $args
     }
 
     # bgerror msg
@@ -359,6 +375,43 @@ namespace eval ::marsutil::test {
     } -cleanup {
         Cleanup
     } -result {A1 {A1 A2} {}}
+
+    #-------------------------------------------------------------------
+    # trace
+
+    test trace-1.1 {No trace command initially} -body {
+        notifier trace
+    } -result {}
+
+    test trace-1.3 {Can set trace command} -body {
+        notifier trace ::marsutil::test::Trace
+    } -cleanup {
+        Cleanup
+    } -result {::marsutil::test::Trace}
+
+    test trace-1.3 {Can set and query trace command} -body {
+        notifier trace ::marsutil::test::Trace
+        notifier trace
+    } -cleanup {
+        Cleanup
+    } -result {::marsutil::test::Trace}
+
+    test send-2.1 {sends are traced} -body {
+        notifier bind Subject <Event1> O1 ::marsutil::test::CB
+        notifier bind Subject <Event1> O2 ::marsutil::test::CB
+        notifier bind Subject <Event2> O2 ::marsutil::test::CB
+
+        notifier trace ::marsutil::test::Trace
+
+        notifier send Subject <Event1> a b c
+        notifier send Subject <Event2> d e f
+        notifier send Subject <Event3> g h i
+        set trace
+    } -cleanup {
+        Cleanup
+    } -result {{Subject <Event1> {a b c} {O1 O2}} {Subject <Event2> {d e f} O2} {Subject <Event3> {g h i} {}}}
+
+
 
     #-------------------------------------------------------------------
     # rename

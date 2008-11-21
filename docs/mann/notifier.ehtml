@@ -155,6 +155,17 @@ relied upon.  If the sequence of execution of a set of bindings is
 important, write one binding that does the whole job in the
 right order.<p>
 
+<<defitem "notifier trace" {notifier trace ?<i>cmd</i>?}>>
+
+Sets/queries the notifier(n) trace command, which (if defined) is
+called each time an event is sent.  If given, <i>cmd</i> must
+be the prefix of a command expecting four additional arguments: the
+subject, the event, the event arguments, and a list of the objects
+which receive the event.  To disable tracing, pass an empty string as
+<i>cmd</i>.<p>
+
+Tracing is disabled by default.<p>
+
 <</deflist commands>>
 
 <<section ENVIRONMENT>>

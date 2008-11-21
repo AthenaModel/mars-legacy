@@ -35,6 +35,19 @@ snit::type ::marsutil::notifier {
     typecomponent db   ;# An in-memory SQLite3 table
 
     #-------------------------------------------------------------------
+    # Type Variable
+
+    # info array: Scalars
+    #
+    # tracecmd     Name of command to trace execution of events.
+
+    typevariable info -array {
+        tracecmd {}
+    }
+
+
+
+    #-------------------------------------------------------------------
     # Type Constructor
 
     typeconstructor {
@@ -202,6 +215,28 @@ snit::type ::marsutil::notifier {
         }
     }
 
+    # trace ?cmd?
+    #
+    # cmd   A command prefix to be called to trace sent events.
+    #
+    # Sets/queries the trace command.  Set explicitly to "" to
+    # delete the trace.  The command will receive four arguments,
+    # the subject, the event, the arguments, and the objects which
+    # will receive it.
+
+    typemethod trace {{args}} {
+        if {[llength $args] > 1} {
+            error "wrong \# args: should be \"notifier trace ?cmd?\""
+        }
+
+        if {[llength $args] == 1} {
+            set info(tracecmd) [lindex $args 0]
+        }
+
+        return $info(tracecmd)
+    }
+    
+
     # send subject event args
     #
     # subject    An object name
@@ -211,6 +246,15 @@ snit::type ::marsutil::notifier {
     # Calls the binding for each object wired to this event.
     
     typemethod send {subject event args} {
+        if {$info(tracecmd) ne ""} {
+            set objects [$db eval {
+                SELECT object FROM bindings
+                WHERE subject=$subject AND event=$event
+            }]
+
+            {*}$info(tracecmd) $subject $event $args $objects
+        }
+        
         $db eval {
             SELECT binding FROM bindings
             WHERE subject=$subject AND event=$event
