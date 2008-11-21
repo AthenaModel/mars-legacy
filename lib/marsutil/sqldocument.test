@@ -158,7 +158,7 @@ CREATE TABLE sqldocument_master <
 
     test sqlsection_functions-1.1 {Standard functions are defined} -body {
         sqldocument sqlsection functions
-    } -result {error ::error format ::format joinlist ::join percent ::marsutil::percent wallclock {::clock seconds}}
+    } -result {error ::error format ::format joinlist ::join nonempty ::marsutil::sqldocument::NonEmpty percent ::marsutil::percent wallclock {::clock seconds}}
 
     #-------------------------------------------------------------------
     # register
