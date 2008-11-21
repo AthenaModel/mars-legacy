@@ -598,7 +598,7 @@ snit::type ::marsutil::sequence {
 
     proc LayoutTitle {} {
         # FIRST, compute the x and y values
-        let x {$page(width) / 2}
+        let x {($page(xmin) + $page(xmax)) / 2}
         set y $page(y)
 
         # NEXT, save the result
