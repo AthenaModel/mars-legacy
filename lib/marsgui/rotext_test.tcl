@@ -29,7 +29,6 @@ pack .bar -side top -fill x -expand 1
 
 # NEXT, create a rotext and fill in the rest with it.
 rotext .rotext                          \
-    -setgrid 1                          \
     -wrap none                          \
     -highlightthickness 1               \
     -borderwidth 1                      \

@@ -154,7 +154,6 @@ snit::widget ::marsgui::cli {
     constructor {args} {
         # FIRST, Create the text widget and scroll bar
         install log using text $win.log \
-            -setgrid            1       \
             -wrap               char    \
             -highlightthickness 0       \
             -borderwidth        1       \

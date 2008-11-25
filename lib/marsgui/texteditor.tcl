@@ -161,7 +161,6 @@ snit::widget ::marsgui::texteditor {
 
         # NEXT, create the text widget
         install text using text $win.text \
-            -setgrid        1 \
             -wrap           none \
             -undo           1 \
             -autoseparators 1 \

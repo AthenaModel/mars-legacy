@@ -114,7 +114,7 @@ option add *selectBorderWidth 0
 # menu widget
 option add *Menu.activeBackground  "royal blue"
 option add *Menu.activeForeground  white
-option add *Menu.activeBorderWidth 0
+option add *Menu.activeBorderWidth 0                
 option add *Menu.borderWidth       1
 option add *Menu.tearOff           no
 option add *Menu.font              TkDefaultFont
@@ -153,7 +153,7 @@ option add *Scrollbar.borderWidth         1
 option add *Scrollbar.width               10
 
 # text widget
-option add *Text.setGrid            true
+option add *Text.setGrid            false
 option add *Text.foreground         black
 option add *Text.background         white
 option add *Text.selectBorderWidth  0
@@ -161,7 +161,7 @@ option add *Text.relief             flat
 option add *Text.borderWidth        0
 
 # listbox widget
-option add *Listbox.setgrid            true
+option add *Listbox.setGrid            false
 option add *Listbox.foreground         black
 option add *Listbox.background         white
 option add *Listbox.borderWidth        1

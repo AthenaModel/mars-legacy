@@ -137,7 +137,6 @@ snit::widget ::marsgui::logdisplay {
         # NEXT, Install the rotext widget.
         install rotext using ::marsgui::rotext $win.text \
             -wrap               none                 \
-            -setgrid            1                    \
             -selectborderwidth  0                    \
             -xscrollcommand     [list $win.xbar set] \
             -yscrollcommand     [list $win.ybar set] \

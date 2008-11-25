@@ -103,7 +103,6 @@ snit::widgetadaptor ::marsgui::rotext {
                          -width 80 \
                          -height 24 \
                          -wrap none \
-                         -setgrid 1 \
                          -insertwidth 0]
 
         # NEXT, set the default font.  Use $self configure, so that
