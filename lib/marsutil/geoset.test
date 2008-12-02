@@ -293,15 +293,17 @@ namespace eval ::marsutil::test {
         setup
     } -body {
         gs create point P1 {1.0 1.0}
-        gs create line L1 {1.0 2.0 2.0 1.0}
+        gs create line L1 {1.0 2.0 2.0 1.0} border
         gs create polygon N1 {1.0 1.0 2.0 2.0 1.0 2.0}
+
+        set a [gs tags L1]
 
         gs delete L1
 
-        list [gs list] [gs list line] [gs exists L1]
+        list $a [gs list] [gs list line] [gs list border] [gs exists L1]
     } -cleanup {
         cleanup
-    } -result {{P1 N1} {} 0}
+    } -result {{line border} {P1 N1} {} {} 0}
 
 
 

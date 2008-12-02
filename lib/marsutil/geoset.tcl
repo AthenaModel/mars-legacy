@@ -157,9 +157,11 @@ snit::type ::marsutil::geoset {
         ldelete info(ids) $id
         unset itemcoords($id)
         unset bbox($id)
-        ldelete info(ids-$itemtype($id)) $id
-        unset itemtype($id)
+        foreach tag $info(tags-$id) {
+            ldelete info(ids-$tag) $id
+        }
         unset info(tags-$id)
+        unset itemtype($id)
     }
 
     # exists id
