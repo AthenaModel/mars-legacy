@@ -125,6 +125,11 @@ After creation, the item will be tagged with the special tag
 
 <</deflist create>>
 
+<<defitem delete {$gs delete <i>id</i>}>>
+
+Deletes the item with the specified <i>id</i>.  Does nothing if there
+is no such item.<p>
+
 <<defitem exists {$gs exists <i>id</i>}>>
 
 Returns 1 if there is an item called <i>id</i>, and 0 otherwise.<p>

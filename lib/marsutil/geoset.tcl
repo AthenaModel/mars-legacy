@@ -147,6 +147,20 @@ snit::type ::marsutil::geoset {
         }
     }
 
+    # delete id
+    #
+    # id      An item ID
+    #
+    # Deletes the item with this ID.
+
+    method delete {id} {
+        ldelete info(ids) $id
+        unset itemcoords($id)
+        unset bbox($id)
+        unset itemtype($id)
+        unset info(tags-$id)
+    }
+
     # exists id
     #
     # id      An item ID
