@@ -298,10 +298,10 @@ namespace eval ::marsutil::test {
 
         gs delete L1
 
-        list [gs list] [gs exists L1]
+        list [gs list] [gs list line] [gs exists L1]
     } -cleanup {
         cleanup
-    } -result {{P1 N1} 0}
+    } -result {{P1 N1} {} 0}
 
 
 
