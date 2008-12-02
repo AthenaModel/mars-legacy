@@ -33,6 +33,7 @@ namespace eval ::marsutil:: {
         clength      \
         creverse     \
         intersect    \
+        avgpoint     \
         point        \
         ptinpoly     \
         px           \
@@ -85,6 +86,27 @@ proc ::marsutil::px {point} {
 
 proc ::marsutil::py {point} {
     lindex $point 1
+}
+
+# avgpoint coords
+#
+# coords   A list of point pairs
+#
+# Returns the average of the provided points
+
+proc ::marsutil::avgpoint {coords} {
+        set len [llength $coords]
+        set sumx 0.0
+        set sumy 0.0
+        foreach {px py} $coords {
+            let sumx {$sumx+$px}
+            let sumy {$sumy+$py}
+        }
+
+        let avgx {$sumx/($len/2)}
+        let avgy {$sumy/($len/2)}
+
+        list $avgx $avgy
 }
 
 if {[llength [info commands ::marsutil::ccw]] == 0} {
