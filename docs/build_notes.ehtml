@@ -9,6 +9,29 @@
 Library</h1>
 <h2>Build Notes</h2>
 
+<h3>Build 1.4, 3 December 2008</h3>
+This build includes some new functionality in a few areas: sequence diagrams,
+introduction of pixane, a mars commit tool, and a few others in the bugs list
+below. There are also a couple of bug fixes. The following packages are 
+included:
+<ul>
+   <li>Bug 1783: pixane(n): New module in mars.
+   <li>Bug 1787: sequence(5) sequence diagram format
+   <li>Bug 1789: Log level pull-downs in consoles are too narrow to display
+   <li>Bug 1790: sequence(5) sequence diagram format, Part 2
+   <li>Bug 1791: sequence(n): Fix for pixane text handling
+   <li>Bug 1794: geometry(n): boxaround
+   <li>Bug 1796: marsmisc(n): normalize
+   <li>Bug 1800: sequence(n): Draw dots at tail of message arrows
+   <li>Bug 1801: sequence(n): message text alignment
+   <li>Bug 1803: mars_commit(1): New tool
+   <li>Bug 1804: sequence(n): diagrams with titles cause a stack trace
+   <li>Bug 1805: sqldocument(n): nonempty() function
+   <li>Bug 1806: notifier(n): trace
+   <li>Bug 1808: marsgui(n): -setgrid
+   <li>Bug 1811: geoset(n): delete
+</ul>
+
 <h3>Build 1.3, 14 November 2008</h3>
 This build includes some updates to sqldocument to make it more flexible. It
 also introduces the saveable(i) interface, which is used by cli(n). Some bug
