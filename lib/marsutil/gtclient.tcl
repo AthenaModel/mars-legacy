@@ -48,9 +48,16 @@ snit::type gtclient {
 
     # -refreshcmd
     #
-    # Called on "gt refresh", before any watchers are called.
+    # Called on "gt refresh", after the refresh is complete and
+    # before any watchers are called.
 
     option -refreshcmd {}
+
+    # -startcmd
+    #
+    # Called on "gt refresh", before the refresh begins.
+
+    option -startcmd {}
 
     # -completecmd
     #
@@ -123,9 +130,13 @@ snit::type gtclient {
         # FIRST, log that a refresh is starting
         $self Log normal "startrefresh"
 
+        # NEXT, allow app to prepare.
+        if {$options(-startcmd) ne ""} {
+            uplevel \#0 $options(-startcmd)
+        }
+
         # NEXT, set the refresh flag
         set receivingRefresh 1
-
     }
 
     # endrefresh
