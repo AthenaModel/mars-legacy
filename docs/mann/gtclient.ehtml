@@ -53,9 +53,14 @@ activity.<p>
 The component name to pass to the <code>-logger</code> object when
 logging messages; defaults to "gt".<p>
 
-<<defopt {-refreshcmd <i>command</i>}>>
+<<defopt {-refreshstartcmd <i>command</i>}>>
 
-If defined, the <code>-refreshcmd</code> is called in the global scope
+If defined, the <code>-refreshstartcmd</code> is called in the global scope
+on <<iref startrefresh>>, before the refresh begins.<p>
+
+<<defopt {-refreshendcmd <i>command</i>}>>
+
+If defined, the <code>-refreshendcmd</code> is called in the global scope
 on <<iref endrefresh>>, before any watchers are called.<p>
 
 <<defopt {-completecmd <i>command</i>}>>
@@ -95,7 +100,7 @@ called until the refresh is complete.<p>
 <<defitem endrefresh {$gtclient endrefresh}>>
 
 Indicates the end of a game truth refresh.  The
-<code>-refreshcmd</code> will be called, if defined, followed by
+<code>-refreshendcmd</code> will be called, if defined, followed by
 all defined watcher callbacks.<p>
 
 <<defitem set {$gtclient set <i>name value</i> ?<i>name value...</i>?}>>
@@ -136,7 +141,7 @@ Defines a watcher callback on the named game truth variable; whenever
 the variable's value is updated, the new value will be append to
 <i>command</i> and the result evaluated in the global scope.  All
 defined watchers are also called after each refresh, immediately
-after the <code>-refreshcmd</code>.<p>
+after the <code>-refreshendcmd</code>.<p>
 
 To delete a watcher, set it to the empty string.<p>
 
@@ -188,7 +193,7 @@ the <<xref commclient(n)>>'s alias is "gt".<p>
 # FIRST, create the gtclient(n) object
 gtclient ::gt \
     -logger ::log \
-    -refreshcmd [list puts "Got a refresh!"] \
+    -refreshendcmd [list puts "Got a refresh!"] \
     -db ::wsdb
 
 # NEXT, initialize some variables to known values, so that the labels

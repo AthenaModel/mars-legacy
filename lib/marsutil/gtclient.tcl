@@ -46,18 +46,18 @@ snit::type gtclient {
     
     option -logcomponent -default "gt"
 
-    # -refreshcmd
+    # -refreshstartcmd
+    #
+    # Called on "gt refresh", before the refresh begins.
+
+    option -refreshstartcmd {}
+
+    # -refreshendcmd
     #
     # Called on "gt refresh", after the refresh is complete and
     # before any watchers are called.
 
-    option -refreshcmd {}
-
-    # -startcmd
-    #
-    # Called on "gt refresh", before the refresh begins.
-
-    option -startcmd {}
+    option -refreshendcmd {}
 
     # -completecmd
     #
@@ -131,8 +131,8 @@ snit::type gtclient {
         $self Log normal "startrefresh"
 
         # NEXT, allow app to prepare.
-        if {$options(-startcmd) ne ""} {
-            uplevel \#0 $options(-startcmd)
+        if {$options(-refreshstartcmd) ne ""} {
+            uplevel \#0 $options(-refreshstartcmd)
         }
 
         # NEXT, set the refresh flag
@@ -151,8 +151,8 @@ snit::type gtclient {
         set receivingRefresh 0
 
         # NEXT, do allow app to respond to changes.
-        if {$options(-refreshcmd) ne ""} {
-            uplevel \#0 $options(-refreshcmd)
+        if {$options(-refreshendcmd) ne ""} {
+            uplevel \#0 $options(-refreshendcmd)
         }
 
         # NEXT, call individual watchers; note, the order is
