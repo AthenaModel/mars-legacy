@@ -530,6 +530,20 @@ current working directory.
 
     template proc indexfile {} {
         set title "Man Page Section $::sectionTitle"
+
+        # FIRST, see if we've got any parents for which no man page exists.
+        set hasparent [list]
+
+        foreach mod [array names submodule] {
+            lappend hasparent {*}$submodule($mod)
+        }
+
+        foreach mod [array names submodule] {
+            if {$mod ne "" && $mod ni $hasparent} {
+                lappend submodule() $mod
+                set module($mod) "Unknown Man Page"
+            }
+        }
     } {
         |<--
         <head>
