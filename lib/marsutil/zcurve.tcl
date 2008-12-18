@@ -64,9 +64,6 @@ namespace eval ::marsutil:: {
 # zcurve type-definition ensemble
 
 snit::type ::marsutil::zcurve {
-    # Make it an ensemble
-    pragma -hastypeinfo 0 -hastypedestroy 0 -hasinstances 0
-
     #-------------------------------------------------------------------
     # Type Variables
 
@@ -77,7 +74,7 @@ snit::type ::marsutil::zcurve {
 
     # validate curve
     #
-    # curve       Z-curve parameters {low a b high}
+    # curve       Z-curve parameters {lo a b hi}
     #
     # Validates the parameters, throwing an error on failure and
     # returning them unchanged on success.
@@ -85,29 +82,35 @@ snit::type ::marsutil::zcurve {
     typemethod validate {curve} {
         # FIRST, does it have four elements?
         if {[llength $curve] != 4} {
-            error "invalid zcurve, should be {lo a b hi}: \"$curve\""
+            return -code error -errorcode INVALID \
+                "invalid zcurve, should be {lo a b hi}: \"$curve\""
         }
 
         lassign $curve lo a b hi
 
         if {![string is double -strict $lo]} {
-            error "invalid zcurve, lo is not a number: \"$lo\""
+            return -code error -errorcode INVALID \
+                "invalid zcurve, lo is not a number: \"$lo\""
         }
         
         if {![string is double -strict $a]} {
-            error "invalid zcurve, a is not a number: \"$a\""
+            return -code error -errorcode INVALID \
+                "invalid zcurve, a is not a number: \"$a\""
         }
         
         if {![string is double -strict $b]} {
-            error "invalid zcurve, b is not a number: \"$b\""
+            return -code error -errorcode INVALID \
+                "invalid zcurve, b is not a number: \"$b\""
         }
         
         if {$a > $b} {
-            error "invalid zcurve, (a=$a) > (b=$b)"
+            return -code error -errorcode INVALID \
+                "invalid zcurve, (a=$a) > (b=$b)"
         }
         
         if {![string is double -strict $hi]} {
-            error "invalid zcurve, hi is not a number: \"$hi\""
+            return -code error -errorcode INVALID \
+                "invalid zcurve, hi is not a number: \"$hi\""
         }
         
         return $curve
@@ -138,6 +141,88 @@ snit::type ::marsutil::zcurve {
             return [expr {double($lo) + $slope*(double($x) - double($a))}]
         }
     }
+
+    #-------------------------------------------------------------------
+    # Instance Options
+
+    # -xmin
+    # -xmax
+    # -ymin
+    # -ymax
+    #
+    # Set the min and max limits for the Z-curve.
+
+    option -xmin -default -100.0 -type snit::double -readonly yes
+    option -xmax -default  100.0 -type snit::double -readonly yes
+    option -ymin -default    0.0 -type snit::double -readonly yes
+    option -ymax -default  100.0 -type snit::double -readonly yes
+
+    #-------------------------------------------------------------------
+    # Constructor
+
+    constructor {args} {
+        # FIRST, get the options
+        $self configurelist $args
+
+        # NEXT, verify them.
+        if {$options(-xmin) > $options(-xmax)} {
+            error "-xmin > -xmax ($options(-xmin) > $options(-xmax))"
+        }
+
+        if {$options(-ymin) > $options(-ymax)} {
+            error "-ymin > -ymax ($options(-ymin) > $options(-ymax))"
+        }
+    }
+
+    #-------------------------------------------------------------------
+    # Instance Methods
+
+    delegate method eval using {%t eval}
+
+    # validate curve
+    #
+    # curve       Z-curve parameters {lo a b hi}
+    #
+    # Validates the parameters, throwing an error on failure and
+    # returning them unchanged on success.
+    #
+    # First uses [zcurve validate], then checks the limits.
+
+    method validate {curve} {
+        # FIRST, validate as a general z-curve
+        $type validate $curve
+
+        # NEXT, check the limits
+        lassign $curve lo a b hi
+
+        if {$a < $options(-xmin) || $a > $options(-xmax)} {
+            return -code error -errorcode INVALID \
+  "invalid a \"$a\", expected value in range $options(-xmin), $options(-xmax)"
+        }
+        
+        if {$b < $options(-xmin) || $b > $options(-xmax)} {
+            return -code error -errorcode INVALID \
+  "invalid b \"$b\", expected value in range $options(-xmin), $options(-xmax)"
+        }
+
+        if {$lo < $options(-ymin) || $lo > $options(-ymax)} {
+            return -code error -errorcode INVALID \
+ "invalid lo \"$lo\", expected value in range $options(-ymin), $options(-ymax)"
+        }
+        
+        if {$hi < $options(-ymin) || $hi > $options(-ymax)} {
+            return -code error -errorcode INVALID \
+ "invalid hi \"$hi\", expected value in range $options(-ymin), $options(-ymax)"
+        }
+
+        return $curve
+    }
+
+
+
+
+
+
 }
 
 
