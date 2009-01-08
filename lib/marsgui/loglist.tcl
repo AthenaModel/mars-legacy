@@ -597,17 +597,14 @@ snit::widget ::marsgui::loglist {
         # Throw an error if $type isn't valid.
         switch -exact $searchtype {
             "exact"     {
-                set grepOpt "-schF"
-                set pattern $target
+                set pattern "***=$target"
             }
             
             "wildcard"  {
-                set grepOpt "-schE";
                 set pattern [::marsutil::wildToRegexp $target]
             }
                          
             "regexp"    {
-                set grepOpt "-schE"
                 set pattern $target
             }
             
