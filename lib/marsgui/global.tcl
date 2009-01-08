@@ -55,6 +55,8 @@ font create codefont       -family {Luxi Mono}   -size -12 -weight normal
 font create codefontitalic -family {Luxi Mono}   -size -12 -weight normal \
                            -slant italic
 font create codefontbold   -family {Luxi Mono}   -size -12 -weight bold
+font create tinyfont       -family {Luxi Sans}   -size  -9 -weight normal
+
 font create messagefont    -family Helvetica -size -12
 font create messagefontb   -family Helvetica -size -12 -weight bold
 font create reportfont     -family Helvetica -size -14 -weight bold
