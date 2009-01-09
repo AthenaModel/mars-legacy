@@ -9,6 +9,15 @@
 Library</h1>
 <h2>Build Notes</h2>
 
+<h3>Build 1.5, 9 January 2009</h3>
+This build includes some minor enhancements and a bug fix. Zcurves are now
+more flexible in their use. The following packages are included.
+<ul>
+   <li>Bug 1754: mars_man(1): Stack trace on unknown parent module
+   <li>Bug 1815: Add a -cmd option to indicate the start of a refresh
+   <li>Bug 1825: zcurve(n): Add instances with min/max limits
+</ul>
+
 <h3>Build 1.4, 3 December 2008</h3>
 This build includes some new functionality in a few areas: sequence diagrams,
 introduction of pixane, a mars commit tool, and a few others in the bugs list
