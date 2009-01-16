@@ -357,6 +357,7 @@ snit::type app {
         puts ""
 
         svn propset svn:externals "mars $mars(URL)\n" .
+        svn commit -m "Permanent link to $mars(relURL)." .
 
         puts ""
         puts "$marsDir is permanently linked to $mars(relURL)."
