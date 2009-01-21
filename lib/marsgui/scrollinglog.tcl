@@ -53,10 +53,7 @@ snit::widget ::marsgui::scrollinglog {
 
     # Options delegated to the logdisplay widget
     delegate option -format             to log
-    delegate option -parsecmd           to log
     delegate option -tags               to log
-    delegate option -updateinterval     to log
-    delegate option -autoupdate         to log
     delegate option -font               to log
     delegate option -height             to log
     delegate option -width              to log
@@ -64,6 +61,17 @@ snit::widget ::marsgui::scrollinglog {
     delegate option -background         to log
     delegate option {-insertbackground insertBackground Foreground} to log
     delegate option {-insertwidth insertWidth InsertWidth}          to log
+
+    # Options we'd like to delegate to loglist but can't since loglist is
+    # optional.  They'll be "propagated" instead.
+    option -defaultappdir                  -configuremethod SetLogListOpts
+    option -formattext    -default "no"    -configuremethod SetLogListOpts
+    option -logpattern    -default "*.log" -configuremethod SetLogListOpts
+    option -rootdir                        -configuremethod SetLogListOpts
+
+    # Options progagated to both log and loglist
+    option -updateinterval -default 1000   -configuremethod SetOpts 
+    option -parsecmd                       -configuremethod SetOpts
 
     # -title
     #
@@ -85,11 +93,17 @@ snit::widget ::marsgui::scrollinglog {
 
     option -loglevel -default "normal" -configuremethod SetLogLevel
 
+    # -inclloglist
+    #
+    # Flag indicating whether or not to include a loglist(n)
+    option -inclloglist -default "false" -type snit::boolean -readonly yes
+
     #-------------------------------------------------------------------
     # Components
 
     component bar            ;# The title/tool bar
     component log            ;# The scrolling text widget
+    component loglist        ;# The optional loglist
 
     #-------------------------------------------------------------------
     # Instance variables
@@ -101,9 +115,10 @@ snit::widget ::marsgui::scrollinglog {
     #-------------------------------------------------------------------
     # Constructor
 
-    constructor {args} {
+    constructor {args} {        
         # FIRST, create the components
-        
+
+        # Toplevel hull
         $hull configure \
             -borderwidth 1 \
             -relief raised
@@ -126,9 +141,38 @@ snit::widget ::marsgui::scrollinglog {
             {error   -background orange}
             {warning -background yellow}
         }]
+
+        # NEXT, Determine if a loglist should be included and create it if so.
+        set loglist ""
+        if {[dict exists $args -inclloglist]} {
+            $self configure -inclloglist [dict get $args -inclloglist]
+        }
+
+        if {$options(-inclloglist)} {
+            # Paner to contain the loglist and log
+            set paner [paner $win.paner -orient horizontal -showhandle 1]
+
+            install loglist using loglist $paner.loglist \
+                -msgcmd           [mymethod LogCmd]       \
+                -selectcmd        [mymethod ListSelectCB] \
+                -autoupdate       1                       \
+                -autoload         $scrollbackFlag         \
+                -inclbutton       "no"                    \
+                -inclapplist      "no"                    \
+                -defaultappdir    "jnem_sim"              \
+                -parsecmd         $parseCmd               \
+                -formatcmd        [list $log format]
             
-        # log
-        install log using logdisplay $win.dlog          \
+            # NOTE: Propagated options handled via configurelist below
+
+            # Set the proper name for the log display
+            set dlogName $paner.dlog
+        } else {
+            # The log display will be a child of the hull in this case
+            set dlogName $win.dlog
+        }
+        
+        install log using logdisplay $dlogName          \
             -foreground     black                       \
             -background     white                       \
             -height         24                          \
@@ -164,25 +208,39 @@ snit::widget ::marsgui::scrollinglog {
             -highlightthickness 0 \
             -command [mymethod SetScrollback]
 
-        finder $bar.finder             \
-            -findcmd [list $log find]  \
-            -msgcmd  [mymethod LogCmd] \
-            -width   20
+        finder $bar.finder              \
+            -findcmd  [list $log find]  \
+            -msgcmd   [mymethod LogCmd] \
+            -width    20                \
+            -loglist  $loglist
 
         filter $bar.filter \
             -filtercmd [mymethod FilterHandler] \
             -msgcmd    [mymethod LogCmd]        \
             -width     20
 
+        # NEXT, pack the components
         pack $bar.title      -side left  -padx 1
         pack $bar.loglevel   -side left  -padx 1
         pack $bar.scrollback -side right -padx 1
         pack $bar.finder     -side right -padx 1
         pack $bar.filter     -side right -padx 1
 
-        # Pack it up
         pack $bar -side top -fill x
-        pack $log -side top -fill both -expand 1
+
+        if {$options(-inclloglist)} {
+            # Add a separator
+            frame $win.sep -height 2 -relief sunken -borderwidth 2
+            pack  $win.sep -side top -fill x
+
+            $paner add $loglist -minsize 25 -sticky nsew 
+            $paner add $log     -minsize 30 -sticky nsew
+            
+            pack $paner -side top -fill both -expand 1
+        } else {
+            # We only have the log display
+            pack $log -side top -fill both -expand 1
+        }
 
         # NEXT, process the arguments
         $self configurelist $args
@@ -190,6 +248,33 @@ snit::widget ::marsgui::scrollinglog {
 
     #-------------------------------------------------------------------
     # Private Methods
+
+    # SetOpts 
+    #
+    # Sets the options that are potentially propagated to both log and
+    # loglist.
+
+    method SetOpts  {option value} {
+        set options($option) $value
+
+        $log configure $option $value
+
+        if {$options(-inclloglist) && $loglist ne {}} {
+            $loglist configure $option $value
+        }
+    }
+
+    # SetLogListOpts 
+    #
+    # Sets the options of the loglist component if it exists.
+
+    method SetLogListOpts  {option value} {
+        set options($option) $value
+
+        if {$options(-inclloglist) && $loglist ne {}} {
+            $loglist configure $option $value
+        }
+    }
 
     # SetLogLevel 
     #
@@ -235,6 +320,10 @@ snit::widget ::marsgui::scrollinglog {
             
             $log configure -autoupdate on
 
+            if {$loglist ne ""} {
+                $loglist configure -autoload on 
+            }
+
             # During the time scrollback was disabled either the log contents
             # or the most recent file may have changed.  Load again to
             # handle either case.
@@ -247,6 +336,10 @@ snit::widget ::marsgui::scrollinglog {
                                 -bitmap @$::marsgui::library/autoscroll_off.xbm
             
             $log configure -autoupdate off
+
+            if {$loglist ne ""} {
+                $loglist configure -autoload off
+            }
         }
     }
 
@@ -271,6 +364,17 @@ snit::widget ::marsgui::scrollinglog {
         }
 
         return [$bar.filter check $entryStr]
+    }
+
+    # listSelectCB filepath showend
+    #
+    # filepath  Full pathname of the selected file.
+    # showend   Indicates a desire to show the most recent content
+    # 
+    # Loads the specified log file.
+
+    method ListSelectCB {filepath showend} {
+        $log load $filepath $showend
     }
 
     # LogCmd args

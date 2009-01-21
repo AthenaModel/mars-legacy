@@ -21,7 +21,8 @@ different formats of text file.<p>
 scrollinglog(n) combines the display capabilities of the
 <<xref logdisplay(n)>> widget with the search and filtering
 capabilities of the <<xref finder(n)>> and <<xref filter(n)>> widgets
-in one convenient package.<p>
+in one convenient package.  A <<xref loglist(n)>> widget can be
+optionally included. <p>
 
 A combobox is provided to filter based on log level.  The select log
 level and higher levels will be displayed.  The levels provided are in
@@ -47,10 +48,14 @@ The <<iref scrollinglog>> widget may be created with the following options:<p>
 
 <<deflist scrollinglog options>>
 
-<<defopt {-autoupdate <i>boolean</i>}>>
+<<defopt {-inclloglist <i>boolean</i>}>>
 
-If true (the default), the <<iref scrollinglog>> will look for new log
-contents periodically, and update the display accordingly.<p>
+When true, enables the inclusion of a <<xref loglist(n)>> widget to the left
+of the <<xref logdisplau(n)>> widget.  When enabled the
+<<xref loglist(n)>> will be configured according to these options:
+<code>-defaultappdir</code>, <code>-formattext</code>,
+<code>-logpattern</code>, <code>-rootdir</code>, 
+<code>-parsecmd</code> and <code>-updateinterval</code>. <p>
 
 <<defopt {-logcmd <i>command</i>}>>
 
@@ -65,17 +70,16 @@ Defines the maximum log verbosity level to display.  The value of
 See <<xref logger(n)>> of marsutil for more information on log
 levels.<p>
 
-
 <<defopt {-title <i>title</i>}>>
 
 Specifies a title string to display in the widget's control bar.
 Defaults to "Log".<p>
 
-<<defopt {-updateinterval <i>seconds</i>}>>
+<<defopt {-updateinterval <i>milliseconds</i>}>>
 
 Determines how often the <<iref scrollinglog>> will perform automatic
-updates when <code>-autoupdate</code> is true.  The default is 5
-seconds.<p>
+updates when auto-scroll is enabled. 
+Defaults to 1000 (i.e., one second).<p>
 
 <<defopt {-format <i>formatlist</i>}>>
 <<defopt {-parsecmd <i>cmd</i>}>>
@@ -84,7 +88,10 @@ seconds.<p>
 These options are all identical to the matching <<xref logdisplay(n)>>
 options; they are configured by default to support <<xref logger(n)>>
 log files.  See the <<xref logdisplay(n)>> man page and the
-scrollinglog(n) code to see how to customize them for other formats.<p>
+scrollinglog(n) code to see how to customize them for other formats.
+If <code>-inclloglist</code> is true, the <code>-parsecmd</code>
+option will also be used to configure the loglist according to
+<<xref loglist(n)>>.<p>
 
 <<defopt {-font <i>font</i>}>>
 <<defopt {-height <i>height</i>}>>
@@ -107,6 +114,15 @@ to the Tk frame widget options of the same name.<p>
 
 Sets the hull frame's background color.<p>
 
+<<defopt {-defaultappdir <i>appdir</i>}>>
+<<defopt {-formattext <i>val</i>}>>
+<<defopt {-logpattern <i>glob_pattern</i>}>>
+<<defopt {-rootdir <i>directory</i>}>>
+
+These options are all identical to the matching <<xref loglist(n)>>
+options; they are configured by default to support <<xref logger(n)>>
+log files.  See the <<xref loglist(n)>> man page and the
+scrollinglog(n) code to see how to customize them for other formats.
 
 <</deflist scrollinglog options>>
 

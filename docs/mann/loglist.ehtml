@@ -57,6 +57,17 @@ application list and the log file list will each
 be allocated roughly half of the <code>-height</code>.
 Defaults to 15.  Read-only after creation.<p>
 
+<<defopt {-inclbutton <i>boolean</i>}>>
+
+When true (the default), a button containing <code>-title</code> will
+be included directly above the list.  Pressing the button causes the
+list to be updated. <p>  
+
+<<defopt {-inclapplist <i>boolean</i>}>>
+
+When true (the default), the list of applications will be included
+directly above the list of logs files. <p>
+
 <<defopt {-rootdir <i>directory</i>}>>
 
 The root of the log tree; its subdirectories contain log files for

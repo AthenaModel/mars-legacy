@@ -5,15 +5,17 @@
 # AUTHOR:
 #   Dave Jaffe
 #   Will Duquette
+#   Jon Stinzel
 # 
 # DESCRIPTION:
 #   Mars marsgui(n) package: Loglist widget.
 # 
-#   This widget displays the Mars logs available for browsing.  At the
-#   top is a list of applications which produce logs; at the bottom is
-#   the list of logs for the currently selected application.
+#   This widget displays a list of logs available for browsing.
+#   At the top, a list of applications which produce logs is provide as
+#   an option; at the bottom is the list of logs for the currently 
+#   selected application.
 #
-#   A Mars log file name has this structure
+#   A log file name has this structure
 #
 #   <rootdir>/<appdir>/log<nnnn>.log
 #
@@ -59,6 +61,16 @@ snit::widget ::marsgui::loglist {
     # The character height of the loglist window, roughly.
     option -height -default 15 -readonly yes
     
+    # -inclbutton
+    #
+    # Flag indicating whether to include a button at the top of the list.
+    option -inclbutton -default yes -type snit::boolean -readonly yes
+
+    # -inclapplist
+    #
+    # Flag indicating whether or not an app list should be shown.
+    option -inclapplist -default yes -type snit::boolean -readonly yes
+
     # -rootdir dir
     #
     # The root of the log directory tree
@@ -196,81 +208,86 @@ snit::widget ::marsgui::loglist {
         # NEXT, Save the constructor options.
         $self configurelist $args
         
-        # NEXT, Create the widgets.
+        # NEXT, set the default height
+        set height $options(-height)
 
-        # Update button
-        button $win.update                        \
-            -textvariable [myvar options(-title)] \
-            -command      [mymethod update]
-                
-        # Paner which contains the applist and loglist
-        set pane [paner $win.paner -orient vertical]
+        # NEXT, create the widgets
 
-        # Applist -- list of application subdirectories
-        set height [expr $options(-height) / 2]
-        
-        frame $pane.appfrm -borderwidth 0
-        $pane add $pane.appfrm -sticky ns
-        
-        install applist using text $pane.appfrm.applist   \
-            -wrap           none                          \
-            -xscrollcommand [list $pane.appfrm.xbar1 set] \
-            -yscrollcommand [list $pane.appfrm.ybar1 set] \
-            -cursor         left_ptr                      \
-            -width          $options(-width)              \
-            -height         $height                       \
-            -state          disabled
+        # Applist -- optional list of application subdirectories
+        if {$options(-inclapplist)} {
+            # Paner which contains the applist and loglist
+            set pane [paner $win.paner -orient vertical]
 
-        scrollbar $pane.appfrm.xbar1       \
-            -orient  horizontal            \
-            -command [list $applist xview]
-                
-        scrollbar $pane.appfrm.ybar1       \
-            -orient  vertical              \
-            -command [list $applist yview]
+            # Split the overall height
+            set height [expr $options(-height) / 2]
+            
+            frame $pane.appfrm -borderwidth 0
+            $pane add $pane.appfrm -sticky ns
+            
+            install applist using text $pane.appfrm.applist   \
+                -wrap           none                          \
+                -xscrollcommand [list $pane.appfrm.xbar1 set] \
+                -yscrollcommand [list $pane.appfrm.ybar1 set] \
+                -cursor         left_ptr                      \
+                -width          $options(-width)              \
+                -height         $height                       \
+                -state          disabled
 
-        grid $applist            $pane.appfrm.ybar1 -sticky nsew
-        grid $pane.appfrm.xbar1  x                 -sticky nsew            
+            scrollbar $pane.appfrm.xbar1       \
+                -orient  horizontal            \
+                -command [list $applist xview]
+            
+            scrollbar $pane.appfrm.ybar1       \
+                -orient  vertical              \
+                -command [list $applist yview]
 
-        grid rowconfigure    $pane.appfrm 0 -weight 1
-        grid columnconfigure $pane.appfrm 0 -weight 1
+            grid $applist            $pane.appfrm.ybar1 -sticky nsew
+            grid $pane.appfrm.xbar1  x                  -sticky nsew
 
-        bind $applist <ButtonPress-1> [mymethod SelectAppCB @%x,%y]
+            grid rowconfigure    $pane.appfrm 0 -weight 1
+            grid columnconfigure $pane.appfrm 0 -weight 1
 
-        # Disable the applist's normal selection, and add a selection
-        # tag we'll use to show the selected appdir.
-        $applist configure \
-            -selectbackground [$applist cget -background]
-        $applist tag configure SELECTED \
-            -background black \
-            -foreground white
-                   
-        # Loglist: list of logfiles
-        frame $pane.logfrm -borderwidth 0
-        $pane add $pane.logfrm -sticky ns
-                                         
-        install loglist using text $pane.logfrm.loglist       \
-            -wrap               none                          \
-            -xscrollcommand     [list $pane.logfrm.xbar2 set] \
-            -yscrollcommand     [list $pane.logfrm.ybar2 set] \
-            -cursor             left_ptr                      \
-            -width              $options(-width)              \
-            -height             $height                       \
+            bind $applist <ButtonPress-1> [mymethod SelectAppCB @%x,%y]
+
+            # Disable the applist's normal selection, and add a selection
+            # tag we'll use to show the selected appdir.
+            $applist configure \
+                -selectbackground [$applist cget -background]
+            $applist tag configure SELECTED \
+                -background black \
+                -foreground white
+
+            # Loglist: list of logfiles
+            set logfrm [frame $pane.logfrm -borderwidth 0]
+            $pane add $logfrm -sticky ns
+        } else {
+            # In the simple case, loglist is a direct child of the hull
+            set logfrm [frame $win.logfrm -borderwidth 0]
+        }
+
+        # Loglist -- list of log files
+        install loglist using text $logfrm.loglist       \
+            -wrap               none                     \
+            -xscrollcommand     [list $logfrm.xbar2 set] \
+            -yscrollcommand     [list $logfrm.ybar2 set] \
+            -cursor             left_ptr                 \
+            -width              $options(-width)         \
+            -height             $height                  \
             -state              disabled
             
-        scrollbar $pane.logfrm.xbar2       \
+        scrollbar $logfrm.xbar2            \
             -orient  horizontal            \
             -command [list $loglist xview]
                 
-        scrollbar $pane.logfrm.ybar2       \
+        scrollbar $logfrm.ybar2            \
             -orient  vertical              \
             -command [list $loglist yview]
 
-        grid $loglist            $pane.logfrm.ybar2 -sticky nsew
-        grid $pane.logfrm.xbar2  x                  -sticky nsew        
+        grid $loglist       $logfrm.ybar2 -sticky nsew
+        grid $logfrm.xbar2  x             -sticky nsew        
 
-        grid rowconfigure    $pane.logfrm 0 -weight 1
-        grid columnconfigure $pane.logfrm 0 -weight 1
+        grid rowconfigure    $logfrm 0 -weight 1
+        grid columnconfigure $logfrm 0 -weight 1
 
         bind $loglist <ButtonPress-1> [mymethod SelectLogCB @%x,%y]
 
@@ -285,12 +302,28 @@ snit::widget ::marsgui::loglist {
         $loglist tag configure SELECTED \
             -foreground white
             
-        # NEXT, lay out the top-level widgets
-        grid $win.update  -sticky nsew
-        grid $pane        -sticky nsew
+        # NEXT, handle the optional elements
+        set listrow 0
+        
+        # Update button
+        if {$options(-inclbutton)} {
+            button $win.update                        \
+                -textvariable [myvar options(-title)] \
+                -command      [mymethod update]
 
-        grid rowconfigure    $win 1 -weight 1
-        grid columnconfigure $win 0 -weight 1
+            grid $win.update  -sticky nsew
+            incr listrow
+        }
+
+        # Applist+loglist or loglist only?
+        if {$options(-inclapplist)} {
+            grid $pane   -sticky nsew
+        } else {
+            grid $logfrm -sticky nsew
+        }
+
+        grid rowconfigure    $win $listrow -weight 1
+        grid columnconfigure $win 0        -weight 1
 
         # NEXT, note the default app dir
         set currentAppDir $options(-defaultappdir)
@@ -311,6 +344,49 @@ snit::widget ::marsgui::loglist {
 
     #-------------------------------------------------------------------
     # Private Methods
+
+    # AppListUpdate
+    #
+    # Update the applist with all subdirectories in the file directory, and 
+    # then update the loglist for the current or default appdir.
+    method AppListUpdate {} {
+        # FIRST, Enable and clear the applist
+        $applist configure -state normal
+        $applist delete 1.0 end
+        
+        # NEXT, Get the list app directories--just the bare names.
+        set dirs [lsort [glob -nocomplain -directory $options(-rootdir) */]]
+
+        set appDirs {}
+
+        foreach path $dirs {
+            # Extract the subdir name.
+            set appDir [file tail [string trimright $path /]]
+
+            lappend appDirs $appDir
+        }
+
+        # NEXT, if there are no app directories note that; otherwise,
+        # list them.
+        
+        if {[llength $appDirs] == 0} {
+            $applist insert end "No applications found\n"
+        } else {
+            foreach appDir $appDirs {
+                $applist insert end "$appDir\n"
+            }
+
+            # Select the appropriate app
+            if {$currentAppDir in $appDirs} {
+                $self SelectApp $currentAppDir
+            } else {
+                $self SelectApp [lindex $appDirs 0]
+            }
+        }
+        
+        # Disable the applist widget.
+        $applist configure -state disabled
+    }
 
     # SelectAppCB index
     #
@@ -535,47 +611,22 @@ snit::widget ::marsgui::loglist {
         
     # update 
     #
-    # Update the applist with all subdirectories in the file directory, and 
-    # then update the loglist for the current or default appdir.
+    # If the applist is enabled, update it with all subdirectories in the 
+    # root directory. Always update the loglist for the current or default 
+    # appdir.
     method update {} {
-        # FIRST, Enable and clear the applist
-        $applist configure -state normal
-        $applist delete 1.0 end
-        
-        # NEXT, Get the list app directories--just the bare names.
-        set dirs [lsort [glob -nocomplain -directory $options(-rootdir) */]]
 
-        set appDirs {}
-
-        foreach path $dirs {
-            # Extract the subdir name.
-            set appDir [file tail [string trimright $path /]]
-
-            lappend appDirs $appDir
-        }
-
-        # NEXT, if there are no app directories note that; otherwise,
-        # list them.
-        
-        if {[llength $appDirs] == 0} {
-            $applist insert end "No applications found\n"
+        if {$options(-inclapplist)} {
+            $self AppListUpdate
         } else {
-            foreach appDir $appDirs {
-                $applist insert end "$appDir\n"
-            }
-
-            # Select the appropriate app
-            if {$currentAppDir in $appDirs} {
-                $self SelectApp $currentAppDir
-            } else {
-                $self SelectApp [lindex $appDirs 0]
-            }
+            # Clear our memory of the selected log since it's no longer valid.
+            set selectedLog -1
+     
+            # Load the logslist with the application directory.
+            $self LoadFiles
         }
-        
-        # Disable the applist widget.
-        $applist configure -state disabled
+
     }
-    
     
     # searchlogs direction target ?searchtype?
     #
