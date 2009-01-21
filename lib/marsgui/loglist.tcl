@@ -88,7 +88,17 @@ snit::widget ::marsgui::loglist {
     # -defaultappdir dir
     #
     # Look for and select this dir when updating the loglist.
-    option -defaultappdir -default ""
+    option -defaultappdir -default "" -configuremethod ConfigureAppDir
+    
+    method ConfigureAppDir {option value} {
+        set options($option) $value
+        set currentAppDir    $value
+
+        # Update the loglist if this happens after creation.
+        if {$initialized} {
+            $self update
+        }
+    }
     
     # -logpattern pattern
     # 

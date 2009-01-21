@@ -159,7 +159,6 @@ snit::widget ::marsgui::scrollinglog {
                 -autoload         $scrollbackFlag         \
                 -inclbutton       "no"                    \
                 -inclapplist      "no"                    \
-                -defaultappdir    "jnem_sim"              \
                 -parsecmd         $parseCmd               \
                 -formatcmd        [list $log format]
             
