@@ -68,10 +68,12 @@ snit::widget ::marsgui::scrollinglog {
     option -formattext    -default "no"    -configuremethod SetLogListOpts
     option -logpattern    -default "*.log" -configuremethod SetLogListOpts
     option -rootdir                        -configuremethod SetLogListOpts
+    option -showapplist   -default "no"    -readonly yes
 
-    # Options progagated to both log and loglist
+    # Options progagated to both log and loglist.
     option -updateinterval -default 1000   -configuremethod SetOpts 
     option -parsecmd                       -configuremethod SetOpts
+    option -showtitle      -default "no"   -readonly yes
 
     # -title
     #
@@ -93,10 +95,10 @@ snit::widget ::marsgui::scrollinglog {
 
     option -loglevel -default "normal" -configuremethod SetLogLevel
 
-    # -inclloglist
+    # -showloglist
     #
     # Flag indicating whether or not to include a loglist(n)
-    option -inclloglist -default "false" -type snit::boolean -readonly yes
+    option -showloglist -default "false" -type snit::boolean -readonly yes
 
     #-------------------------------------------------------------------
     # Components
@@ -127,7 +129,7 @@ snit::widget ::marsgui::scrollinglog {
         install bar using frame $win.bar \
             -relief flat
 
-        # Get the -parsecmd, -format, and -tags values, specifying
+        # Get the -parsecmd, -format, -tags and -showtitle values, specifying
         # the scrollinglog(n) default.
         set parseCmd [from args -parsecmd [myproc LogParser]]
         set format   [from args -format {
@@ -141,14 +143,18 @@ snit::widget ::marsgui::scrollinglog {
             {error   -background orange}
             {warning -background yellow}
         }]
+        set showTitle [from args -showtitle "no"]
 
         # NEXT, Determine if a loglist should be included and create it if so.
         set loglist ""
-        if {[dict exists $args -inclloglist]} {
-            $self configure -inclloglist [dict get $args -inclloglist]
+        if {[dict exists $args -showloglist]} {
+            $self configure -showloglist [dict get $args -showloglist]
         }
 
-        if {$options(-inclloglist)} {
+        if {$options(-showloglist)} {
+            # Get the -showapplist value for loglist(n).
+            set showAppList [from args -showapplist "no"]
+
             # Paner to contain the loglist and log
             set paner [paner $win.paner -orient horizontal -showhandle 1]
 
@@ -157,8 +163,8 @@ snit::widget ::marsgui::scrollinglog {
                 -selectcmd        [mymethod ListSelectCB] \
                 -autoupdate       1                       \
                 -autoload         $scrollbackFlag         \
-                -inclbutton       "no"                    \
-                -inclapplist      "no"                    \
+                -showtitle        $showTitle              \
+                -showapplist      $showAppList            \
                 -parsecmd         $parseCmd               \
                 -formatcmd        [list $log format]
             
@@ -183,7 +189,8 @@ snit::widget ::marsgui::scrollinglog {
             -foundcmd       [list $bar.finder found]    \
             -parsecmd       $parseCmd                   \
             -format         $format                     \
-            -tags           $tags
+            -tags           $tags                       \
+            -showtitle      $showTitle
 
         # Title bar contents
         label $bar.title \
@@ -227,7 +234,7 @@ snit::widget ::marsgui::scrollinglog {
 
         pack $bar -side top -fill x
 
-        if {$options(-inclloglist)} {
+        if {$options(-showloglist)} {
             # Add a separator
             frame $win.sep -height 2 -relief sunken -borderwidth 2
             pack  $win.sep -side top -fill x
@@ -258,7 +265,7 @@ snit::widget ::marsgui::scrollinglog {
 
         $log configure $option $value
 
-        if {$options(-inclloglist) && $loglist ne {}} {
+        if {$options(-showloglist) && $loglist ne {}} {
             $loglist configure $option $value
         }
     }
@@ -270,7 +277,7 @@ snit::widget ::marsgui::scrollinglog {
     method SetLogListOpts  {option value} {
         set options($option) $value
 
-        if {$options(-inclloglist) && $loglist ne {}} {
+        if {$options(-showloglist) && $loglist ne {}} {
             $loglist configure $option $value
         }
     }

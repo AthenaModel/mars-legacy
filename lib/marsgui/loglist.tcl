@@ -61,15 +61,15 @@ snit::widget ::marsgui::loglist {
     # The character height of the loglist window, roughly.
     option -height -default 15 -readonly yes
     
-    # -inclbutton
+    # -showtitle
     #
     # Flag indicating whether to include a button at the top of the list.
-    option -inclbutton -default yes -type snit::boolean -readonly yes
+    option -showtitle -default yes -type snit::boolean -readonly yes
 
-    # -inclapplist
+    # -showapplist
     #
     # Flag indicating whether or not an app list should be shown.
-    option -inclapplist -default yes -type snit::boolean -readonly yes
+    option -showapplist -default yes -type snit::boolean -readonly yes
 
     # -rootdir dir
     #
@@ -227,7 +227,7 @@ snit::widget ::marsgui::loglist {
         # NEXT, create the widgets
 
         # Applist -- optional list of application subdirectories
-        if {$options(-inclapplist)} {
+        if {$options(-showapplist)} {
             # Paner which contains the applist and loglist
             set pane [paner $win.paner -orient vertical]
 
@@ -235,7 +235,7 @@ snit::widget ::marsgui::loglist {
             set height [expr $options(-height) / 2]
             
             frame $pane.appfrm -borderwidth 0
-            $pane add $pane.appfrm -sticky ns
+            $pane add $pane.appfrm -sticky nsew
             
             install applist using text $pane.appfrm.applist   \
                 -wrap           none                          \
@@ -272,7 +272,7 @@ snit::widget ::marsgui::loglist {
 
             # Loglist: list of logfiles
             set logfrm [frame $pane.logfrm -borderwidth 0]
-            $pane add $logfrm -sticky ns
+            $pane add $logfrm -sticky nsew
         } else {
             # In the simple case, loglist is a direct child of the hull
             set logfrm [frame $win.logfrm -borderwidth 0]
@@ -319,7 +319,7 @@ snit::widget ::marsgui::loglist {
         set listrow 0
         
         # Update button
-        if {$options(-inclbutton)} {
+        if {$options(-showtitle)} {
             button $win.update                        \
                 -textvariable [myvar options(-title)] \
                 -command      [mymethod update]
@@ -329,7 +329,7 @@ snit::widget ::marsgui::loglist {
         }
 
         # Applist+loglist or loglist only?
-        if {$options(-inclapplist)} {
+        if {$options(-showapplist)} {
             grid $pane   -sticky nsew
         } else {
             grid $logfrm -sticky nsew
@@ -632,7 +632,7 @@ snit::widget ::marsgui::loglist {
     # appdir.
     method update {} {
 
-        if {$options(-inclapplist)} {
+        if {$options(-showapplist)} {
             $self AppListUpdate
         } else {
             # Clear our memory of the selected log since it's no longer valid.

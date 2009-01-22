@@ -48,7 +48,7 @@ The <<iref scrollinglog>> widget may be created with the following options:<p>
 
 <<deflist scrollinglog options>>
 
-<<defopt {-inclloglist <i>boolean</i>}>>
+<<defopt {-showloglist <i>boolean</i>}>>
 
 When true, enables the inclusion of a <<xref loglist(n)>> widget to the left
 of the <<xref logdisplau(n)>> widget.  When enabled the
@@ -84,14 +84,15 @@ Defaults to 1000 (i.e., one second).<p>
 <<defopt {-format <i>formatlist</i>}>>
 <<defopt {-parsecmd <i>cmd</i>}>>
 <<defopt {-tags <i>tagslist</i>}>>
+<<defopt {-showtitle <i>boolean</i>}>>
 
 These options are all identical to the matching <<xref logdisplay(n)>>
 options; they are configured by default to support <<xref logger(n)>>
 log files.  See the <<xref logdisplay(n)>> man page and the
 scrollinglog(n) code to see how to customize them for other formats.
-If <code>-inclloglist</code> is true, the <code>-parsecmd</code>
-option will also be used to configure the loglist according to
-<<xref loglist(n)>>.<p>
+If <code>-showloglist</code> is true, the <code>-parsecmd</code> and
+<code>-showtitle</code> options will also be used to configure the
+loglist according to <<xref loglist(n)>>.<p>
 
 <<defopt {-font <i>font</i>}>>
 <<defopt {-height <i>height</i>}>>
@@ -118,6 +119,7 @@ Sets the hull frame's background color.<p>
 <<defopt {-formattext <i>val</i>}>>
 <<defopt {-logpattern <i>glob_pattern</i>}>>
 <<defopt {-rootdir <i>directory</i>}>>
+<<defopt {-showapplist <i>boolean</i>}>>
 
 These options are all identical to the matching <<xref loglist(n)>>
 options; they are configured by default to support <<xref logger(n)>>
