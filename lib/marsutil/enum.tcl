@@ -229,10 +229,10 @@ snit::type ::marsutil::enum {
 
         for {set i 0} {$i < $len} {incr i} {
             append out "<tr>\n"
-            append out "<td align=\"center\">$i</td>\n"
+            append out "<td valign=\"baseline\" align=\"center\">$i</td>\n"
             append out \
-                "<td align=\"left\"><tt>[lindex $shortnames $i]</tt></td>\n"
-            append out "<td align=\"left\">[lindex $longnames $i]</td>\n"
+                "<td valign=\"baseline\" align=\"left\"><tt>[lindex $shortnames $i]</tt></td>\n"
+            append out "<td valign=\"baseline\" align=\"left\">[lindex $longnames $i]</td>\n"
             append out "</tr>\n"
         }
 

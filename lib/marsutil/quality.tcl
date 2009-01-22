@@ -312,12 +312,12 @@ snit::type ::marsutil::quality {
         for {set i 0} {$i < $len} {incr i} {
             append out "<tr>\n"
             append out \
-                "<td align=\"left\"><tt>[lindex $shortnames $i]</tt></td>\n"
-            append out "<td align=\"left\">[lindex $longnames $i]</td>\n"
-            append out "<td align=\"right\">[lindex $values $i]</td>\n"
+                "<td valign=\"baseline\" align=\"left\"><tt>[lindex $shortnames $i]</tt></td>\n"
+            append out "<td valign=\"baseline\" align=\"left\">[lindex $longnames $i]</td>\n"
+            append out "<td valign=\"baseline\" align=\"right\">[lindex $values $i]</td>\n"
 
             if {$options(-bounds)} {
-                append out "<td align=\"right\">"
+                append out "<td valign=\"baseline\" align=\"right\">"
                 append out [lindex $mins $i]
                 append out " &lt; <i>value</i> &le; "
                 append out [lindex $maxs $i]
