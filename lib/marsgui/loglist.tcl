@@ -197,6 +197,9 @@ snit::widget ::marsgui::loglist {
     variable appDirs        ""  ;# Bare names of the app directories.
     variable currentAppDir  ""  ;# Bare name of the current app directory.
 
+    variable lastLogSize    0   ;# Size of the most recent log 
+
+    variable logFile        ""  ;# Full path of the currently selected log 
     variable logFiles       {}  ;# List of full paths of logs displayed
                                  # in the log list.
     variable numLogs        0   ;# The number of logs displayed in the
@@ -490,6 +493,11 @@ snit::widget ::marsgui::loglist {
         set selectedLog $num
 
         set logFile [lindex $logFiles [expr {$num - 1}]]
+
+        # If this is the most recent file, save the size
+        if {$num == $numLogs} {
+            catch {set lastLogSize [file size $logFile]}
+        }
         
         # Configure tags to highlight the selection.  Set the SELECTED tag
         # background to grey indicating the start of the select command.
@@ -548,25 +556,23 @@ snit::widget ::marsgui::loglist {
             # Notify clients that no log is selected.
             $self CallSelectCmd ""
         } else {
+            catch {set size [file size \
+                                 [lindex $logFiles [expr {$numLogs - 1}]]]}
+
             # Rebuild the list and show the latest if requested or this is
-            # the first time for the current app.
-            if {$options(-autoload) || $showend || $prevSelectedLog == -1} {
+            # the first time for the current app. Only autoload latest
+            # if there's a new latest or the content of the latest changed.
+            if {$showend || $prevSelectedLog == -1 ||
+                ($options(-autoload) && 
+                 ($numLogs > $prevNumLogs || $size != $lastLogSize))
+            } {
                 $loglist   delete 1.0 end
 
                 foreach filepath $logFiles {
                     set file [file tail $filepath]
                     $loglist insert end "$file\n"
                 }
-
-                # If this is a user request or the first time indicate that
-                # this is a change.  Otherwise indicate that this is a
-                # change only if the log count really changed and we've 
-                # selected the latest as a result.
-                if {$showend || $prevSelectedLog == -1} {
-                    $self SelectLog $numLogs 1
-                } else {
-                    $self SelectLog $numLogs [expr {$numLogs > $prevNumLogs}]
-                }
+                $self SelectLog $numLogs 1
             } else {
                 # Otherwise just keep the list updated with new entries.
                 # This will be the case if the user has taken control 
