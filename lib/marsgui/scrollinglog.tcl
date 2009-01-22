@@ -143,13 +143,11 @@ snit::widget ::marsgui::scrollinglog {
             {error   -background orange}
             {warning -background yellow}
         }]
-        set showTitle [from args -showtitle "no"]
+        set showTitle [from args -showtitle]
 
         # NEXT, Determine if a loglist should be included and create it if so.
         set loglist ""
-        if {[dict exists $args -showloglist]} {
-            $self configure -showloglist [dict get $args -showloglist]
-        }
+        set options(-showloglist) [from args -showloglist]
 
         if {$options(-showloglist)} {
             # Get the -showapplist value for loglist(n).

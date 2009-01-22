@@ -214,8 +214,12 @@ snit::widget ::marsgui::loglist {
     
     constructor {args} {
         # FIRST, create the updater.
+        set options(-showapplist) [from args -showapplist]
+        set updateMethod \
+            [expr {$options(-showapplist) ? "AppListUpdate" : "LoadFiles"}]
+
         install updater using timeout ${selfns}::updater \
-            -command [mymethod LoadFiles] \
+            -command [mymethod $updateMethod] \
             -repetition yes
 
         # NEXT, Save the constructor options.
@@ -360,9 +364,11 @@ snit::widget ::marsgui::loglist {
 
     # AppListUpdate
     #
+    # ?showend?   Force most recent content to be displayed
+    #
     # Update the applist with all subdirectories in the file directory, and 
     # then update the loglist for the current or default appdir.
-    method AppListUpdate {} {
+    method AppListUpdate {{showend 0}} {
         # FIRST, Enable and clear the applist
         $applist configure -state normal
         $applist delete 1.0 end
@@ -391,9 +397,9 @@ snit::widget ::marsgui::loglist {
 
             # Select the appropriate app
             if {$currentAppDir in $appDirs} {
-                $self SelectApp $currentAppDir
+                $self SelectApp $currentAppDir $showend
             } else {
-                $self SelectApp [lindex $appDirs 0]
+                $self SelectApp [lindex $appDirs 0] $showend
             }
         }
         
@@ -436,6 +442,12 @@ snit::widget ::marsgui::loglist {
             error "Unknown application directory: \"$name\""
         }
 
+        # Only if this is a change, clear our memory of the selected log 
+        # since it's no longer valid.
+        if {$currentAppDir ne $name} {
+            set selectedLog -1
+        }
+
         # Update the current dir.
         set currentAppDir $name
         
@@ -446,9 +458,6 @@ snit::widget ::marsgui::loglist {
         $applist tag add    SELECTED \
             "$index linestart" "$index+1 lines linestart"
         $applist see $index
-
-        # Clear our memory of the selected log since it's no longer valid.
-        set selectedLog -1
      
         # Load the logslist with the application directory.
         $self LoadFiles $showend
@@ -633,7 +642,7 @@ snit::widget ::marsgui::loglist {
     method update {} {
 
         if {$options(-showapplist)} {
-            $self AppListUpdate
+            $self AppListUpdate 1
         } else {
             # Clear our memory of the selected log since it's no longer valid.
             set selectedLog -1
