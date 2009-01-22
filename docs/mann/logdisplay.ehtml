@@ -124,7 +124,7 @@ entry.<p>
 Each entry in <i>formatlist</i> must be a list of the form:<p>
 
 <pre>
-    <field name> <field width> <display flag>
+    &lt;field name>  &lt;field width>  &lt;display flag>
 </pre>
 
 The <i>field name</i> identifies the field.<p>
