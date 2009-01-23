@@ -53,13 +53,23 @@ snit::widget ::marsgui::filter {
     # A command to be executed when filtration is triggered.
     option -filtercmd -default ""
 
+    # -ignorecase flag
+    option -ignorecase -default no -configuremethod ConfigThenFilter
+
+    # -filtertype value
+    option -filtertype -default exact -configuremethod ConfigThenFilter
+
+    method ConfigThenFilter {opt val} {
+        set options($opt) $val
+        $self FilterNow
+    }
+
     # Delegate all other options to the hull
     delegate option * to hull
     
     #-------------------------------------------------------------------
     # Variables
 
-    variable filterType   "exact"    ;# exact, wildcard, regexp
     variable inclusive    yes        ;# Include or exclude matches
     variable targetRegexp ""         ;# Used by "check".
 
@@ -87,27 +97,40 @@ snit::widget ::marsgui::filter {
             -tearoff      0  \
             -borderwidth  1
         
-        $win.type.menu add radio           \
-            -label    "Exact"              \
-            -variable [myvar filterType]   \
-            -value    "exact"              \
+        $win.type.menu add radio                   \
+            -label    "Exact"                      \
+            -variable [myvar options(-filtertype)] \
+            -value    "exact"                      \
+            -command  [mymethod FilterNow]
+
+        $win.type.menu add radio                   \
+            -label    "Incremental"                \
+            -variable [myvar options(-filtertype)] \
+            -value    "incremental"                \
             -command  [mymethod FilterNow]
             
-        $win.type.menu add radio           \
-            -label    "Wildcard"           \
-            -variable [myvar filterType]   \
-            -value    "wildcard"           \
+        $win.type.menu add radio                   \
+            -label    "Wildcard"                   \
+            -variable [myvar options(-filtertype)] \
+            -value    "wildcard"                   \
             -command  [mymethod FilterNow]
 
 
-        $win.type.menu add radio           \
-            -label    "Regexp"             \
-            -variable [myvar filterType]   \
-            -value    "regexp"             \
+        $win.type.menu add radio                   \
+            -label    "Regexp"                     \
+            -variable [myvar options(-filtertype)] \
+            -value    "regexp"                     \
             -command  [mymethod FilterNow]
             
         $win.type.menu add separator
-        
+
+        $win.type.menu add check                   \
+            -label    "Ignore Case"                \
+            -variable [myvar options(-ignorecase)] \
+            -command  [mymethod FilterNow]
+            
+        $win.type.menu add separator
+
         $win.type.menu add radio           \
             -label    "Include Matches"    \
             -variable [myvar inclusive]    \
@@ -145,9 +168,11 @@ snit::widget ::marsgui::filter {
 
     # EntryChange string
     #
-    # Triggers filtration if the field is now empty
+    # Triggers filtration if the field is now empty or if the
+    # filter type is incremental
+
     method EntryChange {string} {
-        if {$string eq ""} {
+        if {$string eq "" || $options(-filtertype) eq "incremental"} {
             $self FilterNow
         }
     }
@@ -171,10 +196,9 @@ snit::widget ::marsgui::filter {
             set targetRegexp ""
         } else {
             # Process the new target according to the type.
-            switch -exact -- $filterType {
-                "exact" {
-                    # JLS: This syntax no longer works with 8.5!
-                    # See bug1647
+            switch -exact -- $options(-filtertype) {
+                "exact" -
+                "incremental" {
                     set targetRegexp  "***=$target"
                 }        
                 "wildcard" {
@@ -183,12 +207,16 @@ snit::widget ::marsgui::filter {
                 "regexp" {
                     set targetRegexp $target
                 }
+
+                default {
+                    error "Unknown -filtertype: \"$options(-filtertype)\""
+                }
             }
 
             # Check the regexp for errors.  On error, write a message
             # using the -msgcmd.
             if {[catch {regexp -- $targetRegexp dummy} result]} {
-                $self Message "invalid $filterType: \"[$entry get]\""
+                $self Message "invalid $options(-filtertype): \"[$entry get]\""
                 bell
                 return
             }
@@ -228,7 +256,11 @@ snit::widget ::marsgui::filter {
             return 1
         }
 
-        set flag [regexp -- $targetRegexp $string]
+        if {$options(-ignorecase)} {
+            set flag [regexp -nocase -- $targetRegexp $string]
+        } else {
+            set flag [regexp -- $targetRegexp $string]
+        }
 
         if {!$inclusive} {
             set flag [expr {!$flag}]
