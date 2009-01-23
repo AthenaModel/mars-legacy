@@ -35,6 +35,24 @@ namespace eval ::marsgui:: {
 
 snit::widget ::marsgui::filter {
     #-------------------------------------------------------------------
+    # Type Constructor
+
+    typeconstructor {
+        snit::enum filterType -values {
+            exact
+            incremental
+            wildcard
+            regexp
+        }
+
+        snit::enum ignorecaseType -values {
+            no
+            yes
+        }
+    }
+
+
+    #-------------------------------------------------------------------
     # Components
 
     component entry       ;# The command entry in which they enter the
@@ -54,10 +72,16 @@ snit::widget ::marsgui::filter {
     option -filtercmd -default ""
 
     # -ignorecase flag
-    option -ignorecase -default no -configuremethod ConfigThenFilter
+    option -ignorecase                                     \
+        -default         no                                \
+        -type            ::marsgui::filter::ignorecaseType \
+        -configuremethod ConfigThenFilter
 
     # -filtertype value
-    option -filtertype -default exact -configuremethod ConfigThenFilter
+    option -filtertype                                 \
+        -default         exact                         \
+        -type            ::marsgui::filter::filterType \
+        -configuremethod ConfigThenFilter
 
     method ConfigThenFilter {opt val} {
         set options($opt) $val
@@ -127,6 +151,8 @@ snit::widget ::marsgui::filter {
         $win.type.menu add check                   \
             -label    "Ignore Case"                \
             -variable [myvar options(-ignorecase)] \
+            -onvalue  yes                          \
+            -offvalue no                           \
             -command  [mymethod FilterNow]
             
         $win.type.menu add separator
