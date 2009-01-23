@@ -378,6 +378,7 @@ snit::widget ::marsgui::scrollinglog {
     # Loads the specified log file.
 
     method ListSelectCB {filepath showend} {
+        set logfile $filepath
         $log load $filepath $showend
     }
 
