@@ -8,6 +8,17 @@
 <h1 style="background: red;">&nbsp;Mars <<version>>: Simulation Infrastructure
 Library</h1>
 <h2>Build Notes</h2>
+<h3>Build 1.6, 27 January 2009</h3>
+This build includes some new functionality for loglist(n), filter(n), 
+enum(n) and quality(n). There are also some icons added for the CV tool.
+The following packages are included:
+<ul>
+  <li>Bug 1852: loglist(n): make applist optional
+  <li>Bug 1855: Need to add/modify icons in support of CV tool
+  <li>Bug 1865: mars_link(1): "mars link save" doesn't commit the change.
+  <li>Bug 1867: enum(n), quality(n): Better HTML output
+  <li>Bug 1876: filter(n): Incremental and case-insensitive filtration
+</ul>
 
 <h3>Build 1.5, 9 January 2009</h3>
 This build includes some minor enhancements and a bug fix. Zcurves are now
