@@ -36,9 +36,7 @@
 #
 #    sqlsection(i) modules register themselves with sqldocument(n) on
 #    load; sqldocument(n) queries the sqlsection(i) modules for their
-#    definitions on database open and clear.  The names of the 
-#    included sqlsection(i) modules are stored in such database's 
-#    sqldocument_master table.
+#    definitions on database open and clear.
 #
 #-----------------------------------------------------------------------
 
@@ -93,14 +91,6 @@ snit::type ::marsutil::sqldocument {
     # The following routines implement the module's sqlsection(i)
     # interface.
 
-    # This module's sqlsection(i) schema
-    typevariable section_schema {
-        CREATE TABLE sqldocument_master (
-            -- Name of a registered sqlsection(i) module
-            section TEXT PRIMARY KEY
-        );
-    }
-
     # sqlsection title
     #
     # Returns a human-readable title for the section
@@ -114,7 +104,7 @@ snit::type ::marsutil::sqldocument {
     # Returns the section's persistent schema definitions, if any.
 
     typemethod {sqlsection schema} {} {
-        return [outdent $section_schema]
+        return ""
     }
 
     # sqlsection tempschema
@@ -307,15 +297,6 @@ snit::type ::marsutil::sqldocument {
 
             if {$schema ne ""} {
                 $db eval $schema
-            }
-        }
-
-        # NEXT, insert the section names into the sqldocument_master
-        # table, for later use.
-        foreach section $registry {
-            $db eval {
-                INSERT INTO sqldocument_master(section)
-                VALUES($section)
             }
         }
 

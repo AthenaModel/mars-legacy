@@ -138,10 +138,7 @@ namespace eval ::marsutil::test {
     test sqlsection_schema-1.1 {Base schema is defined} -body {
         bprint [sqldocument sqlsection schema]
     } -result {
-CREATE TABLE sqldocument_master <
-    -- Name of a registered sqlsection<i> module
-    section TEXT PRIMARY KEY
->;
+
     }
 
     #-------------------------------------------------------------------
@@ -399,7 +396,7 @@ CREATE TABLE sqldocument_master <
         db eval {SELECT name FROM sqlite_master}
     } -cleanup {
         cleanup
-    } -result {sqldocument_master sqlite_autoindex_sqldocument_master_1}
+    } -result {}
 
     test clear-1.5 {Section schema is defined} -body {
         sqldocument register ::marsutil::test::testsection
@@ -410,7 +407,7 @@ CREATE TABLE sqldocument_master <
         db eval {SELECT name FROM sqlite_master}
     } -cleanup {
         cleanup
-    } -result {sqldocument_master sqlite_autoindex_sqldocument_master_1 perm}
+    } -result {perm}
 
     test clear-1.6 {Temp schema is still defined} -body {
         sqldocument register ::marsutil::test::testsection
@@ -422,17 +419,6 @@ CREATE TABLE sqldocument_master <
     } -cleanup {
         cleanup
     } -result {temp}
-
-    test clear-1.7 {sqldocument_master is populated with all sections} -body {
-        sqldocument register ::marsutil::test::testsection
-        sqldocument db
-        db open :memory:
-        db clear
-
-        db eval {SELECT section FROM sqldocument_master}
-    } -cleanup {
-        cleanup
-    } -result {::marsutil::sqldocument ::marsutil::test::testsection}
 
     test clear-1.8 {functions remain defined} -body {
         sqldocument db
@@ -458,7 +444,7 @@ CREATE TABLE sqldocument_master <
         list $a $b
     } -cleanup {
         cleanup
-    } -result {foo {sqldocument_master sqlite_autoindex_sqldocument_master_1}}
+    } -result {foo {}}
 
     test clear-1.10 {Schema tables are emptied} -body {
         sqldocument register ::marsutil::test::testsection
@@ -511,7 +497,7 @@ CREATE TABLE sqldocument_master <
     } -cleanup {
         cleanup
         removeFile test.db
-    } -result {{fred sqldocument_master} sqldocument_master}
+    } -result {fred {}}
 
     test commit-1.3 {commit on request} -body {
         sqldocument db
@@ -530,12 +516,11 @@ CREATE TABLE sqldocument_master <
 
         set b [db tables]
 
-        # Should only see fred before closing
         list $a $b
     } -cleanup {
         cleanup
         removeFile test.db
-    } -result {{fred sqldocument_master} {fred sqldocument_master}}
+    } -result {fred fred}
 
 
     #-------------------------------------------------------------------
@@ -568,7 +553,7 @@ CREATE TABLE sqldocument_master <
     } -cleanup {
         cleanup
         removeFile test.db
-    } -result {{fred sqldocument_master} {fred sqldocument_master}}
+    } -result {fred fred}
 
     #-------------------------------------------------------------------
     # lock/unlock/islocked
