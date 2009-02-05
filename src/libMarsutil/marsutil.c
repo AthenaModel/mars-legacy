@@ -31,7 +31,7 @@
  */
 
 #define PRECISION_MIN     0
-#define PRECISION_DEFAULT 3
+#define PRECISION_DEFAULT 5
 #define PRECISION_MAX     5
 #define LAT_MIN          -90.0
 #define LAT_MAX           90.0
