@@ -460,6 +460,7 @@ snit::type ::marsutil::sqldocument {
     delegate method tables to db using {::marsutil::sqlib %m %c} 
     delegate method schema to db using {::marsutil::sqlib %m %c} 
     delegate method mat    to db using {::marsutil::sqlib %m %c} 
+    delegate method insert to db using {::marsutil::sqlib %m %c}
     delegate method *      to db
 
     # dbfile

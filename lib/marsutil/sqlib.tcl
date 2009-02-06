@@ -545,6 +545,31 @@ snit::type ::marsutil::sqlib {
             return $mat
         }
     }
+
+    # insert db table dict
+    #
+    # db      A database handle
+    # table   Name of a table in db
+    # dict    A dictionary whose keys are column names in the table
+    #
+    # Inserts the contents of dict into table.  This will be less
+    # efficient than an explicit "INSERT INTO" with hardcoded column
+    # names, but where performance isn't an issue it wins on 
+    # maintainability.
+    #
+    # WARNING: None of the dict columns can be named "sqlib_table".
+
+    typemethod insert {db table dict} {
+        set sqlib_table $table
+        set keys [dict keys $dict]
+
+        dict with dict {
+            $db eval [tsubst {
+                INSERT INTO ${sqlib_table}([join $keys ,])
+                VALUES(\$[join $keys ,\$])
+            }]
+        }
+    }
 }
 
 

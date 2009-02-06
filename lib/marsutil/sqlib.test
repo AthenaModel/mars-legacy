@@ -243,6 +243,28 @@ CREATE TABLE third(g,h,i)}
     # TBD
 
     #-------------------------------------------------------------------
+    # insert
+
+    test insert-1.1 {Inserts dict into table} -setup {
+        sqlite3 $db :memory:
+
+        $db eval {
+            CREATE TABLE mytable(a,b,c);
+        }
+    } -body {
+        sqlib insert $db mytable {
+            a "The First" 
+            b "The Second"
+            c "The Third"
+        }
+
+        $db eval {SELECT * FROM mytable} row {}
+        array get row
+    } -result {a {The First} b {The Second} * {a b c} c {The Third}}
+
+
+
+    #-------------------------------------------------------------------
     # Cleanup
 
     cleanupTests

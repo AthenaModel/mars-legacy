@@ -189,6 +189,17 @@ command has no effect.<p>
 
 Returns the name of the last-opened database file, or "" if none.<p>
 
+<<defitem insert {$db insert <i>table dict</i>}>>
+
+Inserts the contents of dictionary <i>dict</i> into the database as a
+row in the named <i>table</i>.  The dictionary keys must be the same
+as the column names in the table.<p>
+
+This will be less efficient than an explicit "INSERT INTO" with
+hardcoded column names, but where performance isn't an issue it wins
+on maintainability.<p>
+
+
 <<defitem islocked {$db islocked <i>table</i>}>>
 
 Returns 1 if the named table exists and is <<iref lock>>ed, and 0
