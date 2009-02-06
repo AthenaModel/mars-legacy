@@ -148,7 +148,7 @@ namespace eval ::marsutil::test {
             [latlong tomgrs {0.0 0.0} 3] \
             [latlong tomgrs {0.0 0.0} 4] \
             [latlong tomgrs {0.0 0.0} 5]
-    } -result {31NAA660000 31NBA 31NAA70 31NAA6600 31NAA660000 31NAA66020000 31NAA6602100000}
+    } -result {31NAA6602100000 31NBA 31NAA70 31NAA6600 31NAA660000 31NAA66020000 31NAA6602100000}
 
     #-------------------------------------------------------------------
     # frommgrs
