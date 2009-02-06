@@ -8,6 +8,15 @@
 <h1 style="background: red;">&nbsp;Mars <<version>>: Simulation Infrastructure
 Library</h1>
 <h2>Build Notes</h2>
+<h3>Build 1.7, 6 February 2009</h3>
+This build has two minor changes: The removal of an unused SQL table and an 
+increase in the precision of MGRS locations from 100m resolution to 1m resolution.
+The following packages are included:
+<ul>
+  <li>Bug 1889: sqldocument(n): remove sqldocument_master
+  <li>Bug 1894: MGRS locations should have 10 digits
+</ul>
+
 <h3>Build 1.6, 27 January 2009</h3>
 This build includes some new functionality for loglist(n), filter(n), 
 enum(n) and quality(n). There are also some icons added for the CV tool.
