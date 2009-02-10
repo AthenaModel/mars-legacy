@@ -83,6 +83,17 @@ namespace eval ::marsutil::test {
         error
     } -result {Out of range: "2.0"}
 
+    test range_validate-1.4 {-errorcode INVALID} -setup {
+        setup
+    } -body {
+        rng configure -min 0.0 -max 1.0
+        catch {rng validate 2.0}
+        set ::errorCode
+    } -cleanup {
+        cleanup
+    } -result {INVALID}
+
+
     #-------------------------------------------------------------------
     # value
 

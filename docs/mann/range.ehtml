@@ -81,7 +81,8 @@ Sets the value of one or more options.<p>
 <<defitem validate {$range validate <i>input</i>}>>
 
 Validates that <i>input</i> belongs to the range.  If it does, it is
-returned unchanged.  If it does not, an error is thrown.<p>
+returned unchanged.  If it does not, an error is thrown with error
+code <b>INVALID</b>.<p>
 
 <<defitem value {$range value <i>input</i>}>>
 

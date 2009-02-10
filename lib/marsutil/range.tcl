@@ -58,7 +58,8 @@ snit::type ::marsutil::range {
         # FIRST, is it numeric?  Throw an error or return the value.
         if {![string is double -strict $input] ||
             ![$self inrange $input]} {
-            error "Out of range: \"$input\""
+            return -code error -errorcode INVALID \
+                "Out of range: \"$input\""
         }
 
         return $input
