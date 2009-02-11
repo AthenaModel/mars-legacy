@@ -7,11 +7,27 @@
 <body bgcolor="#F5F5F5" alink="Blue" link="Blue">
 <h1 style="background: red;">&nbsp;Mars <<version>>: Simulation Infrastructure
 Library</h1>
+
 <h2>Build Notes</h2>
+
+<h3>Build 1.8, 11 February 2009</h3>
+
+This build has two minor changes.  The range(n) type now participates
+in the "INVALID" error protocol, and sqldocument(n) now provides the
+ability to insert a dictionary of column names and values into a
+table.<p>
+
+<ul>
+  <li> Bug 1898: sqlib(n), sqldocument(n): insert dict into table
+  <li> Bug 1902: range(n): -errorcode INVALID 
+</ul><p>
+
 <h3>Build 1.7, 6 February 2009</h3>
+
 This build has two minor changes: The removal of an unused SQL table and an 
-increase in the precision of MGRS locations from 100m resolution to 1m resolution.
-The following packages are included:
+increase in the precision of MGRS locations from 100m resolution to 1m
+resolution. The following packages are included:<p>
+
 <ul>
   <li>Bug 1889: sqldocument(n): remove sqldocument_master
   <li>Bug 1894: MGRS locations should have 10 digits
