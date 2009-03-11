@@ -10,6 +10,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.9, 11 March 2009</h3>
+Two minor changes in this build. marsutil(n) no longer includes the parmdb(n)
+man page and Mars now uses the 2008Q4 version of ActiveTcl Enterprise Edition.<p>
+
+<ul>
+  <li> Bug 1917: marsutil(n) erroneously includes parmdb(n) man page
+  <li> Bug 1928: Use ATEE 2008Q4
+</ul>
+
 <h3>Build 1.8, 11 February 2009</h3>
 
 This build has two minor changes.  The range(n) type now participates
