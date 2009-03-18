@@ -325,7 +325,7 @@ CREATE TABLE gram_c (
     -- Concern identification
 
     c              TEXT,    -- Name of concern
-    ctype          TEXT,    -- Concern type, CIV or ORG
+    gtype          TEXT,    -- Concern type, CIV or ORG
 
     --------------------------------------------------------------------
     -- Satisfaction Outputs

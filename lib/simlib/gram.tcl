@@ -219,8 +219,10 @@ snit::type ::simlib::gram {
     # Some GRAM model data is stored as elements in the "db" array.  The 
     # elements are as listed below.
     #
-    # initialized        0 if engine has never been initialized from
-    #                    the simdb(5) data, and 1 if it has.
+    # initialized        0 if -loadcmd has never been called, and 1 if 
+    #                    it has.
+    #
+    # loadstate          Indicates the progress of the -loadcmd.
     #
     # time               Simulation Time: integer ticks, starting at 0
     #
@@ -232,6 +234,7 @@ snit::type ::simlib::gram {
     
     variable db -array {
         initialized      0
+        loadstate        ""
         time             {}
         timelast         {}
     }
@@ -310,18 +313,13 @@ snit::type ::simlib::gram {
     # -reload    If present, calls the -loadcmd to reload the 
     #            initial data into the RDB.
     #
-    # Initializes the simulation to 0.  Checks invariants and
-    # does the initial computations.  Reloads initial data on
+    # Initializes the simulation to 0.  Reloads initial data on
     # demand.
 
     method init {{opt ""}} {
         # FIRST, get inputs from the RDB
         if {!$db(initialized) || $opt eq "-reload"} {
-            $self ClearTables
-            $options(-loadcmd) $self
-            $self SanityCheck
-            $self FinishPopulatingTables
-            $self CreateValidators
+            $self LoadData
             set db(initialized) 1
         } elseif {$opt ne ""} {
             error "invalid option: \"$opt\""
@@ -357,6 +355,42 @@ snit::type ::simlib::gram {
         return
     }
 
+    #-------------------------------------------------------------------
+    # load API
+    #
+    # This API is used by the load command to load new data into 
+    # GRAM.  The commands must be used in a strict order, as indicated
+    # by db(loadstate).
+
+    # LoadData
+    #
+    # This is called by "init" when it's necessary to reload input
+    # data from the client.
+
+    method LoadData {} {
+        # FIRST, clear all of the tables, so that they can be
+        # refilled.
+        $self ClearTables
+
+        # NEXT, the client's -loadcmd must call the "load *" methods
+        # in a precise sequence.  Set up the state machine to handle
+        # it.
+        set db(loadstate) begin
+
+        # NEXT, call the -loadcmd.  The client will specify the
+        # entities and input data, and GRAM will populate tables.
+        $options(-loadcmd) $self
+
+        # NEXT, make sure that all "load *" methods were called,
+        # and terminate the state machine.
+        assert {$db(loadstate) eq "coop"}
+        set db(loadstate) end
+
+        # NEXT, final steps.  Do a sanity check of the input data,
+        # and create the validation enums.
+        $self SanityCheck
+        $self CreateValidators
+    }
 
     # ClearTables
     #
@@ -382,20 +416,369 @@ snit::type ::simlib::gram {
         }
     }
 
-    # SanityCheck
+    # load nbhoods name ?name...?
     #
-    # Verifies that we have everything we need to run.
+    # name         A neighborhood name.
+    #
+    # Loads the neighborhoods.  Typically, the names should be pre-sorted.
 
-    method SanityCheck {} {
-        # TBD: Not yet implemented.
+    method {load nbhoods} {args} {
+        assert {$db(loadstate) eq "begin"}
+
+        foreach n $args {
+            $rdb eval {
+                INSERT INTO gram_n(object,n)
+                VALUES($dbid,$n);
+            }
+        }
+
+        set db(loadstate) "nbhoods"
     }
 
-    # FinishPopulatingTables
+    # load groups name gtype ?name gtype...?
+    # 
+    # name       Group name
+    # gtype      Group type (CIV, FRC, ORG)
     #
-    # Given the data provided by the -loadcmd, computes additional
-    # parameters, e.g., sat_tracked.
+    # Loads the group names.  Typically, the groups are ordered
+    # first by group type, and then by name.
 
-    method FinishPopulatingTables {} {
+    method {load groups} {args} {
+        assert {$db(loadstate) eq "nbhoods"}
+
+        foreach {g gtype} $args {
+            $rdb eval {
+                INSERT INTO gram_g(object,g,gtype)
+                VALUES($dbid,$g,$gtype);
+            }
+        }
+
+        set db(loadstate) "groups"
+    }
+
+    # load concerns name gtype ?name gtype...?
+    # 
+    # name       Concern name
+    # gtype      Concern type (CIV, ORG)
+    #
+    # Loads the concern names.  Typically, the concerns are ordered
+    # first by concern type, and then by name.
+
+    method {load concerns} {args} {
+        assert {$db(loadstate) eq "groups"}
+
+        foreach {c gtype} $args {
+            $rdb eval {
+                INSERT INTO gram_c(object,c,gtype)
+                VALUES($dbid,$c,$gtype);
+            }
+        }
+
+        $self PopulateDefaultsAfterConcerns
+
+        set db(loadstate) "concerns"
+    }
+
+    # PopulateDefaultsAfterConcerns
+    #
+    # Once all of the relevant neighborhoods, groups, and concerns
+    # known, this routine populates dependent tables with default
+    # values.  The -loadcmd can subsequently fill in details as
+    # desired.
+
+    method PopulateDefaultsAfterConcerns {} {
+        # FIRST, populate gram_nc.
+        $rdb eval {
+            INSERT INTO gram_nc(
+                object,
+                n,
+                c)
+            SELECT $dbid, n, c
+            FROM gram_n JOIN gram_c USING (object)
+            WHERE object=$dbid
+            ORDER BY n, gtype, c;
+        }
+
+        # NEXT, populate gram_gc.
+        $rdb eval {
+            INSERT INTO gram_gc(
+                object,
+                g,
+                c)
+            SELECT $dbid, g, c
+            FROM gram_g JOIN gram_c USING (object,gtype)
+            WHERE object=$dbid
+            ORDER BY gtype, g, c
+        }
+
+        # NEXT, populate gram_mn: A nbhood is "here" to itself and
+        # "far" to all others, and effects_delays are all 0.0
+
+        $rdb eval {
+            INSERT INTO gram_mn(
+                object,
+                m,
+                n,
+                proximity,
+                effects_delay)
+            SELECT $dbid,
+                   M.n,
+                   N.n,
+                   CASE WHEN M.n=N.n THEN 0 ELSE 2 END,
+                   0.0
+            FROM gram_n AS M join gram_n AS N USING (object)
+            WHERE object=$dbid
+            ORDER BY M.n, N.n
+        }
+
+        # NEXT, populate gram_ng.  Weights and factors are 1.0,
+        # sat_tracked is 1 only for ORG groups, and all populations
+        # are 0.
+
+        $rdb eval {
+            SELECT n, g, gtype
+            FROM gram_n JOIN gram_g USING (object)
+            WHERE object=$dbid
+            AND   gtype IN ('CIV', 'ORG')
+            ORDER BY n, gtype, g
+        } {
+            # FIRST, Satisfaction is not tracked for CIVs unless 
+            # population is not 0, which we don't know yet.
+            # population is 0!
+            if {$gtype eq "CIV"} {
+                set sat_tracked 0
+            } else {
+                set sat_tracked 1
+            }
+
+            $rdb eval {
+                -- Note: ng_id is set automatically
+                INSERT INTO 
+                gram_ng(object, n, g, 
+                        population, rollup_weight, effects_factor,
+                        sat_tracked)
+                VALUES($dbid, $n, $g, 0, 1.0, 1.0, $sat_tracked)
+            }
+        }
+    }
+
+    # load nbrel m n proximity effects_delay ?...?
+    #
+    # m               Neighborhood name
+    # n               Neighborhood name
+    # proximity       eproximity(n); must be 0 if m=n.
+    # effects_delay   Effects delay in decimal days.
+
+    method {load nbrel} {args} {
+        assert {$db(loadstate) eq "concerns"}
+
+        foreach {m n proximity effects_delay} $args {
+            set proximity [eproximity index $proximity]
+
+            assert {
+                ($m eq $n && $proximity == 0) ||
+                ($m ne $n && $proximity != 0)
+            }
+
+            set mn_id [$rdb onecolumn {
+                SELECT mn_id FROM gram_mn
+                WHERE object=$dbid AND m=$m AND n=$n;
+            }]
+
+            require {$mn_id ne ""} "Invalid nbhood pair: $m $n"
+
+            $rdb eval {
+                UPDATE gram_mn
+                SET proximity     = $proximity,
+                    effects_delay = $effects_delay
+                WHERE mn_id = $mn_id;
+            }
+        }
+
+        set db(loadstate) "nbrel"
+    }
+
+    # load nbgroups n g population rollup_weight effects_factor ?...?
+    #
+    # n               Neighborhood name
+    # g               Group name
+    # population      Population; 0 for ORG groups
+    # rollup_weight   Rollup Weight
+    # effects_factor  Effects Factor
+
+    method {load nbgroups} {args} {
+        assert {$db(loadstate) eq "nbrel"}
+
+        foreach {n g population rollup_weight effects_factor} $args {
+            set ng_id [$rdb onecolumn {
+                SELECT ng_id FROM gram_ng 
+                WHERE object=$dbid AND n=$n AND g=$g
+            }]
+
+            require {$ng_id ne ""} "Invalid nbgroup: $n $g"
+
+            # TBD: Should verify that population is 0 if g is ORG.
+
+            $rdb eval {
+                UPDATE gram_ng
+                SET population     = $population,
+                    rollup_weight  = $rollup_weight,
+                    effects_factor = $effects_factor,
+                    sat_tracked    = CASE 
+                        WHEN $population > 0 THEN 1 ELSE 0 
+                    END
+                WHERE ng_id=$ng_id
+            }
+        }
+
+        $self PopulateDefaultsAfterNbgroups
+
+        set db(loadstate) "nbgroups"
+    }
+
+    # PopulateDefaultsAfterNbgroups
+    #
+    # Once all of the relevant neighborhood groups are
+    # known, this routine populates dependent tables with default
+    # values.  The -loadcmd can subsequently fill in details as
+    # desired.
+
+    method PopulateDefaultsAfterNbgroups {} {
+        # FIRST, populate gram_ngc. Saliency is 1.0 if sat_tracked,
+        # and 0.0 otherwise; trend is always 0.0; there's a curve
+        # only if sat_tracked.
+        $rdb eval {
+            SELECT ng_id, 
+                   n, 
+                   g, 
+                   sat_tracked,
+                   c, 
+                   gram_g.gtype AS gtype 
+            FROM gram_ng 
+            JOIN gram_g USING (object, g)
+            JOIN gram_c
+            WHERE gram_ng.object = $dbid
+            AND   gram_c.object  = $dbid
+            AND   gram_g.gtype   = gram_c.gtype
+            ORDER BY n, gram_g.gtype, g, c
+        } {
+            if {$sat_tracked} {
+                $rdb eval {
+                    -- Note: curve_id is set automatically
+                    INSERT INTO gram_curves(object, curve_type, val0, val)
+                    VALUES($dbid, 'SAT', 0.0, 0.0);
+
+                    -- Note: ngc_id is set automatically
+                    INSERT INTO 
+                    gram_ngc(object, ng_id, curve_id, n, g, c,
+                             gtype, saliency, trend)
+                    VALUES($dbid, $ng_id, last_insert_rowid(),  $n, $g, $c, 
+                           $gtype, 1.0, 0.0);
+                }
+
+            } else {
+                $rdb eval {
+                    -- Note: ngc_id is set automatically
+                    INSERT INTO 
+                    gram_ngc(object, ng_id, n, g, c, gtype, saliency, trend)
+                    VALUES($dbid, $ng_id, $n, $g, $c, $gtype, 0.0, 0.0);
+                }
+            }
+        }
+
+        # NEXT, populate gram_nfg.  Default relationships are 0.0,
+        # unless f=g. Default cooperations are 50.0 where f is a FRC
+        # group and g is a CIV group and ng.sat_tracked is 1, and 0.0
+        # otherwise.
+        $rdb eval {
+            INSERT INTO gram_nfg(
+                object,
+                n,
+                f,
+                g,
+                rel)
+            SELECT $dbid,
+                   gram_n.n AS n,
+                   F.g      AS f,
+                   G.g      AS g,
+                   CASE WHEN F.g=G.g THEN 1.0 ELSE 0.0 END
+            FROM  gram_n 
+            JOIN  gram_g AS F USING (object)
+            JOIN  gram_g AS G USING (object)
+            WHERE gram_n.object=$dbid
+            ORDER BY n, F.g, G.g
+        }
+
+        $rdb eval {
+            SELECT gram_ng.n AS n,
+                   gram_ng.g AS f,
+                   G.g       AS g
+            FROM gram_ng 
+            JOIN gram_g AS F USING (object) 
+            JOIN gram_g AS G USING (object)             
+            WHERE gram_ng.object=$dbid
+            AND   gram_ng.sat_tracked=1
+            AND   F.gtype = 'CIV'
+            AND   G.gtype = 'FRC'
+            AND   gram_ng.g = F.g
+            ORDER BY n, f, g
+        } {
+            $rdb eval {
+                -- Note: curve_id is set automatically.
+                INSERT INTO gram_curves(object, curve_type, val0, val)
+                VALUES($dbid, 'COOP', 50.0, 50.0);
+
+                UPDATE gram_nfg
+                SET curve_id = last_insert_rowid()
+                WHERE object=$dbid AND n=$n AND f=$f AND g=$g;
+            }
+        }
+    }
+
+    # load sat n g c sat0 saliency trend 
+    #
+    # n               Neighborhood name
+    # g               Group name
+    # c               Concern name
+    # sat0            Initial satisfaction level
+    # saliency        Saliency
+    # trend           Long-term trend
+
+    method {load sat} {args} {
+        assert {$db(loadstate) eq "nbgroups"}
+
+        foreach {n g c sat0 saliency trend} $args {
+            set curve_id [$rdb onecolumn {
+                SELECT curve_id 
+                FROM gram_ngc
+                WHERE object=$dbid AND n=$n AND g=$g AND c=$c;
+            }]
+
+            require {$curve_id ne ""} "No such sat curve: $n $g $c"
+
+            $rdb eval {
+                UPDATE gram_curves
+                SET val0 = $sat0,
+                    val  = $sat0
+                WHERE curve_id = $curve_id;
+                
+                UPDATE gram_ngc
+                SET saliency = $saliency,
+                    trend    = $trend
+                WHERE curve_id = $curve_id;
+            }
+        }
+
+        $self PopulateTablesAfterSat
+
+        set db(loadstate) "sat"
+    }
+
+    # PopulateTablesAfterSat
+    #
+    # Computes the total saliency for each n,g,c.
+
+    method PopulateTablesAfterSat {} {
         # FIRST, get the total_saliency for each neighborhood group
         $rdb eval {
             SELECT n,
@@ -411,213 +794,72 @@ snit::type ::simlib::gram {
                 WHERE object=$dbid AND n=$n AND g=$g
             }
         }
-
-        # NEXT, populate gram_nc.
-        $rdb eval {
-            INSERT INTO gram_nc(
-                object,
-                n,
-                c)
-            SELECT $dbid, n, c
-            FROM gram_n JOIN gram_c USING (object)
-            WHERE object=$dbid
-            ORDER BY n, ctype, c;
-        }
-
-        # NEXT, populate gram_gc.
-        $rdb eval {
-            INSERT INTO gram_gc(
-                object,
-                g,
-                c)
-            SELECT $dbid, g, c
-            FROM gram_g JOIN gram_c USING (object)
-            WHERE object=$dbid
-            AND   gtype=ctype
-            ORDER BY gtype, g, c
-        }
     }
 
-    method PopulateTables {} {
-        # TBD: prune this down.
+    # load rel n f g rel ?....? 
+    #
+    # n               Neighborhood name
+    # f               Group name
+    # g               Group name
+    # rel             Group relationship
 
-        # NEXT, populate gram_n.
-        $rdb eval {
-            INSERT INTO gram_n(object, n)
-            SELECT $dbid, name
-            FROM nbhoods
-            ORDER BY name
-        }
+    method {load rel} {args} {
+        assert {$db(loadstate) eq "sat"}
 
+        foreach {n f g rel} $args {
+            set nfg_id [$rdb onecolumn {
+                SELECT nfg_id FROM gram_nfg 
+                WHERE object=$dbid AND n=$n AND f=$f AND g=$g
+            }]
 
-        # NEXT, populate gram_g.
-        $rdb eval {
-            INSERT INTO gram_g(object, g, gtype)
-            SELECT $dbid, name, type
-            FROM pgroups
-            ORDER BY type, name
-        }
-
-        # NEXT, populate gram_c.
-        $rdb eval {
-            INSERT INTO gram_c(object, c, ctype)
-            SELECT $dbid, name, type
-            FROM concerns
-            ORDER BY type, name
-        }
-
-        # NEXT, populate gram_mn
-        $rdb eval {
-            INSERT INTO gram_mn(
-                object,
-                m,
-                n,
-                proximity,
-                effects_delay)
-            SELECT $dbid,
-                   m,
-                   n,
-                   proximity,
-                   effects_delay
-            FROM db_mn 
-            ORDER BY m, n
-        }
-
-        # NEXT, populate gram_ng
-        $rdb eval {
-            SELECT n,
-                   g,
-                   population,
-                   db_ng.rollup_weight,
-                   db_ng.effects_factor,
-                   type AS gtype
-            FROM db_ng 
-            JOIN pgroups ON db_ng.g = pgroups.name 
-            WHERE pgroups.type IN ('CIV', 'ORG')
-            ORDER BY n, pgroups.type, g
-        } {
-            # FIRST, Satisfaction is not tracked if CIV and the 
-            # population is 0!
-            if {$gtype ne "CIV" || $population > 0} {
-                set sat_tracked 1
-            } else {
-                set sat_tracked 0
-            }
+            require {$nfg_id ne ""} "Invalid relationship: $n $f $g"
 
             $rdb eval {
-                -- Note: ng_id is set automatically
-                INSERT INTO 
-                gram_ng(object, n, g, 
-                        population, rollup_weight, effects_factor,
-                        sat_tracked)
-                VALUES($dbid, $n, $g,
-                       $population, $rollup_weight, $effects_factor,
-                       $sat_tracked)
-            }
-        }
-
-
-        # NEXT, populate gram_ngc
-        $rdb eval {
-            SELECT db_ngc.n            AS n,
-                   db_ngc.g            AS g,
-                   db_ngc.c            AS c,
-                   db_ngc.sat0         AS sat0,
-                   db_ngc.trend0       AS trend,
-                   db_ngc.saliency     AS saliency,
-                   gram_ng.ng_id       AS ng_id,
-                   gram_ng.sat_tracked AS tracked,
-                   gram_g.gtype        AS gtype
-            FROM db_ngc 
-            JOIN gram_ng USING (n, g)
-            JOIN gram_g  ON db_ngc.g = gram_g.g
-            WHERE gram_ng.object      = $dbid
-            AND   gram_g.object       = $dbid
-            ORDER BY db_ngc.n, gtype, db_ngc.g, db_ngc.c
-        } {
-            # Plug the data into the gram_curves and gram_ngc
-            # tables.
-            #
-            # TBD: We should probably have an internal API for defining 
-            # curves and manipulating curves.
-
-            if {$tracked} {
-                $rdb eval {
-                    -- Note: curve_id is set automatically
-                    INSERT INTO gram_curves(object, curve_type, 
-                                            val0, val)
-                    VALUES($dbid, 'SAT', $sat0, $sat0);
-
-                    -- Note: ngc_id is set automatically
-                    INSERT INTO 
-                    gram_ngc(object, ng_id, curve_id,
-                             n, g, c, gtype, saliency, trend)
-                    VALUES($dbid, $ng_id, last_insert_rowid(),
-                           $n, $g, $c, $gtype,
-                           $saliency, $trend);
-                }
-            } else {
-                # Satisfaction is not tracked.  The saliency is 0.0,
-                # and the curve_id is NULL.
-                $rdb eval {
-                    -- Note: ngc_id is set automatically
-                    INSERT INTO 
-                    gram_ngc(object, ng_id,
-                             n, g, c, gtype, saliency, trend)
-                    VALUES($dbid, $ng_id,
-                           $n, $g, $c, $gtype,
-                           0.0, 0.0);
-                }
-            }
-        }
-
-
-        # NEXT, populate gram_nfg with its basic data.
-        $rdb eval {
-            INSERT INTO gram_nfg(
-                object,
-                n,
-                f,
-                g,
-                rel)
-            SELECT $dbid,
-                   n,
-                   f,
-                   g,
-                   rel
-            FROM db_nfg
-            JOIN pgroups AS F ON db_nfg.f = F.name
-            JOIN pgroups AS G ON db_nfg.g = G.name
-            ORDER BY n, f, g
-        }
-        
-        # NEXT, for all neighborhood-civ groups and force groups,
-        # create cooperation curves.
-        $rdb eval {
-            SELECT db_nfg.n AS n,
-                   db_nfg.f AS f,
-                   db_nfg.g AS g,
-                   coop0
-            FROM db_nfg
-            JOIN gram_ng ON gram_ng.n = db_nfg.n AND gram_ng.g=db_nfg.f
-            JOIN pgroups AS F ON db_nfg.f = F.name
-            JOIN pgroups AS G ON db_nfg.g = G.name
-            WHERE gram_ng.object = $dbid
-            AND   gram_ng.sat_tracked = 1
-            AND   F.type = 'CIV'
-            AND   G.type = 'FRC'
-            ORDER BY n, f, g
-        } {
-            $rdb eval {
-                -- Note: curve_id is set automatically.
-                INSERT INTO gram_curves(object, curve_type, val0, val)
-                VALUES($dbid, 'COOP', $coop0, $coop0);
-
                 UPDATE gram_nfg
-                SET curve_id = last_insert_rowid()
-                WHERE n=$n AND f=$f AND g=$g;
+                SET rel = $rel
+                WHERE nfg_id = $nfg_id;
             }
         }
+
+        set db(loadstate) "rel"
+    }
+
+    # load coop n f g coop0 
+    #
+    # n               Neighborhood name
+    # f               Force group name
+    # g               Civ group name
+    # coop0           Initial cooperation level
+
+    method {load coop} {args} {
+        assert {$db(loadstate) eq "rel"}
+
+        foreach {n f g coop0} $args {
+            set curve_id [$rdb onecolumn {
+                SELECT curve_id 
+                FROM gram_nfg
+                WHERE object=$dbid AND n=$n AND f=$f AND g=$g;
+            }]
+
+            require {$curve_id ne ""} "No such coop curve: $n $f $g"
+
+            $rdb eval {
+                UPDATE gram_curves
+                SET val0 = $coop0,
+                    val  = $coop0
+                WHERE curve_id = $curve_id;
+            }
+        }
+
+        set db(loadstate) "coop"
+    }
+
+    # SanityCheck
+    #
+    # Verifies that we have everything we need to run.
+
+    method SanityCheck {} {
+        # TBD: Not yet implemented.
     }
 
     # CreateValidators

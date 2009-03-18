@@ -284,327 +284,107 @@ namespace eval ::simlib::test {
     # Loads data into the gram's RDB tables.
 
     proc LoadGram {gram} {
-        InsertInto $gram gram_n {
-            {n N1}
-            {n N2}
-        }
+        $gram load nbhoods N1 N2
 
-        InsertInto $gram gram_g {
-            {gtype CIV g KURD }
-            {gtype CIV g SHIA }
-            {gtype CIV g SUNN }
-            {gtype FRC g BLUE }
-            {gtype FRC g BRIT }
-            {gtype FRC g OPFOR}
-            {gtype ORG g ORGA }
-            {gtype ORG g ORGB }
-        }
+        $gram load groups \
+            KURD  CIV     \
+            SHIA  CIV     \
+            SUNN  CIV     \
+            BLUE  FRC     \
+            BRIT  FRC     \
+            OPFOR FRC     \
+            ORGA  ORG     \
+            ORGB  ORG
 
-        InsertInto $gram gram_c {
-            {ctype CIV c AUT}
-            {ctype CIV c CUL}
-            {ctype CIV c QOL}
-            {ctype CIV c SFT}
-            {ctype ORG c CAS}
-            {ctype ORG c SVC}
-        }
+        $gram load concerns \
+            AUT CIV         \
+            CUL CIV         \
+            QOL CIV         \
+            SFT CIV         \
+            CAS ORG         \
+            SVC ORG
 
-        InsertInto $gram gram_mn {
-            {m N1 n N1 proximity 0 effects_delay 0.0}
-            {m N1 n N2 proximity 2 effects_delay 0.0}
-            {m N2 n N1 proximity 2 effects_delay 0.0}
-            {m N2 n N2 proximity 0 effects_delay 0.0}
-        }
+        $gram load nbrel
 
-        InsertInto $gram gram_ng {
-            {n N1 g KURD population 10000 rollup_weight 1.0 effects_factor 1.0}
-            {n N1 g SHIA population 10000 rollup_weight 1.0 effects_factor 1.0}
-            {n N1 g SUNN population 10000 rollup_weight 1.0 effects_factor 1.0}
-            {n N1 g ORGA population     0 rollup_weight 1.0 effects_factor 1.0}
-            {n N1 g ORGB population     0 rollup_weight 1.0 effects_factor 1.0}
-            {n N2 g KURD population 10000 rollup_weight 1.0 effects_factor 1.0}
-            {n N2 g SHIA population 10000 rollup_weight 1.0 effects_factor 1.0}
-            {n N2 g SUNN population 10000 rollup_weight 1.0 effects_factor 1.0}
-            {n N2 g ORGA population     0 rollup_weight 1.0 effects_factor 1.0}
-            {n N2 g ORGB population     0 rollup_weight 1.0 effects_factor 1.0}
-        }
+        $gram load nbgroups \
+            N1 KURD 10000 1.0 1.0 \
+            N1 SHIA 10000 1.0 1.0 \
+            N1 SUNN 10000 1.0 1.0 \
+            N2 KURD 10000 1.0 1.0 \
+            N2 SHIA 10000 1.0 1.0 \
+            N2 SUNN 10000 1.0 1.0
 
-        MakeSatCurve $gram N1 KURD AUT   0.0 1.0 -1.0
-        MakeSatCurve $gram N1 KURD CUL   0.0 1.0 -1.0
-        MakeSatCurve $gram N1 KURD QOL   0.0 1.0 -4.0
-        MakeSatCurve $gram N1 KURD SFT -80.0 1.0 -4.0
+        $gram load sat \
+            N1 KURD AUT   0.0 1.0 -1.0 \
+            N1 KURD CUL   0.0 1.0 -1.0 \
+            N1 KURD QOL   0.0 1.0 -4.0 \
+            N1 KURD SFT -80.0 1.0 -4.0 \
+            N1 SHIA AUT  40.0 1.0  4.0 \
+            N1 SHIA CUL -40.0 1.0 -1.0 \
+            N1 SHIA QOL -40.0 1.0 -4.0 \
+            N1 SHIA SFT  40.0 1.0  4.0 \
+            N1 SUNN AUT -80.0 1.0 -8.0 \
+            N1 SUNN CUL -80.0 1.0 -4.0 \
+            N1 SUNN QOL -40.0 1.0 -8.0 \
+            N1 SUNN SFT -80.0 1.0 -8.0 \
+            N2 KURD AUT   0.0 1.0 -1.0 \
+            N2 KURD CUL   0.0 1.0 -1.0 \
+            N2 KURD QOL   0.0 1.0 -4.0 \
+            N2 KURD SFT -80.0 1.0 -4.0 \
+            N2 SHIA AUT  40.0 1.0  4.0 \
+            N2 SHIA CUL -40.0 1.0 -1.0 \
+            N2 SHIA QOL -40.0 1.0 -4.0 \
+            N2 SHIA SFT  40.0 1.0  4.0 \
+            N2 SUNN AUT -80.0 1.0 -8.0 \
+            N2 SUNN CUL -80.0 1.0 -4.0 \
+            N2 SUNN QOL -40.0 1.0 -8.0 \
+            N2 SUNN SFT -80.0 1.0 -8.0
 
-        MakeSatCurve $gram N1 SHIA AUT  40.0 1.0  4.0
-        MakeSatCurve $gram N1 SHIA CUL -40.0 1.0 -1.0
-        MakeSatCurve $gram N1 SHIA QOL -40.0 1.0 -4.0
-        MakeSatCurve $gram N1 SHIA SFT  40.0 1.0  4.0
-
-        MakeSatCurve $gram N1 SUNN AUT -80.0 1.0 -8.0
-        MakeSatCurve $gram N1 SUNN CUL -80.0 1.0 -4.0
-        MakeSatCurve $gram N1 SUNN QOL -40.0 1.0 -8.0
-        MakeSatCurve $gram N1 SUNN SFT -80.0 1.0 -8.0
-
-        MakeSatCurve $gram N1 ORGA CAS 0.0 1.0 0.0
-        MakeSatCurve $gram N1 ORGA SVC 0.0 1.0 0.0
-
-        MakeSatCurve $gram N1 ORGB CAS 0.0 1.0 0.0
-        MakeSatCurve $gram N1 ORGB SVC 0.0 1.0 0.0
-
-        MakeSatCurve $gram N2 KURD AUT   0.0 1.0 -1.0
-        MakeSatCurve $gram N2 KURD CUL   0.0 1.0 -1.0
-        MakeSatCurve $gram N2 KURD QOL   0.0 1.0 -4.0
-        MakeSatCurve $gram N2 KURD SFT -80.0 1.0 -4.0
-
-        MakeSatCurve $gram N2 SHIA AUT  40.0 1.0  4.0
-        MakeSatCurve $gram N2 SHIA CUL -40.0 1.0 -1.0
-        MakeSatCurve $gram N2 SHIA QOL -40.0 1.0 -4.0
-        MakeSatCurve $gram N2 SHIA SFT  40.0 1.0  4.0
-
-        MakeSatCurve $gram N2 SUNN AUT -80.0 1.0 -8.0
-        MakeSatCurve $gram N2 SUNN CUL -80.0 1.0 -4.0
-        MakeSatCurve $gram N2 SUNN QOL -40.0 1.0 -8.0
-        MakeSatCurve $gram N2 SUNN SFT -80.0 1.0 -8.0
-
-        MakeSatCurve $gram N2 ORGA CAS 0.0 1.0 0.0
-        MakeSatCurve $gram N2 ORGA SVC 0.0 1.0 0.0
-
-        MakeSatCurve $gram N2 ORGB CAS 0.0 1.0 0.0
-        MakeSatCurve $gram N2 ORGB SVC 0.0 1.0 0.0
-
-        InsertInto $gram gram_nfg {
-            {n N1 f BLUE g BLUE  rel   1.0}
-            {n N1 f BLUE g BRIT  rel   0.8}
-            {n N1 f BLUE g KURD  rel   0.0}
-            {n N1 f BLUE g OPFOR rel  -0.8}
-            {n N1 f BLUE g ORGA  rel   0.0}
-            {n N1 f BLUE g ORGB  rel   0.0}
-            {n N1 f BLUE g SHIA  rel   0.0}
-            {n N1 f BLUE g SUNN  rel   0.0}
-
-            {n N1 f BRIT g BLUE  rel   0.8}
-            {n N1 f BRIT g BRIT  rel   1.0}
-            {n N1 f BRIT g KURD  rel   0.0}
-            {n N1 f BRIT g OPFOR rel  -0.8}
-            {n N1 f BRIT g ORGA  rel   0.0}
-            {n N1 f BRIT g ORGB  rel   0.0}
-            {n N1 f BRIT g SHIA  rel   0.0}
-            {n N1 f BRIT g SUNN  rel   0.0}
-
-            {n N1 f KURD g BLUE  rel   0.6}
-            {n N1 f KURD g BRIT  rel   0.6}
-            {n N1 f KURD g KURD  rel   1.0}
-            {n N1 f KURD g OPFOR rel  -0.6}
-            {n N1 f KURD g ORGA  rel   0.0}
-            {n N1 f KURD g ORGB  rel   0.0}
-            {n N1 f KURD g SHIA  rel   0.6}
-            {n N1 f KURD g SUNN  rel  -0.6}
-
-            {n N1 f OPFOR g BLUE  rel -0.8}
-            {n N1 f OPFOR g BRIT  rel -0.8}
-            {n N1 f OPFOR g KURD  rel  0.0}
-            {n N1 f OPFOR g OPFOR rel  1.0}
-            {n N1 f OPFOR g ORGA  rel  0.0}
-            {n N1 f OPFOR g ORGB  rel  0.0}
-            {n N1 f OPFOR g SHIA  rel  0.0}
-            {n N1 f OPFOR g SUNN  rel  0.0}
-
-            {n N1 f ORGA g BLUE  rel   0.0}
-            {n N1 f ORGA g BRIT  rel   0.0}
-            {n N1 f ORGA g KURD  rel   0.0}
-            {n N1 f ORGA g OPFOR rel   0.0}
-            {n N1 f ORGA g ORGA  rel   1.0}
-            {n N1 f ORGA g ORGB  rel   0.0}
-            {n N1 f ORGA g SHIA  rel   0.0}
-            {n N1 f ORGA g SUNN  rel   0.0}
-
-            {n N1 f ORGB g BLUE  rel   0.0}
-            {n N1 f ORGB g BRIT  rel   0.0}
-            {n N1 f ORGB g KURD  rel   0.0}
-            {n N1 f ORGB g OPFOR rel   0.0}
-            {n N1 f ORGB g ORGA  rel   0.0}
-            {n N1 f ORGB g ORGB  rel   1.0}
-            {n N1 f ORGB g SHIA  rel   0.0}
-            {n N1 f ORGB g SUNN  rel   0.0}
-
-            {n N1 f SHIA g BLUE  rel   0.3}
-            {n N1 f SHIA g BRIT  rel   0.3}
-            {n N1 f SHIA g KURD  rel   0.6}
-            {n N1 f SHIA g OPFOR rel  -0.3}
-            {n N1 f SHIA g ORGA  rel   0.0}
-            {n N1 f SHIA g ORGB  rel   0.0}
-            {n N1 f SHIA g SHIA  rel   1.0}
-            {n N1 f SHIA g SUNN  rel   0.0}
-
-            {n N1 f SUNN g BLUE  rel  -0.6}
-            {n N1 f SUNN g BRIT  rel  -0.6}
-            {n N1 f SUNN g KURD  rel  -0.6}
-            {n N1 f SUNN g OPFOR rel   0.6}
-            {n N1 f SUNN g ORGA  rel   0.0}
-            {n N1 f SUNN g ORGB  rel   0.0}
-            {n N1 f SUNN g SHIA  rel  -0.3}
-            {n N1 f SUNN g SUNN  rel   1.0}
-
-            {n N2 f BLUE g BLUE  rel   1.0}
-            {n N2 f BLUE g BRIT  rel   0.8}
-            {n N2 f BLUE g KURD  rel   0.0}
-            {n N2 f BLUE g OPFOR rel  -0.8}
-            {n N2 f BLUE g ORGA  rel   0.0}
-            {n N2 f BLUE g ORGB  rel   0.0}
-            {n N2 f BLUE g SHIA  rel   0.0}
-            {n N2 f BLUE g SUNN  rel   0.0}
-
-            {n N2 f BRIT g BLUE  rel   0.8}
-            {n N2 f BRIT g BRIT  rel   1.0}
-            {n N2 f BRIT g KURD  rel   0.0}
-            {n N2 f BRIT g OPFOR rel  -0.8}
-            {n N2 f BRIT g ORGA  rel   0.0}
-            {n N2 f BRIT g ORGB  rel   0.0}
-            {n N2 f BRIT g SHIA  rel   0.0}
-            {n N2 f BRIT g SUNN  rel   0.0}
-
-            {n N2 f KURD g BLUE  rel   0.6}
-            {n N2 f KURD g BRIT  rel   0.6}
-            {n N2 f KURD g KURD  rel   1.0}
-            {n N2 f KURD g OPFOR rel  -0.6}
-            {n N2 f KURD g ORGA  rel   0.0}
-            {n N2 f KURD g ORGB  rel   0.0}
-            {n N2 f KURD g SHIA  rel   0.6}
-            {n N2 f KURD g SUNN  rel  -0.6}
-
-            {n N2 f OPFOR g BLUE  rel -0.8}
-            {n N2 f OPFOR g BRIT  rel -0.8}
-            {n N2 f OPFOR g KURD  rel  0.0}
-            {n N2 f OPFOR g OPFOR rel  1.0}
-            {n N2 f OPFOR g ORGA  rel  0.0}
-            {n N2 f OPFOR g ORGB  rel  0.0}
-            {n N2 f OPFOR g SHIA  rel  0.0}
-            {n N2 f OPFOR g SUNN  rel  0.0}
-
-            {n N2 f ORGA g BLUE  rel   0.0}
-            {n N2 f ORGA g BRIT  rel   0.0}
-            {n N2 f ORGA g KURD  rel   0.0}
-            {n N2 f ORGA g OPFOR rel   0.0}
-            {n N2 f ORGA g ORGA  rel   1.0}
-            {n N2 f ORGA g ORGB  rel   0.0}
-            {n N2 f ORGA g SHIA  rel   0.0}
-            {n N2 f ORGA g SUNN  rel   0.0}
-
-            {n N2 f ORGB g BLUE  rel   0.0}
-            {n N2 f ORGB g BRIT  rel   0.0}
-            {n N2 f ORGB g KURD  rel   0.0}
-            {n N2 f ORGB g OPFOR rel   0.0}
-            {n N2 f ORGB g ORGA  rel   0.0}
-            {n N2 f ORGB g ORGB  rel   1.0}
-            {n N2 f ORGB g SHIA  rel   0.0}
-            {n N2 f ORGB g SUNN  rel   0.0}
-
-            {n N2 f SHIA g BLUE  rel   0.3}
-            {n N2 f SHIA g BRIT  rel   0.3}
-            {n N2 f SHIA g KURD  rel   0.6}
-            {n N2 f SHIA g OPFOR rel  -0.3}
-            {n N2 f SHIA g ORGA  rel   0.0}
-            {n N2 f SHIA g ORGB  rel   0.0}
-            {n N2 f SHIA g SHIA  rel   1.0}
-            {n N2 f SHIA g SUNN  rel   0.0}
-
-            {n N2 f SUNN g BLUE  rel  -0.6}
-            {n N2 f SUNN g BRIT  rel  -0.6}
-            {n N2 f SUNN g KURD  rel  -0.6}
-            {n N2 f SUNN g OPFOR rel   0.6}
-            {n N2 f SUNN g ORGA  rel   0.0}
-            {n N2 f SUNN g ORGB  rel   0.0}
-            {n N2 f SUNN g SHIA  rel  -0.3}
-            {n N2 f SUNN g SUNN  rel   1.0}
-        }
-
-        MakeCoopCurve $gram N1 KURD BLUE  50.0
-        MakeCoopCurve $gram N1 KURD BRIT  50.0
-        MakeCoopCurve $gram N1 KURD OPFOR 50.0
-
-        MakeCoopCurve $gram N1 SHIA BLUE  50.0
-        MakeCoopCurve $gram N1 SHIA BRIT  50.0
-        MakeCoopCurve $gram N1 SHIA OPFOR 50.0
-
-        MakeCoopCurve $gram N1 SUNN BLUE  50.0
-        MakeCoopCurve $gram N1 SUNN BRIT  50.0
-        MakeCoopCurve $gram N1 SUNN OPFOR 50.0
-
-        MakeCoopCurve $gram N2 KURD BLUE  50.0
-        MakeCoopCurve $gram N2 KURD BRIT  50.0
-        MakeCoopCurve $gram N2 KURD OPFOR 50.0
-
-        MakeCoopCurve $gram N2 SHIA BLUE  50.0
-        MakeCoopCurve $gram N2 SHIA BRIT  50.0
-        MakeCoopCurve $gram N2 SHIA OPFOR 50.0
-
-        MakeCoopCurve $gram N2 SUNN BLUE  50.0
-        MakeCoopCurve $gram N2 SUNN BRIT  50.0
-        MakeCoopCurve $gram N2 SUNN OPFOR 50.0
-    }
-
-    proc InsertInto {gram table dicts} {
-        set dbid [dict create object [$gram cget -dbid]]
-        set rdb  [$gram cget -rdb]
-
-        foreach dict $dicts {
-            $rdb insert $table [dict merge $dbid $dict]
-        }
-    }
-
-    proc MakeSatCurve {gram n g c sat0 saliency trend} {
-        set dbid [$gram cget -dbid]
-        set rdb  [$gram cget -rdb]
-
-        $rdb eval {
-            SELECT ng_id, gtype, sat_tracked AS tracked
-            FROM gram_ng JOIN gram_g USING (object,g)
-            WHERE object=$dbid AND n=$n AND g=$g
-        } {
-            if {$tracked} {
-                $rdb eval {
-                    -- Note: curve_id is set automatically
-                    INSERT INTO gram_curves(object, curve_type, 
-                                            val0, val)
-                    VALUES($dbid, 'SAT', $sat0, $sat0);
-
-                    -- Note: ngc_id is set automatically
-                    INSERT INTO 
-                    gram_ngc(object, ng_id, curve_id,
-                             n, g, c, gtype, saliency, trend)
-                    VALUES($dbid, $ng_id, last_insert_rowid(),
-                           $n, $g, $c, $gtype,
-                           $saliency, $trend);
-                }
-            } else {
-                # Satisfaction is not tracked.  The saliency is 0.0,
-                # and the curve_id is NULL.
-                $rdb eval {
-                    -- Note: ngc_id is set automatically
-                    INSERT INTO 
-                    gram_ngc(object, ng_id,
-                             n, g, c, gtype, saliency, trend)
-                    VALUES($dbid, $ng_id,
-                           $n, $g, $c, $gtype,
-                           0.0, 0.0);
-                }
-            }
-        }
-    }
-
-    proc MakeCoopCurve {gram n f g coop0} {
-        set dbid [$gram cget -dbid]
-        set rdb  [$gram cget -rdb]
-
-        $rdb eval {
-            -- Note: curve_id is set automatically.
-            INSERT INTO gram_curves(object, curve_type, val0, val)
-            VALUES($dbid, 'COOP', $coop0, $coop0);
+        $gram load rel \
+            N1 BLUE  BRIT   0.8 \
+            N1 BLUE  OPFOR -0.8 \
+            N1 BRIT  BLUE   0.8 \
+            N1 BRIT  OPFOR -0.8 \
+            N1 KURD  BLUE   0.6 \
+            N1 KURD  BRIT   0.6 \
+            N1 KURD  OPFOR -0.6 \
+            N1 KURD  SHIA   0.6 \
+            N1 KURD  SUNN  -0.6 \
+            N1 OPFOR BLUE  -0.8 \
+            N1 OPFOR BRIT  -0.8 \
+            N1 SHIA  BLUE   0.3 \
+            N1 SHIA  BRIT   0.3 \
+            N1 SHIA  KURD   0.6 \
+            N1 SHIA  OPFOR -0.3 \
+            N1 SUNN  BLUE  -0.6 \
+            N1 SUNN  BRIT  -0.6 \
+            N1 SUNN  KURD  -0.6 \
+            N1 SUNN  OPFOR  0.6 \
+            N1 SUNN  SHIA  -0.3 \
+            N2 BLUE  BRIT   0.8 \
+            N2 BLUE  OPFOR -0.8 \
+            N2 BRIT  BLUE   0.8 \
+            N2 BRIT  OPFOR -0.8 \
+            N2 KURD  BLUE   0.6 \
+            N2 KURD  BRIT   0.6 \
+            N2 KURD  OPFOR -0.6 \
+            N2 KURD  SHIA   0.6 \
+            N2 KURD  SUNN  -0.6 \
+            N2 OPFOR BLUE  -0.8 \
+            N2 OPFOR BRIT  -0.8 \
+            N2 SHIA  BLUE   0.3 \
+            N2 SHIA  BRIT   0.3 \
+            N2 SHIA  KURD   0.6 \
+            N2 SHIA  OPFOR -0.3 \
+            N2 SUNN  BLUE  -0.6 \
+            N2 SUNN  BRIT  -0.6 \
+            N2 SUNN  KURD  -0.6 \
+            N2 SUNN  OPFOR  0.6 \
+            N2 SUNN  SHIA  -0.3
             
-            UPDATE gram_nfg
-            SET curve_id = last_insert_rowid()
-            WHERE n=$n AND f=$f AND g=$g;
-        }
+        $gram load coop
     }
+
 
     # init ?options?
     #
@@ -1101,7 +881,7 @@ g_id object g     gtype sat   sat0
     } -cleanup {
         cleanup
     } -result {
-c_id object c   ctype sat                 sat0                
+c_id object c   gtype sat                 sat0                
 ---- ------ --- ----- ------------------- ------------------- 
 1    gram   AUT CIV   -13.333333333333334 -13.333333333333334 
 2    gram   CUL CIV   -40.0               -40.0               

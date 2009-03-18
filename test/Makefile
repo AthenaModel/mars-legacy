@@ -24,7 +24,7 @@ TOP_DIR = $(shell pwd)/..
 
 include $(TOP_DIR)/MakeDefs
 
-PACKAGES = marsutil
+PACKAGES = marsutil simlib
 
 #---------------------------------------------------------------------
 # Target: all
