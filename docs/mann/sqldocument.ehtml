@@ -92,12 +92,26 @@ empty string, or the empty string if no argument is non-empty.  This
 is a Tcl-friendly equivalent to COALESCE() which treats empty strings
 like NULLs.<p>
 
+<<defitem now {now(?<i>offset</i>?)}>>
+
+If <code>-clock</code> is specified, then <<iref now>> will be
+defined, and will return the current simulation time in ticks.  If
+<i>offset</i> is given, it's an offset in integer ticks; it will be
+added to the current simulation time, and returned.<p>
+
 <<defitem percent {percent(<i>frac</i>)}>>
 Displays the fraction as a percentage.  If the fraction
 is at least 0.005, displays it as an integer percentage, e.g.,
 1%, 10%, 25%.  If the fraction is <= 0.005 but greater than
 0.0, displays it as "~0%".
 <p>
+
+<<defitem tozulu {tozulu(<i>ticks</i>, ?<i>offset</i>?)}>>
+
+If <code>-clock</code> is specified, then <<iref tozulu>> will be
+defined.  Given a simulation time as <i>ticks</i> plus an optional
+<i>offset</i>, returns the resulting simulation time as a
+<<xref zulu(n)>> time string.<p>
 
 <<defitem wallclock {wallclock()}>>
 
@@ -132,6 +146,12 @@ If <b>on</b>, the default, the sqldocument(n) always has an open
 transaction; changes are not committed until <<iref commit>> is
 called.  If <b>off</b>, the application can batch queries into
 transactions as it chooses, and <<iref commit>> has no effect.<p>
+
+<<defopt {-clock <i>simclock</i>}>>
+
+<b>Readonly.</b> The <i>simclock</i> must be an instance of
+<<xref simclock(n)>>.  If this option is given, the <<iref now>> and
+<<iref tozulu>> SQL functions will be defined.<p>
 
 <<defopt {-rollback <i>boolean</i>}>>
 

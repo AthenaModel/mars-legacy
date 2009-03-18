@@ -161,6 +161,16 @@ snit::type ::marsutil::sqldocument {
         -readonly yes       \
         -type snit::boolean
 
+    # -clock
+    #
+    # Specifies a simclock.  If it exists, simclock-related functions
+    # are defined.
+
+    option -clock     \
+        -default  ""  \
+        -readonly yes
+
+
     #-------------------------------------------------------------------
     # Instance variables
 
@@ -342,6 +352,13 @@ snit::type ::marsutil::sqldocument {
     # Define SQL functions.
 
     method DefineFunctions {} {
+        # FIRST, define the -clock functions
+        if {$options(-clock) ne ""} {
+            $db function tozulu [list $options(-clock) toZulu]
+            $db function now    [list $options(-clock) now]
+        }
+
+        # NEXT, define functions defined in sqlsections.
         foreach section $registry {
             foreach {name definition} [$section sqlsection functions] {
                 $db function $name $definition

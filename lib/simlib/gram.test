@@ -61,11 +61,9 @@ namespace eval ::simlib::test {
     simclockType myclock
 
     # Create a run-time database in memory
-    sqldocument rdb
+    sqldocument rdb -clock [namespace current]::myclock
     rdb open :memory:
     rdb clear
-
-    rdb function tozulu [list [namespace current]::myclock toZulu]
 
     # tableSave table
     #
