@@ -88,6 +88,36 @@ snit::type ::marsutil::zulu {
 
         return $result
     }
+
+    # validate zulutime
+    #
+    # zulutime     A Zulu time string
+    #
+    # Validates a Zulu time string
+
+    typemethod validate {zulutime} {
+        # FIRST, convert to uppercase
+        set upzulu [string toupper $zulutime]
+
+        # NEXT, the "clock" command doesn't know how to scan Zulu time,
+        # so parse the string and convert it to something that "clock"
+        # can scan: hhmm dd monthname yy
+        if {![regexp {^(\d\d)(\d\d)(\d\d)Z([A-Z][A-Z][A-Z])(\d\d)$} $upzulu \
+                  dummy dd hh mm monthname yy]} {
+            return -code error -errorcode INVALID \
+                "invalid Zulu-time string: \"$zulutime\""
+        }
+
+        set time "$hh:$mm $dd $monthname $yy"
+
+        if {[catch {clock scan $time -gmt 1} result]} {
+            return -code error -errorcode INVALID \
+                "invalid Zulu-time string: \"$zulutime\""
+        }
+
+        return $upzulu
+    }
+
 }
 
 

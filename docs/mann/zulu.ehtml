@@ -5,7 +5,7 @@
 <pare>
 package require marsutil 0.1
 namespace import ::marsutil::*
-</pre>
+</pre><p>
 
 <<itemlist>>
 
@@ -49,6 +49,12 @@ zulu-time string.  Seconds within the minute are truncated.<p>
 
 Given a <i>zulutime</i> string, returns the standard Unix time in
 clock seconds.<p>
+
+<<defitem "zulu validate" {zulu validate <i>zulutime</i>}>>
+
+Validates the <i>zulutime</i>, throwing an error with error code
+<b>INVALID</b> for invalid strings and returning the canonical form
+(all uppercase) otherwise.<p>
 
 <</deflist>>
 

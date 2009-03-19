@@ -80,6 +80,35 @@ namespace eval ::marsutil::test {
     } -result {1105404780}
 
     #-------------------------------------------------------------------
+    # validate
+
+    test zulu_validate-1.1 {normal case} -body {
+        zulu validate "280854ZJUL05"
+    } -result {280854ZJUL05}
+
+    test zulu_validate-1.2 {error, regexp fails} -body {
+        zulu validate "280854ZJUL05X"
+    } -returnCodes {
+        error
+    } -result {invalid Zulu-time string: "280854ZJUL05X"}
+
+    test zulu_validate-1.3 {error, clock scan fails} -body {
+        zulu validate "280854ZXYZ05"
+    } -returnCodes {
+        error
+    } -result {invalid Zulu-time string: "280854ZXYZ05"}
+
+    test zulu_validate-2.1 {time with hour = "00"} -body {
+        # This test covers a bug fix; originally, validate choked
+        # if the hour digits were "00".
+        zulu validate "110053ZJAN05"
+    } -result {110053ZJAN05}
+
+    test zulu_validate-3.1 {lowercase time} -body {
+        zulu validate "110053zjan05"
+    } -result {110053ZJAN05}
+
+    #-------------------------------------------------------------------
     # Cleanup
 
     cleanupTests
