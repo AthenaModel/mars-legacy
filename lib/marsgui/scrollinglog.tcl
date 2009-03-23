@@ -363,7 +363,9 @@ snit::widget ::marsgui::scrollinglog {
 
     method LogFilter {entryStr} {
         #  Filter by verbosity.
-        if {!$verbosities([lindex $entryStr 1])} {
+        set verb [lindex $entryStr 1]
+        
+        if {![info exists verbosities($verb)] || !$verbosities($verb)} {
             return 0
         }
 

@@ -416,6 +416,11 @@ snit::widget ::marsgui::logdisplay {
         set newlineOffset 0
         set entryStr      ""
 
+        # Don't bother with empty entries.
+        if {$entry eq ""} {
+            return ""
+        }
+
         # Filter the entry if a filter exists.
         if {$options(-filtercmd) ne ""} {
             # Setup the entry filter command.
