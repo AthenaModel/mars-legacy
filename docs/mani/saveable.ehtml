@@ -17,17 +17,23 @@ subcommand.<p>
 
 <<deflist subcommands>>
 
-<<defitem checkpoint {<i>saveable</i> checkpoint}>>
+<<defitem checkpoint {<i>saveable</i> checkpoint ?-saved?}>>
 
 This subcommand returns the <i>saveable</i>'s state as a single
 string, which can be saved in any desired manner and later can be
 <<iref restore>>ed.  Note that the returned value need not be the
 the object's entire state; this is not a serialization interface.<p>
 
-<<defitem restore {<i>saveable</i> restore <i>checkpoint</i>}>>
+If <code>-saved</code> is given, then the object's unsaved changes
+flag is cleared.<p>
+
+<<defitem restore {<i>saveable</i> restore <i>checkpoint</i> ?-saved?}>>
 
 Restores the <i>saveable</i>'s state to the saved <i>checkpoint</i>,
 which was originally returned by <<iref checkpoint>>.<p>
+
+By default, this command should set the object's unsaved changes flag;
+if <code>-saved</code> is given, then the flag should be cleared.<p>
 
 <<defitem changed {<i>saveable</i> changed}>>
 
@@ -42,7 +48,8 @@ all saveables every time it saves its state.<p>
 <<section EXAMPLES>>
 
 Here's an example of a minimal saveable(i) that saves its checkpointed
-data in a single array.  The saveable(i) is a singleton module that
+data in a single array and always considers itself saved.
+The saveable(i) is a singleton module that
 implements the interface as subcommands of the singleton.<p>
 
 <pre>
@@ -51,17 +58,17 @@ snit::type sample {
 
     typevariable info -array { ... }
 
-    typemethod checkpoint {} {
+    typemethod checkpoint {{option ""}} {
         array get info
     }
 
-    typemethod restore {checkpoint} {
+    typemethod restore {checkpoint {option ""}} {
         array unset info
         array set info $checkpoint
     }
 
     typemethod changed {} {
-        # Depends on how info() is used.
+        return 0
     }
     ...
 }

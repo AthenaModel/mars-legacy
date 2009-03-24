@@ -796,21 +796,21 @@ snit::widget ::marsgui::cli {
     #-------------------------------------------------------------------
     # saveable(i) interface
 
-    # saveable checkpoint
+    # saveable checkpoint ?-saved?
     #
-    # Returns the CLI's history stack
+    # Returns the CLI's history stack.  -saved is ignored.
 
-    method {saveable checkpoint} {} {
+    method {saveable checkpoint} {{option ""}} {
         return $history
     }
 
-    # saveable restore checkpoint
+    # saveable restore checkpoint ?-saved?
     #
     # checkpoint    The return value of "saveable checkpoint"
     #
-    # Restores the history data.
+    # Restores the history data.  -saved is ignored.
 
-    method {saveable restore} {checkpoint} {
+    method {saveable restore} {checkpoint {option ""}} {
         $self clear
         set history $checkpoint
         set hp -1
@@ -819,7 +819,7 @@ snit::widget ::marsgui::cli {
     # saveable changed
     #
     # Always returns 0: saving the history is a convenience, not a
-    # necessity.
+    # necessity, so there are never unsaved changes.
 
     method {saveable changed} {} {
         return 0
