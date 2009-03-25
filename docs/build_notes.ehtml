@@ -10,6 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.10, 25 March 2009</h3>
+Four changes in support of ongoing Athena development are in this build. There's
+also a patch to prevent a bgerror from occurring in log browsers.
+
+<ul>
+  <li>Bug 1954: simlib(n): simtypes(n), rmf(n), gram(n)
+  <li>Bug 1956: sqldocument(n): -clock option
+  <li>Bug 1957: zulu(n): zulu validate
+  <li>Bug 1960: saveable(i) checkpoint -saved
+</ul>
+
 <h3>Build 1.9, 11 March 2009</h3>
 Two minor changes in this build. marsutil(n) no longer includes the parmdb(n)
 man page and Mars now uses the 2008Q4 version of ActiveTcl Enterprise Edition.<p>
