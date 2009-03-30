@@ -245,6 +245,15 @@ snit::type ::simlib::gram {
 
     # This gram's identifier in rdb records.
     variable dbid ""
+    
+    # Non-checkpointed scalar data
+    #
+    # changed    1 if db() has changed, and 0 otherwise.
+
+    
+    variable info -array {
+        changed          0
+    }
 
     #-------------------------------------------------------------------
     # Constructor
@@ -269,9 +278,6 @@ snit::type ::simlib::gram {
         set rdb $options(-rdb)
         assert {[info commands $rdb] ne ""}
 
-        # NEXT, initialize the RDB
-        $self init -reload
-
         $self Log normal "Created"
     }
 
@@ -282,27 +288,48 @@ snit::type ::simlib::gram {
     #-------------------------------------------------------------------
     # Object Management Methods
 
-    # checkpoint
+    # checkpoint ?-saved?
     #
     # Return a copy of the engine's state for later restoration.
     # This includes only the data stored in the db array; data stored
     # in the RDB is checkpointed automatically.
     
-    method checkpoint {} {
+    method checkpoint {{option ""}} {
+        if {$option eq "-saved"} {
+            set info(changed) 0
+        }
+
         return [array get db]
     }
 
-    # restore state
+
+    # restore state ?-saved?
     #
     # state     Checkpointed state returned by the checkpoint method.
     #
     # Restores the checkpointed state; this is just the reverse of
     # "checkpoint".
 
-    method restore {state} {
+    method restore {state {option ""}} {
         # First, restore the state.
         array unset db
         array set db $state
+
+        # Next, set the changed flag
+        if {$option eq "-saved"} {
+            set info(changed) 0
+        } else {
+            set info(changed) 1
+        }
+    }
+
+
+    # changed
+    #
+    # Returns the changed flag.
+
+    method changed {} {
+        return $info(changed)
     }
 
     #-------------------------------------------------------------------
@@ -352,7 +379,19 @@ snit::type ::simlib::gram {
             UPDATE gram_gc SET sat0 = sat WHERE object=$dbid;
         }
 
+        # NEXT, set the changed flag
+        set info(changed) 1
+
         return
+    }
+
+    # initialized
+    #
+    # Returns 1 if the -loadcmd has ever been successfully called, and 0
+    # otherwise.
+
+    method initialized {} {
+        return $db(initialized)
     }
 
     #-------------------------------------------------------------------
@@ -379,7 +418,7 @@ snit::type ::simlib::gram {
 
         # NEXT, call the -loadcmd.  The client will specify the
         # entities and input data, and GRAM will populate tables.
-        $options(-loadcmd) $self
+        {*}$options(-loadcmd) $self
 
         # NEXT, make sure that all "load *" methods were called,
         # and terminate the state machine.
@@ -1332,6 +1371,7 @@ snit::type ::simlib::gram {
         assert {[$clock now] > $db(time)}
         set db(timelast) $db(time)
         set db(time) [$clock now]
+        set info(changed) 1
 
         # NEXT, Compute the contribution to each of the curves for
         # this time step.

@@ -30,11 +30,17 @@ GRAM differs from JRAM in the following ways:<p>
        <code>-loadcmd</code> to initially populate its RDB tables;
        see <<xref "LOADING DATA">> for more details.<p>
 
+  <li> JRAM loads its input data immediately upon creation.  GRAM
+       requires an explicit call to the <<iref init>> method.<p>
+
   <li> JRAM requires the <i>cause</i> specified with inputs to be a
        member of a JNEM-specific enumeration.  The list of valid
        causes differs in different domains; and as GRAM treats the
        cause as an arbitrary string, there's no need to validate
        them.  Thus, in GRAM this is left up to the client.<p>
+
+  <li> GRAM supports the full <<xref saveable(i)>> API; JRAM supports
+       the simpler checkpoint/restore API used in JNEM.<p>
 </ul>
 
 An application can create multiple independent instances of the model
@@ -876,17 +882,25 @@ error to specify this option if <i>n</i> is "*".<p>
 
 <</deflist coop>>
 
-<<defitem checkpoint {$obj checkpoint}>>
+<<defitem checkpoint {$obj checkpoint ?-saved?}>>
 
 Returns the current state of the object's in-memory data; the engine
-can later be restored to this state using <<iref recover>>.  Note that
-the RDB must also be checkpointed as well.<p>
+can later be restored to this state using <<iref restore>>.  See
+<<xref saveable(i)>> for details.<p>
 
-<<defitem recover {$obj recover <i>state</i>}>>
+Note that the RDB must also be checkpointed as well.<p>
 
-Restores the engine to a <i>state</i> produced by a previous call to
-<<iref checkpoint>>.  Note that the RDB must also be checkpointed as
-well.<p>
+<<defitem restore {$obj restore <i>checkpoint</i> ?-saved?}>>
+
+Restores the engine to a <i>checkpoint</i> produced by a previous call to
+<<iref checkpoint>>.  See <<xref saveable(i)>> for details.<p>
+<p>
+Note that the RDB must be restored as well.<p>
+
+<<defitem changed {$obj changed}>>
+
+Indicates whether the object's <<xref saveable(i)>> data has changed
+or not.<p>
 
 <<defitem dump {$obj dump <i>subcommand</i> ?<i>args..</i>?}>>
 

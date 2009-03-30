@@ -264,6 +264,8 @@ namespace eval ::simlib::test {
 
         eval $cmd $args
 
+        jr init
+
         # Add some dummy events/situations
         for {set i 0} {$i < $drivers} {incr i} {
             jr driver add -oneliner "Dummy DRIVER"
