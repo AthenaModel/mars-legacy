@@ -88,6 +88,7 @@ snit::type ::marsutil::parmset {
     # notify           Flag: if 1, call -notifycmd, otherwise don't.
     # master           The master parmset(n)'s name, or "" if none.
     # slaves           List of slave parmset(n)'s, or {} if none.
+    # changed          saveable(i) changed flag
     #
     # children-$id     IDs of children of subset $id. info(children-) 
     #                  is the list of top-level item IDs.
@@ -101,11 +102,12 @@ snit::type ::marsutil::parmset {
     #                  the parm was grafted, or "" if none.
 
     variable info -array {
-        items  {}
-        parms  {}
-        notify 1
-        master ""
-        slaves {}
+        items   {}
+        parms   {}
+        notify  1
+        master  ""
+        slaves  {}
+        changed 0
     }
 
     #-------------------------------------------------------------------
@@ -293,6 +295,9 @@ snit::type ::marsutil::parmset {
             # NEXT, notify client.
             callwith $options(-notifycmd) $name
         }
+
+        # NEXT, set the change flag
+        set info(changed) 1
 
         return $value
     }
@@ -549,6 +554,8 @@ snit::type ::marsutil::parmset {
     # save filename
     #
     # Saves non-defaulted parameter data to a file   
+    #
+    # Note: does not affect saveable(i) status!
 
     method save {filename} {
         # FIRST, rename any old file
@@ -584,6 +591,9 @@ snit::type ::marsutil::parmset {
         foreach id [array names values] {
             set values($id) $info(defvalue-$id)
         }
+
+        # NEXT, set changed flag
+        set info(changed) 1
 
         # NEXT, do notifications
         if {$info(notify)} {
@@ -653,6 +663,9 @@ snit::type ::marsutil::parmset {
 
         # NEXT, notify the client.
         callwith $options(-notifycmd) ""
+
+        # NEXT, set changed flag
+        set info(changed) 1
 
         return
     }
@@ -951,28 +964,57 @@ snit::type ::marsutil::parmset {
     }
 
     #-------------------------------------------------------------------
-    # Checkpoint/Restore
+    # Saveable(i) Interface
 
-    # checkpoint
+    # changed
     #
-    # Returns the parmset's checkpoint information as a string.
+    # Returns 1 if the saveable(i) data has changed, and 0 otherwise.
 
-    method checkpoint {} {
-        list values [array get values]
+    method changed {} {
+        return $info(changed)
     }
 
-    # restore checkpoint
+    # checkpoint ?-saved?
+    #
+    # Returns the parmset's checkpoint information as a string.
+    # If -save is specified, clears the changed flag.
+
+    method checkpoint {{opt ""}} {
+        if {$opt eq "-saved"} {
+            set info(changed) 0
+        }
+
+        # Do not include parms with default values
+        set checkpoint [list]
+
+        foreach name [$self names] {
+            set id [string tolower $name]
+            if {$values($id) ne $info(defvalue-$id)} {
+                lappend checkpoint $id $values($id)
+            }
+        }
+
+        return $checkpoint
+    }
+
+    # restore checkpoint ?-saved?
     #
     # checkpoint      A checkpoint string returned by "checkpoint"
     #
-    # Restores the parmset's state back to the checkpoint.
+    # Restores the parmset's state back to the checkpoint.  If
+    # -saved, clears the changed flag; otherwise, sets it.
 
-    method restore {checkpoint} {
-        # FIRST, restore the checkpointed data
-        foreach {name value} $checkpoint {
-            array unset $name
-            array set $name $value
+    method restore {checkpoint {opt ""}} {
+        # FIRST, restore the checkpointed data.  The checkpoint
+        # includes only the non-default values, so reset back to
+        # defaults first; then save the checkpointed values,
+        # if any.
+
+        foreach id [array names values] {
+            set values($id) $info(defvalue-$id)
         }
+
+        array set values $checkpoint
 
         # NEXT, do notifications
         if {$info(notify)} {
@@ -986,6 +1028,13 @@ snit::type ::marsutil::parmset {
             
             # NEXT, notify the client
             callwith $options(-notifycmd) ""
+        }
+
+        # NEXT, set or clear the changed flag
+        if {$opt eq "-saved"} {
+            set info(changed) 0
+        } else {
+            set info(changed) 1
         }
     }
 

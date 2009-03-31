@@ -621,6 +621,124 @@ parm pBool   true
         CleanUp
     } -result {1}
 
+
+    test parmset-11.2 {changed flag cleared by checkpoint -saved} -setup {
+        Setup
+    } -body {
+        ps define pInt    snit::integer 0   ""
+        ps define pBool   snit::boolean 0   ""
+        ps define pDouble snit::double  0.0 ""
+
+        ps reset
+        set a [ps changed]
+
+        ps checkpoint -saved
+        set b [ps changed]
+
+        list $a $b
+    } -cleanup {
+        CleanUp
+    } -result {1 0}
+
+
+    test parmset-11.3 {changed flag not cleared by checkpoint} -setup {
+        Setup
+    } -body {
+        ps define pInt    snit::integer 0   ""
+        ps define pBool   snit::boolean 0   ""
+        ps define pDouble snit::double  0.0 ""
+
+        ps reset
+        set a [ps changed]
+
+        ps checkpoint
+        set b [ps changed]
+
+        list $a $b
+    } -cleanup {
+        CleanUp
+    } -result {1 1}
+
+
+    test parmset-11.4 {changed flag cleared by restore -saved} -setup {
+        Setup
+    } -body {
+        ps define pInt    snit::integer 0   ""
+        ps define pBool   snit::boolean 0   ""
+        ps define pDouble snit::double  0.0 ""
+
+        set checkpoint [ps checkpoint]
+        set a [ps changed]
+
+        ps restore $checkpoint -saved
+        set b [ps changed]
+
+        list $a $b
+    } -cleanup {
+        CleanUp
+    } -result {1 0}
+
+
+    test parmset-11.5 {changed flag not cleared by restore} -setup {
+        Setup
+    } -body {
+        ps define pInt    snit::integer 0   ""
+        ps define pBool   snit::boolean 0   ""
+        ps define pDouble snit::double  0.0 ""
+
+        set checkpoint [ps checkpoint]
+        set a [ps changed]
+
+        ps restore $checkpoint
+        set b [ps changed]
+
+        list $a $b
+    } -cleanup {
+        CleanUp
+    } -result {1 1}
+
+
+    test parmset-11.6 {changed flag set by set} -setup {
+        Setup
+    } -body {
+        ps define pInt    snit::integer 0   ""
+        ps define pBool   snit::boolean 0   ""
+        ps define pDouble snit::double  0.0 ""
+
+        # Clear the changed flag
+        ps checkpoint -saved
+        set a [ps changed]
+
+        # Set something
+        ps set pInt 1
+        set b [ps changed]
+
+        list $a $b
+    } -cleanup {
+        CleanUp
+    } -result {0 1}
+
+
+    test parmset-11.7 {changed flag set by reset} -setup {
+        Setup
+    } -body {
+        ps define pInt    snit::integer 0   ""
+        ps define pBool   snit::boolean 0   ""
+        ps define pDouble snit::double  0.0 ""
+
+        # Clear the changed flag
+        ps checkpoint -saved
+        set a [ps changed]
+
+        # Reset something
+        ps reset
+        set b [ps changed]
+
+        list $a $b
+    } -cleanup {
+        CleanUp
+    } -result {0 1}
+
     #-------------------------------------------------------------------
     # lock/unlock
 
@@ -744,6 +862,7 @@ parm pBool   true
         Setup
         ps configure -notifycmd ::marsutil::test::NotifyCB
         ps define thisOne snit::integer 0 ""
+        set notifyList
     } -body {
         ps reset
     } -cleanup {
@@ -756,6 +875,7 @@ parm pBool   true
         ps define thisOne snit::integer 0 ""
     } -body {
         ps restore [ps checkpoint]
+        set notifyList
     } -cleanup {
         CleanUp
     } -result {{}}
@@ -1200,9 +1320,11 @@ parm pBool   true
         C1 set thisOne 5
         set ckpt [C1 checkpoint]
         C1 reset
+
         set notifyList {}
 
         C1 restore $ckpt
+
         list [A get thisOne] $notifyList
     } -cleanup {
         CleanUpABCs

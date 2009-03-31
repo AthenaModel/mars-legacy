@@ -39,6 +39,8 @@ This module defines the parmset(n) type; to define a parameter set,
 create an instance of parmset(n); then define the parameters using
 the <<iref define>> method.<p>
 
+parmset(n) is a <<xref saveable(i)>> object.<p>
+
 <<subsection "Masters and Slaves">>
 
 Parmsets may be linked in a master/slave relationship.  The master
@@ -122,11 +124,21 @@ subcommands:<p>
 
 Returns the value of the specified <i>option</i>.<p>
 
-<<defitem checkpoint {$parmset checkpoint}>>
+<<defitem changed {$parmset changed}>>
+
+Returns 1 if the parmset's contents have been changed since the
+previous "<<iref checkpoint>> <code>-saved</code>" or
+"<<iref restore>> <code>-saved</code>".<p>
+
+<<defitem checkpoint {$parmset checkpoint ?-saved?}>>
 
 Returns a string which contains the parmset's current state; this
 string can be used to <<iref restore>> the parmset's state at a
-later time.<p>
+later time.  The string contains only the parameters which differ from
+the default values.<p>
+
+If <code>-saved</code> is given, clears the <<iref changed>> flag.<p>
+
 
 <<defitem configure {$parmset configure <i>option value...</i>}>>
 
@@ -237,10 +249,11 @@ definition, which match the specified wildcard pattern; if no
 Resets all parameter values to their defaults, and calls
 the <code>-notifycmd</code>.<p>
 
-<<defitem restore {$parmset restore <i>checkpoint</i>}>>
+<<defitem restore {$parmset restore <i>checkpoint</i> ?-saved?}>>
 
 Restores the parmset's state back to the saved <i>checkpoint</i>, and calls
-the <code>-notifycmd</code>.<p>
+the <code>-notifycmd</code>.  If <code>-saved</code> is specified,
+clears the <<iref changed>> flag; otherwise it sets it.<p>
 
 <<defitem save {$parmset save <i>filename</i>}>>
 
