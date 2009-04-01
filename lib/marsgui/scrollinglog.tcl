@@ -145,36 +145,21 @@ snit::widget ::marsgui::scrollinglog {
         }]
         set showTitle [from args -showtitle]
 
-        # NEXT, Determine if a loglist should be included and create it if so.
+        # NEXT, determine if a loglist should be included.
         set loglist ""
         set options(-showloglist) [from args -showloglist]
 
+        # NEXT, Name the log display based on the parent
         if {$options(-showloglist)} {
-            # Get the -showapplist value for loglist(n).
-            set showAppList [from args -showapplist "no"]
-
             # Paner to contain the loglist and log
             set paner [paner $win.paner -orient horizontal -showhandle 1]
 
-            install loglist using loglist $paner.loglist \
-                -msgcmd           [mymethod LogCmd]       \
-                -selectcmd        [mymethod ListSelectCB] \
-                -autoupdate       1                       \
-                -autoload         $scrollbackFlag         \
-                -showtitle        $showTitle              \
-                -showapplist      $showAppList            \
-                -parsecmd         $parseCmd               \
-                -formatcmd        [list $log format]
-            
-            # NOTE: Propagated options handled via configurelist below
-
-            # Set the proper name for the log display
             set dlogName $paner.dlog
         } else {
             # The log display will be a child of the hull in this case
             set dlogName $win.dlog
         }
-        
+
         install log using logdisplay $dlogName          \
             -foreground     black                       \
             -background     white                       \
@@ -189,6 +174,25 @@ snit::widget ::marsgui::scrollinglog {
             -format         $format                     \
             -tags           $tags                       \
             -showtitle      $showTitle
+
+        # NEXT, create the loglist if need be.
+        if {$options(-showloglist)} {
+            # Get the -showapplist value for loglist(n).
+            set showAppList [from args -showapplist "no"]
+
+            install loglist using loglist $paner.loglist  \
+                -msgcmd           [mymethod LogCmd]       \
+                -selectcmd        [mymethod ListSelectCB] \
+                -autoupdate       1                       \
+                -autoload         $scrollbackFlag         \
+                -showtitle        $showTitle              \
+                -showapplist      $showAppList            \
+                -parsecmd         $parseCmd               \
+                -filtercmd        [mymethod LogFilter]    \
+                -formatcmd        [list $log format]
+            
+            # NOTE: Propagated options handled via configurelist below
+        }
 
         # Title bar contents
         label $bar.title \

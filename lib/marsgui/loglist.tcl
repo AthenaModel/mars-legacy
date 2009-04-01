@@ -156,6 +156,15 @@ snit::widget ::marsgui::loglist {
     # been specified.
     option  -formatcmd
 
+    # -filtercmd cmd
+    # 
+    # cmd
+    # 
+    # The command used to filter the parsed contents of a log file.
+    # This command will be used by searclogs when searching earlier/later
+    # log files.
+    option  -filtercmd
+
     # -title title
     # 
     # Specifies the text displayed on the update button displayed 
@@ -713,15 +722,26 @@ snit::widget ::marsgui::loglist {
             
             # Get the pathname of the log being searched.
             set log [lindex $logFiles [expr {$i - 1}]]
+
+            # Get the raw contents of this file
+            if {[set text [$self ReadLog $log]] eq ""} {
+                continue
+            }
             
-            # Do the grep search.
+            # Do the search.
             set hits 0
             if {!$options(-formattext)} {
-                set f [open $log]
-                catch {set hits [regexp -line $pattern [read $f]]}
-                catch {close $f}
+                # Is there a match in the raw text?
+                catch {set hits [regexp -line $pattern $text]}
+
+                # If so, check again if a filtercmd has been provided
+                if {$hits > 0 && $options(-filtercmd) ne ""} {
+                    catch {set hits \
+                               [regexp -line $pattern [$self Filter $text]]}
+                }
             } else {
-                catch {set hits [regexp $pattern [$self Format $log]]}
+                # Fully format the text prior to looking for a match
+                catch {set hits [regexp $pattern [$self Format $text]]}
             }
 
             if {$hits > 0} {
@@ -768,29 +788,42 @@ snit::widget ::marsgui::loglist {
         set stopFlag 1
     }
 
-    # Format file
+    # ReadLog file
     #
-    # file    The name of the file to format
+    # file    The name of the file to read
     #
-    # Returns the raw, parsed or formatted contents based on what
-    # options have been provided.
-
-    method Format {file} {
+    # Returns the raw contents of the file provided there are no errors
+    # opening or reading the file.
+    method ReadLog  {file} {
 
         # Open the file, and configure it explicitly for "lf" mode.
         # This way, carriage returns in the data don't cause trouble.
-        if {[catch {set handle [open $file]}]} {
+        if {[catch {set handle [open $file]} result]} {
+            $self Message "Error opening [file tail $file]: $result"
             return ""
         }
         fconfigure $handle -translation lf
         
         # Read the file contents. 
-        if {[catch {set contents [read -nonewline $handle]}]} {
+        if {[catch {set contents [read -nonewline $handle]} result]} {
+            $self Message "Error reading [file tail $file]: $result"
+            catch {close $handle}
             return ""
         }
         
         # Close the file.
         catch {close $handle}
+        
+        return $contents
+    }
+
+    # Format file
+    # 
+    # contents    text to be formatted
+    #
+    # Returns the raw, parsed or formatted contents based on which
+    # options have been provided.
+    method Format {contents} {
 
         # Without a parser return the raw contents
         if {$options(-parsecmd) eq ""} {
@@ -820,6 +853,44 @@ snit::widget ::marsgui::loglist {
         }
 
         return $formated
+    }
+
+    # Filter contents
+    #
+    # contents    text to be filtered
+    #
+    # Returns the raw, parsed or filtered text based on which options
+    # have been provided.
+    method Filter {contents} {
+
+        # Without a parser return the raw contents
+        if {$options(-parsecmd) eq ""} {
+            return $contents
+        } 
+        
+        # Parse the contents
+        set cmd $options(-parsecmd)
+        lappend cmd $contents
+        set parsed [uplevel \#0 $cmd]
+        
+        # Without a filter return the parsed contents
+        if {$options(-filtercmd) eq ""} {
+            return $parsed
+        } 
+
+        # Pass each entry through the supplied filter
+        set filtered [list]
+        foreach entry $parsed {
+            set cmd $options(-filtercmd)
+            lappend cmd $entry
+            
+            # Does this entry pass through the filter?
+            if {[uplevel \#0 $cmd]} {
+                lappend filtered $entry
+            }
+        }
+
+        return $filtered
     }
 
 }
