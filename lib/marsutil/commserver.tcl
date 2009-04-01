@@ -339,7 +339,17 @@ snit::type ::marsutil::commserver {
     method broadcast {script} {
         $self Log debug "Broadcast: $script"
         foreach id $info(ids) {
-            $comm send -async $id $script
+            if {[catch {$comm send -async $id $script} result]} {
+                $self Log detail "Error sending to <$id>: $result"
+                
+                # There's likely a disconnect further back in the queue
+                # so just handle it now.
+                if {[regexp "connection reset by peer" $result] ||
+                    [regexp "broken pipe" $result]
+                } {
+                    catch {$self ClientDisconnect $id}
+                }
+            }
         }
     }
 
