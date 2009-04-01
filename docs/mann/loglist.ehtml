@@ -152,7 +152,7 @@ A filtering command to filter individual entry strings.
 The command should take the entry string as the single argument.
 The command should return 1 if the entry string passes the filter and
 0 otherwise.  This command will be used during calls to
-<<iref searchlogs>> when -formattext is off. <p>
+<<iref searchlogs>> when -formattext is off.
 
 <</deflist loglist options>>
 
