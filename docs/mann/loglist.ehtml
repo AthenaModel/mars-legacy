@@ -146,6 +146,14 @@ list of formatted log entries just as they would be displayed
 currently.  It's up to client to define what formatted means.  This
 option only matters when -formattext is true. <p>
 
+<<defopt {-filtercmd <i>cmd</i>}>>
+
+A filtering command to filter individual entry strings.
+The command should take the entry string as the single argument.
+The command should return 1 if the entry string passes the filter and
+0 otherwise.  This command will be used during calls to
+<<iref searchlogs>> when -formattext is off. <p>
+
 <</deflist loglist options>>
 
 <</deflist commands>>
