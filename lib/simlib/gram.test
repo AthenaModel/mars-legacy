@@ -528,7 +528,6 @@ namespace eval ::simlib::test {
     } -result {Error in constructor: Assertion failed: $options(-loadcmd) ne ""}
 
 
-
     #--------------------------------------------------------------------
     # option -clock
 
@@ -1485,6 +1484,42 @@ id object etype curve_id cause direct_ngc active driver input prox ts te       t
     } -cleanup {
         cleanup
     } -result {}
+
+
+    #-------------------------------------------------------------------
+    # clear
+
+
+    test clear-1.1 {No longer initialized} -setup {
+        create
+    } -body {
+        set a [jr initialized]
+        jr clear
+        set b [jr initialized]
+        
+        list $a $b
+    } -cleanup {
+        cleanup
+    } -result {1 0}
+
+
+    test clear-1.2 {Spot check: empty tables} -setup {
+        create
+    } -body {
+        jr clear
+
+        rdb eval {
+            SELECT count(curve_id) AS count
+            FROM gram_curves
+            WHERE object='gram'
+        } {}
+
+        set count
+    } -cleanup {
+        cleanup
+    } -result {0}
+
+
    
     #-------------------------------------------------------------------
     # driver

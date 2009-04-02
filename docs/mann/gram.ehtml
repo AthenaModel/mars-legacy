@@ -324,6 +324,18 @@ If <code>-reload</code> is specified, the object's
 data from scratch; otherwise it will work from its cached (and
 possibly modified) copy of that data.<p>
 
+<<defitem initialized {$obj initialized}>>
+
+Returns 1 if either <<iref init>> or <<iref restore>> has been called
+such this instance's RDB tables are populated and it is capable of
+advancing time, and 0 otherwise.<p>
+
+<<defitem clear {$obj clear}>>
+
+Returns the instance of gram(n) to its state at creation: the RDB
+tables are cleared, and the in-memory variables are returned to their
+initial values.<p>
+
 <<defitem load {$obj load <i>subcommand</i> ?<i>args...</i>?}>>
 
 The <<iref load>> family of subcommands is used to load input data

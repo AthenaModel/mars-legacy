@@ -232,7 +232,10 @@ snit::type ::simlib::gram {
     #
     #-----------------------------------------------------------------------
     
-    variable db -array {
+    variable db -array { }
+
+    # Initial db values
+    variable initdb {
         initialized      0
         loadstate        ""
         time             {}
@@ -277,6 +280,9 @@ snit::type ::simlib::gram {
 
         set rdb $options(-rdb)
         assert {[info commands $rdb] ne ""}
+
+        # NEXT, initialize db
+        array set db $initdb
 
         $self Log normal "Created"
     }
@@ -383,6 +389,20 @@ snit::type ::simlib::gram {
         set info(changed) 1
 
         return
+    }
+
+    # clear
+    #
+    # Uninitializes gram, returning it to its initial state on 
+    # creation and deleting all of the instance's data from the RDB.
+
+    method clear {} {
+        # FIRST, reset the in-memory data
+        array unset db
+        array set db $initdb
+
+        # NEXT, Clear the RDB
+        $self ClearTables
     }
 
     # initialized
