@@ -401,6 +401,9 @@ snit::type ::simlib::gram {
         array unset db
         array set db $initdb
 
+        # NEXT, destroy validators
+        $self DestroyValidators
+
         # NEXT, Clear the RDB
         $self ClearTables
     }
@@ -929,11 +932,7 @@ snit::type ::simlib::gram {
     method CreateValidators {} {
         # FIRST, if they already exist get rid of them.
         if {$db(initialized)} {
-            rename $nbhoods   ""
-            rename $cgroups   ""
-            rename $cogroups  ""
-            rename $fgroups   ""
-            rename $concerns  ""
+            $self DestroyValidators
         }
 
         # Nbhoods
@@ -983,6 +982,19 @@ snit::type ::simlib::gram {
         }]
 
         set concerns [snit::enum ${selfns}::concerns -values $values]
+    }
+
+    # DestroyValidators
+    #
+    # Destroys the snit::enums for the valid nbhoods, concerns,
+    # etc.
+
+    method DestroyValidators {} {
+        rename $nbhoods   "" ; set nbhoods  ""
+        rename $cgroups   "" ; set cgroups  ""
+        rename $cogroups  "" ; set cogroups ""
+        rename $fgroups   "" ; set fgroups  ""
+        rename $concerns  "" ; set concerns ""
     }
 
     # CreateLongTermTrends
