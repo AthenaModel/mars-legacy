@@ -176,10 +176,7 @@ CREATE TABLE gram_effects (
     -- current nominal satisfaction change/day
     slope      DOUBLE,
 
-    -- current satisfaction change limit
-    slimit     DOUBLE,
-
-    -- future slope links: Tcl list of {ts slope climit ...}
+    -- future slope links: Tcl list of {ts slope ...}
     -- If empty, there are no future links.
     future     TEXT DEFAULT ''
 );
@@ -740,7 +737,6 @@ SELECT -- Effect Identification
        -- Slope Effect Details
        gram_effects.delay     AS delay,
        gram_effects.slope     AS slope,
-       gram_effects.slimit    AS slimit,
        gram_effects.future    AS future,
 
        -- Satisfaction Curve Identity
@@ -860,7 +856,6 @@ SELECT -- Effect Identification
        -- Slope Effect Details
        gram_effects.delay     AS delay,
        gram_effects.slope     AS slope,
-       gram_effects.slimit    AS slimit,
        gram_effects.future    AS future,
 
        -- Cooperation Curve Identity

@@ -732,32 +732,32 @@ gram   0      Trend Trend Satisfaction Long-Term Trend 1
     } -cleanup {
         cleanup
     } -result {
-id object curve_id direct_id driver input etype cause prox ts te       active tlast ncontrib acontrib nominal actual days tau llimit delay slope slimit future 
--- ------ -------- --------- ------ ----- ----- ----- ---- -- -------- ------ ----- -------- -------- ------- ------ ---- --- ------ ----- ----- ------ ------ 
-1  gram   1        1         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0  -100.0        
-2  gram   2        2         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0  -100.0        
-3  gram   3        3         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0  -100.0        
-4  gram   4        4         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0  -100.0        
-5  gram   5        5         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0   100.0         
-6  gram   6        6         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0  -100.0        
-7  gram   7        7         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0  -100.0        
-8  gram   8        8         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0   100.0         
-9  gram   9        9         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0  -100.0        
-10 gram   10       10        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0  -100.0        
-11 gram   11       11        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0  -100.0        
-12 gram   12       12        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0  -100.0        
-13 gram   17       17        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0  -100.0        
-14 gram   18       18        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0  -100.0        
-15 gram   19       19        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0  -100.0        
-16 gram   20       20        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0  -100.0        
-17 gram   21       21        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0   100.0         
-18 gram   22       22        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0  -100.0        
-19 gram   23       23        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0  -100.0        
-20 gram   24       24        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0   100.0         
-21 gram   25       25        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0  -100.0        
-22 gram   26       26        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0  -100.0        
-23 gram   27       27        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0  -100.0        
-24 gram   28       28        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0  -100.0        
+id object curve_id direct_id driver input etype cause prox ts te       active tlast ncontrib acontrib nominal actual days tau llimit delay slope future 
+-- ------ -------- --------- ------ ----- ----- ----- ---- -- -------- ------ ----- -------- -------- ------- ------ ---- --- ------ ----- ----- ------ 
+1  gram   1        1         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+2  gram   2        2         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+3  gram   3        3         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+4  gram   4        4         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+5  gram   5        5         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
+6  gram   6        6         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+7  gram   7        7         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+8  gram   8        8         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
+9  gram   9        9         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+10 gram   10       10        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+11 gram   11       11        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+12 gram   12       12        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+13 gram   17       17        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+14 gram   18       18        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+15 gram   19       19        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+16 gram   20       20        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+17 gram   21       21        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
+18 gram   22       22        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+19 gram   23       23        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+20 gram   24       24        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
+21 gram   25       25        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+22 gram   26       26        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+23 gram   27       27        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+24 gram   28       28        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
     }
 
     test init-2.4 {initial contents: gram_contribs} -setup {
@@ -1447,32 +1447,32 @@ gram   -1   0     1.0    10        32        N2 ORGB SVC 32       N2 ORGB
     } -cleanup {
         cleanup
     } -result {
-id object etype curve_id cause direct_ngc active driver input prox ts te       tlast ncontrib acontrib nominal actual days tau llimit delay slope slimit future n  g    c   sat   dn dg   
--- ------ ----- -------- ----- ---------- ------ ------ ----- ---- -- -------- ----- -------- -------- ------- ------ ---- --- ------ ----- ----- ------ ------ -- ---- --- ----- -- ---- 
-1  gram   S     1        TREND 1          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0  -100.0        N1 KURD AUT 0.0   N1 KURD 
-2  gram   S     2        TREND 2          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0  -100.0        N1 KURD CUL 0.0   N1 KURD 
-3  gram   S     3        TREND 3          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0  -100.0        N1 KURD QOL 0.0   N1 KURD 
-4  gram   S     4        TREND 4          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0  -100.0        N1 KURD SFT -80.0 N1 KURD 
-5  gram   S     5        TREND 5          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0   100.0         N1 SHIA AUT 40.0  N1 SHIA 
-6  gram   S     6        TREND 6          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0  -100.0        N1 SHIA CUL -40.0 N1 SHIA 
-7  gram   S     7        TREND 7          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0  -100.0        N1 SHIA QOL -40.0 N1 SHIA 
-8  gram   S     8        TREND 8          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0   100.0         N1 SHIA SFT 40.0  N1 SHIA 
-9  gram   S     9        TREND 9          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0  -100.0        N1 SUNN AUT -80.0 N1 SUNN 
-10 gram   S     10       TREND 10         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0  -100.0        N1 SUNN CUL -80.0 N1 SUNN 
-11 gram   S     11       TREND 11         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0  -100.0        N1 SUNN QOL -40.0 N1 SUNN 
-12 gram   S     12       TREND 12         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0  -100.0        N1 SUNN SFT -80.0 N1 SUNN 
-13 gram   S     17       TREND 17         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0  -100.0        N2 KURD AUT 0.0   N2 KURD 
-14 gram   S     18       TREND 18         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0  -100.0        N2 KURD CUL 0.0   N2 KURD 
-15 gram   S     19       TREND 19         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0  -100.0        N2 KURD QOL 0.0   N2 KURD 
-16 gram   S     20       TREND 20         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0  -100.0        N2 KURD SFT -80.0 N2 KURD 
-17 gram   S     21       TREND 21         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0   100.0         N2 SHIA AUT 40.0  N2 SHIA 
-18 gram   S     22       TREND 22         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0  -100.0        N2 SHIA CUL -40.0 N2 SHIA 
-19 gram   S     23       TREND 23         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0  -100.0        N2 SHIA QOL -40.0 N2 SHIA 
-20 gram   S     24       TREND 24         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0   100.0         N2 SHIA SFT 40.0  N2 SHIA 
-21 gram   S     25       TREND 25         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0  -100.0        N2 SUNN AUT -80.0 N2 SUNN 
-22 gram   S     26       TREND 26         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0  -100.0        N2 SUNN CUL -80.0 N2 SUNN 
-23 gram   S     27       TREND 27         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0  -100.0        N2 SUNN QOL -40.0 N2 SUNN 
-24 gram   S     28       TREND 28         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0  -100.0        N2 SUNN SFT -80.0 N2 SUNN 
+id object etype curve_id cause direct_ngc active driver input prox ts te       tlast ncontrib acontrib nominal actual days tau llimit delay slope future n  g    c   sat   dn dg   
+-- ------ ----- -------- ----- ---------- ------ ------ ----- ---- -- -------- ----- -------- -------- ------- ------ ---- --- ------ ----- ----- ------ -- ---- --- ----- -- ---- 
+1  gram   S     1        TREND 1          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N1 KURD AUT 0.0   N1 KURD 
+2  gram   S     2        TREND 2          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N1 KURD CUL 0.0   N1 KURD 
+3  gram   S     3        TREND 3          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 KURD QOL 0.0   N1 KURD 
+4  gram   S     4        TREND 4          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 KURD SFT -80.0 N1 KURD 
+5  gram   S     5        TREND 5          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N1 SHIA AUT 40.0  N1 SHIA 
+6  gram   S     6        TREND 6          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N1 SHIA CUL -40.0 N1 SHIA 
+7  gram   S     7        TREND 7          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 SHIA QOL -40.0 N1 SHIA 
+8  gram   S     8        TREND 8          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N1 SHIA SFT 40.0  N1 SHIA 
+9  gram   S     9        TREND 9          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN AUT -80.0 N1 SUNN 
+10 gram   S     10       TREND 10         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 SUNN CUL -80.0 N1 SUNN 
+11 gram   S     11       TREND 11         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN QOL -40.0 N1 SUNN 
+12 gram   S     12       TREND 12         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN SFT -80.0 N1 SUNN 
+13 gram   S     17       TREND 17         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N2 KURD AUT 0.0   N2 KURD 
+14 gram   S     18       TREND 18         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N2 KURD CUL 0.0   N2 KURD 
+15 gram   S     19       TREND 19         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 KURD QOL 0.0   N2 KURD 
+16 gram   S     20       TREND 20         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 KURD SFT -80.0 N2 KURD 
+17 gram   S     21       TREND 21         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N2 SHIA AUT 40.0  N2 SHIA 
+18 gram   S     22       TREND 22         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N2 SHIA CUL -40.0 N2 SHIA 
+19 gram   S     23       TREND 23         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 SHIA QOL -40.0 N2 SHIA 
+20 gram   S     24       TREND 24         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N2 SHIA SFT 40.0  N2 SHIA 
+21 gram   S     25       TREND 25         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN AUT -80.0 N2 SUNN 
+22 gram   S     26       TREND 26         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 SUNN CUL -80.0 N2 SUNN 
+23 gram   S     27       TREND 27         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN QOL -40.0 N2 SUNN 
+24 gram   S     28       TREND 28         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN SFT -80.0 N2 SUNN 
     }
 
     test init-2.19 {initial contents: gram_sat_contribs} -setup {
@@ -2475,7 +2475,7 @@ ORGB  0.0000
         create
     } -body {
         jr sat level 1 0 N1 SHIA QOL 5 .1  
-        jr sat slope 2 0 N1 SHIA SFT 10 100
+        jr sat slope 2 0 N1 SHIA SFT 10
         jr sat level 3 0 N1 SHIA CUL 5 .1  
         jr sat level 4 0 N1 SHIA AUT 5 .1  
         myclock advance 1440
@@ -2510,7 +2510,7 @@ gram   1440 4      N1 SUNN AUT -0.3
     test table_gram_contribs-1.2 {sat contribs retained over time} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA QOL 10 100
+        jr sat slope 1 0 N1 SHIA QOL 10
         myclock advance 1440
         jr advance
         myclock advance 2880
@@ -2540,7 +2540,7 @@ gram   2880 1      N1 SUNN QOL -1.6
     } -body {
         jr coop level 1 0 N1 SHIA BLUE  5 .1  
         jr coop level 3 0 N1 SHIA BRIT  5 .1  
-        jr coop slope 3 0 N1 SHIA OPFOR 5  5
+        jr coop slope 3 0 N1 SHIA OPFOR 5
         myclock advance 1440
         jr advance
 
@@ -3886,7 +3886,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.1 {ts not numeric} -setup {
         create
     } -body {
-        jr sat slope 1 DUMMY N1 SHIA SFT 100.0 10.0
+        jr sat slope 1 DUMMY N1 SHIA SFT 100.0
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -3897,7 +3897,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.2 {ts in the past.} -setup {
         create
     } -body {
-        jr sat slope 1 -1 N1 SHIA SFT 100.0 10.0
+        jr sat slope 1 -1 N1 SHIA SFT 100.0
     } -returnCodes {
         error
     } -cleanup {
@@ -3907,7 +3907,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.3 {invalid nbhood} -setup {
         create
     } -body {
-        jr sat slope 1 0 DUMMY SHIA SFT 100.0 10.0
+        jr sat slope 1 0 DUMMY SHIA SFT 100.0
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -3917,7 +3917,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.4 {invalid pgroup} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 DUMMY QOL 100.0 10.0
+        jr sat slope 1 0 N1 DUMMY QOL 100.0
     } -returnCodes {
         error
     } -cleanup {
@@ -3927,7 +3927,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.5 {invalid concern} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA DUMMY 100.0 10.0
+        jr sat slope 1 0 N1 SHIA DUMMY 100.0
     } -returnCodes {
         error
     } -cleanup {
@@ -3937,7 +3937,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.6 {invalid group/concern combo} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA SVC 100.0 10.0
+        jr sat slope 1 0 N1 SHIA SVC 100.0
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -3947,27 +3947,19 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.7 {invalid slope: unknown symbol} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA SFT DUMMY 10.0
+        jr sat slope 1 0 N1 SHIA SFT DUMMY
     } -returnCodes {
         error
     } -cleanup {
         cleanup
     } -result {invalid value, "DUMMY"}
 
-    test sat_slope-1.8 {invalid limit: unknown symbol} -setup {
-        create
-    } -body {
-        jr sat slope 1 0 N1 SHIA SFT 100.0 DUMMY
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup
-    } -result {invalid value, "DUMMY"}
+    # test sat_slope-1.8 {invalid limit: unknown symbol} OBSOLETE
 
     test sat_slope-1.9 {Invalid option} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA SFT 100.0 10.0 -nonesuch foo
+        jr sat slope 1 0 N1 SHIA SFT 100.0 -nonesuch foo
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -3978,7 +3970,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.10 {Non-numeric -p} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA SFT 100.0 10.0 -p FOO
+        jr sat slope 1 0 N1 SHIA SFT 100.0 -p FOO
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -3988,7 +3980,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.11 {Negative -p} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA SFT 100.0 10.0 -p -0.1
+        jr sat slope 1 0 N1 SHIA SFT 100.0 -p -0.1
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -3998,7 +3990,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.12 {-p greater than 1.0} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA SFT 100.0 10.0 -p 1.1
+        jr sat slope 1 0 N1 SHIA SFT 100.0 -p 1.1
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -4009,7 +4001,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.13 {Non-numeric -q} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA SFT 100.0 10.0 -q FOO
+        jr sat slope 1 0 N1 SHIA SFT 100.0 -q FOO
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -4019,7 +4011,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.14 {Negative -q} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA SFT 100.0 10.0 -q -0.1
+        jr sat slope 1 0 N1 SHIA SFT 100.0 -q -0.1
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -4029,7 +4021,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.15 {-q greater than 1.0} -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA SFT 100.0 10.0 -q 1.1
+        jr sat slope 1 0 N1 SHIA SFT 100.0 -q 1.1
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -4039,7 +4031,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.16 {invalid cause} -constraints cause -setup {
         create
     } -body {
-        jr sat slope 1 0 N1 SHIA SFT 10.0 100 -cause DUMMY
+        jr sat slope 1 0 N1 SHIA SFT 10.0 -cause DUMMY
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -4049,8 +4041,8 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.17 {slope scheduled for an driver in decreasing time sequence} -setup {
         create
     } -body {
-        jr sat slope 1 10 N1 SHIA SFT 10.0 100
-        jr sat slope 1  5 N1 SHIA SFT 10.0 100
+        jr sat slope 1 10 N1 SHIA SFT 10.0
+        jr sat slope 1  5 N1 SHIA SFT 10.0
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -4060,7 +4052,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.18 {-p given when n=*} -setup {
         create
     } -body {
-        jr sat slope 1 0 * SHIA QOL 5.0 0.1 -p 0.1
+        jr sat slope 1 0 * SHIA QOL 5.0 -p 0.1
     } -returnCodes {
         error
     } -cleanup {
@@ -4070,7 +4062,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-1.19 {-q given when n=*} -setup {
         create
     } -body {
-        jr sat slope 1 0 * SHIA QOL 5.0 0.1 -q 0.1
+        jr sat slope 1 0 * SHIA QOL 5.0 -q 0.1
     } -returnCodes {
         error
     } -cleanup {
@@ -4082,62 +4074,62 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     test sat_slope-2.1 {schedule slope for one n,g,c.} -setup {
         create -trend no
     } -body {
-        jr sat slope 1 0 N2 KURD SFT 100.0 10.0
+        jr sat slope 1 0 N2 KURD SFT 100.0
         dumpSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N2 KURD D1    D 010000ZJAN70 n/a      N2   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -60.0 -10.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N2 KURD D1    D 010000ZJAN70 n/a      N2   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -60.0   0.0     0.0  
     }
 
     test sat_slope-2.2 {schedule slope for all n} -setup {
         create -trend no
     } -body {
-        jr sat slope 1 0 * KURD SFT 100.0 10.0
+        jr sat slope 1 0 * KURD SFT 100.0
         dumpSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0 -10.0   0.0     0.0  
-'     N2 '    '     D 010000ZJAN70 n/a      N2   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -60.0 -10.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
+'     N2 '    '     D 010000ZJAN70 n/a      N2   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -60.0   0.0     0.0  
     }
 
 
     test sat_slope-2.3 {successive inputs for an driver stack} -setup {
         create -trend no
     } -body {
-        jr sat slope 1  0 N2 KURD SFT 100.0 10.0
-        jr sat slope 1  5 N2 KURD SFT  75.0  5.0
-        jr sat slope 1 10 N2 KURD SFT   0.0  0.0
-        jr sat slope 1 15 N2 KURD SFT 100.0 20.0
+        jr sat slope 1  0 N2 KURD SFT 100.0
+        jr sat slope 1  5 N2 KURD SFT  75.0
+        jr sat slope 1 10 N2 KURD SFT   0.0
+        jr sat slope 1 15 N2 KURD SFT 100.0
         dumpSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ ------------ ---- ---- --- ----- ----- ------- ------ 
-1.4   N2 KURD D1    D 010000ZJAN70 010005ZJAN70 N2   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     D 010005ZJAN70 010010ZJAN70 N2   KURD SFT  75.0   5.0   0.0     0.0  
-'     '  '    '     D 010010ZJAN70 010015ZJAN70 N2   KURD SFT   0.0   0.0   0.0     0.0  
-'     '  '    '     D 010015ZJAN70 n/a          N2   KURD SFT 100.0  20.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010005ZJAN70 N2   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010005ZJAN70 010010ZJAN70 N2   SHIA SFT  45.0   5.0   0.0     0.0  
-'     '  '    '     I 010010ZJAN70 010015ZJAN70 N2   SHIA SFT   0.0   0.0   0.0     0.0  
-'     '  '    '     I 010015ZJAN70 n/a          N2   SHIA SFT  60.0  20.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010005ZJAN70 N2   SUNN SFT -60.0 -10.0   0.0     0.0  
-'     '  '    '     I 010005ZJAN70 010010ZJAN70 N2   SUNN SFT -45.0  -5.0   0.0     0.0  
-'     '  '    '     I 010010ZJAN70 010015ZJAN70 N2   SUNN SFT   0.0   0.0   0.0     0.0  
-'     '  '    '     I 010015ZJAN70 n/a          N2   SUNN SFT -60.0 -20.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ ------------ ---- ---- --- ----- ------- ------ 
+1.4   N2 KURD D1    D 010000ZJAN70 010005ZJAN70 N2   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     D 010005ZJAN70 010010ZJAN70 N2   KURD SFT  75.0   0.0     0.0  
+'     '  '    '     D 010010ZJAN70 010015ZJAN70 N2   KURD SFT   0.0   0.0     0.0  
+'     '  '    '     D 010015ZJAN70 n/a          N2   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010005ZJAN70 N2   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010005ZJAN70 010010ZJAN70 N2   SHIA SFT  45.0   0.0     0.0  
+'     '  '    '     I 010010ZJAN70 010015ZJAN70 N2   SHIA SFT   0.0   0.0     0.0  
+'     '  '    '     I 010015ZJAN70 n/a          N2   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010005ZJAN70 N2   SUNN SFT -60.0   0.0     0.0  
+'     '  '    '     I 010005ZJAN70 010010ZJAN70 N2   SUNN SFT -45.0   0.0     0.0  
+'     '  '    '     I 010010ZJAN70 010015ZJAN70 N2   SUNN SFT   0.0   0.0     0.0  
+'     '  '    '     I 010015ZJAN70 n/a          N2   SUNN SFT -60.0   0.0     0.0  
     }
 
     test sat_slope-2.4 {no direct effect if pgroup has zero pop} -setup {
@@ -4155,16 +4147,16 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Limit Nomina
     } -body {
 
 
-        jr sat slope 1 0 N1 SHIA SFT 100.0 10.0
+        jr sat slope 1 0 N1 SHIA SFT 100.0
 
         dumpSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N1 SHIA D1    I 010000ZJAN70 n/a      N1   KURD SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -30.0 -10.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 SHIA D1    I 010000ZJAN70 n/a      N1   KURD SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -30.0   0.0     0.0  
     }
 
     test sat_slope-2.5 {no indirect effect if pgroup has zero pop} -setup {
@@ -4180,22 +4172,22 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
         
         init -trend no
     } -body {
-        jr sat slope 1 0 N1 KURD SFT 100.0 10.0
+        jr sat slope 1 0 N1 KURD SFT 100.0
 
         dumpSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0 -10.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
     }
 
     test sat_slope-2.6 {direct effects in all nbhoods} -setup {
         create -trend no
     } -body {
-        jr sat slope 1 0 * KURD SFT 100.0 10.0
+        jr sat slope 1 0 * KURD SFT 100.0
 
         # Expect direct effect on SHIA, indirect on others, in both 
         # neighborhoods
@@ -4203,14 +4195,14 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0 -10.0   0.0     0.0  
-'     N2 '    '     D 010000ZJAN70 n/a      N2   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -60.0 -10.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
+'     N2 '    '     D 010000ZJAN70 n/a      N2   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -60.0   0.0     0.0  
     }
 
     test sat_slope-2.7 {Indirect effects in all nbhoods, N2 near} -setup {
@@ -4229,7 +4221,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
         init -trend no
     }  -body {
         # Enter slope input
-        jr sat slope 1 0 N1 KURD SFT 100.0 10.0 -p 0.5 -q 0.1
+        jr sat slope 1 0 N1 KURD SFT 100.0 -p 0.5 -q 0.1
 
         # Expect direct effect on SHIA, indirect on others, in both 
         # neighborhoods; 0.5 effect in N2 since N2 is near.
@@ -4237,20 +4229,20 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0 -10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   KURD SFT  50.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  30.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -30.0 -10.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   KURD SFT  50.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  30.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -30.0   0.0     0.0  
     }
 
     test sat_slope-2.8 {Indirect effects in all nbhoods, N2 far} -setup {
         create -trend no
     } -body {
-        jr sat slope 1 0 N1 KURD SFT 100.0 10.0 -p 0.5 -q 0.1
+        jr sat slope 1 0 N1 KURD SFT 100.0 -p 0.5 -q 0.1
 
         # Expect direct effect on SHIA, indirect on others, in both 
         # neighborhoods; 0.1 effect in N2 since N2 is far.
@@ -4258,14 +4250,14 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0 -10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   KURD SFT  10.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT   6.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT  -6.0 -10.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   KURD SFT  10.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT   6.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT  -6.0   0.0     0.0  
     }
 
     test sat_slope-2.9 {Indirect effects in all nbhoods, N2 remote} -setup {
@@ -4284,7 +4276,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
         init -trend no
     } -body {
         # Enter a slope input.
-        jr sat slope 1 0 N1 KURD SFT 100.0 10.0 -p 0.5 -q 0.1
+        jr sat slope 1 0 N1 KURD SFT 100.0 -p 0.5 -q 0.1
 
         # Expect direct effect on SHIA, indirect on others in N1;
         # no effects in N2 since N2 is remote.
@@ -4292,11 +4284,11 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0 -10.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
     }
 
     test sat_slope-2.10 {effects_factor != 1.0} -setup {
@@ -4313,7 +4305,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
         init -trend no
     }  -body {
         # Create a slope input
-        jr sat slope 1 0 N1 KURD SFT 100.0 10.0 -p 0.5 -q 0.1
+        jr sat slope 1 0 N1 KURD SFT 100.0 -p 0.5 -q 0.1
 
         # Expect direct effect on SHIA, indirect on others, in both 
         # neighborhoods; effect in N2 is 0.2 (2.0 * 0.1).
@@ -4321,14 +4313,14 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0 -10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   KURD SFT  20.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  12.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -12.0 -10.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   KURD SFT  20.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  12.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -12.0   0.0     0.0  
     }
 
     test sat_slope-2.11 {delayed indirect effects} -setup {
@@ -4345,7 +4337,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
         init -trend no
     }  -body {
         # Enter a slope input.
-        jr sat slope 1 0 N1 KURD SFT 100.0 10.0 -p 0.5 -q 0.1
+        jr sat slope 1 0 N1 KURD SFT 100.0 -p 0.5 -q 0.1
 
         # Expect direct effect on SHIA, indirect on others, in both 
         # neighborhoods; 0.1 effect in N2 delayed 1 day.
@@ -4353,14 +4345,14 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0 -10.0   0.0     0.0  
-'     '  '    '     I 020000ZJAN70 n/a      N2   KURD SFT  10.0  10.0   0.0     0.0  
-'     '  '    '     I 020000ZJAN70 n/a      N2   SHIA SFT   6.0  10.0   0.0     0.0  
-'     '  '    '     I 020000ZJAN70 n/a      N2   SUNN SFT  -6.0 -10.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
+'     '  '    '     I 020000ZJAN70 n/a      N2   KURD SFT  10.0   0.0     0.0  
+'     '  '    '     I 020000ZJAN70 n/a      N2   SHIA SFT   6.0   0.0     0.0  
+'     '  '    '     I 020000ZJAN70 n/a      N2   SUNN SFT  -6.0   0.0     0.0  
     }
 
     test sat_slope-2.12 {far effects are terminated if -q becomes 0} -setup {
@@ -4377,10 +4369,10 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
         init -trend no
     }  -body {
         # At time 0, schedule a slope input with far effects.
-        jr sat slope 1 0 N1 KURD SFT 100.0 10.0 -p 1.0 -q 1.0
+        jr sat slope 1 0 N1 KURD SFT 100.0 -p 1.0 -q 1.0
 
         # At time 10, schedule a new slope input without far effects.
-        jr sat slope 1 10 N1 KURD SFT 50.0 5.0 -p 1.0        
+        jr sat slope 1 10 N1 KURD SFT 50.0 -p 1.0        
 
         # Expect direct effect on SHIA, indirect on others, in both 
         # neighborhoods; 1.0 effect in N2 delayed 1 day; and then,
@@ -4390,26 +4382,26 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ ------------ ---- ---- --- ----- ----- ------- ------ 
-1.2   N1 KURD D1    D 010000ZJAN70 010010ZJAN70 N1   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     D 010010ZJAN70 n/a          N1   KURD SFT  50.0   5.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010010ZJAN70 N1   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 010010ZJAN70 n/a          N1   SHIA SFT  30.0   5.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010010ZJAN70 N1   SUNN SFT -60.0 -10.0   0.0     0.0  
-'     '  '    '     I 010010ZJAN70 n/a          N1   SUNN SFT -30.0  -5.0   0.0     0.0  
-'     '  '    '     I 020000ZJAN70 020010ZJAN70 N2   KURD SFT 100.0  10.0   0.0     0.0  
-'     '  '    '     I 020010ZJAN70 n/a          N2   KURD SFT   0.0   0.0   0.0     0.0  
-'     '  '    '     I 020000ZJAN70 020010ZJAN70 N2   SHIA SFT  60.0  10.0   0.0     0.0  
-'     '  '    '     I 020010ZJAN70 n/a          N2   SHIA SFT   0.0   0.0   0.0     0.0  
-'     '  '    '     I 020000ZJAN70 020010ZJAN70 N2   SUNN SFT -60.0 -10.0   0.0     0.0  
-'     '  '    '     I 020010ZJAN70 n/a          N2   SUNN SFT   0.0   0.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ ------------ ---- ---- --- ----- ------- ------ 
+1.2   N1 KURD D1    D 010000ZJAN70 010010ZJAN70 N1   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     D 010010ZJAN70 n/a          N1   KURD SFT  50.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010010ZJAN70 N1   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 010010ZJAN70 n/a          N1   SHIA SFT  30.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010010ZJAN70 N1   SUNN SFT -60.0   0.0     0.0  
+'     '  '    '     I 010010ZJAN70 n/a          N1   SUNN SFT -30.0   0.0     0.0  
+'     '  '    '     I 020000ZJAN70 020010ZJAN70 N2   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 020010ZJAN70 n/a          N2   KURD SFT   0.0   0.0     0.0  
+'     '  '    '     I 020000ZJAN70 020010ZJAN70 N2   SHIA SFT  60.0   0.0     0.0  
+'     '  '    '     I 020010ZJAN70 n/a          N2   SHIA SFT   0.0   0.0     0.0  
+'     '  '    '     I 020000ZJAN70 020010ZJAN70 N2   SUNN SFT -60.0   0.0     0.0  
+'     '  '    '     I 020010ZJAN70 n/a          N2   SUNN SFT   0.0   0.0     0.0  
     }
     
     test sat_slope-2.13 {Causes are tagged automatically if -cause is not given} -setup {
         create -trend no
     } -body {
-        jr sat slope 1 0 N1 SHIA SFT 10 10
+        jr sat slope 1 0 N1 SHIA SFT 10
 
         rdb eval {SELECT DISTINCT cause FROM gram_effects}
     } -cleanup {
@@ -4422,7 +4414,7 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Limit Nomina
         create -trend no
     } -body {
         # NEXT, do a slope effect.
-        jr sat slope 1 0 N2 KURD QOL 100.0 100.0
+        jr sat slope 1 0 N2 KURD QOL 100.0
 
         # Advance to noon
         myclock advance 720
@@ -4433,27 +4425,14 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Limit Nomina
         cleanup
     } -result {{N2 KURD QOL 50} {N2 SHIA QOL 42} {N2 SUNN QOL -18}}
 
-    test sat_slope-3.2 {sat increases to limit} -setup {
-        create -trend no
-    } -body {
-        # NEXT, do a level effect.
-        jr sat slope 1 0 N2 KURD QOL 100.0 27.0
-
-        # Advance to noon
-        myclock advance 720
-        jr advance
-
-        tableDiffCols gram_sat {n g c} sat sat0
-    } -cleanup {
-        cleanup
-    } -result {{N2 KURD QOL 27} {N2 SHIA QOL 37.8} {N2 SUNN QOL -16.2}}
+    # test sat_slope-3.2 {sat increases to limit} -setup OBSOLETE
 
     test sat_slope-3.3 {successive slope records take effect} -setup {
         create -trend no
     } -body {
         # NEXT, do a level effect.
-        jr sat slope 1 0   N2 KURD QOL 100.0 100.0
-        jr sat slope 1 360 N2 KURD QOL   0.0   0.0
+        jr sat slope 1 0   N2 KURD QOL 100.0
+        jr sat slope 1 360 N2 KURD QOL   0.0
 
         # Advance to noon; should get only 25.0 points of increase.
         myclock advance 720
@@ -4466,26 +4445,13 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Limit Nomina
 
     # sat_slope-4.*: Expiration
 
-    test sat_slope-4.1 {slope records expire due to limit} -setup {
-        create -trend no
-    } -body {
-        jr sat slope 1 0 N2 KURD QOL 100.0 27.0
-
-        # Advance to noon; the effect should expire
-        myclock advance 720
-        jr advance
-
-        dumpSlopes
-    } -cleanup {
-        cleanup
-    } -result {
-    }
+    # test sat_slope-4.1 {slope records expire due to limit} obsolete
 
     test sat_slope-4.2 {slope records expire due to time} -setup {
         create -trend no
     } -body {
-        jr sat slope 1 0   N2 KURD QOL 100.0 100.0
-        jr sat slope 1 360 N2 KURD QOL   0.0   0.0
+        jr sat slope 1 0   N2 KURD QOL 100.0
+        jr sat slope 1 360 N2 KURD QOL   0.0
 
         # Advance to noon; records should expire.
         myclock advance 720
@@ -4500,42 +4466,28 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Limit Nomina
     test sat_slope-4.3 {negative slopes don't expire immediately} -setup {
         create -trend no
     } -body {
-        jr sat slope 1 [myclock now] N1 SHIA SFT -10 -5
+        jr sat slope 1 [myclock now] N1 SHIA SFT -10
         myclock advance 5
         jr advance
         dumpSlopes
     } -cleanup {
         cleanup
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-1.1   N1 SHIA D1    D 010000ZJAN70 n/a      N1   SHIA SFT -10.0  -5.0  -0.0    -0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   KURD SFT  -6.0  -5.0  -0.0    -0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT   3.0   5.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 SHIA D1    D 010000ZJAN70 n/a      N1   SHIA SFT -10.0  -0.0    -0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   KURD SFT  -6.0  -0.0    -0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT   3.0   0.0     0.0  
     }
 
-    test sat_slope-4.4 {negative slopes reach their limit} -setup {
-        create -trend no
-    } -body {
-        jr sat slope 1 [myclock now] N1 SHIA SFT -10 -5
-        myclock advance 1440
-        jr advance
-
-        rdb onecolumn {
-            SELECT nominal FROM gram_effects
-            WHERE object='gram'
-        }
-    } -cleanup {
-        cleanup
-    } -result {-5.0}
-
+    # test sat_slope-4.4 {negative slopes reach their limit} OBSOLETE
 
     # sat_slope-5.*: Tracking of contributions
 
     test sat_slope-5.1 {gram_effects tracks total change} -setup {
         create -trend no
     } -body {
-        jr sat slope 1 0 N2 KURD QOL 100.0 100.0
+        jr sat slope 1 0 N2 KURD QOL 100.0
 
         # Advance to noon
         myclock advance 720
@@ -4545,36 +4497,36 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Ac
     } -cleanup {
         cleanup
     } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit  Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ------ ------- ------ 
-1.1   N2 KURD D1    D 010000ZJAN70 n/a      N2   KURD QOL 100.0 100.0   50.0    50.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA QOL  60.0 100.0   30.0    42.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN QOL -60.0 -100.0 -30.0   -18.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N2 KURD D1    D 010000ZJAN70 n/a      N2   KURD QOL 100.0  50.0    50.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA QOL  60.0  30.0    42.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN QOL -60.0 -30.0   -18.0  
     }
 
     test sat_slope-5.2 {change is tracked across sequential effects} -setup {
         create -trend no
     } -body {
-        jr sat slope 1    0 N2 KURD QOL 100.0 100.0
-        jr sat slope 1  360 N2 KURD QOL   0.0   0.0
-        jr sat slope 1  720 N2 KURD QOL 100.0 100.0
+        jr sat slope 1    0 N2 KURD QOL 100.0
+        jr sat slope 1  360 N2 KURD QOL   0.0
+        jr sat slope 1  720 N2 KURD QOL 100.0
 
         # Advance 18 hours.
         myclock advance 1080
         jr advance
 
         pprint [rdb query {
-            SELECT id,ts,te,slope,nominal,actual,slimit FROM gram_effects
+            SELECT id,ts,te,slope,nominal,actual FROM gram_effects
             ORDER BY ts
         }]
     } -cleanup {
         cleanup
     } -result {
-id ts  te       slope nominal actual slimit 
--- --- -------- ----- ------- ------ ------ 
-1  720 99999999 100.0 50.0    50.0   100.0  
-2  720 99999999 60.0  30.0    42.0   100.0  
-3  720 99999999 -60.0 -30.0   -18.0  -100.0 
+id ts  te       slope nominal actual 
+-- --- -------- ----- ------- ------ 
+1  720 99999999 100.0 50.0    50.0   
+2  720 99999999 60.0  30.0    42.0   
+3  720 99999999 -60.0 -30.0   -18.0  
     }
 
     # sat_slope-6.*: Cause interactions
@@ -4589,8 +4541,8 @@ id ts  te       slope nominal actual slimit
         # Schedule two effects of differing strength but the same cause
         # on the same pgroup.  The total effect over the timestep should
         # be the maximum of the two.
-        jr sat slope 1 0 N1 SHIA SFT 10 100.0 -cause CIVCAS
-        jr sat slope 2 0 N1 SHIA SFT  5 100.0 -cause CIVCAS
+        jr sat slope 1 0 N1 SHIA SFT 10 -cause CIVCAS
+        jr sat slope 2 0 N1 SHIA SFT  5 -cause CIVCAS
 
         # Advance time.
         myclock advance 720
@@ -4607,10 +4559,10 @@ id ts  te       slope nominal actual slimit
     } -cleanup {
         cleanup
     } -result {
-Cause  Start Time   End Time Slope Limit NTotal NContrib ATotal AContrib Input DN DG   E 
------- ------------ -------- ----- ----- ------ -------- ------ -------- ----- -- ---- - 
-CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   5.000    3.33   3.333  1.1   N1 SHIA D 
-'      '            '          5.0 100.0   2.50   2.500    1.67   1.667  2.1   N1 SHIA D 
+Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DG   E 
+------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- - 
+CIVCAS 010000ZJAN70 n/a       10.0   5.00   5.000    3.33   3.333  1.1   N1 SHIA D 
+'      '            '          5.0   2.50   2.500    1.67   1.667  2.1   N1 SHIA D 
     }
 
     test sat_slope-6.2 {Inputs with the same cause overlap: multiple time steps} -setup {
@@ -4623,8 +4575,8 @@ CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   5.000    3.33   3.333  1.1   N
         # Schedule two effects of differing strength but the same cause
         # on the same pgroup.  The total effect over the timestep should
         # be the maximum of the two.
-        jr sat slope 1 0 N1 SHIA SFT 10 100 -cause CIVCAS
-        jr sat slope 2 0 N1 SHIA SFT  5 100 -cause CIVCAS
+        jr sat slope 1 0 N1 SHIA SFT 10 -cause CIVCAS
+        jr sat slope 2 0 N1 SHIA SFT  5 -cause CIVCAS
 
         # Advance time.
         myclock advance 360
@@ -4645,11 +4597,11 @@ CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   5.000    3.33   3.333  1.1   N
     } -cleanup {
         cleanup
     } -result {
-Cause  Start Time   End Time Slope Limit NTotal NContrib ATotal AContrib Input DN DG   E 
------- ------------ -------- ----- ----- ------ -------- ------ -------- ----- -- ---- - 
-CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   2.500    3.27   1.608  1.1   N1 SHIA D 
-'      '            '          5.0 100.0   2.50   1.250    1.64   0.804  2.1   N1 SHIA D 
-TREND  '            '          4.0 100.0   2.00   1.000    1.96   0.965  0.1   N1 SHIA D 
+Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DG   E 
+------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- - 
+CIVCAS 010000ZJAN70 n/a       10.0   5.00   2.500    3.27   1.608  1.1   N1 SHIA D 
+'      '            '          5.0   2.50   1.250    1.64   0.804  2.1   N1 SHIA D 
+TREND  '            '          4.0   2.00   1.000    1.96   0.965  0.1   N1 SHIA D 
     }
    
     test sat_slope-6.3 {Inputs with different causes are independent} -setup {
@@ -4663,8 +4615,8 @@ TREND  '            '          4.0 100.0   2.00   1.000    1.96   0.965  0.1   N
         # Schedule two effects of differing strength but the same cause
         # on the same pgroup.  The total effect over the timestep should
         # be the maximum of the two.
-        jr sat slope 1 0 N1 SHIA SFT 10 100 -cause CIVCAS
-        jr sat slope 2 0 N1 SHIA SFT  5 100 -cause HOSCAP
+        jr sat slope 1 0 N1 SHIA SFT 10 -cause CIVCAS
+        jr sat slope 2 0 N1 SHIA SFT  5 -cause HOSCAP
 
         # Advance time.
         myclock advance 720
@@ -4677,10 +4629,10 @@ TREND  '            '          4.0 100.0   2.00   1.000    1.96   0.965  0.1   N
     } -cleanup {
         cleanup
     } -result {
-Cause  Start Time   End Time Slope Limit NTotal NContrib ATotal AContrib Input DN DG   E 
------- ------------ -------- ----- ----- ------ -------- ------ -------- ----- -- ---- - 
-CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   5.000    5.00   5.000  1.1   N1 SHIA D 
-HOSCAP '            '          5.0 100.0   2.50   2.500    2.50   2.500  2.1   N1 SHIA D 
+Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DG   E 
+------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- - 
+CIVCAS 010000ZJAN70 n/a       10.0   5.00   5.000    5.00   5.000  1.1   N1 SHIA D 
+HOSCAP '            '          5.0   2.50   2.500    2.50   2.500  2.1   N1 SHIA D 
     }
    
     test sat_slope-6.4 {Effects from different inputs with same cause} -setup {
@@ -4692,8 +4644,8 @@ HOSCAP '            '          5.0 100.0   2.50   2.500    2.50   2.500  2.1   N
     } -body {
         # Schedule effects on SHIA and KURD, and look at the indirect effects
         # on SUNN.
-        jr sat slope 1 0 N1 SHIA SFT 10 100 -cause CIVCAS
-        jr sat slope 2 0 N1 KURD SFT 10 100 -cause CIVCAS
+        jr sat slope 1 0 N1 SHIA SFT 10 -cause CIVCAS
+        jr sat slope 2 0 N1 KURD SFT 10 -cause CIVCAS
 
         # Advance time.
         myclock advance 720
@@ -4709,10 +4661,10 @@ HOSCAP '            '          5.0 100.0   2.50   2.500    2.50   2.500  2.1   N
     } -cleanup {
         cleanup
     } -result {
-Cause  Start Time   End Time Slope Limit  NTotal NContrib ATotal AContrib Input DN DG   E 
------- ------------ -------- ----- ------ ------ -------- ------ -------- ----- -- ---- - 
-CIVCAS 010000ZJAN70 n/a       -3.0 -100.0  -1.50  -1.500   -1.00  -1.000  1.1   N1 SHIA I 
-'      '            '         -6.0 -100.0  -3.00  -3.000   -2.00  -2.000  2.1   N1 KURD I 
+Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DG   E 
+------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- - 
+CIVCAS 010000ZJAN70 n/a       -3.0  -1.50  -1.500   -1.00  -1.000  1.1   N1 SHIA I 
+'      '            '         -6.0  -3.00  -3.000   -2.00  -2.000  2.1   N1 KURD I 
     }
 
     test sat_slope-6.5 {Chained effects in timestep are combined} -setup {
@@ -4723,9 +4675,9 @@ CIVCAS 010000ZJAN70 n/a       -3.0 -100.0  -1.50  -1.500   -1.00  -1.000  1.1   
         init -trend no
     } -body {
         # Schedule chained effects
-        jr sat slope 1   0 N1 SHIA SFT 10 100 -cause CIVCAS
-        jr sat slope 1 360 N1 SHIA SFT  0   0 -cause CIVCAS
-        jr sat slope 1 720 N1 SHIA SFT 10 100 -cause CIVCAS
+        jr sat slope 1   0 N1 SHIA SFT 10 -cause CIVCAS
+        jr sat slope 1 360 N1 SHIA SFT  0 -cause CIVCAS
+        jr sat slope 1 720 N1 SHIA SFT 10 -cause CIVCAS
 
         # Advance time by 18 hours so that we get 6 hours of each of the positive
         # effects.
@@ -4745,9 +4697,9 @@ CIVCAS 010000ZJAN70 n/a       -3.0 -100.0  -1.50  -1.500   -1.00  -1.000  1.1   
     } -cleanup {
         cleanup
     } -result {
-Cause  Start Time   End Time Slope Limit NTotal NContrib ATotal AContrib Input DN DG   E 
------- ------------ -------- ----- ----- ------ -------- ------ -------- ----- -- ---- - 
-CIVCAS 011200ZJAN70 n/a       10.0 100.0   5.00   5.000    5.00   5.000  1.3   N1 SHIA D 
+Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DG   E 
+------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- - 
+CIVCAS 011200ZJAN70 n/a       10.0   5.00   5.000    5.00   5.000  1.3   N1 SHIA D 
     }
 
     test sat_slope-6.6 {different causes have distinct chains} -setup {
@@ -4755,73 +4707,71 @@ CIVCAS 011200ZJAN70 n/a       10.0 100.0   5.00   5.000    5.00   5.000  1.3   N
     } -body {
         # If we create two inputs for the same n,g,c with different
         # causes, we get different chains
-        jr sat slope 1  5 N1 SHIA SFT 10.0 100 -cause PATROL
-        jr sat slope 1 10 N1 SHIA SFT 10.0 100 -cause GUARD
+        jr sat slope 1  5 N1 SHIA SFT 10.0 -cause PATROL
+        jr sat slope 1 10 N1 SHIA SFT 10.0 -cause GUARD
 
         dumpSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause  E Start Time   End Time Nbhd Grp  Con Slope Limit  Nominal Actual 
------ -- ---- ------ - ------------ -------- ---- ---- --- ----- ------ ------- ------ 
-1.1   N1 SHIA PATROL D 010005ZJAN70 n/a      N1   SHIA SFT  10.0 100.0    0.0     0.0  
-'     '  '    '      I 010005ZJAN70 n/a      N1   KURD SFT   6.0 100.0    0.0     0.0  
-'     '  '    '      I 010005ZJAN70 n/a      N1   SUNN SFT  -3.0 -100.0   0.0     0.0  
-1.2   '  '    GUARD  D 010010ZJAN70 n/a      N1   SHIA SFT  10.0 100.0    0.0     0.0  
-'     '  '    '      I 010010ZJAN70 n/a      N1   KURD SFT   6.0 100.0    0.0     0.0  
-'     '  '    '      I 010010ZJAN70 n/a      N1   SUNN SFT  -3.0 -100.0   0.0     0.0  
+Input DN DG   Cause  E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ------ - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N1 SHIA PATROL D 010005ZJAN70 n/a      N1   SHIA SFT  10.0   0.0     0.0  
+'     '  '    '      I 010005ZJAN70 n/a      N1   KURD SFT   6.0   0.0     0.0  
+'     '  '    '      I 010005ZJAN70 n/a      N1   SUNN SFT  -3.0   0.0     0.0  
+1.2   '  '    GUARD  D 010010ZJAN70 n/a      N1   SHIA SFT  10.0   0.0     0.0  
+'     '  '    '      I 010010ZJAN70 n/a      N1   KURD SFT   6.0   0.0     0.0  
+'     '  '    '      I 010010ZJAN70 n/a      N1   SUNN SFT  -3.0   0.0     0.0  
     }
     
     test sat_slope-6.7 {different causes have distinct chains: update} -setup {
         create -trend no
     } -body {
         # If we update for one cause, it doesn't affect the other
-        jr sat slope 1  5 N1 SHIA SFT 10.0 100 -cause PATROL
-        jr sat slope 1 10 N1 SHIA SFT 10.0 100 -cause GUARD
-
-        jr sat slope 1 15 N1 SHIA SFT  5.0 100 -cause PATROL
+        jr sat slope 1  5 N1 SHIA SFT 10.0 -cause PATROL
+        jr sat slope 1 10 N1 SHIA SFT 10.0 -cause GUARD
+        jr sat slope 1 15 N1 SHIA SFT  5.0 -cause PATROL
 
         dumpSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Limit  Nominal Actual 
------ -- ---- ------ - ------------ ------------ ---- ---- --- ----- ------ ------- ------ 
-1.2   N1 SHIA GUARD  D 010010ZJAN70 n/a          N1   SHIA SFT  10.0 100.0    0.0     0.0  
-'     '  '    '      I 010010ZJAN70 n/a          N1   KURD SFT   6.0 100.0    0.0     0.0  
-'     '  '    '      I 010010ZJAN70 n/a          N1   SUNN SFT  -3.0 -100.0   0.0     0.0  
-1.3   '  '    PATROL D 010005ZJAN70 010015ZJAN70 N1   SHIA SFT  10.0 100.0    0.0     0.0  
-'     '  '    '      D 010015ZJAN70 n/a          N1   SHIA SFT   5.0 100.0    0.0     0.0  
-'     '  '    '      I 010005ZJAN70 010015ZJAN70 N1   KURD SFT   6.0 100.0    0.0     0.0  
-'     '  '    '      I 010015ZJAN70 n/a          N1   KURD SFT   3.0 100.0    0.0     0.0  
-'     '  '    '      I 010005ZJAN70 010015ZJAN70 N1   SUNN SFT  -3.0 -100.0   0.0     0.0  
-'     '  '    '      I 010015ZJAN70 n/a          N1   SUNN SFT  -1.5 -100.0   0.0     0.0  
+Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ------ - ------------ ------------ ---- ---- --- ----- ------- ------ 
+1.2   N1 SHIA GUARD  D 010010ZJAN70 n/a          N1   SHIA SFT  10.0   0.0     0.0  
+'     '  '    '      I 010010ZJAN70 n/a          N1   KURD SFT   6.0   0.0     0.0  
+'     '  '    '      I 010010ZJAN70 n/a          N1   SUNN SFT  -3.0   0.0     0.0  
+1.3   '  '    PATROL D 010005ZJAN70 010015ZJAN70 N1   SHIA SFT  10.0   0.0     0.0  
+'     '  '    '      D 010015ZJAN70 n/a          N1   SHIA SFT   5.0   0.0     0.0  
+'     '  '    '      I 010005ZJAN70 010015ZJAN70 N1   KURD SFT   6.0   0.0     0.0  
+'     '  '    '      I 010015ZJAN70 n/a          N1   KURD SFT   3.0   0.0     0.0  
+'     '  '    '      I 010005ZJAN70 010015ZJAN70 N1   SUNN SFT  -3.0   0.0     0.0  
+'     '  '    '      I 010015ZJAN70 n/a          N1   SUNN SFT  -1.5   0.0     0.0  
     }
     
     test sat_slope-6.8 {different causes have distinct chains: end} -setup {
         create -trend no
     } -body {
         # If we update for one cause, it doesn't affect the other
-        jr sat slope 1  5 N1 SHIA SFT 10.0 100 -cause PATROL
-        jr sat slope 1 10 N1 SHIA SFT 10.0 100 -cause GUARD
-
-        jr sat slope 1 15 N1 SHIA SFT  0.0 100 -cause PATROL
+        jr sat slope 1  5 N1 SHIA SFT 10.0 -cause PATROL
+        jr sat slope 1 10 N1 SHIA SFT 10.0 -cause GUARD
+        jr sat slope 1 15 N1 SHIA SFT  0.0 -cause PATROL
 
         dumpSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Limit  Nominal Actual 
------ -- ---- ------ - ------------ ------------ ---- ---- --- ----- ------ ------- ------ 
-1.2   N1 SHIA GUARD  D 010010ZJAN70 n/a          N1   SHIA SFT  10.0 100.0    0.0     0.0  
-'     '  '    '      I 010010ZJAN70 n/a          N1   KURD SFT   6.0 100.0    0.0     0.0  
-'     '  '    '      I 010010ZJAN70 n/a          N1   SUNN SFT  -3.0 -100.0   0.0     0.0  
-1.3   '  '    PATROL D 010005ZJAN70 010015ZJAN70 N1   SHIA SFT  10.0 100.0    0.0     0.0  
-'     '  '    '      D 010015ZJAN70 n/a          N1   SHIA SFT   0.0   0.0    0.0     0.0  
-'     '  '    '      I 010005ZJAN70 010015ZJAN70 N1   KURD SFT   6.0 100.0    0.0     0.0  
-'     '  '    '      I 010015ZJAN70 n/a          N1   KURD SFT   0.0   0.0    0.0     0.0  
-'     '  '    '      I 010005ZJAN70 010015ZJAN70 N1   SUNN SFT  -3.0 -100.0   0.0     0.0  
-'     '  '    '      I 010015ZJAN70 n/a          N1   SUNN SFT   0.0   0.0    0.0     0.0  
+Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ------ - ------------ ------------ ---- ---- --- ----- ------- ------ 
+1.2   N1 SHIA GUARD  D 010010ZJAN70 n/a          N1   SHIA SFT  10.0   0.0     0.0  
+'     '  '    '      I 010010ZJAN70 n/a          N1   KURD SFT   6.0   0.0     0.0  
+'     '  '    '      I 010010ZJAN70 n/a          N1   SUNN SFT  -3.0   0.0     0.0  
+1.3   '  '    PATROL D 010005ZJAN70 010015ZJAN70 N1   SHIA SFT  10.0   0.0     0.0  
+'     '  '    '      D 010015ZJAN70 n/a          N1   SHIA SFT   0.0   0.0     0.0  
+'     '  '    '      I 010005ZJAN70 010015ZJAN70 N1   KURD SFT   6.0   0.0     0.0  
+'     '  '    '      I 010015ZJAN70 n/a          N1   KURD SFT   0.0   0.0     0.0  
+'     '  '    '      I 010005ZJAN70 010015ZJAN70 N1   SUNN SFT  -3.0   0.0     0.0  
+'     '  '    '      I 010015ZJAN70 n/a          N1   SUNN SFT   0.0   0.0     0.0  
     }
 
     # sat_slope-7.*: Scheduling returns input
@@ -4829,8 +4779,8 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Limit  Nomi
     test sat_slope-7.1 {Return input, case 1: one nbhood, 0 limit} -setup {
         create -trend no
     } -body {
-        set a [jr sat slope 1 0 N1 SHIA SFT 0 0]
-        set b [jr sat slope 1 0 N1 SHIA QOL 0 0]
+        set a [jr sat slope 1 0 N1 SHIA SFT 0]
+        set b [jr sat slope 1 0 N1 SHIA QOL 0]
         set c [rdb eval {SELECT DISTINCT input FROM gram_effects}]
 
         list $a $b $c
@@ -4841,10 +4791,10 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Limit  Nomi
     test sat_slope-7.2 {Return input, case 2: one nbhood, terminate} -setup {
         create -trend no
     } -body {
-        set a [jr sat slope 1 0 N1 SHIA SFT 10 10]
-        set b [jr sat slope 1 0 N1 SHIA QOL 10 10]
-        set c [jr sat slope 1 0 N1 SHIA SFT 0 0]
-        set d [jr sat slope 1 0 N1 SHIA QOL 0 0]
+        set a [jr sat slope 1 0 N1 SHIA SFT 10]
+        set b [jr sat slope 1 0 N1 SHIA QOL 10]
+        set c [jr sat slope 1 0 N1 SHIA SFT 0]
+        set d [jr sat slope 1 0 N1 SHIA QOL 0]
         set e [rdb eval {SELECT DISTINCT input FROM gram_effects}]
 
         list $a $b $c $d $e
@@ -4855,8 +4805,8 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Limit  Nomi
     test sat_slope-7.3 {Return input, case 3: all nbhoods, 0 limit} -setup {
         create -trend no
     } -body {
-        set a [jr sat slope 1 0 * SHIA SFT 0 0]
-        set b [jr sat slope 1 0 * SHIA QOL 0 0]
+        set a [jr sat slope 1 0 * SHIA SFT 0]
+        set b [jr sat slope 1 0 * SHIA QOL 0]
         set c [rdb eval {SELECT DISTINCT input FROM gram_effects}]
 
         list $a $b $c
@@ -4867,10 +4817,10 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Limit  Nomi
     test sat_slope-7.4 {Return input, case 4: all nbhoods, terminate} -setup {
         create -trend no
     } -body {
-        set a [jr sat slope 1 0 * SHIA SFT 10 10]
-        set b [jr sat slope 1 0 * SHIA QOL 10 10]
-        set c [jr sat slope 1 0 * SHIA SFT 0 0]
-        set d [jr sat slope 1 0 * SHIA QOL 0 0]
+        set a [jr sat slope 1 0 * SHIA SFT 10]
+        set b [jr sat slope 1 0 * SHIA QOL 10]
+        set c [jr sat slope 1 0 * SHIA SFT 0]
+        set d [jr sat slope 1 0 * SHIA QOL 0]
         set e [rdb eval {SELECT DISTINCT input FROM gram_effects}]
 
         list $a $b $c $d $e
@@ -4881,8 +4831,8 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Limit  Nomi
     test sat_slope-7.5 {Return input, case 5: nominal case} -setup {
         create -trend no
     } -body {
-        set a [jr sat slope 1 0 N1 SHIA SFT 10 10]
-        set b [jr sat slope 1 0 N1 SHIA QOL 10 10]
+        set a [jr sat slope 1 0 N1 SHIA SFT 10]
+        set b [jr sat slope 1 0 N1 SHIA QOL 10]
         set c [rdb eval {SELECT DISTINCT input FROM gram_effects}]
 
         list $a $b $c
@@ -6289,7 +6239,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.1 {ts not numeric} -setup {
         create
     } -body {
-        jr coop slope 1 DUMMY N1 SHIA BRIT 100.0 10.0
+        jr coop slope 1 DUMMY N1 SHIA BRIT 100.0
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6300,7 +6250,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.2 {ts in the past.} -setup {
         create
     } -body {
-        jr coop slope 1 -1 N1 SHIA BRIT 100.0 10.0
+        jr coop slope 1 -1 N1 SHIA BRIT 100.0
     } -returnCodes {
         error
     } -cleanup {
@@ -6310,7 +6260,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.3 {invalid nbhood} -setup {
         create
     } -body {
-        jr coop slope 1 0 DUMMY SHIA BRIT 100.0 10.0
+        jr coop slope 1 0 DUMMY SHIA BRIT 100.0
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6320,7 +6270,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.4 {invalid pgroup} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 DUMMY BLUE 100.0 10.0
+        jr coop slope 1 0 N1 DUMMY BLUE 100.0
     } -returnCodes {
         error
     } -cleanup {
@@ -6330,7 +6280,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.5 {invalid concern} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 SHIA DUMMY 100.0 10.0
+        jr coop slope 1 0 N1 SHIA DUMMY 100.0
     } -returnCodes {
         error
     } -cleanup {
@@ -6340,27 +6290,19 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.6 {invalid slope: unknown symbol} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 SHIA BRIT DUMMY 10.0
+        jr coop slope 1 0 N1 SHIA BRIT DUMMY
     } -returnCodes {
         error
     } -cleanup {
         cleanup
     } -result {invalid value, "DUMMY"}
 
-    test coop_slope-1.7 {invalid limit: unknown symbol} -setup {
-        create
-    } -body {
-        jr coop slope 1 0 N1 SHIA BRIT 100.0 DUMMY
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup
-    } -result {invalid value, "DUMMY"}
+    # test coop_slope-1.7 {invalid limit: unknown symbol} OBSOLETE
 
     test coop_slope-1.8 {Invalid option} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 SHIA BRIT 100.0 10.0 -nonesuch foo
+        jr coop slope 1 0 N1 SHIA BRIT 100.0 -nonesuch foo
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6371,7 +6313,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.9 {Non-numeric -p} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 SHIA BRIT 100.0 10.0 -p FOO
+        jr coop slope 1 0 N1 SHIA BRIT 100.0 -p FOO
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6381,7 +6323,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.10 {Negative -p} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 SHIA BRIT 100.0 10.0 -p -0.1
+        jr coop slope 1 0 N1 SHIA BRIT 100.0 -p -0.1
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6391,7 +6333,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.11 {-p greater than 1.0} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 SHIA BRIT 100.0 10.0 -p 1.1
+        jr coop slope 1 0 N1 SHIA BRIT 100.0 -p 1.1
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6402,7 +6344,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.12 {Non-numeric -q} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 SHIA BRIT 100.0 10.0 -q FOO
+        jr coop slope 1 0 N1 SHIA BRIT 100.0 -q FOO
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6412,7 +6354,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.13 {Negative -q} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 SHIA BRIT 100.0 10.0 -q -0.1
+        jr coop slope 1 0 N1 SHIA BRIT 100.0 -q -0.1
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6422,7 +6364,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.14 {-q greater than 1.0} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 SHIA BRIT 100.0 10.0 -q 1.1
+        jr coop slope 1 0 N1 SHIA BRIT 100.0 -q 1.1
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6432,7 +6374,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.15 {invalid cause} -constraints cause -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 SHIA BRIT 10.0 100 -cause DUMMY
+        jr coop slope 1 0 N1 SHIA BRIT 10.0 -cause DUMMY
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6442,8 +6384,8 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.16 {slope scheduled for an driver in decreasing time sequence} -setup {
         create
     } -body {
-        jr coop slope 1 10 N1 SHIA BRIT 10.0 100
-        jr coop slope 1  5 N1 SHIA BRIT 10.0 100
+        jr coop slope 1 10 N1 SHIA BRIT 10.0
+        jr coop slope 1  5 N1 SHIA BRIT 10.0
     } -cleanup {
         cleanup 
     } -returnCodes {
@@ -6453,7 +6395,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.17 {-p given when n=*} -setup {
         create
     } -body {
-        jr coop slope 1 0 * SHIA BLUE 5.0 0.1 -p 0.1
+        jr coop slope 1 0 * SHIA BLUE 5.0 -p 0.1
     } -returnCodes {
         error
     } -cleanup {
@@ -6463,7 +6405,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-1.18 {-q given when n=*} -setup {
         create
     } -body {
-        jr coop slope 1 0 * SHIA BLUE 5.0 0.1 -q 0.1
+        jr coop slope 1 0 * SHIA BLUE 5.0 -q 0.1
     } -returnCodes {
         error
     } -cleanup {
@@ -6475,62 +6417,62 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     test coop_slope-2.1 {schedule slope for one n,g,c.} -setup {
         create
     } -body {
-        jr coop slope 1 0 N2 KURD BRIT 100.0 10.0
+        jr coop slope 1 0 N2 KURD BRIT 100.0
         dumpCoopSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ----- ------- ------ 
-1.1   N2 KURD BRIT D1    I 010000ZJAN70 n/a      N2 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N2 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -80.0 -10.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N2 KURD BRIT D1    I 010000ZJAN70 n/a      N2 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 n/a      N2 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -80.0   0.0     0.0  
     }
 
     test coop_slope-2.2 {schedule slope for all n} -setup {
         create
     } -body {
-        jr coop slope 1 0 * KURD BRIT 100.0 10.0
+        jr coop slope 1 0 * KURD BRIT 100.0
         dumpCoopSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ----- ------- ------ 
-1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0 -10.0   0.0     0.0  
-'     N2 '    '    '     I 010000ZJAN70 n/a      N2 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N2 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -80.0 -10.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0   0.0     0.0  
+'     N2 '    '    '     I 010000ZJAN70 n/a      N2 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 n/a      N2 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -80.0   0.0     0.0  
     }
 
 
     test coop_slope-2.3 {successive inputs for an driver stack} -setup {
         create
     } -body {
-        jr coop slope 1  0 N2 KURD BRIT 100.0 10.0
-        jr coop slope 1  5 N2 KURD BRIT  75.0  5.0
-        jr coop slope 1 10 N2 KURD BRIT   0.0  0.0
-        jr coop slope 1 15 N2 KURD BRIT 100.0 20.0
+        jr coop slope 1  0 N2 KURD BRIT 100.0
+        jr coop slope 1  5 N2 KURD BRIT  75.0
+        jr coop slope 1 10 N2 KURD BRIT   0.0
+        jr coop slope 1 15 N2 KURD BRIT 100.0
         dumpCoopSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ ------------ -- ---- ----- ----- ----- ------- ------ 
-1.4   N2 KURD BRIT D1    I 010000ZJAN70 010005ZJAN70 N2 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010005ZJAN70 010010ZJAN70 N2 KURD BLUE   60.0   5.0   0.0     0.0  
-'     '  '    '    '     I 010010ZJAN70 010015ZJAN70 N2 KURD BLUE    0.0   0.0   0.0     0.0  
-'     '  '    '    '     I 010015ZJAN70 n/a          N2 KURD BLUE   80.0  20.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 010005ZJAN70 N2 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     D 010005ZJAN70 010010ZJAN70 N2 KURD BRIT   75.0   5.0   0.0     0.0  
-'     '  '    '    '     D 010010ZJAN70 010015ZJAN70 N2 KURD BRIT    0.0   0.0   0.0     0.0  
-'     '  '    '    '     D 010015ZJAN70 n/a          N2 KURD BRIT  100.0  20.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 010005ZJAN70 N2 KURD OPFOR -80.0 -10.0   0.0     0.0  
-'     '  '    '    '     I 010005ZJAN70 010010ZJAN70 N2 KURD OPFOR -60.0  -5.0   0.0     0.0  
-'     '  '    '    '     I 010010ZJAN70 010015ZJAN70 N2 KURD OPFOR   0.0   0.0   0.0     0.0  
-'     '  '    '    '     I 010015ZJAN70 n/a          N2 KURD OPFOR -80.0 -20.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ ------------ -- ---- ----- ----- ------- ------ 
+1.4   N2 KURD BRIT D1    I 010000ZJAN70 010005ZJAN70 N2 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     I 010005ZJAN70 010010ZJAN70 N2 KURD BLUE   60.0   0.0     0.0  
+'     '  '    '    '     I 010010ZJAN70 010015ZJAN70 N2 KURD BLUE    0.0   0.0     0.0  
+'     '  '    '    '     I 010015ZJAN70 n/a          N2 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 010005ZJAN70 N2 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     D 010005ZJAN70 010010ZJAN70 N2 KURD BRIT   75.0   0.0     0.0  
+'     '  '    '    '     D 010010ZJAN70 010015ZJAN70 N2 KURD BRIT    0.0   0.0     0.0  
+'     '  '    '    '     D 010015ZJAN70 n/a          N2 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 010005ZJAN70 N2 KURD OPFOR -80.0   0.0     0.0  
+'     '  '    '    '     I 010005ZJAN70 010010ZJAN70 N2 KURD OPFOR -60.0   0.0     0.0  
+'     '  '    '    '     I 010010ZJAN70 010015ZJAN70 N2 KURD OPFOR   0.0   0.0     0.0  
+'     '  '    '    '     I 010015ZJAN70 n/a          N2 KURD OPFOR -80.0   0.0     0.0  
     }
 
     test coop_slope-2.4 {no effect if pgroup has zero pop in nbhood} -setup {
@@ -6547,7 +6489,7 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit N
         init
 
 
-        jr coop slope 1 0 N1 SHIA BRIT 100.0 10.0
+        jr coop slope 1 0 N1 SHIA BRIT 100.0
 
         # Note: Result should be empty, as all modeled effects involve SHIA.
         dumpCoopSlopes
@@ -6573,7 +6515,7 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit N
 
 
         # Enter slope input
-        jr coop slope 1 0 N1 KURD BRIT 100.0 10.0 -p 0.5 -q 0.1
+        jr coop slope 1 0 N1 KURD BRIT 100.0 -p 0.5 -q 0.1
 
         # Expect direct effect on BRIT, indirect on others, in both 
         # neighborhoods; 0.5 effect in N2 since N2 is near.
@@ -6581,20 +6523,20 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit N
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ----- ------- ------ 
-1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0 -10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BLUE   40.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BRIT   50.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -40.0 -10.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BLUE   40.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BRIT   50.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -40.0   0.0     0.0  
     }
 
     test coop_slope-2.6 {Indirect effects in all nbhoods, N2 far} -setup {
         create
     } -body {
-        jr coop slope 1 0 N1 KURD BRIT 100.0 10.0 -p 0.5 -q 0.1
+        jr coop slope 1 0 N1 KURD BRIT 100.0 -p 0.5 -q 0.1
 
         # Expect direct effect on BRIT, indirect on others, in both 
         # neighborhoods; 0.1 effect in N2 since N2 is far.
@@ -6602,14 +6544,14 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ----- ------- ------ 
-1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0 -10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BLUE    8.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BRIT   10.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR  -8.0 -10.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BLUE    8.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BRIT   10.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR  -8.0   0.0     0.0  
     }
 
     test coop_slope-2.7 {Indirect effects in all nbhoods, N2 remote} -setup {
@@ -6629,7 +6571,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
 
 
         # Enter a slope input.
-        jr coop slope 1 0 N1 KURD BRIT 100.0 10.0 -p 0.5 -q 0.1
+        jr coop slope 1 0 N1 KURD BRIT 100.0 -p 0.5 -q 0.1
 
         # Expect direct effect on SHIA, indirect on others in N1;
         # no effects in N2 since N2 is remote.
@@ -6637,11 +6579,11 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ----- ------- ------ 
-1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0 -10.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0   0.0     0.0  
     }
 
     test coop_slope-2.8 {effects_factor != 1.0} -setup {
@@ -6659,7 +6601,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
 
 
         # Create a slope input
-        jr coop slope 1 0 N1 KURD BRIT 100.0 10.0 -p 0.5 -q 0.1
+        jr coop slope 1 0 N1 KURD BRIT 100.0 -p 0.5 -q 0.1
 
         # Expect direct effect on BRIT, indirect on others, in both 
         # neighborhoods; effect in N2 is 0.2 (2.0 * 0.1).
@@ -6667,14 +6609,14 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ----- ------- ------ 
-1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0 -10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BLUE   16.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BRIT   20.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -16.0 -10.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BLUE   16.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BRIT   20.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -16.0   0.0     0.0  
     }
 
     test coop_slope-2.9 {delayed indirect effects} -setup {
@@ -6692,7 +6634,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
 
 
         # Enter a slope input.
-        jr coop slope 1 0 N1 KURD BRIT 100.0 10.0 -p 0.5 -q 0.1
+        jr coop slope 1 0 N1 KURD BRIT 100.0 -p 0.5 -q 0.1
 
         # Expect direct effect on BRIT, indirect on others, in both 
         # neighborhoods; 0.1 effect in N2 delayed 1 day.
@@ -6700,14 +6642,14 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ----- ------- ------ 
-1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0 -10.0   0.0     0.0  
-'     '  '    '    '     I 020000ZJAN70 n/a      N2 KURD BLUE    8.0  10.0   0.0     0.0  
-'     '  '    '    '     I 020000ZJAN70 n/a      N2 KURD BRIT   10.0  10.0   0.0     0.0  
-'     '  '    '    '     I 020000ZJAN70 n/a      N2 KURD OPFOR  -8.0 -10.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0   0.0     0.0  
+'     '  '    '    '     I 020000ZJAN70 n/a      N2 KURD BLUE    8.0   0.0     0.0  
+'     '  '    '    '     I 020000ZJAN70 n/a      N2 KURD BRIT   10.0   0.0     0.0  
+'     '  '    '    '     I 020000ZJAN70 n/a      N2 KURD OPFOR  -8.0   0.0     0.0  
     }
 
     test coop_slope-2.10 {far effects are terminated if -q becomes 0} -setup {
@@ -6725,10 +6667,10 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
 
 
         # At time 0, schedule a slope input with far effects.
-        jr coop slope 1 0 N1 KURD BRIT 100.0 10.0 -p 1.0 -q 1.0
+        jr coop slope 1 0 N1 KURD BRIT 100.0 -p 1.0 -q 1.0
 
         # At time 10, schedule a new slope input without far effects.
-        jr coop slope 1 10 N1 KURD BRIT 50.0 5.0 -p 1.0        
+        jr coop slope 1 10 N1 KURD BRIT 50.0 -p 1.0        
 
         # Expect direct effect on BRIT, indirect on others, in both 
         # neighborhoods; 1.0 effect in N2 delayed 1 day; and then,
@@ -6738,26 +6680,26 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ ------------ -- ---- ----- ----- ----- ------- ------ 
-1.2   N1 KURD BRIT D1    I 010000ZJAN70 010010ZJAN70 N1 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010010ZJAN70 n/a          N1 KURD BLUE   40.0   5.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 010010ZJAN70 N1 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     D 010010ZJAN70 n/a          N1 KURD BRIT   50.0   5.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 010010ZJAN70 N1 KURD OPFOR -80.0 -10.0   0.0     0.0  
-'     '  '    '    '     I 010010ZJAN70 n/a          N1 KURD OPFOR -40.0  -5.0   0.0     0.0  
-'     '  '    '    '     I 020000ZJAN70 020010ZJAN70 N2 KURD BLUE   80.0  10.0   0.0     0.0  
-'     '  '    '    '     I 020010ZJAN70 n/a          N2 KURD BLUE    0.0   0.0   0.0     0.0  
-'     '  '    '    '     I 020000ZJAN70 020010ZJAN70 N2 KURD BRIT  100.0  10.0   0.0     0.0  
-'     '  '    '    '     I 020010ZJAN70 n/a          N2 KURD BRIT    0.0   0.0   0.0     0.0  
-'     '  '    '    '     I 020000ZJAN70 020010ZJAN70 N2 KURD OPFOR -80.0 -10.0   0.0     0.0  
-'     '  '    '    '     I 020010ZJAN70 n/a          N2 KURD OPFOR   0.0   0.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ ------------ -- ---- ----- ----- ------- ------ 
+1.2   N1 KURD BRIT D1    I 010000ZJAN70 010010ZJAN70 N1 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     I 010010ZJAN70 n/a          N1 KURD BLUE   40.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 010010ZJAN70 N1 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     D 010010ZJAN70 n/a          N1 KURD BRIT   50.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 010010ZJAN70 N1 KURD OPFOR -80.0   0.0     0.0  
+'     '  '    '    '     I 010010ZJAN70 n/a          N1 KURD OPFOR -40.0   0.0     0.0  
+'     '  '    '    '     I 020000ZJAN70 020010ZJAN70 N2 KURD BLUE   80.0   0.0     0.0  
+'     '  '    '    '     I 020010ZJAN70 n/a          N2 KURD BLUE    0.0   0.0     0.0  
+'     '  '    '    '     I 020000ZJAN70 020010ZJAN70 N2 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 020010ZJAN70 n/a          N2 KURD BRIT    0.0   0.0     0.0  
+'     '  '    '    '     I 020000ZJAN70 020010ZJAN70 N2 KURD OPFOR -80.0   0.0     0.0  
+'     '  '    '    '     I 020010ZJAN70 n/a          N2 KURD OPFOR   0.0   0.0     0.0  
     }
     
     test coop_slope-2.11 {Causes are tagged automatically if -cause is not given} -setup {
         create -trend no
     } -body {
-        jr coop slope 1 0 N1 SHIA BRIT 10 10
+        jr coop slope 1 0 N1 SHIA BRIT 10
 
         rdb eval {SELECT DISTINCT cause FROM gram_effects}
     } -cleanup {
@@ -6769,7 +6711,7 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit N
     test coop_slope-3.1 {coop increases} -setup {
         create
     } -body {
-        jr coop slope 1 0 N2 KURD BLUE 100.0 100.0
+        jr coop slope 1 0 N2 KURD BLUE 100.0
 
         # Advance to noon
         myclock advance 720
@@ -6780,25 +6722,13 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit N
         cleanup
     } -result {{N2 KURD BLUE 25} {N2 KURD BRIT 20} {N2 KURD OPFOR -20}}
 
-    test coop_slope-3.2 {sat increases to limit} -setup {
-        create
-    } -body {
-        jr coop slope 1 0 N2 KURD BLUE 100.0 27.0
-
-        # Advance to noon
-        myclock advance 720
-        jr advance
-
-        tableDiffCols gram_coop {n f g} coop coop0
-    } -cleanup {
-        cleanup
-    } -result {{N2 KURD BLUE 13.5} {N2 KURD BRIT 13.5} {N2 KURD OPFOR -13.5}}
+    # test coop_slope-3.2 {sat increases to limit} OBSOLETE
 
     test coop_slope-3.3 {successive slope records take effect} -setup {
         create
     } -body {
-        jr coop slope 1 0   N2 KURD BLUE 100.0 100.0
-        jr coop slope 1 360 N2 KURD BLUE   0.0   0.0
+        jr coop slope 1 0   N2 KURD BLUE 100.0
+        jr coop slope 1 360 N2 KURD BLUE   0.0
 
         # Advance to noon; should get only 25.0, scaled down by 1/2.
         myclock advance 720
@@ -6811,26 +6741,13 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit N
 
     # coop_slope-4.*: Expiration
 
-    test coop_slope-4.1 {slope records expire due to limit} -setup {
-        create
-    } -body {
-        jr coop slope 1 0 N2 KURD BLUE 100.0 27.0
-
-        # Advance to noon; the effect should expire
-        myclock advance 720
-        jr advance
-
-        dumpCoopSlopes
-    } -cleanup {
-        cleanup
-    } -result {
-    }
+    # test coop_slope-4.1 {slope records expire due to limit} OBSOLETE
 
     test coop_slope-4.2 {slope records expire due to time} -setup {
         create
     } -body {
-        jr coop slope 1 0   N2 KURD BLUE 100.0 100.0
-        jr coop slope 1 360 N2 KURD BLUE   0.0   0.0
+        jr coop slope 1 0   N2 KURD BLUE 100.0
+        jr coop slope 1 360 N2 KURD BLUE   0.0
 
         # Advance to noon; records should expire.
         myclock advance 720
@@ -6845,42 +6762,28 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit N
     test coop_slope-4.3 {negative slopes don't expire immediately} -setup {
         create
     } -body {
-        jr coop slope 1 [myclock now] N1 SHIA BRIT -10 -5
+        jr coop slope 1 [myclock now] N1 SHIA BRIT -10
         myclock advance 5
         jr advance
         dumpCoopSlopes
     } -cleanup {
         cleanup
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ----- ------- ------ 
-1.1   N1 SHIA BRIT D1    I 010000ZJAN70 n/a      N1 SHIA BLUE   -8.0  -5.0  -0.0    -0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N1 SHIA BRIT  -10.0  -5.0  -0.0    -0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N1 SHIA OPFOR   8.0   5.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N1 SHIA BRIT D1    I 010000ZJAN70 n/a      N1 SHIA BLUE   -8.0  -0.0    -0.0  
+'     '  '    '    '     D 010000ZJAN70 n/a      N1 SHIA BRIT  -10.0  -0.0    -0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N1 SHIA OPFOR   8.0   0.0     0.0  
     }
 
-    test coop_slope-4.4 {negative slopes reach their limit} -setup {
-        create -trend no
-    } -body {
-        jr coop slope 1 [myclock now] N1 SHIA BRIT -10 -5
-        myclock advance 1440
-        jr advance
-
-        rdb onecolumn {
-            SELECT nominal FROM gram_effects
-            WHERE object='gram'
-        }
-    } -cleanup {
-        cleanup
-    } -result {-5.0}
-
+    # test coop_slope-4.4 {negative slopes reach their limit} OBSOLETE
 
     # coop_slope-5.*: Tracking of contributions
 
     test coop_slope-5.1 {gram_effects tracks total change} -setup {
         create
     } -body {
-        jr coop slope 1 0 N2 KURD BLUE 100.0 100.0
+        jr coop slope 1 0 N2 KURD BLUE 100.0
 
         # Advance to noon
         myclock advance 720
@@ -6890,36 +6793,36 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
     } -cleanup {
         cleanup
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit  Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------ ------- ------ 
-1.1   N2 KURD BLUE D1    D 010000ZJAN70 n/a      N2 KURD BLUE  100.0 100.0   50.0    25.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BRIT   80.0 100.0   40.0    20.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -80.0 -100.0 -40.0   -20.0  
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N2 KURD BLUE D1    D 010000ZJAN70 n/a      N2 KURD BLUE  100.0  50.0    25.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD BRIT   80.0  40.0    20.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -80.0 -40.0   -20.0  
     }
 
     test coop_slope-5.2 {change is tracked across sequential effects} -setup {
         create -trend no
     } -body {
-        jr coop slope 1    0 N2 KURD BLUE 100.0 100.0
-        jr coop slope 1  360 N2 KURD BLUE   0.0   0.0
-        jr coop slope 1  720 N2 KURD BLUE 100.0 100.0
+        jr coop slope 1    0 N2 KURD BLUE 100.0
+        jr coop slope 1  360 N2 KURD BLUE   0.0
+        jr coop slope 1  720 N2 KURD BLUE 100.0
 
         # Advance 18 hours.
         myclock advance 1080
         jr advance
 
         pprint [rdb query {
-            SELECT id,ts,te,slope,nominal,actual,slimit FROM gram_effects
+            SELECT id,ts,te,slope,nominal,actual FROM gram_effects
             ORDER BY ts
         }]
     } -cleanup {
         cleanup
     } -result {
-id ts  te       slope nominal actual slimit 
--- --- -------- ----- ------- ------ ------ 
-1  720 99999999 100.0 50.0    25.0   100.0  
-2  720 99999999 80.0  40.0    20.0   100.0  
-3  720 99999999 -80.0 -40.0   -20.0  -100.0 
+id ts  te       slope nominal actual 
+-- --- -------- ----- ------- ------ 
+1  720 99999999 100.0 50.0    25.0   
+2  720 99999999 80.0  40.0    20.0   
+3  720 99999999 -80.0 -40.0   -20.0  
     }
 
     # coop_slope-6.*: Cause interactions
@@ -6935,8 +6838,8 @@ id ts  te       slope nominal actual slimit
         # Schedule two effects of differing strength but the same cause
         # on the same pgroup.  The total effect over the timestep should
         # be the maximum of the two.
-        jr coop slope 1 0 N1 SHIA BRIT 10 100.0 -cause CIVCAS
-        jr coop slope 2 0 N1 SHIA BRIT  5 100.0 -cause CIVCAS
+        jr coop slope 1 0 N1 SHIA BRIT 10 -cause CIVCAS
+        jr coop slope 2 0 N1 SHIA BRIT  5 -cause CIVCAS
 
         # Advance time.
         myclock advance 720
@@ -6953,10 +6856,10 @@ id ts  te       slope nominal actual slimit
     } -cleanup {
         cleanup
     } -result {
-Cause  Start Time   End Time Slope Limit NTotal NContrib ATotal AContrib Input DN DF   DG   E 
------- ------------ -------- ----- ----- ------ -------- ------ -------- ----- -- ---- ---- - 
-CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   5.000    3.33   3.333  1.1   N1 SHIA BRIT D 
-'      '            '          5.0 100.0   2.50   2.500    1.67   1.667  2.1   N1 SHIA BRIT D 
+Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DF   DG   E 
+------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- ---- - 
+CIVCAS 010000ZJAN70 n/a       10.0   5.00   5.000    3.33   3.333  1.1   N1 SHIA BRIT D 
+'      '            '          5.0   2.50   2.500    1.67   1.667  2.1   N1 SHIA BRIT D 
     }
 
     test coop_slope-6.2 {Inputs with the same cause overlap: multiple time steps} -setup {
@@ -6970,8 +6873,8 @@ CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   5.000    3.33   3.333  1.1   N
         # Schedule two effects of differing strength but the same cause
         # on the same pgroup.  The total effect over the timestep should
         # be the maximum of the two.
-        jr coop slope 1 0 N1 SHIA BRIT 10 100 -cause CIVCAS
-        jr coop slope 2 0 N1 SHIA BRIT  5 100 -cause CIVCAS
+        jr coop slope 1 0 N1 SHIA BRIT 10 -cause CIVCAS
+        jr coop slope 2 0 N1 SHIA BRIT  5 -cause CIVCAS
 
         # Advance time.
         myclock advance 360
@@ -6992,10 +6895,10 @@ CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   5.000    3.33   3.333  1.1   N
     } -cleanup {
         cleanup
     } -result {
-Cause  Start Time   End Time Slope Limit NTotal NContrib ATotal AContrib Input DN DF   DG   E 
------- ------------ -------- ----- ----- ------ -------- ------ -------- ----- -- ---- ---- - 
-CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   2.500    3.29   1.625  1.1   N1 SHIA BRIT D 
-'      '            '          5.0 100.0   2.50   1.250    1.65   0.812  2.1   N1 SHIA BRIT D 
+Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DF   DG   E 
+------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- ---- - 
+CIVCAS 010000ZJAN70 n/a       10.0   5.00   2.500    3.29   1.625  1.1   N1 SHIA BRIT D 
+'      '            '          5.0   2.50   1.250    1.65   0.812  2.1   N1 SHIA BRIT D 
     }
    
     test coop_slope-6.3 {Inputs with different causes are independent} -setup {
@@ -7009,8 +6912,8 @@ CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   2.500    3.29   1.625  1.1   N
         # Schedule two effects of differing strength but the same cause
         # on the same pgroup.  The total effect over the timestep should
         # be the maximum of the two.
-        jr coop slope 1 0 N1 SHIA BRIT 10 100 -cause CIVCAS
-        jr coop slope 2 0 N1 SHIA BRIT  5 100 -cause HOSCAP
+        jr coop slope 1 0 N1 SHIA BRIT 10 -cause CIVCAS
+        jr coop slope 2 0 N1 SHIA BRIT  5 -cause HOSCAP
 
         # Advance time.
         myclock advance 720
@@ -7023,10 +6926,10 @@ CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   2.500    3.29   1.625  1.1   N
     } -cleanup {
         cleanup
     } -result {
-Cause  Start Time   End Time Slope Limit NTotal NContrib ATotal AContrib Input DN DF   DG   E 
------- ------------ -------- ----- ----- ------ -------- ------ -------- ----- -- ---- ---- - 
-CIVCAS 010000ZJAN70 n/a       10.0 100.0   5.00   5.000    5.00   5.000  1.1   N1 SHIA BRIT D 
-HOSCAP '            '          5.0 100.0   2.50   2.500    2.50   2.500  2.1   N1 SHIA BRIT D 
+Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DF   DG   E 
+------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- ---- - 
+CIVCAS 010000ZJAN70 n/a       10.0   5.00   5.000    5.00   5.000  1.1   N1 SHIA BRIT D 
+HOSCAP '            '          5.0   2.50   2.500    2.50   2.500  2.1   N1 SHIA BRIT D 
     }
    
     test coop_slope-6.4 {Effects from different inputs with same cause} -setup {
@@ -7034,8 +6937,8 @@ HOSCAP '            '          5.0 100.0   2.50   2.500    2.50   2.500  2.1   N
     } -body {
         # Schedule effects on BLUE and BRIT, and look at the indirect effects
         # on OPFOR.
-        jr coop slope 1 0 N1 SHIA BLUE 10 100 -cause CIVCAS
-        jr coop slope 2 0 N1 SHIA BRIT 10 100 -cause CIVCAS
+        jr coop slope 1 0 N1 SHIA BLUE 10 -cause CIVCAS
+        jr coop slope 2 0 N1 SHIA BRIT 10 -cause CIVCAS
 
         # Advance time.
         myclock advance 720
@@ -7052,10 +6955,10 @@ HOSCAP '            '          5.0 100.0   2.50   2.500    2.50   2.500  2.1   N
     } -cleanup {
         cleanup
     } -result {
-Cause  Start Time   End Time Slope Limit  NTotal NContrib ATotal AContrib Input DN DF   DG   E 
------- ------------ -------- ----- ------ ------ -------- ------ -------- ----- -- ---- ---- - 
-CIVCAS 010000ZJAN70 n/a       -8.0 -100.0  -4.00  -4.000   -1.00  -1.000  1.1   N1 SHIA BLUE I 
-'      '            '         -8.0 -100.0  -4.00  -4.000   -1.00  -1.000  2.1   N1 SHIA BRIT I 
+Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DF   DG   E 
+------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- ---- - 
+CIVCAS 010000ZJAN70 n/a       -8.0  -4.00  -4.000   -1.00  -1.000  1.1   N1 SHIA BLUE I 
+'      '            '         -8.0  -4.00  -4.000   -1.00  -1.000  2.1   N1 SHIA BRIT I 
     }
 
     test coop_slope-6.5 {Chained effects in timestep are combined} -setup {
@@ -7067,9 +6970,9 @@ CIVCAS 010000ZJAN70 n/a       -8.0 -100.0  -4.00  -4.000   -1.00  -1.000  1.1   
 
 
         # Schedule chained effects
-        jr coop slope 1   0 N1 SHIA BRIT 10 100 -cause CIVCAS
-        jr coop slope 1 360 N1 SHIA BRIT  0   0 -cause CIVCAS
-        jr coop slope 1 720 N1 SHIA BRIT 10 100 -cause CIVCAS
+        jr coop slope 1   0 N1 SHIA BRIT 10 -cause CIVCAS
+        jr coop slope 1 360 N1 SHIA BRIT  0 -cause CIVCAS
+        jr coop slope 1 720 N1 SHIA BRIT 10 -cause CIVCAS
 
         # Advance time by 18 hours so that we get 6 hours of each of the positive
         # effects.
@@ -7087,9 +6990,9 @@ CIVCAS 010000ZJAN70 n/a       -8.0 -100.0  -4.00  -4.000   -1.00  -1.000  1.1   
     } -cleanup {
         cleanup
     } -result {
-Cause  Start Time   End Time Slope Limit NTotal NContrib ATotal AContrib Input DN DF   DG   E 
------- ------------ -------- ----- ----- ------ -------- ------ -------- ----- -- ---- ---- - 
-CIVCAS 011200ZJAN70 n/a       10.0 100.0   5.00   5.000    5.00   5.000  1.3   N1 SHIA BRIT D 
+Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DF   DG   E 
+------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- ---- - 
+CIVCAS 011200ZJAN70 n/a       10.0   5.00   5.000    5.00   5.000  1.3   N1 SHIA BRIT D 
     }
 
     test coop_slope-6.6 {different causes have distinct chains} -setup {
@@ -7097,73 +7000,71 @@ CIVCAS 011200ZJAN70 n/a       10.0 100.0   5.00   5.000    5.00   5.000  1.3   N
     } -body {
         # If we create two inputs for the same n,f,g with different
         # causes, we get different chains
-        jr coop slope 1  5 N1 SHIA BRIT 10.0 100 -cause PATROL
-        jr coop slope 1 10 N1 SHIA BRIT 10.0 100 -cause GUARD
+        jr coop slope 1  5 N1 SHIA BRIT 10.0 -cause PATROL
+        jr coop slope 1 10 N1 SHIA BRIT 10.0 -cause GUARD
 
         dumpCoopSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause  E Start Time   End Time N  F    G     Slope Limit  Nominal Actual 
------ -- ---- ---- ------ - ------------ -------- -- ---- ----- ----- ------ ------- ------ 
-1.1   N1 SHIA BRIT PATROL I 010005ZJAN70 n/a      N1 SHIA BLUE    8.0 100.0    0.0     0.0  
-'     '  '    '    '      D 010005ZJAN70 n/a      N1 SHIA BRIT   10.0 100.0    0.0     0.0  
-'     '  '    '    '      I 010005ZJAN70 n/a      N1 SHIA OPFOR  -8.0 -100.0   0.0     0.0  
-1.2   '  '    '    GUARD  I 010010ZJAN70 n/a      N1 SHIA BLUE    8.0 100.0    0.0     0.0  
-'     '  '    '    '      D 010010ZJAN70 n/a      N1 SHIA BRIT   10.0 100.0    0.0     0.0  
-'     '  '    '    '      I 010010ZJAN70 n/a      N1 SHIA OPFOR  -8.0 -100.0   0.0     0.0  
+Input DN DF   DG   Cause  E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ------ - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N1 SHIA BRIT PATROL I 010005ZJAN70 n/a      N1 SHIA BLUE    8.0   0.0     0.0  
+'     '  '    '    '      D 010005ZJAN70 n/a      N1 SHIA BRIT   10.0   0.0     0.0  
+'     '  '    '    '      I 010005ZJAN70 n/a      N1 SHIA OPFOR  -8.0   0.0     0.0  
+1.2   '  '    '    GUARD  I 010010ZJAN70 n/a      N1 SHIA BLUE    8.0   0.0     0.0  
+'     '  '    '    '      D 010010ZJAN70 n/a      N1 SHIA BRIT   10.0   0.0     0.0  
+'     '  '    '    '      I 010010ZJAN70 n/a      N1 SHIA OPFOR  -8.0   0.0     0.0  
     }
     
     test coop_slope-6.7 {different causes have distinct chains: update} -setup {
         create
     } -body {
         # If we update for one cause, it doesn't affect the other
-        jr coop slope 1  5 N1 SHIA BRIT 10.0 100 -cause PATROL
-        jr coop slope 1 10 N1 SHIA BRIT 10.0 100 -cause GUARD
-
-        jr coop slope 1 15 N1 SHIA BRIT  5.0 100 -cause PATROL
+        jr coop slope 1  5 N1 SHIA BRIT 10.0 -cause PATROL
+        jr coop slope 1 10 N1 SHIA BRIT 10.0 -cause GUARD
+        jr coop slope 1 15 N1 SHIA BRIT  5.0 -cause PATROL
 
         dumpCoopSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Limit  Nominal Actual 
------ -- ---- ---- ------ - ------------ ------------ -- ---- ----- ----- ------ ------- ------ 
-1.2   N1 SHIA BRIT GUARD  I 010010ZJAN70 n/a          N1 SHIA BLUE    8.0 100.0    0.0     0.0  
-'     '  '    '    '      D 010010ZJAN70 n/a          N1 SHIA BRIT   10.0 100.0    0.0     0.0  
-'     '  '    '    '      I 010010ZJAN70 n/a          N1 SHIA OPFOR  -8.0 -100.0   0.0     0.0  
-1.3   '  '    '    PATROL I 010005ZJAN70 010015ZJAN70 N1 SHIA BLUE    8.0 100.0    0.0     0.0  
-'     '  '    '    '      I 010015ZJAN70 n/a          N1 SHIA BLUE    4.0 100.0    0.0     0.0  
-'     '  '    '    '      D 010005ZJAN70 010015ZJAN70 N1 SHIA BRIT   10.0 100.0    0.0     0.0  
-'     '  '    '    '      D 010015ZJAN70 n/a          N1 SHIA BRIT    5.0 100.0    0.0     0.0  
-'     '  '    '    '      I 010005ZJAN70 010015ZJAN70 N1 SHIA OPFOR  -8.0 -100.0   0.0     0.0  
-'     '  '    '    '      I 010015ZJAN70 n/a          N1 SHIA OPFOR  -4.0 -100.0   0.0     0.0  
+Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ------ - ------------ ------------ -- ---- ----- ----- ------- ------ 
+1.2   N1 SHIA BRIT GUARD  I 010010ZJAN70 n/a          N1 SHIA BLUE    8.0   0.0     0.0  
+'     '  '    '    '      D 010010ZJAN70 n/a          N1 SHIA BRIT   10.0   0.0     0.0  
+'     '  '    '    '      I 010010ZJAN70 n/a          N1 SHIA OPFOR  -8.0   0.0     0.0  
+1.3   '  '    '    PATROL I 010005ZJAN70 010015ZJAN70 N1 SHIA BLUE    8.0   0.0     0.0  
+'     '  '    '    '      I 010015ZJAN70 n/a          N1 SHIA BLUE    4.0   0.0     0.0  
+'     '  '    '    '      D 010005ZJAN70 010015ZJAN70 N1 SHIA BRIT   10.0   0.0     0.0  
+'     '  '    '    '      D 010015ZJAN70 n/a          N1 SHIA BRIT    5.0   0.0     0.0  
+'     '  '    '    '      I 010005ZJAN70 010015ZJAN70 N1 SHIA OPFOR  -8.0   0.0     0.0  
+'     '  '    '    '      I 010015ZJAN70 n/a          N1 SHIA OPFOR  -4.0   0.0     0.0  
     }
     
     test coop_slope-6.8 {different causes have distinct chains: end} -setup {
         create
     } -body {
         # If we update for one cause, it doesn't affect the other
-        jr coop slope 1  5 N1 SHIA BRIT 10.0 100 -cause PATROL
-        jr coop slope 1 10 N1 SHIA BRIT 10.0 100 -cause GUARD
-
-        jr coop slope 1 15 N1 SHIA BRIT  0.0 100 -cause PATROL
+        jr coop slope 1  5 N1 SHIA BRIT 10.0 -cause PATROL
+        jr coop slope 1 10 N1 SHIA BRIT 10.0 -cause GUARD
+        jr coop slope 1 15 N1 SHIA BRIT  0.0 -cause PATROL
 
         dumpCoopSlopes
     } -cleanup {
         cleanup 
     } -result {
-Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Limit  Nominal Actual 
------ -- ---- ---- ------ - ------------ ------------ -- ---- ----- ----- ------ ------- ------ 
-1.2   N1 SHIA BRIT GUARD  I 010010ZJAN70 n/a          N1 SHIA BLUE    8.0 100.0    0.0     0.0  
-'     '  '    '    '      D 010010ZJAN70 n/a          N1 SHIA BRIT   10.0 100.0    0.0     0.0  
-'     '  '    '    '      I 010010ZJAN70 n/a          N1 SHIA OPFOR  -8.0 -100.0   0.0     0.0  
-1.3   '  '    '    PATROL I 010005ZJAN70 010015ZJAN70 N1 SHIA BLUE    8.0 100.0    0.0     0.0  
-'     '  '    '    '      I 010015ZJAN70 n/a          N1 SHIA BLUE    0.0   0.0    0.0     0.0  
-'     '  '    '    '      D 010005ZJAN70 010015ZJAN70 N1 SHIA BRIT   10.0 100.0    0.0     0.0  
-'     '  '    '    '      D 010015ZJAN70 n/a          N1 SHIA BRIT    0.0   0.0    0.0     0.0  
-'     '  '    '    '      I 010005ZJAN70 010015ZJAN70 N1 SHIA OPFOR  -8.0 -100.0   0.0     0.0  
-'     '  '    '    '      I 010015ZJAN70 n/a          N1 SHIA OPFOR   0.0   0.0    0.0     0.0  
+Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ------ - ------------ ------------ -- ---- ----- ----- ------- ------ 
+1.2   N1 SHIA BRIT GUARD  I 010010ZJAN70 n/a          N1 SHIA BLUE    8.0   0.0     0.0  
+'     '  '    '    '      D 010010ZJAN70 n/a          N1 SHIA BRIT   10.0   0.0     0.0  
+'     '  '    '    '      I 010010ZJAN70 n/a          N1 SHIA OPFOR  -8.0   0.0     0.0  
+1.3   '  '    '    PATROL I 010005ZJAN70 010015ZJAN70 N1 SHIA BLUE    8.0   0.0     0.0  
+'     '  '    '    '      I 010015ZJAN70 n/a          N1 SHIA BLUE    0.0   0.0     0.0  
+'     '  '    '    '      D 010005ZJAN70 010015ZJAN70 N1 SHIA BRIT   10.0   0.0     0.0  
+'     '  '    '    '      D 010015ZJAN70 n/a          N1 SHIA BRIT    0.0   0.0     0.0  
+'     '  '    '    '      I 010005ZJAN70 010015ZJAN70 N1 SHIA OPFOR  -8.0   0.0     0.0  
+'     '  '    '    '      I 010015ZJAN70 n/a          N1 SHIA OPFOR   0.0   0.0     0.0  
     }
 
     # coop_slope-7.*: Scheduling returns input
@@ -7171,8 +7072,8 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Limit 
     test coop_slope-7.1 {Return input, case 1: one nbhood, 0 limit} -setup {
         create -trend no
     } -body {
-        set a [jr coop slope 1 0 N1 SHIA BRIT 0 0]
-        set b [jr coop slope 1 0 N1 SHIA BLUE 0 0]
+        set a [jr coop slope 1 0 N1 SHIA BRIT 0]
+        set b [jr coop slope 1 0 N1 SHIA BLUE 0]
         set c [rdb eval {SELECT DISTINCT input FROM gram_effects}]
 
         list $a $b $c
@@ -7183,10 +7084,10 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Limit 
     test coop_slope-7.2 {Return input, case 2: one nbhood, terminate} -setup {
         create -trend no
     } -body {
-        set a [jr coop slope 1 0 N1 SHIA BRIT 10 10]
-        set b [jr coop slope 1 0 N1 SHIA BLUE 10 10]
-        set c [jr coop slope 1 0 N1 SHIA BRIT 0 0]
-        set d [jr coop slope 1 0 N1 SHIA BLUE 0 0]
+        set a [jr coop slope 1 0 N1 SHIA BRIT 10]
+        set b [jr coop slope 1 0 N1 SHIA BLUE 10]
+        set c [jr coop slope 1 0 N1 SHIA BRIT 0]
+        set d [jr coop slope 1 0 N1 SHIA BLUE 0]
         set e [rdb eval {SELECT DISTINCT input FROM gram_effects}]
 
         list $a $b $c $d $e
@@ -7197,8 +7098,8 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Limit 
     test coop_slope-7.3 {Return input, case 3: all nbhoods, 0 limit} -setup {
         create -trend no
     } -body {
-        set a [jr coop slope 1 0 * SHIA BRIT 0 0]
-        set b [jr coop slope 1 0 * SHIA BLUE 0 0]
+        set a [jr coop slope 1 0 * SHIA BRIT 0]
+        set b [jr coop slope 1 0 * SHIA BLUE 0]
         set c [rdb eval {SELECT DISTINCT input FROM gram_effects}]
 
         list $a $b $c
@@ -7209,10 +7110,10 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Limit 
     test coop_slope-7.4 {Return input, case 4: all nbhoods, terminate} -setup {
         create -trend no
     } -body {
-        set a [jr coop slope 1 0 * SHIA BRIT 10 10]
-        set b [jr coop slope 1 0 * SHIA BLUE 10 10]
-        set c [jr coop slope 1 0 * SHIA BRIT 0 0]
-        set d [jr coop slope 1 0 * SHIA BLUE 0 0]
+        set a [jr coop slope 1 0 * SHIA BRIT 10]
+        set b [jr coop slope 1 0 * SHIA BLUE 10]
+        set c [jr coop slope 1 0 * SHIA BRIT 0]
+        set d [jr coop slope 1 0 * SHIA BLUE 0]
         set e [rdb eval {SELECT DISTINCT input FROM gram_effects}]
 
         list $a $b $c $d $e
@@ -7223,8 +7124,8 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Limit 
     test coop_slope-7.5 {Return input, case 5: nominal case} -setup {
         create
     } -body {
-        set a [jr coop slope 1 0 N1 SHIA BRIT 10 10]
-        set b [jr coop slope 1 0 N1 SHIA BLUE 10 10]
+        set a [jr coop slope 1 0 N1 SHIA BRIT 10]
+        set b [jr coop slope 1 0 N1 SHIA BLUE 10]
         set c [rdb eval {SELECT DISTINCT input FROM gram_effects}]
 
         list $a $b $c
@@ -7242,14 +7143,14 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Limit 
         # Create two pairs of inputs; verify that only one pair
         # gets deleted.
         jr sat  level 1 0 N1 SHIA SFT  10 1 
-        jr sat  slope 1 0 N1 SHIA SFT  10 10
+        jr sat  slope 1 0 N1 SHIA SFT  10
         jr coop level 1 0 N1 SHIA BLUE 10 1
-        jr coop slope 1 0 N1 SHIA BLUE 10 10
+        jr coop slope 1 0 N1 SHIA BLUE 10
 
         jr sat  level 2 0 N1 SUNN SFT  20 2 
-        jr sat  slope 2 0 N1 SUNN SFT  20 20
+        jr sat  slope 2 0 N1 SUNN SFT  20
         jr coop level 2 0 N1 SUNN BLUE 20 2
-        jr coop slope 2 0 N1 SUNN BLUE 10 10
+        jr coop slope 2 0 N1 SUNN BLUE 10
 
         jr cancel 1
 
@@ -7268,23 +7169,23 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Days  Limit N
 '     '  '    '    '     I 010000ZJAN70 030000ZJAN70 N1 SUNN BRIT  2.000  16.0   0.00    0.00 
 '     '  '    '    '     I 010000ZJAN70 030000ZJAN70 N1 SUNN OPFOR 2.000 -16.0   0.00    0.00 
 
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ----- ------- ------ 
-2.2   N1 SUNN D2    D 010000ZJAN70 n/a      N1   SUNN SFT  20.0  20.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   KURD SFT -12.0 -20.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+2.2   N1 SUNN D2    D 010000ZJAN70 n/a      N1   SUNN SFT  20.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N1   KURD SFT -12.0   0.0     0.0  
 
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ----- ------- ------ 
-2.4   N1 SUNN BLUE D2    D 010000ZJAN70 n/a      N1 SUNN BLUE   10.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N1 SUNN BRIT    8.0  10.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N1 SUNN OPFOR  -8.0 -10.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+2.4   N1 SUNN BLUE D2    D 010000ZJAN70 n/a      N1 SUNN BLUE   10.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N1 SUNN BRIT    8.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N1 SUNN OPFOR  -8.0   0.0     0.0  
     }
 
     test cancel-2.1 {cancel deletes gram_contribs} -setup {
         create -trend no
     } -body {
         jr sat  level 1 0 N1 SHIA SFT  10 1 
-        jr sat  slope 1 0 N1 SHIA SFT  10 10
+        jr sat  slope 1 0 N1 SHIA SFT  10
         jr coop level 1 0 N1 SHIA BLUE 10 1
 
         myclock advance 1440
@@ -7438,61 +7339,61 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Limit Nomin
     test terminate-2.1 {terminates sat slopes} -setup {
         create -trend no
     } -body {
-        jr sat slope 1 0  N1 SHIA QOL 10 5 -p 1.0 -q 1.0
+        jr sat slope 1 0  N1 SHIA QOL 10 -p 1.0 -q 1.0
         jr terminate 1 60
 
         dumpSlopes
     } -cleanup {
         cleanup
     } -result {
-Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ ------------ ---- ---- --- ----- ----- ------- ------ 
-1.2   N1 SHIA D1    D 010000ZJAN70 010100ZJAN70 N1   SHIA QOL  10.0   5.0   0.0     0.0  
-'     '  '    '     D 010100ZJAN70 n/a          N1   SHIA QOL   0.0   0.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010100ZJAN70 N1   KURD QOL   6.0   5.0   0.0     0.0  
-'     '  '    '     I 010100ZJAN70 n/a          N1   KURD QOL   0.0   0.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010100ZJAN70 N1   SUNN QOL  -3.0  -5.0   0.0     0.0  
-'     '  '    '     I 010100ZJAN70 n/a          N1   SUNN QOL   0.0   0.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010100ZJAN70 N2   KURD QOL   6.0   5.0   0.0     0.0  
-'     '  '    '     I 010100ZJAN70 n/a          N2   KURD QOL   0.0   0.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010100ZJAN70 N2   SHIA QOL  10.0   5.0   0.0     0.0  
-'     '  '    '     I 010100ZJAN70 n/a          N2   SHIA QOL   0.0   0.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010100ZJAN70 N2   SUNN QOL  -3.0  -5.0   0.0     0.0  
-'     '  '    '     I 010100ZJAN70 n/a          N2   SUNN QOL   0.0   0.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ ------------ ---- ---- --- ----- ------- ------ 
+1.2   N1 SHIA D1    D 010000ZJAN70 010100ZJAN70 N1   SHIA QOL  10.0   0.0     0.0  
+'     '  '    '     D 010100ZJAN70 n/a          N1   SHIA QOL   0.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010100ZJAN70 N1   KURD QOL   6.0   0.0     0.0  
+'     '  '    '     I 010100ZJAN70 n/a          N1   KURD QOL   0.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010100ZJAN70 N1   SUNN QOL  -3.0   0.0     0.0  
+'     '  '    '     I 010100ZJAN70 n/a          N1   SUNN QOL   0.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010100ZJAN70 N2   KURD QOL   6.0   0.0     0.0  
+'     '  '    '     I 010100ZJAN70 n/a          N2   KURD QOL   0.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010100ZJAN70 N2   SHIA QOL  10.0   0.0     0.0  
+'     '  '    '     I 010100ZJAN70 n/a          N2   SHIA QOL   0.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010100ZJAN70 N2   SUNN QOL  -3.0   0.0     0.0  
+'     '  '    '     I 010100ZJAN70 n/a          N2   SUNN QOL   0.0   0.0     0.0  
     }
 
     
     test terminate-2.2 {terminates coop slopes} -setup {
         create
     } -body {
-        jr coop slope 1 0  N1 SHIA BLUE 10 5 -p 1.0 -q 1.0
+        jr coop slope 1 0  N1 SHIA BLUE 10 -p 1.0 -q 1.0
         jr terminate 1 60
 
         dumpCoopSlopes
     } -cleanup {
         cleanup
     } -result {
-Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit Nominal Actual 
------ -- ---- ---- ----- - ------------ ------------ -- ---- ----- ----- ----- ------- ------ 
-1.2   N1 SHIA BLUE D1    D 010000ZJAN70 010100ZJAN70 N1 SHIA BLUE   10.0   5.0   0.0     0.0  
-'     '  '    '    '     D 010100ZJAN70 n/a          N1 SHIA BLUE    0.0   0.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 010100ZJAN70 N1 SHIA BRIT    8.0   5.0   0.0     0.0  
-'     '  '    '    '     I 010100ZJAN70 n/a          N1 SHIA BRIT    0.0   0.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 010100ZJAN70 N1 SHIA OPFOR  -8.0  -5.0   0.0     0.0  
-'     '  '    '    '     I 010100ZJAN70 n/a          N1 SHIA OPFOR   0.0   0.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 010100ZJAN70 N2 SHIA BLUE   10.0   5.0   0.0     0.0  
-'     '  '    '    '     I 010100ZJAN70 n/a          N2 SHIA BLUE    0.0   0.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 010100ZJAN70 N2 SHIA BRIT    8.0   5.0   0.0     0.0  
-'     '  '    '    '     I 010100ZJAN70 n/a          N2 SHIA BRIT    0.0   0.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 010100ZJAN70 N2 SHIA OPFOR  -8.0  -5.0   0.0     0.0  
-'     '  '    '    '     I 010100ZJAN70 n/a          N2 SHIA OPFOR   0.0   0.0   0.0     0.0  
+Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ ------------ -- ---- ----- ----- ------- ------ 
+1.2   N1 SHIA BLUE D1    D 010000ZJAN70 010100ZJAN70 N1 SHIA BLUE   10.0   0.0     0.0  
+'     '  '    '    '     D 010100ZJAN70 n/a          N1 SHIA BLUE    0.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 010100ZJAN70 N1 SHIA BRIT    8.0   0.0     0.0  
+'     '  '    '    '     I 010100ZJAN70 n/a          N1 SHIA BRIT    0.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 010100ZJAN70 N1 SHIA OPFOR  -8.0   0.0     0.0  
+'     '  '    '    '     I 010100ZJAN70 n/a          N1 SHIA OPFOR   0.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 010100ZJAN70 N2 SHIA BLUE   10.0   0.0     0.0  
+'     '  '    '    '     I 010100ZJAN70 n/a          N2 SHIA BLUE    0.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 010100ZJAN70 N2 SHIA BRIT    8.0   0.0     0.0  
+'     '  '    '    '     I 010100ZJAN70 n/a          N2 SHIA BRIT    0.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 010100ZJAN70 N2 SHIA OPFOR  -8.0   0.0     0.0  
+'     '  '    '    '     I 010100ZJAN70 n/a          N2 SHIA OPFOR   0.0   0.0     0.0  
     }
 
     test terminate-2.3 {terminates only for the given driver} -setup {
         create -trend no
     } -body {
-        jr sat slope 1 0  N1 SHIA QOL 10 5
-        jr sat slope 2 0  N1 SUNN SFT 10 5
+        jr sat slope 1 0  N1 SHIA QOL 10
+        jr sat slope 2 0  N1 SUNN SFT 10
         
         jr terminate 1 60
 
@@ -7500,16 +7401,16 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Limit N
     } -cleanup {
         cleanup
     } -result {
-Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Limit Nominal Actual 
------ -- ---- ----- - ------------ ------------ ---- ---- --- ----- ----- ------- ------ 
-1.2   N1 SHIA D1    D 010000ZJAN70 010100ZJAN70 N1   SHIA QOL  10.0   5.0   0.0     0.0  
-'     '  '    '     D 010100ZJAN70 n/a          N1   SHIA QOL   0.0   0.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010100ZJAN70 N1   KURD QOL   6.0   5.0   0.0     0.0  
-'     '  '    '     I 010100ZJAN70 n/a          N1   KURD QOL   0.0   0.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 010100ZJAN70 N1   SUNN QOL  -3.0  -5.0   0.0     0.0  
-'     '  '    '     I 010100ZJAN70 n/a          N1   SUNN QOL   0.0   0.0   0.0     0.0  
-2.1   '  SUNN D2    D 010000ZJAN70 n/a          N1   SUNN SFT  10.0   5.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a          N1   KURD SFT  -6.0  -5.0   0.0     0.0  
+Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ ------------ ---- ---- --- ----- ------- ------ 
+1.2   N1 SHIA D1    D 010000ZJAN70 010100ZJAN70 N1   SHIA QOL  10.0   0.0     0.0  
+'     '  '    '     D 010100ZJAN70 n/a          N1   SHIA QOL   0.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010100ZJAN70 N1   KURD QOL   6.0   0.0     0.0  
+'     '  '    '     I 010100ZJAN70 n/a          N1   KURD QOL   0.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 010100ZJAN70 N1   SUNN QOL  -3.0   0.0     0.0  
+'     '  '    '     I 010100ZJAN70 n/a          N1   SUNN QOL   0.0   0.0     0.0  
+2.1   '  SUNN D2    D 010000ZJAN70 n/a          N1   SUNN SFT  10.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a          N1   KURD SFT  -6.0   0.0     0.0  
     }
 
     test terminate-2.4 {levels are unaffected} -setup {
@@ -7958,7 +7859,7 @@ I 0  7200 N1 SUNN QOL -3.00
         jr cancel 0
 
         # NEXT, create a slope effect at time 5, and advance to time 5.
-        jr sat slope 1 5 N1 SHIA AUT 10 100
+        jr sat slope 1 5 N1 SHIA AUT 10
 
         myclock advance 5
         jr advance

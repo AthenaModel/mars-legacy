@@ -41,6 +41,9 @@ GRAM differs from JRAM in the following ways:<p>
 
   <li> GRAM supports the full <<xref saveable(i)>> API; JRAM supports
        the simpler checkpoint/restore API used in JNEM.<p>
+
+  <li> GRAM slope inputs lack JRAM's "limit" parameter.  In GRAM,
+       slope effects continue until explicitly terminated.<p>
 </ul>
 
 An application can create multiple independent instances of the model

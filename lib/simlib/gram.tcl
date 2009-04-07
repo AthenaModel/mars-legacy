@@ -137,7 +137,7 @@ snit::type ::simlib::gram {
 
     # This value is used as a sentinel, to indicate that a slope effect
     # has no end time.
-    typevariable maxEndTime 99999999
+    typevariable maxEndTime [expr {int(99999999)}]
 
     # This value indicates the numeric proximity limit for each
     # value of gram.*.proxlimit.
@@ -1027,12 +1027,6 @@ snit::type ::simlib::gram {
             AND   trend != 0.0
         } row {
             set input(slope)     $row(trend)
-
-            if {$input(slope) > 0.0} {
-                set input(slimit) 100.0
-            } else {
-                set input(slimit) -100.0
-            }
 
             set chain(curve_id)  $row(curve_id)
             set chain(direct_id) $row(ngc_id)
@@ -1987,7 +1981,7 @@ snit::type ::simlib::gram {
     }
 
 
-    # sat slope driver ts n g c slope limit ?options...?
+    # sat slope driver ts n g c slope ?options...?
     #
     # driver       Driver ID
     # ts           Input start time, integer ticks
@@ -1995,7 +1989,6 @@ snit::type ::simlib::gram {
     # g            Group name
     # c            Concern name
     # slope        Slope (change/day) of the effect (qmag)
-    # limit        Maximum change, +/- (qmag)
     #
     # Options: 
     #     -cause cause   Name of the cause of this input
@@ -2012,9 +2005,9 @@ snit::type ::simlib::gram {
     # * Such subsequent inputs must have a start time, ts,
     #   no earlier than the ts of the previous input.
 
-    method {sat slope} {driver ts n g c slope limit args} {
+    method {sat slope} {driver ts n g c slope args} {
         $self Log detail \
-            "sat slope driver=$driver ts=$ts n=$n g=$g c=$c s=$slope lim=$limit $args"
+            "sat slope driver=$driver ts=$ts n=$n g=$g c=$c s=$slope $args"
 
         # FIRST, validate the regular inputs
         $self driver validate $driver "Cannot sat slope"
@@ -2034,13 +2027,6 @@ snit::type ::simlib::gram {
         $self ValidateGC $g $c
 
         qmag validate $slope
-        qmag validate $limit
-
-        # Ensure that the slope and the limit have the same sign.
-        if {($slope < 0.0 && $limit > 0.0) ||
-            ($limit < 0.0 && $slope > 0.0)} {
-            error "slope and limit differ in sign: \"$slope\", \"$limit\""
-        }
 
         # NEXT, validate the options
         $self ParseInputOptions opts $args $n
@@ -2052,12 +2038,11 @@ snit::type ::simlib::gram {
         set input(dg)       $g
         set input(c)        $c
         set input(slope)    [qmag value $slope]
-        set input(slimit)   [qmag value $limit]
         set input(ts)       $ts
         set input(p)        $opts(-p)
         set input(q)        $opts(-q)
 
-        # NEXT, if the slope or limit is less than epsilon, make it
+        # NEXT, if the slope is less than epsilon, make it
         # zero.
 
         set epsilon [$parm get gram.epsilon]
@@ -2065,11 +2050,6 @@ snit::type ::simlib::gram {
         if {abs($input(slope)) < $epsilon} {
             set input(slope) 0.0
         }
-
-        if {abs($input(slimit)) < $epsilon} {
-            set input(slimit) 0.0
-        }
-
 
         # If no cause is given, use the Driver ID;
         # this ensures that truly independent effects are treated as such.
@@ -2088,11 +2068,11 @@ snit::type ::simlib::gram {
         if {$n ne "*"} {
             # ONE NEIGHBORHOOD
 
-            # FIRST, if the limit or slope is 0, ignore it; otherwise,
+            # FIRST, if the slope is 0, ignore it; otherwise,
             # if there are effects on-going terminate all related
             # chains.  Either way, we're done.
 
-            if {$input(slope) == 0.0 || $input(slimit) == 0.0} {
+            if {$input(slope) == 0.0} {
                 $rdb eval {
                     SELECT id, ts, te, cause, delay, future 
                     FROM gram_ngc     AS direct
@@ -2160,11 +2140,11 @@ snit::type ::simlib::gram {
         } else {
             # ALL NEIGHBORHOODS: -p and -q are ignored.
 
-            # FIRST, if the limit or slope is 0, ignore it, unless effects
+            # FIRST, if the slope is 0, ignore it, unless effects
             # are ongoing for this driver, in which case terminate all related
             # chains.  Either way, we're done.
 
-            if {$input(slope) == 0.0 || $input(slimit) == 0.0} {
+            if {$input(slope) == 0.0} {
                 $rdb eval {
                     SELECT id, ts, te, cause, delay, future 
                     FROM gram_ngc     AS direct
@@ -2613,7 +2593,7 @@ snit::type ::simlib::gram {
         return $input(input)
     }
 
-    # coop slope driver ts n f g slope limit ?options...?
+    # coop slope driver ts n f g slope ?options...?
     #
     # driver       Driver ID
     # ts           Start time, integer ticks
@@ -2621,7 +2601,6 @@ snit::type ::simlib::gram {
     # f            Civilian group name
     # g            Force group name
     # slope        Slope (change/day) of the effect (qmag)
-    # limit        Maximum change, +/- (qmag)
     #
     # Options: 
     #     -cause cause   Name of the cause of this input
@@ -2636,9 +2615,9 @@ snit::type ::simlib::gram {
     # * Such subsequent inputs must have a start time, ts,
     #   no earlier than the ts of the previous input.
 
-    method {coop slope} {driver ts n f g slope limit args} {
+    method {coop slope} {driver ts n f g slope args} {
         $self Log detail \
-            "coop slope driver=$driver ts=$ts n=$n f=$f g=$g s=$slope lim=$limit $args"
+            "coop slope driver=$driver ts=$ts n=$n f=$f g=$g s=$slope $args"
 
         # FIRST, validate the regular inputs
         $self driver validate $driver "Cannot coop slope"
@@ -2659,13 +2638,6 @@ snit::type ::simlib::gram {
         $fgroups validate $g
 
         qmag validate $slope
-        qmag validate $limit
-
-        # Ensure that the slope and the limit have the same sign.
-        if {($slope < 0.0 && $limit > 0.0) ||
-            ($limit < 0.0 && $slope > 0.0)} {
-            error "slope and limit differ in sign: \"$slope\", \"$limit\""
-        }
 
         # NEXT, validate the options
         $self ParseInputOptions opts $args $n
@@ -2678,7 +2650,6 @@ snit::type ::simlib::gram {
         set input(df)       $f
         set input(dg)       $g
         set input(slope)    [qmag value $slope]
-        set input(slimit)   [qmag value $limit]
         set input(ts)       $ts
         set input(p)        $opts(-p)
         set input(q)        $opts(-q)
@@ -2694,7 +2665,7 @@ snit::type ::simlib::gram {
             let input(q) {$opts(-q) * $effects_factor}
         }
 
-        # NEXT, if the slope or limit is less than epsilon, make it
+        # NEXT, if the slope is less than epsilon, make it
         # zero.
 
         set epsilon [$parm get gram.epsilon]
@@ -2702,11 +2673,6 @@ snit::type ::simlib::gram {
         if {abs($input(slope)) < $epsilon} {
             set input(slope) 0.0
         }
-
-        if {abs($input(slimit)) < $epsilon} {
-            set input(slimit) 0.0
-        }
-
 
         # If no cause is given, use the driver ID;
         # this ensures that truly independent effects are treated as such.
@@ -2725,11 +2691,11 @@ snit::type ::simlib::gram {
         if {$n ne "*"} {
             # ONE NEIGHBORHOOD
 
-            # FIRST, if the limit or slope is 0, ignore it, unless effects
+            # FIRST, if the slope is 0, ignore it, unless effects
             # are ongoing for this driver, in which case terminate all related
             # chains.  Either way, we're done.
 
-            if {$input(slope) == 0.0 || $input(slimit) == 0.0} {
+            if {$input(slope) == 0.0} {
                 $rdb eval {
                     SELECT id, ts, te, cause, delay, future 
                     FROM gram_nfg     AS direct
@@ -2797,11 +2763,11 @@ snit::type ::simlib::gram {
         } else {
             # ALL NEIGHBORHOODS: -p and -q are ignored.
 
-            # FIRST, if the limit or slope is 0, ignore it, unless effects
+            # FIRST, if the slope is 0, ignore it, unless effects
             # are on-going for this driver, in which case terminate all related
             # chains.  Either way, we're done.
 
-            if {$input(slope) == 0.0 || $input(slimit) == 0.0} {
+            if {$input(slope) == 0.0} {
                 $rdb eval {
                     SELECT id, ts, te, cause, delay, future 
                     FROM gram_nfg     AS direct
@@ -3134,7 +3100,6 @@ snit::type ::simlib::gram {
     #     cause      "Cause" of this input
     #     ts         Start time, in ticks
     #     slope      Slope, in nominal points/day
-    #     slimit     Maximum nominal slope change for this effect.
     #     p          Near effects multiplier
     #	  q          Far effects multiplier
     # effectArray  Array of data about the current effect
@@ -3152,7 +3117,7 @@ snit::type ::simlib::gram {
         upvar 1 $inputArray input
         upvar 1 $effectArray effect
 
-        # FIRST, determine the real slope and slimit
+        # FIRST, determine the real slope.
         if {$effect(prox) == 1} {
             # Near.
             let mult {$input(p) * $effect(factor)}
@@ -3166,21 +3131,10 @@ snit::type ::simlib::gram {
         
         let slope {$mult * $input(slope)}
 
-        # The slimit isn't scaled, but we might need to change its sign.
-        if {$mult < 0.0} {
-            let slimit {-1.0 * $input(slimit)}
-        } else {
-            set slimit $input(slimit)
-        }
-        
-        # NEXT, if the slope or limit are very small, set them to
+        # NEXT, if the slope is very small, set it to
         # zero.
         if {abs($slope) < $epsilon} {
             set slope 0.0
-        }
-        
-        if {abs($slimit) < $epsilon} {
-            set slimit 0.0
         }
 
         # NEXT, compute the start time, taking the effects 
@@ -3208,8 +3162,7 @@ snit::type ::simlib::gram {
             # FIRST, if the chain is inactive, and this 
             # link has 0 slope, we can skip it; adding another
             # link won't change anything.
-            if {!$old(active) && 
-                ($slope == 0.0 || $slimit == 0.0)} {
+            if {!$old(active) && $slope == 0.0} {
                 # SKIP!
                 return
             }
@@ -3221,14 +3174,14 @@ snit::type ::simlib::gram {
                 set tPrev $old(ts)
             } else {
                 set te $old(te)
-                set tPrev [lindex $old(future) end-2]
+                set tPrev [lindex $old(future) end-1]
             }
 
             require {$ts >= $tPrev} \
                 "slope scheduled in decreasing time sequence: $ts < $tPrev"
 
             # NEXT, add this link's data to the profile
-            lappend old(future) $ts $slope $slimit
+            lappend old(future) $ts $slope
             
             # NEXT, update the record, and mark it active.
             $rdb eval {
@@ -3245,10 +3198,10 @@ snit::type ::simlib::gram {
         }
 
         # NEXT, this is the first link in a new chain.  There's
-        # no point in creating the record if the slope or limit
+        # no point in creating the record if the slope
         # is zero.
 
-        if {$slope == 0.0 || $slimit == 0.0} {
+        if {$slope == 0.0} {
             # SKIP!
             return
         }
@@ -3266,7 +3219,6 @@ snit::type ::simlib::gram {
                 delay,
                 cause,
                 slope,
-                slimit, 
                 ts,
                 te
             )
@@ -3281,7 +3233,6 @@ snit::type ::simlib::gram {
                 $effect(delay),
                 $input(cause),
                 $slope,
-                $slimit,
                 $ts,
                 $maxEndTime
             );
@@ -3302,11 +3253,11 @@ snit::type ::simlib::gram {
     #     delay      Delay of this effect, in ticks
     #     future     Future slopes
     #
-    # Terminates a slope effect by scheduling a slope and limit of 0
+    # Terminates a slope effect by scheduling a slope of 0
     # after the appropriate time delay.
     #
     # Constraints: The relevant effect already exists in gram_effects 
-    #and is active.
+    # and is active.
 
     method TerminateSlope {inputArray effectArray} {
         upvar 1 $inputArray  input
@@ -3323,14 +3274,14 @@ snit::type ::simlib::gram {
             set tPrev $effect(ts)
         } else {
             set te $effect(te)
-            set tPrev [lindex $effect(future) end-2]
+            set tPrev [lindex $effect(future) end-1]
         }
 
         require {$ts >= $tPrev} \
             "slope scheduled in decreasing time sequence: $ts < $tPrev"
 
         # NEXT, add this link's data to the profile
-        lappend effect(future) $ts 0.0 0.0
+        lappend effect(future) $ts 0.0
                  
         # NEXT, update the record.
         $rdb eval {
@@ -3500,14 +3451,13 @@ snit::type ::simlib::gram {
 
         # NEXT, Get each slope effect that's been active during
         # the last time step, and compute and save their nominal 
-        # and scaled nominal contributions.
+        # contributions.
 
         $rdb eval {
             SELECT id, 
                    nominal, 
                    ts, 
                    te, 
-                   slimit, 
                    gram_effects.slope AS slope,
                    future,
                    gram_curves.val AS val,
@@ -3534,33 +3484,18 @@ snit::type ::simlib::gram {
                 set step [expr {$te - $ts}]
                 set stepDays [$clock toDays $step]
 
-                # NEXT, Get the contribution of this link in the
-                # chain, and check it against the limit.
+                # NEXT, Get the nominal contribution of this link in the
+                # chain.
                 
-                if {($row(slimit) > 0.0 && $row(nominal) < $row(slimit)) ||
-                    ($row(slimit) < 0.0 && $row(nominal) > $row(slimit))} {
-                    let nvalue       {$row(slope)*$stepDays}
-                    let changeToDate {$row(nominal) + $nvalue}
-
-                    if {($row(slimit) >= 0 && $changeToDate > $row(slimit)) ||
-                        ($row(slimit) <= 0 && $changeToDate < $row(slimit))} {
-                        let delta {$changeToDate - $row(slimit)}
-                        let nvalue {$nvalue - $delta}
-                        set changeToDate $row(slimit)
-                    } 
-
-                    # NEXT, update the nominal and scaled nominal 
-                    # contributions.
-                    set row(nominal) $changeToDate
-                    let ncontrib {$ncontrib + $nvalue}
-                }
+                let nvalue       {$row(slope)*$stepDays}
+                let row(nominal) {$row(nominal) + $nvalue}
+                let ncontrib     {$ncontrib + $nvalue}
 
                 # NEXT, if there's another active link get it.
                 if {$row(te) < $db(time)} {
                     set row(ts)     [lindex $row(future) 0]
                     set row(slope)  [lindex $row(future) 1]
-                    set row(slimit) [lindex $row(future) 2]
-                    set row(future) [lrange $row(future) 3 end]
+                    set row(future) [lrange $row(future) 2 end]
 
                     if {[llength $row(future)] == 0} {
                         set row(te) $maxEndTime
@@ -3573,7 +3508,6 @@ snit::type ::simlib::gram {
                         SET ts     = $row(ts),
                             te     = $row(te),
                             slope  = $row(slope),
-                            slimit = $row(slimit),
                             future = $row(future)
                         WHERE id=$row(id)
                     }
@@ -3686,8 +3620,7 @@ snit::type ::simlib::gram {
         #
         # Expire level effects if their full time has elapsed.
         #
-        # Expire slope effects if they have reached their limit, or
-        # if they have reached their end time.
+        # Expire slope effects if they have reached their end time.
 
         $rdb eval {
             UPDATE gram_effects
@@ -3701,12 +3634,8 @@ snit::type ::simlib::gram {
                 -- level effect's time has elapsed
                 (etype = 'L' AND te <= $db(time)) OR
 
-                -- slope effect's reached its limit or its time
-                -- has elapsed.
-                (etype = 'S' AND
-                 ((slimit >= 0 AND nominal >= slimit) OR
-                  (slimit <= 0 AND nominal <= slimit) OR 
-                  (slope == 0.0 AND te = $maxEndTime)))
+                -- slope effect's is endlessly 0.0
+                (etype = 'S' AND slope == 0 AND te = $maxEndTime)
             )
         }
     }
@@ -4124,7 +4053,10 @@ snit::type ::simlib::gram {
     # dump sat slopes ?driver?
     #
     # Returns a pretty-printed list of slope effects, one per line.
-    # If driver is given, only those effects that match are included.  
+    # If driver is given, only those effects that match are included.
+    #
+    # TBD: The disaggregation of the "future" column can be done in
+    # one routine shared with [dump coop slopes].
 
     method {dump sat slopes} {{driver ""}} {
         # FIRST, build a temporary table, then query it, then destroy
@@ -4145,7 +4077,6 @@ snit::type ::simlib::gram {
                 g,
                 c,
                 slope,
-                slimit,
                 nominal,
                 actual
             );
@@ -4165,7 +4096,6 @@ snit::type ::simlib::gram {
                    g,
                    c,
                    slope,
-                   slimit,
                    nominal,
                    actual
             FROM gram_sat_effects
@@ -4179,12 +4109,11 @@ snit::type ::simlib::gram {
                      prox ASC, n ASC, g ASC, ts ASC, c ASC, id ASC
         } row {
             set future \
-                [linsert $row(future) 0 $row(ts) $row(slope) $row(slimit)]
+                [linsert $row(future) 0 $row(ts) $row(slope)]
 
             while {[llength $future] > 0} {
                 set ts     [lshift future]
                 set slope  [lshift future]
-                set slimit [lshift future]
                 set te     [lindex $future 0]
 
                 if {$te eq ""} {
@@ -4205,7 +4134,6 @@ snit::type ::simlib::gram {
                         g,
                         c,
                         slope,
-                        slimit,
                         nominal,
                         actual
                     )
@@ -4222,7 +4150,6 @@ snit::type ::simlib::gram {
                         $row(g),
                         $row(c),
                         $slope,
-                        $slimit,
                         $row(nominal),
                         $row(actual)
                     );
@@ -4242,14 +4169,13 @@ snit::type ::simlib::gram {
                    g,
                    c,
                    format('%5.1f',slope),
-                   format('%5.1f',slimit),
                    format('%5.1f',nominal),
                    format('%5.1f',actual)
             FROM temp_gram_slope_query
         " -labels {
             "Input" "DN" "DG" "Cause" "E" 
             "Start Time" "End Time" "Nbhd" "Grp" "Con"  
-            "Slope" "Limit" "Nominal" "Actual"
+            "Slope" "Nominal" "Actual"
         } -headercols 4]
 
         return $out
@@ -4279,7 +4205,6 @@ snit::type ::simlib::gram {
                 n,
                 g,
                 slope,
-                slimit,
                 nominal,
                 actual
             );
@@ -4299,7 +4224,6 @@ snit::type ::simlib::gram {
                    n,
                    g,
                    slope,
-                   slimit,
                    nominal,
                    actual
             FROM gram_coop_effects
@@ -4312,12 +4236,11 @@ snit::type ::simlib::gram {
                      n ASC, g ASC, prox ASC, ts ASC, id ASC
         " row {
             set future \
-                [linsert $row(future) 0 $row(ts) $row(slope) $row(slimit)]
+                [linsert $row(future) 0 $row(ts) $row(slope)]
 
             while {[llength $future] > 0} {
                 set ts     [lshift future]
                 set slope  [lshift future]
-                set slimit [lshift future]
                 set te     [lindex $future 0]
 
                 if {$te eq ""} {
@@ -4338,7 +4261,6 @@ snit::type ::simlib::gram {
                         n,
                         g,
                         slope,
-                        slimit,
                         nominal,
                         actual
                     )
@@ -4355,7 +4277,6 @@ snit::type ::simlib::gram {
                         $row(n),
                         $row(g),
                         $slope,
-                        $slimit,
                         $row(nominal),
                         $row(actual)
                     );
@@ -4371,19 +4292,19 @@ snit::type ::simlib::gram {
                    cause,
                    CASE WHEN prox=-1 THEN 'D' ELSE 'I' END,
                    tozulu(ts) AS ts,
-                   CASE WHEN te=$maxEndTime THEN 'n/a' ELSE tozulu(te) END,
+                   CASE WHEN te = CAST ($maxEndTime AS INTEGER) 
+                        THEN 'n/a' ELSE tozulu(te) END,
                    n,
                    df,
                    g,
                    format('%5.1f',slope),
-                   format('%5.1f',slimit),
                    format('%5.1f',nominal),
                    format('%5.1f',actual)
             FROM temp_gram_slope_query
         " -labels {
             "Input" "DN" "DF" "DG" "Cause" "E" 
             "Start Time" "End Time" "N" "F" "G"  
-            "Slope" "Limit" "Nominal" "Actual"
+            "Slope" "Nominal" "Actual"
         } -headercols 5]
 
         return $out
@@ -4411,7 +4332,6 @@ snit::type ::simlib::gram {
                    tozulu(ts),
                    CASE WHEN te=$maxEndTime THEN 'n/a' ELSE tozulu(te) END,
                    format('%5.1f',slope),
-                   format('%5.1f',slimit),
                    format('%6.2f',nominal),
                    format('%7.3f',ncontrib),
                    format('%6.2f',actual),
@@ -4428,7 +4348,7 @@ snit::type ::simlib::gram {
             ORDER BY cause ASC, ts ASC, slope DESC
         " -labels {
             "Cause" "Start Time" "End Time" 
-            "Slope" "Limit" "NTotal" "NContrib"
+            "Slope" "NTotal" "NContrib"
             "ATotal" "AContrib" 
             "Input" "DN" "DG" "E"
         } -headercols 3]
@@ -4455,7 +4375,6 @@ snit::type ::simlib::gram {
                    tozulu(ts),
                    CASE WHEN te=$maxEndTime THEN 'n/a' ELSE tozulu(te) END,
                    format('%5.1f',slope),
-                   format('%5.1f',slimit),
                    format('%6.2f',nominal),
                    format('%7.3f',ncontrib),
                    format('%6.2f',actual),
@@ -4473,7 +4392,7 @@ snit::type ::simlib::gram {
             ORDER BY cause ASC, ts ASC, slope DESC
         " -labels {
             "Cause" "Start Time" "End Time" 
-            "Slope" "Limit" "NTotal" "NContrib"
+            "Slope" "NTotal" "NContrib"
             "ATotal" "AContrib" 
             "Input" "DN" "DF" "DG" "E"
         } -headercols 3]
