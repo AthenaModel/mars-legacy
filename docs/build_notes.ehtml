@@ -10,6 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.11, 13 April 2009</h3>
+
+There are three changes in support of ongoing Athena development in
+this build:
+
+<ul>
+  <li> Bug 1978: parmset(n): add saveable(i) interface
+  <li> Bug 1985: gram(n): clear
+  <li> Bug 2036: gram(n): slope inputs no longer have "limit" 
+</ul><p>
+
 <h3>Build 1.10, 25 March 2009</h3>
 Four changes in support of ongoing Athena development are in this build. There's
 also a patch to prevent a bgerror from occurring in log browsers.
