@@ -931,9 +931,7 @@ snit::type ::simlib::gram {
 
     method CreateValidators {} {
         # FIRST, if they already exist get rid of them.
-        if {$db(initialized)} {
-            $self DestroyValidators
-        }
+        $self DestroyValidators
 
         # Nbhoods
         set values [$rdb eval {
@@ -990,11 +988,13 @@ snit::type ::simlib::gram {
     # etc.
 
     method DestroyValidators {} {
-        rename $nbhoods   "" ; set nbhoods  ""
-        rename $cgroups   "" ; set cgroups  ""
-        rename $cogroups  "" ; set cogroups ""
-        rename $fgroups   "" ; set fgroups  ""
-        rename $concerns  "" ; set concerns ""
+        if {$nbhoods ne ""} {
+            rename $nbhoods   "" ; set nbhoods  ""
+            rename $cgroups   "" ; set cgroups  ""
+            rename $cogroups  "" ; set cogroups ""
+            rename $fgroups   "" ; set fgroups  ""
+            rename $concerns  "" ; set concerns ""
+        }
     }
 
     # CreateLongTermTrends
