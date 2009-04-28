@@ -184,11 +184,27 @@ might otherwise be obscure.<p>
 
 Inserts the contents of dictionary <i>dict</i> into the <i>db</i> as a
 row in the named <i>table</i>.  The dictionary keys must be the same
-as the column names in the table.<p>
+as the column names in the table.  <b>It's an error if a row already
+exists with the same key column values.</b><p>
 
 This will be less efficient than an explicit "INSERT INTO" with
 hardcoded column names, but where performance isn't an issue it wins
 on maintainability.<p>
+
+Compare to <<iref sqlib replace>>.<p>
+
+<<defitem "sqlib replace" {sqlib replace <i>db table dict</i>}>>
+
+Inserts the contents of dictionary <i>dict</i> into the <i>db</i> as a
+row in the named <i>table</i>.  The dictionary keys must be the same
+as the column names in the table.  <b>If there's already a row with
+matching key columns, it will be replaced.</b><p>
+
+This will be less efficient than an explicit "INSERT OR REPLACE INTO"
+with hardcoded column names, but where performance isn't an issue it
+wins on maintainability.<p>
+
+Compare to <<iref sqlib insert>>.<p>
 
 <</deflist>>
 

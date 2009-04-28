@@ -263,6 +263,51 @@ CREATE TABLE third(g,h,i)}
     } -result {a {The First} b {The Second} * {a b c} c {The Third}}
 
 
+    #-------------------------------------------------------------------
+    # replace
+
+    test replace-1.1 {Inserts dict into table} -setup {
+        sqlite3 $db :memory:
+
+        $db eval {
+            CREATE TABLE mytable(a,b,c);
+        }
+    } -body {
+        sqlib replace $db mytable {
+            a "The First" 
+            b "The Second"
+            c "The Third"
+        }
+
+        $db eval {SELECT * FROM mytable} row {}
+        array get row
+    } -result {a {The First} b {The Second} * {a b c} c {The Third}}
+
+    test replace-1.2 {Replaces dict in table} -setup {
+        sqlite3 $db :memory:
+
+        $db eval {
+            CREATE TABLE mytable(a TEXT PRIMARY KEY,b,c);
+        }
+
+        sqlib insert $db mytable {
+            a "The First" 
+            b "The Second"
+            c "The Third"
+        }
+
+    } -body {
+        sqlib replace $db mytable {
+            a "The First" 
+            b "The New Second"
+            c "The New Third"
+        }
+
+        $db eval {SELECT * FROM mytable} row {}
+        array get row
+    } -result {a {The First} b {The New Second} * {a b c} c {The New Third}}
+
+
 
     #-------------------------------------------------------------------
     # Cleanup

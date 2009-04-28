@@ -473,12 +473,13 @@ snit::type ::marsutil::sqldocument {
     # Public Methods: General database queries
 
     # Delegated methods
-    delegate method query  to db using {::marsutil::sqlib %m %c} 
-    delegate method tables to db using {::marsutil::sqlib %m %c} 
-    delegate method schema to db using {::marsutil::sqlib %m %c} 
-    delegate method mat    to db using {::marsutil::sqlib %m %c} 
-    delegate method insert to db using {::marsutil::sqlib %m %c}
-    delegate method *      to db
+    delegate method query   to db using {::marsutil::sqlib %m %c} 
+    delegate method tables  to db using {::marsutil::sqlib %m %c} 
+    delegate method schema  to db using {::marsutil::sqlib %m %c} 
+    delegate method mat     to db using {::marsutil::sqlib %m %c} 
+    delegate method insert  to db using {::marsutil::sqlib %m %c}
+    delegate method replace to db using {::marsutil::sqlib %m %c}
+    delegate method *       to db
 
     # dbfile
     #
