@@ -348,7 +348,7 @@ snit::type ::marsutil::eventq {
         proc $etypes(handler-$etype) {id} [tsubst {
             |<--
             # Retrieve the event data
-            $::marsutil::eventq::rdb eval {
+            \$::marsutil::eventq::rdb eval {
                 SELECT * FROM eventq_queue_${etype}
                 WHERE id=\$id
             } {}
@@ -392,7 +392,7 @@ snit::type ::marsutil::eventq {
             proc $etypes(schedule-$etype) [concat id $etypes(eargs-$etype)] \
                 [tsubst {
                 |<--
-                $::marsutil::eventq::rdb eval {
+                \$::marsutil::eventq::rdb eval {
                     INSERT INTO eventq_etype_${etype}(id
                     [tif {[llength $etypes(eargs-$etype)] > 0} {
                         ,[join $etypes(eargs-$etype) ,]
