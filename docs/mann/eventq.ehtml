@@ -103,13 +103,19 @@ Executed events are deleted from the event queue, unless they
 Cancels the event with the specified <i>id</i>.  The event is deleted
 from the event queue, and forgotten.<p>
 
-<<defitem checkpoint {eventq checkpoint}>>
+<<defitem changed {eventq changed}>>
 
-The bulk of the event queue's data is stored in the run-time database;
-some, however, is stored in memory.  This call returns a single string
-containing all of the in-memory data; it can be restored by a call to
-<<iref restore>>.  This command is expected to be used by the
-application's checkpoint/restore code.<p>
+Indicates whether the queue <<xref saveable(i)>> data has changed
+or not.<p>
+
+<<defitem checkpoint {eventq checkpoint ?-saved?}>>
+
+Returns the current state of the event queue in-memory data; the queue
+can later be restored to this state using <<iref restore>>.  See
+<<xref saveable(i)>> for details.<p>
+
+Note that the RDB must also be checkpointed as well.<p>
+
 
 <<defitem define {eventq define <i>etype eargs body</i>}>>
 
@@ -198,13 +204,12 @@ Resets the event queue to time 0, deleting all scheduled events and
 resetting the event counter to 0.  Note that old event IDs will be
 reused in this case.<p>
 
-<<defitem restore {eventq restore <i>state</i>}>>
+<<defitem restore {eventq restore <i>state</i> ?-saved?}>>
 
-Restores the event queue's in-memory <i>state</i>; the <i>state</i>
-must be a value that was previously returned by <<iref checkpoint>>.
-This command is expected to be used by the application's
-checkpoint/restore code; note that any call to this routine must be
-synchronized with a restoration of the run-time database.<p>
+Restores the queue to a <i>checkpoint</i> produced by a previous call to
+<<iref checkpoint>>.  See <<xref saveable(i)>> for details.<p>
+
+Note that the RDB must be restored as well.<p>
 
 <<defitem schedule {eventq schedule <i>etype t</i> ?<i>args...</i>?}>>
 

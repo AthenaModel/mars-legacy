@@ -147,6 +147,14 @@ snit::type ::marsutil::eventq {
         names           {}
     }
 
+    # flags
+    #
+    #   changed      1 if there's unchanged data in info(), and 0 o.w.
+
+    typevariable flags -array {
+        changed 0
+    }
+
     #-------------------------------------------------------------------
     # Checkpointed Type Variables
 
@@ -240,6 +248,7 @@ snit::type ::marsutil::eventq {
 
             # Update the sim time
             set info(time) $t
+            set flags(changed) 1
 
             # Execute the event handler
             if {[catch {
@@ -293,6 +302,7 @@ snit::type ::marsutil::eventq {
         # NEXT, reset the event counter
         set info(time)         0
         set info(eventCounter) 0
+        set flags(changed)      1
     }
 
     #-------------------------------------------------------------------
@@ -455,6 +465,7 @@ snit::type ::marsutil::eventq {
 
         # Get the event ID
         set id [incr info(eventCounter)]
+        set flags(changed) 1
 
         # Insert the event into the queue.
         $rdb eval {
@@ -520,28 +531,45 @@ snit::type ::marsutil::eventq {
     # to checkpoint themselves directly to the RDB.  We need a new 
     # protocol (possibly notifier(n)-based) for this.
 
-    # checkpoint
+    # checkpoint ?-saved?
     #
     # Return a copy of the module's state for later restoration.
     # Note that data stored in the RDB is presumed to be checkpointed
     # by the application.
     
-    method checkpoint {} {
+    typemethod checkpoint {{option ""}} {
+        if {$option eq "-saved"} {
+            set flags(changed) 0
+        }
+
         return [array get info]
     }
 
-    # restore state
+    # restore state ?-saved?
     #
     # state     Checkpointed state returned by the checkpoint method.
     #
     # Restores the checkpointed state; this is just the reverse of
     # "checkpoint".
 
-    method restore {state} {
+    typemethod restore {state {option ""}} {
         # First, restore the state.
         array unset info
         array set info $state
+
+        if {$option eq "-saved"} {
+            set flags(changed) 0
+        }
     }
+
+    # changed
+    #
+    # Returns 1 if saveable(i) data has changed, and 0 otherwise.
+
+    typemethod changed {} {
+        return $flags(changed)
+    }
+
 
     #-------------------------------------------------------------------
     # Null RDB
