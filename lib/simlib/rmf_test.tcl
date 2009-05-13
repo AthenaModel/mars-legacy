@@ -145,7 +145,7 @@ proc putplot {name r c} {
 # Main line code
 
 # FIRST, set the nominal relationship to 1.0
-# rmf parm set rmf.nominalRelationship 1.0
+rmf parm set rmf.nominalRelationship 1.0
 
 
 # NEXT, get the min and max extremes.
