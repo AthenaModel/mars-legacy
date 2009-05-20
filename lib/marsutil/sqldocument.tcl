@@ -445,9 +445,16 @@ snit::type ::marsutil::sqldocument {
         require {$info(dbIsOpen)} "database is not open"
 
         if {$options(-autotrans)} {
-            $db eval {
-                COMMIT TRANSACTION;
-                BEGIN IMMEDIATE TRANSACTION;
+            # Break this up into two SQL statements. If one fails, its
+            # easier to trace the problem.
+            try {
+                $db eval {
+                    COMMIT TRANSACTION;
+                }
+            } finally {
+                $db eval {
+                    BEGIN IMMEDIATE TRANSACTION;
+                }
             }
         }
     }
