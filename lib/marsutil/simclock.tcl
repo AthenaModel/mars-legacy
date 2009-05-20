@@ -337,14 +337,15 @@ snit::type ::marsutil::simclockType {
 
     # start ?ticks?
     #
-    # ticks     A simulation time in ticks
+    # ticks           A simulation time in ticks
+    # advancePending  Allows an application using the simclock to 
+    #                 indicate whether there is a time advance pending
     #
     # Starts the motor running, first setting the clock to ticks if
     # given.
 
-    method start {{ticks ""}} {
-        require {$tm(afterId) eq ""} \
-            "simclock $self is already running."
+    method start {{ticks ""} {advancePending 0}} {
+        require {$tm(afterId) eq ""}  "simclock $self is already running."
 
         # FIRST, Advance time to the specified time.
         if {$ticks ne ""} {
@@ -358,7 +359,7 @@ snit::type ::marsutil::simclockType {
         set tm(grantWallclock)  $tm(baseWallclock)
         set tm(baseSimtime)     [$self asMinutes]
         set tm(elapsedTimes)    [list]
-        set tm(advancePending)  0
+        set tm(advancePending)  $advancePending
         set tm(advanceReceived) 0
 
         # NEXT, Start the motor going.
