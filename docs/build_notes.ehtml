@@ -10,10 +10,27 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.12, 27 May 2009</h3>
+
+This build contains a fair number of changes, most of them in support
+of ongoing Athena development; a few relate to bugs found during
+integration of JNEM 4.1.<p>
+
+<ul>
+  <li> Bug 2048: simlib(n): Add coverage(n) coverage function module
+  <li> Bug 2053: gram(n): error on initialization
+  <li> Bug 2072: sqlib(n)/sqldocument(n): replace
+  <li> Bug 2074: eventq(n): Can't schedule events defined before "eventq init"
+  <li> Bug 2087: eventq(n): checkpoint/restore is broken
+  <li> Bug 2112: jnem_sim(1): SPR 1529 - JNEM throws bgerrors on time advance.
+  <li> Bug 2114: bgerror: simclock(n), rtiproxy(n): advance request when advance is pending 
+</ul>
+
+
 <h3>Build 1.11, 13 April 2009</h3>
 
 There are three changes in support of ongoing Athena development in
-this build:
+this build:<p>
 
 <ul>
   <li> Bug 1978: parmset(n): add saveable(i) interface
