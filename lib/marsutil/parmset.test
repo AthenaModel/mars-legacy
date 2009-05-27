@@ -809,6 +809,27 @@ parm pBool   true
         CleanUp
     } -result {1}
 
+    test parmset-12.5 {Error when locking unknown parm} -setup {
+        Setup
+    } -body {
+        ps lock NoneSuch
+    } -returnCodes {
+        error
+    } -cleanup {
+        CleanUp
+    } -result {Pattern matches no parameters: "NoneSuch"}
+
+
+    test parmset-12.6 {Error when unlocking unknown parm} -setup {
+        Setup
+    } -body {
+        ps unlock NoneSuch
+    } -returnCodes {
+        error
+    } -cleanup {
+        CleanUp
+    } -result {Pattern matches no parameters: "NoneSuch"}
+
     #-------------------------------------------------------------------
     # -notifycmd
 

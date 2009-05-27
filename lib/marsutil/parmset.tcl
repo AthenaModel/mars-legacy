@@ -360,13 +360,21 @@ snit::type ::marsutil::parmset {
     
     method lock {pattern} {
         # The keys in values() are all lower case
-        set pattern [string tolower $pattern]
+        set lowpat [string tolower $pattern]
 
-        foreach id [array names values $pattern] {
+        set count 0
+
+        foreach id [array names values $lowpat] {
+            incr count
+
             set info(locked-$id) 1
 
             callwith $info(slave-$id) SlaveLocked  $id 1
             callwith $info(master)    MasterLocked $id 1
+        }
+
+        if {$count == 0} {
+            error "Pattern matches no parameters: \"$pattern\""
         }
     }
 
@@ -378,13 +386,21 @@ snit::type ::marsutil::parmset {
     
     method unlock {pattern} {
         # The keys in values() are all lower case
-        set pattern [string tolower $pattern]
+        set lowpat [string tolower $pattern]
 
-        foreach id [array names values $pattern] {
+        set count 0
+
+        foreach id [array names values $lowpat] {
+            incr count
+
             set info(locked-$id) 0
 
             callwith $info(slave-$id) SlaveLocked  $id 0
             callwith $info(master)    MasterLocked $id 0
+        }
+
+        if {$count == 0} {
+            error "Pattern matches no parameters: \"$pattern\""
         }
     }
 
