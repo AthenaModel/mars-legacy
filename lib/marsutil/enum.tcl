@@ -65,8 +65,9 @@ snit::type ::marsutil::enum {
         set ndx  [$self Input2index $input]
 
         if {$ndx == -1} {
+            set list [join $shortnames ", "]
             return -code error -errorcode INVALID \
-                "invalid value, \"$input\""
+                "invalid value \"$input\", should be one of: $list"
         } else {
             return [lindex $shortnames $ndx]
         }

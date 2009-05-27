@@ -3068,7 +3068,7 @@ gram   5    1      40.0     2        N1 KURD CUL
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value, "DUMMY"}
+    } -result {invalid value "DUMMY", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
 
     test sat_level-1.8 {invalid days: unknown symbol} -setup {
         create
@@ -3078,7 +3078,7 @@ gram   5    1      40.0     2        N1 KURD CUL
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value, "DUMMY"}
+    } -result {invalid value "DUMMY", should be a real number no less than 0.0, or one of: XL, L, M, S, XS}
 
     test sat_level-1.9 {negative days} -setup {
         create
@@ -3088,7 +3088,7 @@ gram   5    1      40.0     2        N1 KURD CUL
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value, "-1"}
+    } -result {invalid value "-1", should be a real number no less than 0.0, or one of: XL, L, M, S, XS}
 
     test sat_level-1.10 {Invalid option} -setup {
         create
@@ -3109,7 +3109,7 @@ gram   5    1      40.0     2        N1 KURD CUL
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "FOO"}
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
     test sat_level-1.12 {Negative -p} -setup {
         create
@@ -3119,7 +3119,7 @@ gram   5    1      40.0     2        N1 KURD CUL
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "-0.1"}
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
     test sat_level-1.13 {-p greater than 1.0} -setup {
         create
@@ -3129,7 +3129,7 @@ gram   5    1      40.0     2        N1 KURD CUL
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "1.1"}
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
 
     test sat_level-1.14 {Non-numeric -q} -setup {
@@ -3140,7 +3140,7 @@ gram   5    1      40.0     2        N1 KURD CUL
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "FOO"}
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
     test sat_level-1.15 {Negative -q} -setup {
         create
@@ -3150,7 +3150,7 @@ gram   5    1      40.0     2        N1 KURD CUL
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "-0.1"}
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
     test sat_level-1.16 {-q greater than 1.0} -setup {
         create
@@ -3160,7 +3160,7 @@ gram   5    1      40.0     2        N1 KURD CUL
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "1.1"}
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
     test sat_level-1.17 {invalid cause} -constraints cause -setup {
         create
@@ -3952,7 +3952,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         error
     } -cleanup {
         cleanup
-    } -result {invalid value, "DUMMY"}
+    } -result {invalid value "DUMMY", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
 
     # test sat_slope-1.8 {invalid limit: unknown symbol} OBSOLETE
 
@@ -3975,7 +3975,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "FOO"}
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
     test sat_slope-1.11 {Negative -p} -setup {
         create
@@ -3985,7 +3985,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "-0.1"}
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
     test sat_slope-1.12 {-p greater than 1.0} -setup {
         create
@@ -3995,8 +3995,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "1.1"}
-
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
     test sat_slope-1.13 {Non-numeric -q} -setup {
         create
@@ -4006,7 +4005,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "FOO"}
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
     test sat_slope-1.14 {Negative -q} -setup {
         create
@@ -4016,7 +4015,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "-0.1"}
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
     test sat_slope-1.15 {-q greater than 1.0} -setup {
         create
@@ -4026,7 +4025,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "1.1"}
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
     test sat_slope-1.16 {invalid cause} -constraints cause -setup {
         create
@@ -5541,7 +5540,7 @@ gram   5    1      40.0     33       N1 KURD BLUE
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value, "DUMMY"}
+    } -result {invalid value "DUMMY", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
 
     test coop_level-1.7 {invalid days: unknown symbol} -setup {
         create
@@ -5551,7 +5550,7 @@ gram   5    1      40.0     33       N1 KURD BLUE
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value, "DUMMY"}
+    } -result {invalid value "DUMMY", should be a real number no less than 0.0, or one of: XL, L, M, S, XS}
 
     test coop_level-1.8 {negative days} -setup {
         create
@@ -5561,7 +5560,7 @@ gram   5    1      40.0     33       N1 KURD BLUE
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value, "-1"}
+    } -result {invalid value "-1", should be a real number no less than 0.0, or one of: XL, L, M, S, XS}
 
     test coop_level-1.9 {Invalid option} -setup {
         create
@@ -5582,7 +5581,7 @@ gram   5    1      40.0     33       N1 KURD BLUE
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "FOO"}
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
     test coop_level-1.11 {Negative -p} -setup {
         create
@@ -5592,7 +5591,7 @@ gram   5    1      40.0     33       N1 KURD BLUE
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "-0.1"}
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
     test coop_level-1.12 {-p greater than 1.0} -setup {
         create
@@ -5602,7 +5601,7 @@ gram   5    1      40.0     33       N1 KURD BLUE
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "1.1"}
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
 
     test coop_level-1.13 {Non-numeric -q} -setup {
@@ -5613,7 +5612,7 @@ gram   5    1      40.0     33       N1 KURD BLUE
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "FOO"}
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
     test coop_level-1.14 {Negative -q} -setup {
         create
@@ -5623,7 +5622,7 @@ gram   5    1      40.0     33       N1 KURD BLUE
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "-0.1"}
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
     test coop_level-1.15 {-q greater than 1.0} -setup {
         create
@@ -5633,7 +5632,7 @@ gram   5    1      40.0     33       N1 KURD BLUE
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "1.1"}
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
     test coop_level-1.16 {invalid cause} -constraints cause -setup {
         create
@@ -6295,7 +6294,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         error
     } -cleanup {
         cleanup
-    } -result {invalid value, "DUMMY"}
+    } -result {invalid value "DUMMY", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
 
     # test coop_slope-1.7 {invalid limit: unknown symbol} OBSOLETE
 
@@ -6318,7 +6317,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "FOO"}
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
     test coop_slope-1.10 {Negative -p} -setup {
         create
@@ -6328,7 +6327,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "-0.1"}
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
     test coop_slope-1.11 {-p greater than 1.0} -setup {
         create
@@ -6338,7 +6337,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "1.1"}
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
 
     test coop_slope-1.12 {Non-numeric -q} -setup {
@@ -6349,7 +6348,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "FOO"}
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
     test coop_slope-1.13 {Negative -q} -setup {
         create
@@ -6359,7 +6358,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "-0.1"}
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
     test coop_slope-1.14 {-q greater than 1.0} -setup {
         create
@@ -6369,7 +6368,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         cleanup 
     } -returnCodes {
         error
-    } -result {Out of range: "1.1"}
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
     test coop_slope-1.15 {invalid cause} -constraints cause -setup {
         create

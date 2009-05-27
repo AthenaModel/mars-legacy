@@ -319,7 +319,7 @@ Row 1  N= 0.5  B= 0.3
         set mat1 {{0.9 0.7} {0.3 FOO}}
 
         mat filter $mat1 [list [namespace current]::goodness validate]
-    } -result {element 1 1: invalid value, "FOO"}
+    } -result {element 1 1: invalid value "FOO", should be a real number, or one of: VG, G, N, B, VB}
 
 
     #-------------------------------------------------------------------

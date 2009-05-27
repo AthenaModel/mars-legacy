@@ -164,8 +164,26 @@ snit::type ::marsutil::quality {
         set ndx  [$self index $input]
 
         if {$ndx == -1} {
-            return -code error -errorcode INVALID \
-                "invalid value, \"$input\""
+            set list [join $shortnames ", "]
+
+            set msg \
+                "invalid value \"$input\", should be a real number"
+
+            if {$options(-min) ne "" && $options(-max) ne ""} {
+                append msg \
+                    " in range $options(-min), $options(-max)"
+            } elseif {$options(-min) ne ""} {
+                append msg \
+                    " no less than $options(-min)"
+            } elseif {$options(-max) ne ""} {
+                append msg \
+                    " no greater than $options(-max)"
+            }
+
+            append msg ", or one of: $list"
+
+            return -code error -errorcode INVALID $msg
+
         }
 
         return $input
