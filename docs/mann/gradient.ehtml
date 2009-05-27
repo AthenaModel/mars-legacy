@@ -12,12 +12,21 @@ namespace import ::marsgui::*
 <<section DESCRIPTION>>
 
 The gradient(n) module defines a type for defining and computing
-color gradients: shadings of color from a minimum to a maximum color.
-A gradient is defined by four parameters: the minimum and maximum
-output colors, defined in <b>#<i>rrggbb</i></b> form, and the minimum
-and maximum input levels.  Then, given any numeric value between the
-minimum and maximum inputs, the gradient will output a color in
-<b>#<i>rrggbb</i></b> form which is scaled between the min and max color.<p>
+color gradients: shadings of color used to visualize a range of input
+levels.<p>
+
+A gradient is defined by six parameters: the input range, specified as
+a minimum level, a midpoint, and a maximum level, and the colors
+associated with each of these points, defined in <b>#<i>rrggbb</i></b>
+form.  Then, given any numeric value between the
+minimum and maximum levels, the gradient will output a color in
+<b>#<i>rrggbb</i></b> form.  For inputs between the minimum level and
+the midpoint it is scaled between the minimum color and the midpoint
+color; for inputs between the midpoint and the maximum level, it is
+scaled between the midpoint color and the maximum color.  For example,
+a value between -100 and +100 could gradate from red at -100 to white
+at 0 to green at +100.<p>
+
 
 <<section COMMANDS>>
 
@@ -41,6 +50,12 @@ Specifies the color, in <b>#<i>rrggbb</i></b> form, which corresponds
 to the minimum input level, <code>-minlevel</code>.  Defaults to
 <b>#FFFFFF</b>.<p>
 
+<<defopt {-midcolor <i>color</i>}>>
+
+Specifies the color, in <b>#<i>rrggbb</i></b> form, which corresponds
+to the midpoint input level, <code>-midlevel</code>.  Defaults to
+<b>#FFFFFF</b>.<p>
+
 <<defopt {-maxcolor <i>color</i>}>>
 
 Specifies the color, in <b>#<i>rrggbb</i></b> form, which corresponds
@@ -50,6 +65,10 @@ to the maximum input level, <code>-maxlevel</code>.  Defaults to
 <<defopt {-minlevel <i>level</i>}>>
 
 Specifies the minimum input level.  Defaults to 0.0.<p>
+
+<<defopt {-midlevel <i>level</i>}>>
+
+Specifies the midpoint input level.  Defaults to 0.0.<p>
 
 <<defopt {-maxlevel <i>level</i>}>>
 
@@ -75,7 +94,7 @@ Returns the value of the specified <i>option</i>.<p>
 
 Given an input <i>level</i> ranging from <code>-minlevel</code> to
 <code>-maxlevel</code>, returns an output color (in <b>#<i>rrggbb</i></b>
-form) scaled from <code>-mincolor</code> to
+form) scaled from <code>-mincolor</code> to <code>-midcolor</code> to
 <code>-maxcolor</code>.<p>
 
 <</deflist>>

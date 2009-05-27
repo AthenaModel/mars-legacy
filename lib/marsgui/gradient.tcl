@@ -40,6 +40,19 @@ snit::type ::marsgui::gradient {
         scan $val "#%2x%2x%2x" min(r) min(g) min(b)
     }
 
+    # -midcolor
+    #
+    # A hexadecimal color string, e.g., "#FFFFFF"
+    
+    option -midcolor -default "#FFFFFF" -configuremethod ConfigMidColor
+
+    method ConfigMidColor {opt val} {
+        set options($opt) $val
+
+        scan $val "#%2x%2x%2x" mid(r) mid(g) mid(b)
+    }
+
+
     # -maxcolor
     #
     # A hexadecimal color string, e.g., "#000000"
@@ -58,6 +71,12 @@ snit::type ::marsgui::gradient {
 
     option -minlevel -default 0.0
 
+    # -midlevel
+    #
+    # The minimum input level
+
+    option -midlevel -default 0.0
+
     # -maxlevel
     #
     # The maximum input level
@@ -74,6 +93,15 @@ snit::type ::marsgui::gradient {
         b    0xFF
     }
 
+
+    # Array of hex components of -midcolor
+    variable mid -array {
+        r    0xFF
+        g    0xFF
+        b    0xFF
+    }
+
+
     # Array of hex components of -maxcolor
     variable max -array {
         r    0x00
@@ -89,21 +117,47 @@ snit::type ::marsgui::gradient {
     # level    An input level
     #
     # Given an input level between -minlevel and -maxlevel, produces
-    # an output color between -mincolor and -maxcolor
+    # an output color between -mincolor and -maxcolor.  Actually, 
+    # inputs from -minlevel to -midlevel scale between -mincolor and
+    # -midcolor; inputs from -midlevel to -maxlevel scale between
+    # -midcolor and -maxcolor.
 
     method color {level} {
-        # FIRST, compute the level fraction
-        set frac \
-            [expr {double($level - $options(-minlevel))/ \
-                   double($options(-maxlevel) - $options(-minlevel))}]     
+        # FIRST, it all depends on where we are relative to the
+        # -midlevel. 
+        if {$level == $options(-midlevel)} {
+            set out(r) $mid(r)
+            set out(g) $mid(g)
+            set out(b) $mid(b)
+        } elseif {$level < $options(-midlevel)} {
+            # FIRST, compute the level fraction
+            set frac \
+                [expr {double($level - $options(-minlevel))/ \
+                           double($options(-midlevel) - $options(-minlevel))}]
 
-        # NEXT, interpolate the three color channels separately.
-        foreach c [list r g b] {
-            if {$min($c) == $max($c)} {
-                set out($c) $min($c)
-            } else {
-                set out($c) \
-                    [expr {int($min($c) + $frac*($max($c) - $min($c)))}]
+            # NEXT, interpolate the three color channels separately.
+            foreach c [list r g b] {
+                if {$min($c) == $mid($c)} {
+                    set out($c) $min($c)
+                } else {
+                    set out($c) \
+                        [expr {int($min($c) + $frac*($mid($c) - $min($c)))}]
+                }
+            }
+        } else {
+            # FIRST, compute the level fraction
+            set frac \
+                [expr {double($level - $options(-midlevel))/ \
+                           double($options(-maxlevel) - $options(-midlevel))}]
+
+            # NEXT, interpolate the three color channels separately.
+            foreach c [list r g b] {
+                if {$max($c) == $mid($c)} {
+                    set out($c) $max($c)
+                } else {
+                    set out($c) \
+                        [expr {int($mid($c) + $frac*($max($c) - $mid($c)))}]
+                }
             }
         }
 
