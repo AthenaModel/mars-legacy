@@ -64,6 +64,18 @@ magnitude is broken down into these categories:<p>
 
 <<qmag html>>
 
+<<defitem qrel qrel>>
+
+This quality is used to describe the relationship between two
+groups.<p>
+
+Numerically,
+<<iref qrel>> values are
+formatted as "<<qrel cget -format>>".  Symbolically,
+relationships are broken down into these categories:<p>
+
+<<qrel html>>
+
 <<defitem qsaliency qsaliency>>
 
 This quality is used to describe the saliency of a concern to a

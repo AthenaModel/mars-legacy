@@ -22,7 +22,7 @@ namespace eval ::simlib:: {
         qcooperation   \
         qduration      \
         qmag           \
-        qduration      \
+        qrel           \
         qsaliency      \
         qsat           \
         qtrend         \
@@ -81,6 +81,12 @@ namespace eval ::simlib:: {
     XXXXL- "XXXX_LARGE_MINUS" -30.0
 } -format {%5.2f}
 
+# Relationship between two groups
+::marsutil::quality ::simlib::qrel {
+    FRIEND  "Friend"      0.3   0.5   1.0
+    NEUTRAL "Neutral"    -0.1   0.1   0.3
+    ENEMY   "Enemy"      -1.0  -0.5  -0.1
+} -bounds yes -format {%+4.1f}
 
 # Saliency (Of a concern)
 ::marsutil::quality ::simlib::qsaliency {
