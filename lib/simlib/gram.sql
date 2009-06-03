@@ -429,6 +429,41 @@ CREATE TABLE gram_ng (
 
 CREATE INDEX gram_ng_index_ng ON gram_ng(n,g);
 
+-- gram(n) force "ng" table.
+-- This table tracks data about each force group in each neighborhood.
+-- TBD: We may want a single gram_ng table to assign ng_id's,
+-- plus child tables for the different kinds of group.
+CREATE TABLE gram_frc_ng (
+    --------------------------------------------------------------------
+    -- Keys and Pointers
+
+    -- Nbhood/Group ID
+    frc_ng_id      INTEGER PRIMARY KEY,
+
+    -- gram(n) instance's log name
+    object         TEXT,
+
+    --------------------------------------------------------------------
+    -- Neighborhood/group indices 
+
+    n              TEXT,    -- Name of affected neighborhood
+    g              TEXT,    -- Name of affected frc group
+
+    --------------------------------------------------------------------
+    -- Cooperation roll-ups
+
+    -- Neighborhood n's current and initial composite cooperation
+    -- with force group g.  (coop.ng, coop0.ng)
+    coop            DOUBLE DEFAULT 0.0,
+    coop0           DOUBLE DEFAULT 0.0,
+
+    -- Indicate that the n,g coordinates are unique,
+    -- and index on them for fast lookups
+    UNIQUE (object, n, g)
+);
+
+CREATE INDEX gram_frc_ng_index_ng ON gram_frc_ng(n,g);
+
 -- gram(n) "nc" table.
 -- This table tracks data about each concern in each neighborhood
 CREATE TABLE gram_nc (

@@ -372,17 +372,19 @@ snit::type ::simlib::gram {
         # NEXT, Create the long-term trend slope effects
         $self CreateLongTermTrends
 
-        # NEXT, compute the initial satisfaction roll-ups.
+        # NEXT, compute the initial roll-ups.
         $self ComputeSatRollups
+        $self ComputeCoopRollups
 
         # NEXT, save initial values
         $rdb eval {
-            UPDATE gram_n  SET sat0 = sat WHERE object=$dbid;
-            UPDATE gram_g  SET sat0 = sat WHERE object=$dbid;
-            UPDATE gram_c  SET sat0 = sat WHERE object=$dbid;
-            UPDATE gram_ng SET sat0 = sat WHERE object=$dbid;
-            UPDATE gram_nc SET sat0 = sat WHERE object=$dbid;
-            UPDATE gram_gc SET sat0 = sat WHERE object=$dbid;
+            UPDATE gram_n      SET sat0  = sat  WHERE object=$dbid;
+            UPDATE gram_g      SET sat0  = sat  WHERE object=$dbid;
+            UPDATE gram_c      SET sat0  = sat  WHERE object=$dbid;
+            UPDATE gram_ng     SET sat0  = sat  WHERE object=$dbid;
+            UPDATE gram_nc     SET sat0  = sat  WHERE object=$dbid;
+            UPDATE gram_gc     SET sat0  = sat  WHERE object=$dbid;
+            UPDATE gram_frc_ng SET coop0 = coop WHERE object=$dbid;
         }
 
         # NEXT, set the changed flag
@@ -470,6 +472,7 @@ snit::type ::simlib::gram {
             DELETE FROM gram_mn             WHERE object=$dbid;
             DELETE FROM gram_nfg            WHERE object=$dbid;
             DELETE FROM gram_ng             WHERE object=$dbid;
+            DELETE FROM gram_frc_ng         WHERE object=$dbid;
             DELETE FROM gram_nc             WHERE object=$dbid;
             DELETE FROM gram_gc             WHERE object=$dbid;
             DELETE FROM gram_ngc            WHERE object=$dbid;
@@ -621,6 +624,19 @@ snit::type ::simlib::gram {
                         sat_tracked)
                 VALUES($dbid, $n, $g, 0, 1.0, 1.0, $sat_tracked)
             }
+        }
+
+        # NEXT, populate gram_frc_ng.
+        $rdb eval {
+            INSERT INTO gram_frc_ng(
+                object,
+                n,
+                g)
+            SELECT $dbid, n, g
+            FROM gram_n JOIN gram_g USING (object)
+            WHERE object=$dbid
+            AND   gtype = 'FRC'
+            ORDER BY n, g
         }
     }
 
@@ -1403,8 +1419,9 @@ snit::type ::simlib::gram {
         # this time step.
         $self UpdateCurves
 
-        # NEXT, Compute all satisfaction roll-ups
+        # NEXT, Compute all roll-ups
         $self ComputeSatRollups
+        $self ComputeCoopRollups
 
         return
     }
@@ -1605,6 +1622,57 @@ snit::type ::simlib::gram {
         }
     }
 
+    #-------------------------------------------------------------------
+    # Cooperation Roll-ups
+    #
+    # We only compute one cooperation roll-up, coop.ng: the cooperation
+    # of a neighborhood as a whole with a force group.
+
+
+    # All roll-ups -- sat.ng, sat.nc, sat.gc, sat.g, sat.c -- all have
+    # the same nature.  The computation is a weighted average over
+    # a set of satisfaction levels; all that changes is the definition
+    # of the set.  The equation for a roll-up over set A is as follows:
+    #
+    #            Sum            w   * L    * S
+    #               n,g,c in A   ng    ngc    ngc
+    #  S  =      --------------------------------
+    #   A        Sum            w   * L   
+    #               n,g,c in A   ng    ngc
+
+    # ComputeCoopRollups
+    #
+    # Computes coop.ng.  The equation is as follows:
+    #
+    #           Sum  population   * coop
+    #              f           nf       nfg
+    #  coop   = ---------------------------
+    #      ng        Sum  population  
+    #                   f           nf
+
+    method ComputeCoopRollups {} {
+        # FIRST, compute coop.ng
+        $rdb eval {
+            SELECT gram_coop.n                                AS n, 
+                   gram_coop.f                                AS f, 
+                   gram_coop.g                                AS g,
+                   total(gram_coop.coop * gram_ng.population) AS num,
+                   total(gram_ng.population)                  AS denom
+            FROM gram_coop
+            JOIN gram_ng ON gram_coop.object = gram_ng.object
+                         AND gram_coop.n     = gram_ng.n
+                         AND gram_coop.f     = gram_ng.g
+            WHERE gram_coop.object=$dbid
+            GROUP BY gram_coop.n, gram_coop.g
+        } {
+            $rdb eval {
+                UPDATE gram_frc_ng
+                SET coop = $num/$denom
+                WHERE object=$dbid AND n=$n AND g=$g
+            }
+        }
+    }
+    
     #-------------------------------------------------------------------
     # Satisfaction Queries
 

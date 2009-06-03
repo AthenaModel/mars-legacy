@@ -1486,6 +1486,61 @@ id object etype curve_id cause direct_ngc active driver input prox ts te       t
     } -result {}
 
 
+    test init-2.20 {initial contents: gram_coop} -setup {
+        create
+    } -body {
+        # OK
+        pprint [rdb query {
+            SELECT * FROM gram_coop WHERE object='gram'
+            ORDER BY nfg_id
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+object nfg_id curve_id n  f    g     coop0 coop delta slope 
+------ ------ -------- -- ---- ----- ----- ---- ----- ----- 
+gram   17     33       N1 KURD BLUE  50.0  50.0 0.0   0.0   
+gram   18     34       N1 KURD BRIT  50.0  50.0 0.0   0.0   
+gram   20     35       N1 KURD OPFOR 50.0  50.0 0.0   0.0   
+gram   49     36       N1 SHIA BLUE  50.0  50.0 0.0   0.0   
+gram   50     37       N1 SHIA BRIT  50.0  50.0 0.0   0.0   
+gram   52     38       N1 SHIA OPFOR 50.0  50.0 0.0   0.0   
+gram   57     39       N1 SUNN BLUE  50.0  50.0 0.0   0.0   
+gram   58     40       N1 SUNN BRIT  50.0  50.0 0.0   0.0   
+gram   60     41       N1 SUNN OPFOR 50.0  50.0 0.0   0.0   
+gram   81     42       N2 KURD BLUE  50.0  50.0 0.0   0.0   
+gram   82     43       N2 KURD BRIT  50.0  50.0 0.0   0.0   
+gram   84     44       N2 KURD OPFOR 50.0  50.0 0.0   0.0   
+gram   113    45       N2 SHIA BLUE  50.0  50.0 0.0   0.0   
+gram   114    46       N2 SHIA BRIT  50.0  50.0 0.0   0.0   
+gram   116    47       N2 SHIA OPFOR 50.0  50.0 0.0   0.0   
+gram   121    48       N2 SUNN BLUE  50.0  50.0 0.0   0.0   
+gram   122    49       N2 SUNN BRIT  50.0  50.0 0.0   0.0   
+gram   124    50       N2 SUNN OPFOR 50.0  50.0 0.0   0.0   
+    }
+
+    test init-2.21 {initial contents: gram_frc_ng} -setup {
+        create
+    } -body {
+        # OK
+        pprint [rdb query {
+            SELECT * FROM gram_frc_ng WHERE object='gram'
+            ORDER BY frc_ng_id
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+frc_ng_id object n  g     coop coop0 
+--------- ------ -- ----- ---- ----- 
+1         gram   N1 BLUE  50.0 50.0  
+2         gram   N1 BRIT  50.0 50.0  
+3         gram   N1 OPFOR 50.0 50.0  
+4         gram   N2 BLUE  50.0 50.0  
+5         gram   N2 BRIT  50.0 50.0  
+6         gram   N2 OPFOR 50.0 50.0  
+    }
+
+
     #-------------------------------------------------------------------
     # clear
 
