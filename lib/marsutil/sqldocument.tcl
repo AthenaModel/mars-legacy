@@ -32,6 +32,7 @@
 #
 #    * Persistent schema definitions
 #    * Temporary schema definitions
+#    * Temporary data definitions
 #    * SQL functions
 #
 #    sqlsection(i) modules register themselves with sqldocument(n) on
@@ -112,6 +113,14 @@ snit::type ::marsutil::sqldocument {
     # Returns the section's temporary schema definitions, if any.
 
     typemethod {sqlsection tempschema} {} {
+        return ""
+    }
+
+    # sqlsection tempdata
+    #
+    # Returns the section's temporary data definitions, if any.
+
+    typemethod {sqlsection tempdata} {} {
         return ""
     }
 
@@ -248,6 +257,7 @@ snit::type ::marsutil::sqldocument {
 
         # NEXT, define the temporary tables
         $self DefineTempSchema
+        $self DefineTempData
 
         # NEXT, define standard functions.
         $self DefineFunctions
@@ -312,6 +322,7 @@ snit::type ::marsutil::sqldocument {
 
         # NEXT, define temporary schema entities
         $self DefineTempSchema
+        $self DefineTempData
 
         # NEXT, commit the schema changes
         $db eval {COMMIT TRANSACTION;}
@@ -330,12 +341,6 @@ snit::type ::marsutil::sqldocument {
     # Define the temporary tables for the sqlsections included in
     # the registry.  This should be called on both "open"
     # and "clear", so that the temporary tables are always defined.
-    #
-    # NOTE: Possibly, we should only define the temporary schema for
-    # modules already included in the database.  On other hand,
-    # if we define extra, what's the big deal?  And similarly,
-    # if a module no longer exists, what are we to do?  We don't
-    # want to fail to open the database!
 
     method DefineTempSchema {} {
         foreach section $registry {
@@ -347,6 +352,40 @@ snit::type ::marsutil::sqldocument {
         }
     }
 
+    # DefineTempData
+    #
+    # Define the temporary data for the sqlsections included in
+    # the registry.  This should be called on both "open"
+    # and "clear", so that the temporary tables are always populated
+    # as required.
+
+    method DefineTempData {} {
+        foreach section $registry {
+            # FIRST, if the section does not define the tempdata 
+            # subcommand, skip it.
+            #
+            # TBD: Once all existing sections are updated, this
+            # check should be omitted, as it unduly constrains
+            # the clients.
+            if {[catch {
+                if {"sqlsection tempdata" ni [$section info typemethods]} {
+                    continue
+                }
+            }]} {
+                continue
+            }
+
+            set content [$section sqlsection tempdata]
+
+            foreach {table rows} $content {
+                $db eval "DELETE FROM $table"
+
+                foreach row $rows {
+                    $self insert $table $row
+                }
+            }
+        }
+    }
     # DefineFunctions
     #
     # Define SQL functions.

@@ -93,6 +93,15 @@ namespace eval ::marsutil::test {
             return [::marsutil::outdent $tempschema]
         }
 
+        typemethod {sqlsection tempdata} {} {
+            return {
+                temp {
+                    {d 1 e 2 f 3}
+                    {d 4 e 5 f 6}
+                }
+            }
+        }
+
         typemethod {sqlsection functions} {} {
             set functions [list]
 
@@ -360,6 +369,20 @@ namespace eval ::marsutil::test {
     } -cleanup {
         cleanup
     } -result {a b c d}
+
+    test open-3.3 {Temp Data defined} -body {
+        # FIRST, register an additional sqlsection with temp data
+        sqldocument register ::marsutil::test::testsection
+
+        # NEXT, open a document
+        sqldocument db
+        db open :memory:
+
+        db eval {SELECT d,e,f FROM temp}
+    } -cleanup {
+        cleanup
+    } -result {1 2 3 4 5 6}
+    
 
     #-------------------------------------------------------------------
     # clear

@@ -10,7 +10,7 @@
 <<xref sqldocument(n)>> sections, i.e., modules that add to the
 <<xref sqldocument(n)>> schema.  Such a module can add both permanent
 and temporary entities--tables, indicies, views, etc.--to the schema,
-and can also define SQL functions.<p>
+populate its temporary tables, and define SQL functions.<p>
 
 By convention, schema entities and functions defined by an
 <<xref sqlsection(i)>> should have names which derive from the
@@ -73,6 +73,19 @@ related indices.<p>
 If the section defines no temporary schema definitions, this
 subcommand should return the empty string.<p>
 
+<<defitem tempdata {<i>section</i> sqlsection tempdata}>>
+
+Returns content for zero or more of the section's temporary tables.
+The content is structured as a dictionary whose keys are the table
+names and whose values are lists of row dictionaries.<p>
+
+When the <<xref sqldocument(n)>> containing the section is opened or
+cleared, the temporary data will be loaded into the relevant
+tables.<p>
+
+New sections should define this subcommand; it is optional, however,
+for backward compatibility with older code.<p>
+
 <<defitem functions {<i>section</i> sqlsection functions}>>
 
 Returns the <i>section</i>'s function definitions as a dictionary
@@ -115,6 +128,16 @@ snit::type sample {
         -- ...
     }
 
+    # Temporary Data
+    typevariable section_temp_data {
+        temporary {
+            {d 1 e 2 f 3}
+            {d 4 e 5 f 6}
+            ...
+        }
+        ...
+    }
+
     # sqlsection title
     #
     # Returns a human-readable title for the section
@@ -137,6 +160,14 @@ snit::type sample {
 
     typemethod {sqlsection tempschema} {} {
         return [outdent $section_temp_schema]
+    }
+
+    # sqlsection tempdata
+    #
+    # Returns content for the temporary tables
+
+    typemethod {sqlsection tempdata} {} {
+        return $section_temp_data
     }
 
     # sqlsection functions
@@ -167,7 +198,8 @@ Will Duquette<p>
 
 <<section HISTORY>>
 
-Original interface.
+22 June 2009: Added <<iref tempdata>>.  Because this is new to the
+spec, it will remain optional.<p>
 
 <</manpage>>
 
