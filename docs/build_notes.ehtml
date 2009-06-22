@@ -10,6 +10,20 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.13, 22 June 2009</h3>
+This build contains a fair number of changes in support of on-going
+Athena development.  The most obvious is that the enum(n), quality(n),
+and range(n) data types have been updated to have much improved error
+messages.<p>
+
+<ul>
+  <li> Bug 188:  enum(n), quality(n), range(n): better validate error messages
+  <li> Bug 2117: parmdb lock does not error when parameter does not exist
+  <li> Bug 2127: gradient(n): Add -midlevel, -midcolor
+  <li> Bug 2132: simtypes(n): Add qrel(n) type
+  <li> Bug 2140: gram(n): Compute coop.ng 
+</ul><p>
+
 <h3>Build 1.12, 27 May 2009</h3>
 
 This build contains a fair number of changes, most of them in support
