@@ -10,6 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.14, 24 June 2009</h3>
+
+This build contains a bug fix, and two updates related to the Athena
+Demographic model.<p>
+
+<ul>
+  <li> Bug 2154: sqlsection(i): tempdata
+  <li> Bug 2160: gram(n): Validators not created on restore
+  <li> Bug 2161: gram(n): update population  
+</ul><p>
+
 <h3>Build 1.13, 22 June 2009</h3>
 This build contains a fair number of changes in support of on-going
 Athena development.  The most obvious is that the enum(n), quality(n),
