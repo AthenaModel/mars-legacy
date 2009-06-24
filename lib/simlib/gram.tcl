@@ -1057,6 +1057,39 @@ snit::type ::simlib::gram {
     }
 
     #-------------------------------------------------------------------
+    # Update API
+    #
+    # This API is used to update scenario data after the initial load.
+    # Not everything can be modified.
+
+    # update population n g population ...
+    #
+    # n           A neighborhood
+    # g           A group in the neighborhood
+    # population  The group ng's new population
+    #
+    # Updates the population for the specified groups.  Note that
+    # it's an error to assign a non-zero population to a group with
+    # zero population, or a zero population to a group with non-zero
+    # population.
+    #
+    # The change takes affect on the next time advance.
+
+    method {update population} {args} {
+        foreach {n g population} $args {
+            # TBD: Could verify that g is CIV, and that
+            # existing population matches.
+            $rdb eval {
+                UPDATE gram_ng
+                SET population = $population
+                WHERE object=$dbid AND n=$n AND g=$g
+            }
+        }
+    }
+
+
+
+    #-------------------------------------------------------------------
     # Driver IDs
     #
     # Every input to GRAM is associated with a satisfaction or

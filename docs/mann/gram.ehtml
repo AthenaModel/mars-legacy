@@ -429,6 +429,35 @@ be called with no arguments.<p>
 
 <</deflist load>>
 
+<<defitem update {$obj update <i>subcommand</i> ?<i>args...</i>?}>>
+
+The <<iref update>> family of subcommands is used to update selected
+scenario data after the initial load.<p>
+
+<<deflist update>>
+
+<<defitem "update population" {$obj update population ?<i>n g population</i>...?}>>
+
+This command updates the population of civilian neighborhood groups
+for the specified <i>n</i>, <i>g</i>, and <i>population</i> triples
+specified on the command line.<p>
+
+<b>NOTE:</b>  This command is optimized for speed, and consequently
+does little error checking.  The following constraints apply:<p>
+
+<ul>
+  <li> Only civilian groups are allowed.
+  <li> A group with non-zero population must not be assigned a
+       population of zero.
+  <li> A group with zero population must not be assigned a population
+       greater than zero.
+</ul><p>
+
+In other words, the update may not change the set of groups for which
+satisfaction is tracked.<p>
+
+<</deflist update>>
+
 <<defitem advance {$obj advance}>>
 Advances the simulation time to the time returned by the
 simulation <code>-clock</code>, and recomputes the current

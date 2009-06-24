@@ -1540,6 +1540,35 @@ frc_ng_id object n  g     coop coop0
 6         gram   N2 OPFOR 50.0 50.0  
     }
 
+    #-------------------------------------------------------------------
+    # update
+
+    test update_population-1.1 {Updates population values} -setup {
+        create
+    } -body {
+        jr update population N1 KURD 1000 N1 SHIA 2000 N1 SUNN 3000
+        pprint [rdb query {
+            SELECT n,g,population FROM gram_ng WHERE object='gram'
+            ORDER BY ng_id
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+n  g    population 
+-- ---- ---------- 
+N1 KURD 1000       
+N1 SHIA 2000       
+N1 SUNN 3000       
+N1 ORGA 0          
+N1 ORGB 0          
+N2 KURD 10000      
+N2 SHIA 10000      
+N2 SUNN 10000      
+N2 ORGA 0          
+N2 ORGB 0          
+    }
+
+
 
     #-------------------------------------------------------------------
     # clear
