@@ -317,11 +317,16 @@ snit::type ::simlib::gram {
     # "checkpoint".
 
     method restore {state {option ""}} {
-        # First, restore the state.
+        # FIRST, restore the state.
         array unset db
         array set db $state
 
-        # Next, set the changed flag
+        # NEXT, if GRAM is initialized, create the validators.
+        if {$db(initialized)} {
+            $self CreateValidators
+        }
+
+        # NEXT, set the changed flag
         if {$option eq "-saved"} {
             set info(changed) 0
         } else {
