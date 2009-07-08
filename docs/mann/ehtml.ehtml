@@ -90,6 +90,14 @@ Creates an HTML link given the <i>url</i> of the linked page.  If
 specified, <i>anchor</i> is used is used as the displayed anchor text;
 otherwise, the <i>url</i> is displayed explicitly.<p>
 
+
+<<defitem macro {ehtml macro <i>name arglist</i> ?<i>initbody</i>? <i>template</i>}>>
+
+Defines a new macro in the macro namespace.  A macro is really just a
+<<xref template(n)>> <<xref template(n) template>>; the arguments and
+semantics are the same.<p>
+
+
 <<defitem manroots {ehtml manroots <i>roots</i>}>>
 
 Defines a mapping from man page names to URLs, so that

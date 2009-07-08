@@ -400,6 +400,14 @@ snit::type ::marsutil::ehtml {
         return [ehtml link $url $anchor]
     }
 
+    # macro name arglist ?initbody? args
+    #
+    # Defines a template(n) template in the macro namespace.
+    
+    proc macro::macro {name arglist args} {
+        ehtml macro $name $arglist {*}$args
+    }
+
     # xref id ?anchor?
     #
     # id       The XREF id of the page to link to
