@@ -118,6 +118,14 @@ snit::type ::marsutil::ehtml {
             [list namespace import {*}$args]
     }
 
+    # macro name arglist ?initbody? args
+    #
+    # Defines a template(n) template in the macro namespace.
+    
+    typemethod macro {name arglist args} {
+        template ${type}::macro::$name $arglist {*}$args
+    }
+
     # expandFile name
     #
     # name    An input file name
@@ -398,14 +406,6 @@ snit::type ::marsutil::ehtml {
 
     proc macro::link {url {anchor ""}} {
         return [ehtml link $url $anchor]
-    }
-
-    # macro name arglist ?initbody? args
-    #
-    # Defines a template(n) template in the macro namespace.
-    
-    proc macro::macro {name arglist args} {
-        ehtml macro $name $arglist {*}$args
     }
 
     # xref id ?anchor?
