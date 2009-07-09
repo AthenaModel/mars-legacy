@@ -10,6 +10,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.15, 9 July 2009</h3>
+This build updates Mars to use the latest ActiveTclEE (2009 Q2) build and a
+couple of enhancements for HTML documentation purposes.
+
+<ul>
+  <li> Bug 2172: Upgrade to ActiveTclEE 2009Q2
+  <li> Bug 2177: ehtml(n): macro
+  <li> Bug 2178: quality(n) HTML documentation
+</ul>
+
 <h3>Build 1.14, 24 June 2009</h3>
 
 This build contains a bug fix, and two updates related to the Athena
