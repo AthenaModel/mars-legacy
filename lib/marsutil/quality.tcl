@@ -316,7 +316,7 @@ snit::type ::marsutil::quality {
         append out "<table>\n"
 
         append out "<tr>\n"
-        append out "<th align=\"left\">Name</th>\n"
+        append out "<th align=\"left\">Name&nbsp;</th>\n"
         append out "<th align=\"left\">Long Name</th>\n"
         append out "<th align=\"right\">Value</th>\n"
 
@@ -330,14 +330,13 @@ snit::type ::marsutil::quality {
         for {set i 0} {$i < $len} {incr i} {
             append out "<tr>\n"
             append out \
-                "<td valign=\"baseline\" align=\"left\"><tt>[lindex $shortnames $i]</tt></td>\n"
+                "<td valign=\"baseline\" align=\"left\"><tt>[lindex $shortnames $i]</tt>&nbsp;</td>\n"
             append out "<td valign=\"baseline\" align=\"left\">[lindex $longnames $i]</td>\n"
-            append out "<td valign=\"baseline\" align=\"right\">[lindex $values $i]</td>\n"
-
+            append out "<td valign=\"baseline\" align=\"right\">&nbsp;[lindex $values $i]</td>\n"
             if {$options(-bounds)} {
-                append out "<td valign=\"baseline\" align=\"right\">"
+                append out "<td valign=\"baseline\" align=\"right\">&nbsp;"
                 append out [lindex $mins $i]
-                append out " &lt; <i>value</i> &le; "
+                append out " &lt; <i>value</i> &lt;= "
                 append out [lindex $maxs $i]
                 append out "</td>\n"
             }
