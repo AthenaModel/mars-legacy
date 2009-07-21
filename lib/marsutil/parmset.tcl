@@ -526,6 +526,28 @@ snit::type ::marsutil::parmset {
         return $ids
     }
 
+    # locked ?pattern?
+    # 
+    # pattern     A glob pattern.
+    # 
+    # Lists the names of locked parameters that match the pattern, in sorted
+    # order.
+
+    method locked {{pattern "*"}} {
+        set ids [$self GetIDs $pattern]
+
+        set names {}
+        foreach id $ids {
+            if {$info(itype-$id) eq "parm" &&
+                $info(locked-$id)
+            } {
+                lappend names $info(canon-$id)
+            }
+        }
+
+        return $names
+    }
+
     # list ?pattern?
     #
     # pattern     A glob pattern.
@@ -605,7 +627,10 @@ snit::type ::marsutil::parmset {
     method reset {} {
         # FIRST, reset the values
         foreach id [array names values] {
-            set values($id) $info(defvalue-$id)
+            # Only reset unlocked parameters.
+            if {!$info(locked-$id)} {
+                set values($id) $info(defvalue-$id)
+            }
         }
 
         # NEXT, set changed flag

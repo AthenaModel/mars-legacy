@@ -174,6 +174,10 @@ Retrieves the value of the named parameter.<p>
 
 Retrieves the default value of the named parameter.<p>
 
+<<defitem islocked {$parmset islocked <i>name</i>}>>
+
+Returns 1 if the named parameter is locked, and 0 otherwise.<p>
+
 <<defitem items {$parmset items}>>
 
 Returns a list of the subsets and parameters, with their item types.
@@ -210,7 +214,16 @@ Locks all parameters whose name matchs the glob <i>pattern</i>.  The
 value of a locked parameter may not be changed; attempts to do so will
 cause an error to be thrown.  However, calls to
 <<iref set>>, <<iref setdefault>>, and <<iref load>> are accepted if
-they specify the parameter's current value, thus leaving it unchanged.<p>
+they specify the parameter's current value, thus leaving it
+unchanged.  The <<iref reset>> command will reset all <b>unlocked</b>
+parameters to their default values, leaving locked parameters alone.<p>
+
+<<defitem locked {$parmset locked ?<i>pattern</i>?}>>
+
+Returns a list of locked parameter names, grouped by subset, in order of
+definition, which match the specified wildcard pattern; if no
+<i>pattern</i> is specified, the names of all locked parameters
+will be returned.<p>
 
 <<defitem manpage {$parmset manpage}>>
 
@@ -248,6 +261,10 @@ definition, which match the specified wildcard pattern; if no
 
 Resets all parameter values to their defaults, and calls
 the <code>-notifycmd</code>.<p>
+
+This command does not reset the values of locked parameters.  The
+<<iref locked>> command will return the names of all locked
+parameters, so that they can be unlocked and re-locked if need be.<p>
 
 <<defitem restore {$parmset restore <i>checkpoint</i> ?-saved?}>>
 

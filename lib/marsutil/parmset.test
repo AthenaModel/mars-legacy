@@ -830,6 +830,44 @@ parm pBool   true
         CleanUp
     } -result {Pattern matches no parameters: "NoneSuch"}
 
+    test parmset-12.7 {reset doesn't reset locked parameters} -setup {
+        Setup
+        ps define thisOne snit::integer 0   ""
+    } -body {
+        ps set thisOne 1
+        ps lock thisOne
+        ps reset
+        ps get thisOne
+    } -cleanup {
+        CleanUp
+    } -result {1}
+
+    test parmset-12.8 {islocked shows whether parameter is locked} -setup {
+        Setup
+        ps define thisOne snit::integer 0   ""
+        ps define thatOne snit::integer 0   ""
+    } -body {
+        ps lock thisOne
+        list [ps islocked thisOne] [ps islocked thatOne]
+    } -cleanup {
+        CleanUp
+    } -result {1 0}
+
+
+    test parmset-12.9 {locked lists locked parameter names} -setup {
+        Setup
+        ps define thisOne snit::integer 0   ""
+        ps define thatOne snit::integer 0   ""
+        ps define theOther snit::integer 0 ""
+    } -body {
+        ps lock thisOne
+        ps lock theOther
+        list [ps locked] [ps locked this*]
+    } -cleanup {
+        CleanUp
+    } -result {{thisOne theOther} thisOne}
+
+
     #-------------------------------------------------------------------
     # -notifycmd
 
