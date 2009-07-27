@@ -10,7 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.16, 27 July 2009</h3>
+
+This build fixes a bug in parmset(n): the "reset" subcommand reset
+even those parameters that had been locked.<p>
+
+<ul>
+  <li> Bug 2202: parmset(n): "reset" resets locked parameters
+</ul><p>
+
 <h3>Build 1.15, 9 July 2009</h3>
+
 This build updates Mars to use the latest ActiveTclEE (2009 Q2) build and a
 couple of enhancements for HTML documentation purposes.
 
