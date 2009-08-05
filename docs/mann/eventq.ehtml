@@ -103,6 +103,9 @@ Executed events are deleted from the event queue, unless they
 Cancels the event with the specified <i>id</i>.  The event is deleted
 from the event queue, and forgotten.<p>
 
+Returns an "undo token", which may be used to undo the cancellation.
+See <<iref undo cancel>> for details.
+
 <<defitem changed {eventq changed}>>
 
 Indicates whether the queue <<xref saveable(i)>> data has changed
@@ -225,6 +228,22 @@ Returns the event ID of the newly scheduled event.<p>
 
 Returns the number of events in the queue.<p>
 
+<<defitem "undo cancel" {eventq undo cancel <i>undoToken</i>}>>
+
+Undoes a previous cancellation of an event given the
+<i>undoToken</i> returned by <<iref cancel>>.  The restored event will
+have the same data and event ID as it had before it was cancelled.<p>
+
+It is an error to undo a cancellation after the event would have
+executed.  Beyond that, it is up to the application to make sure
+that undoing the cancellation makes sense.<p>
+
+<<defitem "undo schedule" {eventq undo schedule}>>
+
+Undoes the most recent call to <<iref schedule>>, decrementing
+the event counter.  It is an error if the most recently scheduled
+event has already been executed or cancelled.<p>
+
 <</deflist eventq>>
 
 <<section "SEE ALSO">>
@@ -233,7 +252,7 @@ Returns the number of events in the queue.<p>
 
 <<section "FUTURE WORK">>
 
-The following enhancements are foreseen:<p>
+The following enhancements have been considered:<p>
 
 <ul>
   <li> The module should checkpoint its in-memory data directly to the

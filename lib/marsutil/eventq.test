@@ -462,6 +462,49 @@ id t etype   dummy
     }
 
     #-------------------------------------------------------------------
+    # undo schedule
+
+    test undo_schedule-1.1 {No events} -body {
+        eventq undo schedule
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {No event has been scheduled}
+
+    test undo_schedule-1.2 {Latest event already gone} -setup {
+        eventq define arrival  {dummy} { }
+    } -body {
+        eventq schedule arrival 1 a
+        set id [eventq schedule arrival 2 b]
+        eventq cancel $id
+        eventq undo schedule
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {most recent scheduled event no longer exists}
+
+    test undo_schedule-2.1 {Undo resets event counter} -setup {
+        eventq define arrival  {dummy} { }
+    } -body {
+        eventq schedule arrival 1 a
+        set id [eventq schedule arrival 2 b]
+        eventq undo schedule
+        eventq schedule arrival 3 c
+
+        # Event IDs should be 1 and 2
+        pprint [rdb query {SELECT * FROM eventq_queue_arrival}]
+    } -cleanup {
+        cleanup
+    } -result {
+id t etype   dummy 
+-- - ------- ----- 
+1  1 arrival a     
+2  3 arrival c     
+    }
+
+    #-------------------------------------------------------------------
     # reschedule
     #
     # 1.*: Error Checking
@@ -638,6 +681,30 @@ id dummy
     } -cleanup {
         cleanup
     } -result {3 2}
+
+
+    #-------------------------------------------------------------------
+    # undo cancel
+
+    test undo_cancel-1.1 {canceled event can be restored} -body {
+        eventq define arrival {dummy} { }
+        eventq schedule arrival 1 a
+        set id [eventq schedule arrival 2 b]
+        eventq schedule arrival 3 c
+
+        set undoToken [eventq cancel $id]
+        eventq undo cancel $undoToken
+        pprint [rdb query {SELECT * FROM eventq_etype_arrival}]
+    } -cleanup {
+        cleanup
+    } -result {
+id dummy 
+-- ----- 
+1  a     
+2  b     
+3  c     
+    }
+    
 
     #-------------------------------------------------------------------
     # advance

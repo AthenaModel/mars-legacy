@@ -459,14 +459,64 @@ snit::type ::marsutil::eventq {
     # Schedules an event as of time t, returning the event ID.
     
     typemethod schedule {etype t args} {
+        return [$type ScheduleEvent "" $etype $t {*}$args]
+    }
+
+
+    # scheduleWithID id etype t args...
+    # 
+    # id        The ID of the event.
+    # etype     The event type
+    # t         The sim time, > [eventq now]
+    # args...   As defined by the event type
+    #
+    # Schedules an event as of time t, using a previously
+    # cancelled or executed event ID.
+    #
+    # This command is intended to allow an event cancellation to
+    # be undone.
+    
+    typemethod scheduleWithID {id etype t args} {
+        if {![string is integer -strict $id] 
+            || $id < 1                          
+            || $id > $info(eventCounter)
+        } {
+            error "event ID is out of range."
+        }
+        return [$type ScheduleEvent $id $etype $t {*}$args]
+    }
+
+
+    # ScheduleEvent id etype t args...
+    # 
+    # id        The ID of the event, or ""
+    # etype     The event type
+    # t         The sim time, > [eventq now]
+    # args...   As defined by the event type
+    #
+    # Schedules an event as of time t, using a specific event ID,
+    # which must be unused.
+    #
+    # This command is intended to allow an event cancellation to
+    # be undone.
+    
+    typemethod ScheduleEvent {id etype t args} {
         # FIRST, error checking
         EnsureEventTypeExists $etype
         EnsureTimeInFuture    $t
 
-        # Get the event ID
-        set id [incr info(eventCounter)]
-        set flags(changed) 1
+        # NEXT, get the event ID; or, if it's specified, verify that
+        # it doesn't exist.
 
+        if {$id eq ""} {
+            set id [incr info(eventCounter)]
+            set flags(changed) 1
+        } else {
+            if {[$rdb exists {SELECT id FROM eventq_queue WHERE id=$id}]} {
+                error "event already exists with ID: \"$id\""
+            }
+        }
+        
         # Insert the event into the queue.
         $rdb eval {
             INSERT INTO eventq_queue(id,t,etype) 
@@ -478,6 +528,7 @@ snit::type ::marsutil::eventq {
 
         return $id
     }
+
 
     # reschedule id t
     #
@@ -507,21 +558,62 @@ snit::type ::marsutil::eventq {
     # Cancel the event, deleting it from the event queue
 
     typemethod cancel {id} {
-        # Delete the event
-        set etype [$rdb onecolumn {
-            SELECT etype FROM eventq_queue
+        # FIRST, verify that the event exists
+        set etype {}
+        $rdb eval {
+            SELECT etype,t FROM eventq_queue
             WHERE id=$id
-        }]
+        } {}
 
         if {$etype eq ""} {
             error "no event with id: \"$id\""
         }
 
+        # NEXT, get the undo information from the event type
+        # table
+        set eargs [$rdb eval "
+            SELECT * FROM eventq_etype_${etype} WHERE id=\$id;
+        "]
+
+        # NEXT, delete it.
         $rdb eval "
             DELETE FROM eventq_etype_${etype} WHERE id=\$id;
             DELETE FROM eventq_queue WHERE id=\$id;
         "
+
+        return [linsert $eargs 1 $etype $t]
     }
+
+    # undo schedule
+    #
+    # Undoes the most recently scheduled event, decrementing the
+    # event counter.
+
+    typemethod {undo schedule} {} {
+        if {$info(eventCounter) == 0} {
+            error "No event has been scheduled"
+        }
+
+        if {![$rdb exists {
+            SELECT id FROM eventq_queue WHERE id=$info(eventCounter)
+        }]} {
+            error "most recent scheduled event no longer exists"
+        }
+
+        $type cancel $info(eventCounter)
+        incr info(eventCounter) -1
+    }
+
+    # undo cancel undoToken
+    # 
+    # undoToken   The data required to undo the cancellation.
+    #
+    # Reschedules a cancelled event.
+    
+    typemethod {undo cancel} {undoToken} {
+        return [$type ScheduleEvent {*}$undoToken]
+    }
+
 
     #-------------------------------------------------------------------
     # Checkpoint/Restore
@@ -602,7 +694,7 @@ snit::type ::marsutil::eventq {
 
     # EnsureEventIdExists id
     #
-    # id     A putative event ID
+    # id        A putative event ID
     #
     # Throws an error if no such event exists
 
