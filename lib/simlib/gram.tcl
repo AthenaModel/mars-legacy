@@ -3678,34 +3678,43 @@ snit::type ::simlib::gram {
                 WHERE curve_id=$curve_id
             }
 
-            # NEXT, give positive effects credit for their contribution
-            # in proportion to their magnitude.
+            # NEXT, store the positive effects by id and cause
             if {$maxpos > 0.0} {
-                $rdb eval {
-                    UPDATE gram_effects
-                    SET acontrib = $maxpos*(ncontrib*$scale/$sumpos),
-                        actual   = actual + $maxpos*(ncontrib*$scale/$sumpos)
-                    WHERE object=$dbid
-                    AND   active=1
-                    AND   curve_id=$curve_id
-                    AND   cause=$cause
-                    AND   ncontrib > 0.0
-                }
+                let poscontribs($curve_id,$cause) {$maxpos*$scale/$sumpos}
             }
-
-            # NEXT, give negative effects credit for their contribution
-            # in proportion to their magnitude.
+            
+            # NEXT, store the negative effects by id and cause
             if {$minneg < 0.0} {
-                $rdb eval {
-                    UPDATE gram_effects
-                    SET acontrib = $minneg*(ncontrib*$scale/$sumneg),
-                        actual   = actual + $minneg*(ncontrib*$scale/$sumneg)
-                    WHERE object=$dbid
-                    AND   active=1
-                    AND   curve_id=$curve_id
-                    AND   cause=$cause
-                    AND   ncontrib < 0.0
-                }
+                let negcontribs($curve_id,$cause) {$minneg*$scale/$sumneg}
+            }
+        }
+
+        # NEXT, give effects credit for their contribution
+        # in proportion to their magnitude.
+        $rdb eval {
+            SELECT id       AS id,
+                   curve_id AS curve_id,
+                   cause    AS cause,
+                   ncontrib AS ncontrib
+            FROM gram_effects
+            WHERE object    = $dbid
+            AND   active    = 1
+            AND   ncontrib != 0.0
+        } {
+
+            # NEXT, retrieve the multiplier based on the nominal conribution
+            if {$ncontrib < 0.0} {
+                set mult $negcontribs($curve_id,$cause)
+            } else {
+                set mult $poscontribs($curve_id,$cause)
+            } 
+
+            # NEXT update the effects
+            $rdb eval {
+                UPDATE gram_effects
+                SET acontrib = ncontrib*$mult,
+                    actual   = actual + ncontrib*$mult
+                WHERE id=$id
             }
         }
     }
