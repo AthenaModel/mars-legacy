@@ -10,6 +10,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.17, 10 August 2009</h3>
+
+This build integrates one small performance improvement from JRAM into
+GRAM, and adds a couple of capabilities needed for Athena 1.1.<p>
+
+<ul>
+  <li> Bug 2084: gram(n): Performance
+  <li> Bug 2216: simclock(n): Parse generalized time specification strings
+  <li> Bug 2223: eventq(n): undo schedule/undo cancel  
+</ul><p>
+
+
+
 <h3>Build 1.16, 27 July 2009</h3>
 
 This build fixes a bug in parmset(n): the "reset" subcommand reset
