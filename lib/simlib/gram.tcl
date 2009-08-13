@@ -1951,6 +1951,96 @@ snit::type ::simlib::gram {
         return
     }
 
+    # sat set driver n g c mag
+    #
+    # driver       The driver ID
+    # n            Neighborhood name, or "*" for all.
+    # g            Group name, or "*" for all.
+    # c            Concern name, or "*" for all.
+    # sat          Quantity (a qsat value)
+    #
+    # Sets sat.ngc to the required value.
+    #
+    # * The pgroup and concern must have the same group type, CIV or ORG.
+    # * The pgroup and concern cannot both be wildcarded.
+
+    method {sat set} {driver n g c sat} {
+        $self Log detail "sat set driver=$driver n=$n g=$g c=$c S=$sat"
+
+        # FIRST, check the inputs, and accumulate query terms
+        set where ""
+
+        # driver
+        $self driver validate $driver "Cannot sat set"
+
+        # n
+        if {$n ne "*"} {
+            $nbhoods validate $n
+            append where "AND n = \$n "
+        }
+
+        # g
+        if {$g ne "*"} {
+            $cogroups validate $g
+            append where "AND g = \$g "
+        }
+
+        # c
+        if {$c ne "*"} {
+            $concerns validate $c
+            append where "AND c = \$c "
+        }
+
+        # g and c
+        #
+        # If $g and $c are both *, we don't know which group type to
+        # affect.
+        #
+        # If neither $g and $c is *, the types must match.
+
+        require {$g ne "*" || $c ne "*"} \
+            "g and c cannot both be \"*\""
+
+        if {$g ne "*" && $c ne "*"} {
+            require {[$rdb exists {
+                SELECT gc_id FROM gram_gc 
+                WHERE object=$dbid AND g=$g AND c=$c
+            }]} "g and c must have the same group type, CIV or ORG"
+        }
+
+        # n and g
+        #
+        # If they chose a specific neighborhood and group,
+        # verify that satisfaction is tracked for the pair.
+        if {$n ne "*" && $g ne "*"} {
+            require {[$rdb onecolumn {
+                SELECT sat_tracked FROM gram_ng
+                WHERE object=$dbid AND n=$n AND g=$g
+            }]} "satisfaction is not tracked for group $g in nbhood $n"
+        }
+
+
+        # qsat
+        qsat validate $sat
+        set sat [qsat value $sat]
+
+        # NEXT, do the query.
+        $rdb eval "
+            SELECT curve_id, \$sat - sat AS mag
+            FROM gram_sat
+            WHERE object = \$dbid
+            AND   mag != 0.0
+            $where
+        " {
+            $self adjust $driver $curve_id $mag
+        }
+
+        # NEXT, recompute other outputs that depend on sat.ngc
+        $self ComputeSatRollups
+
+        return
+    }
+
     # sat level driver ts n g c limit days ?options?
     #
     # driver       driver ID
@@ -2552,6 +2642,83 @@ snit::type ::simlib::gram {
         " {
             $self adjust $driver $curve_id $mag
         }
+
+        # NEXT, compute the cooperation roll-ups
+        $self ComputeCoopRollups
+
+        return
+    }
+
+    # coop set driver n f g coop
+    #
+    # driver       The driver ID
+    # n            Neighborhood name, or "*" for all.
+    # f            Civilian group name, or "*" for all.
+    # g            Force group name, or "*" for all.
+    # mag          Magnitude (a qmag value)
+    #
+    # Sets coop.nfg to the required amount.
+
+    method {coop set} {driver n f g coop} {
+        $self Log detail "coop adjust driver=$driver n=$n f=$f g=$g C=$coop"
+
+        # FIRST, check the inputs, and accumulate query terms
+        set where ""
+
+        # driver
+        $self driver validate $driver "Cannot coop set"
+
+        # n
+        if {$n ne "*"} {
+            $nbhoods validate $n
+            append where "AND n = \$n "
+        }
+
+        # f
+        if {$f ne "*"} {
+            $cgroups validate $f
+            append where "AND f = \$f "
+        }
+
+        # g
+        if {$g ne "*"} {
+            $fgroups validate $g
+            append where "AND g = \$g "
+        }
+
+        # n and f
+        #
+        # If they chose a specific neighborhood and civ group,
+        # verify that cooperation is tracked for the pair.
+        if {$n ne "*" && $f ne "*"} {
+            # TBD: Should we have a "coop_tracked" attribute?
+            # Or rename "sat_tracked"?
+            require {[$rdb onecolumn {
+                SELECT sat_tracked FROM gram_ng
+                WHERE object=$dbid AND n=$n AND g=$f
+            }]} "cooperation is not tracked for group $f in nbhood $n"
+        }
+
+
+        # qcooperation
+        qcooperation validate $coop
+        set coop [qcooperation value $coop]
+
+        # NEXT, do the query.  Note that we could do the adjustment
+        # in a single UPDATE query, except that we need to save the
+        # adjustment to the history.
+        $rdb eval "
+            SELECT curve_id, \$coop - coop AS mag
+            FROM gram_coop
+            WHERE object = \$dbid
+            AND   mag != 0.0
+            $where
+        " {
+            $self adjust $driver $curve_id $mag
+        }
+
+        # NEXT, compute the cooperation roll-ups
+        $self ComputeCoopRollups
 
         return
     }

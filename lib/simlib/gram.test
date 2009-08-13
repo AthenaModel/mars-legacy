@@ -3082,6 +3082,153 @@ gram   5    1      40.0     2        N1 KURD CUL
 
 
     #-------------------------------------------------------------------
+    # sat set
+
+    test sat_set-1.1 {short names are OK} -setup {
+        create
+    } -body {
+        jr sat set 1 N2 KURD QOL 5
+    } -cleanup {
+        cleanup
+    } -result {}
+
+    test sat_set-1.2 {invalid neighborhood} -setup {
+        create
+    } -body {
+        jr sat set 1 DUMMY KURD QOL 5
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: N1, N2}
+
+    test sat_set-1.3 {invalid group} -setup {
+        create
+    } -body {
+        jr sat set 1 N2 DUMMY QOL 5
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: KURD, SHIA, SUNN, ORGA, ORGB}
+
+    test sat_set-1.4 {invalid concern} -setup {
+        create
+    } -body {
+        jr sat set 1 N2 KURD DUMMY 5
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: AUT, CUL, QOL, SFT, CAS, SVC}
+
+    test sat_set-1.5 {g and c of different types} -setup {
+        create
+    } -body {
+        jr sat set 1 N2 KURD SVC 5
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {g and c must have the same group type, CIV or ORG}
+
+    test sat_set-1.6 {g=*, c=* not allowed} -setup {
+        create
+    } -body {
+        tableSave gram_sat
+        jr sat set 1 N1 * * 5
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {g and c cannot both be "*"}
+
+    test sat_set-1.7 {sat in range} -setup {
+        create
+    } -body {
+        jr sat set 1 N1 SUNN SFT 101
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "101", should be a real number in range -100.0, 100.0, or one of: VS, S, A, D, VD}
+
+    test sat_set-2.1 {set: specific n, g, c} -setup {
+        create
+    } -body {
+        tableSave gram_sat
+        jr sat set 1 N2 SUNN SFT 5
+        tableDiff gram_sat ngc_id {n g c} sat
+    } -cleanup {
+        cleanup
+    } -result {{N2 SUNN SFT 85}}
+
+    test sat_set-2.2 {set: n=*, specific g, c} -setup {
+        create
+    } -body {
+        tableSave gram_sat
+        jr sat set 1 * SUNN SFT 5
+        tableDiff gram_sat ngc_id {n g c} sat
+    } -cleanup {
+        cleanup
+    } -result {{N1 SUNN SFT 85} {N2 SUNN SFT 85}}
+
+    test sat_set-2.3 {set: g=*, specific n, c} -setup {
+        create
+    } -body {
+        tableSave gram_sat
+        jr sat set 1 N2 * SFT 5
+        tableDiff gram_sat ngc_id {n g c} sat
+    } -cleanup {
+        cleanup
+    } -result {{N2 KURD SFT 85} {N2 SHIA SFT -35} {N2 SUNN SFT 85}}
+
+    test sat_set-2.4 {set: c=*, specific n, g} -setup {
+        create
+    } -body {
+        tableSave gram_sat
+        jr sat set 1 N2 SUNN * 5
+        tableDiff gram_sat ngc_id {n g c} sat
+    } -cleanup {
+        cleanup
+    } -result {{N2 SUNN AUT 85} {N2 SUNN CUL 85} {N2 SUNN QOL 45} {N2 SUNN SFT 85}}
+
+    # This one test verifies that satisfaction roll-ups are computed
+    # when satisfaction is set.
+
+    test sat_set-3.1 {sat.ng is recomputed.} -setup {
+        create
+    } -body {
+        # Note, if we set to 5 for all concerns, sat.ng should go
+        # to 5 for that group (since all neighborhoods
+        # have identical inputs).
+        tableSave gram_ng
+        jr sat set 1 * SUNN * 5
+        tableDiff gram_ng ng_id {n g} sat
+    } -cleanup {
+        cleanup
+    } -result {{N1 SUNN 75} {N2 SUNN 75}}
+
+    # sat set uses the code as sat adjust under the hood;
+    # verify that contribs are saved, but leave in-depth
+    # checks for sat adjust.
+
+    test sat_set-4.1 {gram_contribs is saved} -setup {
+        create
+    } -body {
+        jr sat set 1 N1 SHIA AUT 5
+        jr sat set 2 N1 KURD CUL 3
+        pprint [rdb query {SELECT * FROM gram_sat_contribs}]
+    } -cleanup {
+        cleanup
+    } -result {
+object time driver acontrib curve_id n  g    c   
+------ ---- ------ -------- -------- -- ---- --- 
+gram   0    1      -35.0    5        N1 SHIA AUT 
+gram   0    2      3.0      2        N1 KURD CUL 
+    }
+
+    #-------------------------------------------------------------------
     # sat level
         
     test sat_level-1.1 {ts not numeric} -setup {
@@ -5559,6 +5706,143 @@ gram   5    1      40.0     33       N1 KURD BLUE
         cleanup
     } -result {50.0 55.0}
 
+
+    #-------------------------------------------------------------------
+    # coop set
+    #
+    # 1.* -- Error checking
+    # 2.* -- Effect on coop.nfg
+    # 3.* -- Contribs are saved
+
+    test coop_set-1.1 {short names are OK} -setup {
+        create
+    } -body {
+        jr coop set 1 N2 KURD BLUE 5
+    } -cleanup {
+        cleanup
+    } -result {}
+
+    test coop_set-1.2 {n is unknown} -setup {
+        create
+    } -body {
+        jr coop set 1 DUMMY KURD BLUE 5
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: N1, N2}
+
+    test coop_set-1.3 {f is unknown} -setup {
+        create
+    } -body {
+        jr coop set 1 N2 DUMMY BLUE 5
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: KURD, SHIA, SUNN}
+
+    test coop_set-1.4 {f has wrong group type} -setup {
+        create
+    } -body {
+        jr coop set 1 N2 ORGA BLUE 5
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "ORGA", should be one of: KURD, SHIA, SUNN}
+
+
+    test coop_set-1.5 {g is unknown} -setup {
+        create
+    } -body {
+        jr coop set 1 N2 KURD DUMMY 5
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: BLUE, BRIT, OPFOR}
+
+    test coop_set-1.6 {g has wrong group type} -setup {
+        create
+    } -body {
+        jr coop set 1 N2 KURD ORGA 5
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "ORGA", should be one of: BLUE, BRIT, OPFOR}
+
+    test coop_set-1.7 {coop is out of range} -setup {
+        create
+    } -body {
+        jr coop set 1 N2 KURD BLUE 101
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "101", should be a real number in range 0.0, 100.0, or one of: AC, VC, C, MC, U, VU, NC}
+
+    test coop_set-2.1 {set: specific n, f, g} -setup {
+        create
+    } -body {
+        tableSave gram_coop
+        jr coop set 1 N2 SUNN BLUE 5
+        tableDiff gram_coop nfg_id {n f g} coop
+    } -cleanup {
+        cleanup
+    } -result {{N2 SUNN BLUE -45}}
+
+    test coop_set-2.2 {set: n=*, specific f, g} -setup {
+        create
+    } -body {
+        tableSave gram_coop
+        jr coop set 1 * SUNN BLUE 5
+        tableDiff gram_coop nfg_id {n f g} coop
+    } -cleanup {
+        cleanup
+    } -result {{N1 SUNN BLUE -45} {N2 SUNN BLUE -45}}
+
+    test coop_set-2.3 {set: f=*, specific n, g} -setup {
+        create
+    } -body {
+        tableSave gram_coop
+        jr coop set 1 N2 * BLUE 5
+        tableDiff gram_coop nfg_id {n f g} coop
+    } -cleanup {
+        cleanup
+    } -result {{N2 KURD BLUE -45} {N2 SHIA BLUE -45} {N2 SUNN BLUE -45}}
+
+    test coop_set-2.4 {set: g=*, specific n, f} -setup {
+        create
+    } -body {
+        tableSave gram_coop
+        jr coop set 1 N2 SHIA * 5
+        tableDiff gram_coop nfg_id {n f g} coop
+    } -cleanup {
+        cleanup
+    } -result {{N2 SHIA BLUE -45} {N2 SHIA BRIT -45} {N2 SHIA OPFOR -45}}
+
+    # 3.*: Contribs are saved
+    #
+    # Note: this routine uses the same code as "coop adjust" to make
+    # the actual change.  Thus, there's no need to repeat all of
+    # the tests.
+
+    test coop_set-4.1 {gram_contribs is saved} -setup {
+        create
+    } -body {
+        jr coop set 1 N1 SHIA BLUE 5
+        jr coop set 2 N1 KURD BLUE 3
+        pprint [rdb query {SELECT * FROM gram_coop_contribs}]
+    } -cleanup {
+        cleanup
+    } -result {
+object time driver acontrib curve_id n  f    g    
+------ ---- ------ -------- -------- -- ---- ---- 
+gram   0    1      -45.0    36       N1 SHIA BLUE 
+gram   0    2      -47.0    33       N1 KURD BLUE 
+    }
 
     #-------------------------------------------------------------------
     # coop level

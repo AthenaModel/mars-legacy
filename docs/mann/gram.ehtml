@@ -658,6 +658,24 @@ error to specify this option if <i>n</i> is "*".<p>
 
 <</deflist sat level options>>
 
+<<defitem {sat set} {$obj sat set <i>driver n g c sat</i>}>>
+
+Sets group <i>g</i>'s satisfaction with concern <i>c</i> in
+neighborhood <i>n</i> to <i>sat</i>.  The adjustment is related to
+the specified <i>driver</i>. The <i>n</i> argument is a neighborhood 
+name; <i>g</i> is the name of a CIV or ORG group; <i>c</i> is the name
+of a CIV or ORG concern.  Note that <i>g</i> and <i>c</i> must have
+the same type.  The <i>sat</i> is a <<xref simtypes(n) qsat>>
+value.<p>
+
+The <i>n</i>, <i>g</i>, and <i>c</i> arguments may also be passed a
+wildcard, "*"; this means that the adjustment is to be made for all
+entities of that type.  Note that <i>g</i> and <i>c</i> may not both
+be "*".<p>
+
+After making the adjustments, GRAM recomputes all satisfaction roll-ups.<p>
+
+
 <<defitem {sat slope} {$obj sat slope <i>driver ts n g c slope limit</i> ?<i>options...</i>?}>>
 
 Schedules a satisfaction slope input.  The input is for
@@ -806,6 +824,8 @@ The <i>n</i>, <i>f</i>, and <i>g</i> arguments may also be passed a
 wildcard, "*"; this means that the adjustment is to be made for all
 entities of that type.<p>
 
+After the adjustments are made, cooperation roll-ups are computed.<p>
+
 <<defitem {coop level} {$obj coop level <i>driver ts n f g limit days</i> ?<i>options...</i>?}>>
 
 Schedules a cooperation level input.  The input is for
@@ -858,6 +878,21 @@ the strength of indirect effects in neighborhoods which are
 error to specify this option if <i>n</i> is "*".<p>
 
 <</deflist coop level options>>
+
+<<defitem {coop set} {$obj coop set <i>driver n f g coop</i>}>>
+
+Sets CIV group <i>f</i>'s cooperation with FRC group <i>g</i> in
+neighborhood <i>n</i> to <i>coop</i>.  The adjustment is related to
+the specific <i>driver</i>.
+The <i>n</i> argument is a neighborhood
+name; <i>f</i> and <i>g</i> are group names. The <i>coop</i> is a
+<<xref simtypes(n) qcooperation>> value.<p>
+
+The <i>n</i>, <i>f</i>, and <i>g</i> arguments may also be passed a
+wildcard, "*"; this means that the adjustment is to be made for all
+entities of that type.<p>
+
+After the adjustments are made, cooperation roll-ups are computed.<p>
 
 <<defitem {coop slope} {$obj coop slope <i>driver ts n f g slope limit</i> ?<i>options...</i>?}>>
 
