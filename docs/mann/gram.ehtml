@@ -487,6 +487,10 @@ can be specified at this time:<p>
 
 A short name for the driver; defaults to the driver ID itself.<p>
 
+<<defopt {-dtype <i>dtype</i>}>>
+
+The driver type, typically the name of a rule set.<p>
+
 <<defopt {-oneliner <i>text</i>}>>
 
 A one-line description of the driver; defaults to
@@ -516,14 +520,23 @@ message.<p>
 
 <</deflist driver>>
 
-<<defitem cancel {$obj cancel <i>driver</i>}>>
+<<defitem cancel {$obj cancel <i>driver</i> ?-delete?}>>
 
 Cancels all level and slope inputs related to the <i>driver</i>.
 Cancelling a driver causes its actual contributions to satisfaction
 and cooperation to be deleted, almost but not quite as though the
 driver had never occurred. (Drivers are not
 independent; the existence of one affects the contributions of others
-to the same curve.)  Cancelled drivers are deleted from the RDB.<p>
+to the same curve.)<p>
+
+By default, cancelled drivers are marked as "CANCELLED" and retained
+in the RDB; this ensures that driver IDs are not reused.  If the
+<code>-delete</code> flag is specified, cancelled drivers are deleted
+from the RDB.  Note that new drivers are given an ID one more than
+the highest driver ID in the RDB; thus, if the driver with the highest
+ID is cancelled with <code>-delete</code>, its ID will be reused by
+the next driver.  (This is convenient for "undoing" an action that
+created a driver.)<p>
 
 <<defitem terminate {$obj terminate <i>driver</i>}>>
 

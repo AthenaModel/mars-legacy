@@ -1095,7 +1095,7 @@ snit::type ::simlib::gram {
     # Every input to GRAM is associated with a satisfaction or
     # cooperation driver, i.e., an event or situation.
     # Prior to entering the input, the application must allocate
-    # a numeric Driver ID by calling "driver new".
+    # a numeric Driver ID by calling "driver add".
     #
     # OPTIONS
     #
@@ -1110,6 +1110,11 @@ snit::type ::simlib::gram {
     # driver add ?options?
     #
     # Assigns and returns a new Driver ID.  Saves the options if given.
+    #
+    # NOTE: This code has the important property that if the most recently
+    # added driver is deleted (cancel -delete), the driver ID will be 
+    # reused the next time.  This allows allocation of driver IDs to
+    # be undone.  Don't break it!
 
     method {driver add} {args} {
         # FIRST, process the options
@@ -3083,15 +3088,18 @@ snit::type ::simlib::gram {
     #-------------------------------------------------------------------
     # Cancellation/Termination of Drivers
 
-    # cancel driver
+    # cancel driver ?-delete?
     #
     # driver        A Driver ID
+    #   -delete     If the option is given, the driver ID itself will be
+    #               deleted entirely; otherwise, it will remain with a
+    #               type of "unknown" and a name of "CANCELLED".
     #
     # Cancels all actual contributions made to any curve by the specified 
     # driver.  Contributions are cancelled by subtracting the
     # "actual' value from the relevant curves and deleting them from the RDB.
 
-    method cancel {driver} {
+    method cancel {driver {option ""}} {
         # FIRST, Update the curves.
         $rdb eval {
             SELECT curve_id, curve_type, total(acontrib) AS actual
@@ -3108,6 +3116,16 @@ snit::type ::simlib::gram {
         }
 
         # NEXT, delete the contributions from gram_values
+        #
+        # TBD: This code can be extremely slow, and needs to 
+        # be optimized.  For each contribution for each curve
+        # at each timestep, it updates the entire future stream
+        # of values.  This can easily be fixed by processing the
+        # contributions in time order and keeping a running total
+        # of the contributions to date to each curve_id.  Then
+        # we just subtract the total to date from each value at
+        # each time, as we go.  Or can we?  Will we miss some of
+        # the entries that way?  Anyway, it needs to be fixed.
         $rdb eval {
             SELECT curve_id, time, acontrib AS actual
             FROM gram_contribs
@@ -3131,10 +3149,25 @@ snit::type ::simlib::gram {
             DELETE FROM gram_contribs 
             WHERE object = $dbid
             AND   driver = $driver;
+        }
 
-            DELETE FROM gram_driver
-            WHERE object = $dbid
-            AND   driver = $driver
+        # NEXT, delete or mark the driver.
+        if {$option eq "-delete"} {
+            $rdb eval {
+                DELETE FROM gram_driver
+                WHERE object = $dbid
+                AND   driver = $driver
+            }
+        } else {
+            $rdb eval {
+                UPDATE gram_driver
+                SET dtype      = "unknown",
+                    name       = "CANCELLED",
+                    oneliner   = "",
+                    last_input = 0
+                WHERE object = $dbid
+                AND   driver = $driver
+            }
         }
 
         # NEXT, recompute other outputs that depend on sat.ngc

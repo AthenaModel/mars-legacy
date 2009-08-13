@@ -7665,6 +7665,35 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
         cleanup
     } -result {24 0}
 
+    test cancel-5.1 {cancel leaves driver in place} -setup {
+        create
+    } -body {
+        # FIRST, cancel driver 0 (the long-term trend)
+        jr cancel 0
+
+        # NEXT, get the set of drivers.
+        rdb eval {
+            SELECT * FROM gram_driver WHERE object='gram' AND driver=0
+        }
+    } -cleanup {
+        cleanup
+    } -result {gram 0 unknown CANCELLED {} 0}
+
+    test cancel-5.2 {cancel -delete deletes driver} -setup {
+        create
+    } -body {
+        # FIRST, cancel driver 0 (the long-term trend), deleting it
+        # altogether
+        jr cancel 0 -delete
+
+        # NEXT, get the set of drivers.
+        rdb eval {
+            SELECT * FROM gram_driver WHERE object='gram' AND driver=0
+        }
+    } -cleanup {
+        cleanup
+    } -result {}
+
     #-------------------------------------------------------------------
     # terminate
     #
