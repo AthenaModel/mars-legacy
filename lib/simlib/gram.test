@@ -2774,7 +2774,7 @@ gram   1440 50.0 N1 KURD BLUE
         jr sat adjust 1 N2 KURD QOL 5
     } -cleanup {
         cleanup
-    } -result {}
+    } -result {1}
 
     test sat_adjust-1.2 {invalid neighborhood} -setup {
         create
@@ -3080,6 +3080,37 @@ gram   5    1      40.0     2        N1 KURD CUL
     } -result {40.0 45.0}
 
 
+    test sat_adjust-7.1 {last_input is updated and returned} -setup {
+        create
+    } -body {
+        set a [jr sat adjust 1 N1 SHIA AUT 5]
+        set b [jr sat adjust 1 N1 SHIA AUT 5]
+        set c [jr sat adjust 1 N1 SHIA AUT 5]
+        set d [rdb onecolumn {
+            SELECT last_input FROM gram_driver
+            WHERE driver=1
+        }]
+
+        list $a $b $c $d
+    } -cleanup {
+        cleanup
+    } -result {1 2 3 3}
+
+    test sat_adjust-7.2 {last_input is updated and returned} -setup {
+        create
+    } -body {
+        set a [jr sat adjust 1 N1 SHIA AUT 5]
+        set b [jr sat adjust 1 N1 SHIA AUT 5]
+        set c [jr sat adjust 1 N1 SHIA AUT 5]
+        set d [rdb onecolumn {
+            SELECT last_input FROM gram_driver
+            WHERE driver=1
+        }]
+
+        list $a $b $c $d
+    } -cleanup {
+        cleanup
+    } -result {1 2 3 3}
 
     #-------------------------------------------------------------------
     # sat set
@@ -3090,7 +3121,7 @@ gram   5    1      40.0     2        N1 KURD CUL
         jr sat set 1 N2 KURD QOL 5
     } -cleanup {
         cleanup
-    } -result {}
+    } -result {1}
 
     test sat_set-1.2 {invalid neighborhood} -setup {
         create
@@ -3227,6 +3258,42 @@ object time driver acontrib curve_id n  g    c
 gram   0    1      -35.0    5        N1 SHIA AUT 
 gram   0    2      3.0      2        N1 KURD CUL 
     }
+
+
+    test sat_set-5.1 {last_input is updated and returned} -setup {
+        create
+    } -body {
+        set a [jr sat set 1 N1 SHIA AUT 5]
+        set b [jr sat set 1 N1 SHIA AUT 10]
+        set c [jr sat set 1 N1 SHIA AUT 15]
+        set d [rdb onecolumn {
+            SELECT last_input FROM gram_driver
+            WHERE driver=1
+        }]
+
+        list $a $b $c $d
+    } -cleanup {
+        cleanup
+    } -result {1 2 3 3}
+
+
+    test sat_set-5.2 {last_input is undone} -setup {
+        create
+    } -body {
+        set a [jr sat set 1 N1 SHIA AUT 5]
+        set b [jr sat set 1 N1 SHIA AUT 10]
+        set c [jr sat set 1 N1 SHIA AUT 15]
+        set d [jr sat set 1 N1 SHIA AUT 10 -undo]
+        set e [jr sat set 1 N1 SHIA AUT 5 -undo]
+        set f [rdb onecolumn {
+            SELECT last_input FROM gram_driver
+            WHERE driver=1
+        }]
+
+        list $a $b $c $d $e $f
+    } -cleanup {
+        cleanup
+    } -result {1 2 3 {} {} 1}
 
     #-------------------------------------------------------------------
     # sat level
@@ -5480,7 +5547,7 @@ gram   2      N1 SHIA mood -3.5
         jr coop adjust 1 N2 KURD BLUE 5
     } -cleanup {
         cleanup
-    } -result {}
+    } -result {1}
 
     test coop_adjust-1.2 {n is unknown} -setup {
         create
@@ -5707,6 +5774,25 @@ gram   5    1      40.0     33       N1 KURD BLUE
     } -result {50.0 55.0}
 
 
+    test coop_adjust-6.1 {last_input is updated and returned} -setup {
+        create
+    } -body {
+        set a [jr coop adjust 1 N1 SHIA BLUE 5]
+        set b [jr coop adjust 1 N1 SHIA BLUE 5]
+        set c [jr coop adjust 1 N1 SHIA BLUE 5]
+        set d [rdb onecolumn {
+            SELECT last_input FROM gram_driver
+            WHERE driver=1
+        }]
+
+        list $a $b $c $d
+    } -cleanup {
+        cleanup
+    } -result {1 2 3 3}
+
+
+
+
     #-------------------------------------------------------------------
     # coop set
     #
@@ -5720,7 +5806,7 @@ gram   5    1      40.0     33       N1 KURD BLUE
         jr coop set 1 N2 KURD BLUE 5
     } -cleanup {
         cleanup
-    } -result {}
+    } -result {1}
 
     test coop_set-1.2 {n is unknown} -setup {
         create
@@ -5843,6 +5929,43 @@ object time driver acontrib curve_id n  f    g
 gram   0    1      -45.0    36       N1 SHIA BLUE 
 gram   0    2      -47.0    33       N1 KURD BLUE 
     }
+
+
+    test coop_set-5.1 {last_input is updated and returned} -setup {
+        create
+    } -body {
+        set a [jr coop set 1 N1 SHIA BLUE 5]
+        set b [jr coop set 1 N1 SHIA BLUE 10]
+        set c [jr coop set 1 N1 SHIA BLUE 15]
+        set d [rdb onecolumn {
+            SELECT last_input FROM gram_driver
+            WHERE driver=1
+        }]
+
+        list $a $b $c $d
+    } -cleanup {
+        cleanup
+    } -result {1 2 3 3}
+
+
+    test coop_set-5.2 {last_input is undone} -setup {
+        create
+    } -body {
+        set a [jr coop set 1 N1 SHIA BLUE 5]
+        set b [jr coop set 1 N1 SHIA BLUE 10]
+        set c [jr coop set 1 N1 SHIA BLUE 15]
+        set d [jr coop set 1 N1 SHIA BLUE 10 -undo]
+        set e [jr coop set 1 N1 SHIA BLUE 5 -undo]
+        set f [rdb onecolumn {
+            SELECT last_input FROM gram_driver
+            WHERE driver=1
+        }]
+
+        list $a $b $c $d $e $f
+    } -cleanup {
+        cleanup
+    } -result {1 2 3 {} {} 1}
+
 
     #-------------------------------------------------------------------
     # coop level

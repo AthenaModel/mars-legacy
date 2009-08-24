@@ -611,8 +611,11 @@ wildcard, "*"; this means that the adjustment is to be made for all
 entities of that type.  Note that <i>g</i> and <i>c</i> may not both
 be "*".<p>
 
-After making the adjustments, GRAM recomputes all satisfaction roll-ups.<p>
+After making the adjustments, GRAM recomputes all satisfaction
+roll-ups.<p>
 
+The command returns an <i>esinput</i>, a serial number that increments
+with each input made for this <i>driver</i>.<p>
 
 <<defitem {sat level} {$obj sat level <i>driver ts n g c limit days</i> ?<i>options...</i>?}>>
 
@@ -671,7 +674,7 @@ error to specify this option if <i>n</i> is "*".<p>
 
 <</deflist sat level options>>
 
-<<defitem {sat set} {$obj sat set <i>driver n g c sat</i>}>>
+<<defitem {sat set} {$obj sat set <i>driver n g c sat</i> ?-undo?}>>
 
 Sets group <i>g</i>'s satisfaction with concern <i>c</i> in
 neighborhood <i>n</i> to <i>sat</i>.  The adjustment is related to
@@ -686,8 +689,16 @@ wildcard, "*"; this means that the adjustment is to be made for all
 entities of that type.  Note that <i>g</i> and <i>c</i> may not both
 be "*".<p>
 
-After making the adjustments, GRAM recomputes all satisfaction roll-ups.<p>
+After making the adjustments, GRAM recomputes all satisfaction
+roll-ups.<p>
 
+By default, the command returns an <i>esinput</i>, a serial number
+that increments with each input made for this <i>driver</i>.  If the
+<code>-undo</code> flag is given, the command decrements the
+<i>esinput</i> counter, and returns the empty string.  <b>NOTE:</b>
+the <code>-undo</code> flag is a stopgap measure to allow Athena to
+use <<iref sat set>> to undo particular calls to <<iref sat adjust>>
+and <<iref sat set>>.<p>
 
 <<defitem {sat slope} {$obj sat slope <i>driver ts n g c slope limit</i> ?<i>options...</i>?}>>
 
@@ -839,6 +850,9 @@ entities of that type.<p>
 
 After the adjustments are made, cooperation roll-ups are computed.<p>
 
+The command returns an <i>esinput</i>, a serial number
+that increments with each input made for this <i>driver</i>.<p>
+
 <<defitem {coop level} {$obj coop level <i>driver ts n f g limit days</i> ?<i>options...</i>?}>>
 
 Schedules a cooperation level input.  The input is for
@@ -892,7 +906,7 @@ error to specify this option if <i>n</i> is "*".<p>
 
 <</deflist coop level options>>
 
-<<defitem {coop set} {$obj coop set <i>driver n f g coop</i>}>>
+<<defitem {coop set} {$obj coop set <i>driver n f g coop</i> ?-undo?}>>
 
 Sets CIV group <i>f</i>'s cooperation with FRC group <i>g</i> in
 neighborhood <i>n</i> to <i>coop</i>.  The adjustment is related to
@@ -906,6 +920,15 @@ wildcard, "*"; this means that the adjustment is to be made for all
 entities of that type.<p>
 
 After the adjustments are made, cooperation roll-ups are computed.<p>
+
+By default, the command returns an <i>esinput</i>, a serial number
+that increments with each input made for this <i>driver</i>.  If the
+<code>-undo</code> flag is given, the command decrements the
+<i>esinput</i> counter, and returns the empty string.  <b>NOTE:</b>
+the <code>-undo</code> flag is a stopgap measure to allow Athena to
+use <<iref coop set>> to undo particular calls to <<iref coop adjust>>
+and <<iref coop set>>.<p>
+
 
 <<defitem {coop slope} {$obj coop slope <i>driver ts n f g slope limit</i> ?<i>options...</i>?}>>
 

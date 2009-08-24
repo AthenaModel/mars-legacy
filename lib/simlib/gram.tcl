@@ -1303,6 +1303,22 @@ snit::type ::simlib::gram {
         }
     }
 
+    # DriverDecrementInput driver
+    #
+    # Decrements the input counter for a given driver.
+    #
+    # NOTE: This is provided for "sat set -undo" and 
+    # "coop set -undo", pending a real undo mechanism.
+    
+    method DriverDecrementInput {driver} {
+        $rdb eval {
+            UPDATE gram_driver
+            SET last_input = last_input - 1
+            WHERE object = $dbid AND driver=$driver;
+        }
+
+        return
+    }
 
     #-------------------------------------------------------------------
     # Influence
@@ -1872,8 +1888,10 @@ snit::type ::simlib::gram {
     #
     # Adjusts sat.ngc by the required amount, clamping it within bounds.
     #
-    # * The pgroup and concern must have the same group type, CIV or ORG.
-    # * The pgroup and concern cannot both be wildcarded.
+    # * The group and concern must have the same group type, CIV or ORG.
+    # * The group and concern cannot both be wildcarded.
+    #
+    # Returns the input ID for this driver.  
 
     method {sat adjust} {driver n g c mag} {
         $self Log detail "sat adjust driver=$driver n=$n g=$g c=$c M=$mag"
@@ -1953,24 +1971,31 @@ snit::type ::simlib::gram {
         # NEXT, recompute other outputs that depend on sat.ngc
         $self ComputeSatRollups
 
-        return
+        return [$self DriverGetInput $driver]
     }
 
-    # sat set driver n g c mag
+    # sat set driver n g c mag ?-undo?
     #
     # driver       The driver ID
     # n            Neighborhood name, or "*" for all.
     # g            Group name, or "*" for all.
     # c            Concern name, or "*" for all.
     # sat          Quantity (a qsat value)
+    # -undo        Flag; decrements last_input instead of incrementing.
     #
     # Sets sat.ngc to the required value.
     #
-    # * The pgroup and concern must have the same group type, CIV or ORG.
-    # * The pgroup and concern cannot both be wildcarded.
+    # * The group and concern must have the same group type, CIV or ORG.
+    # * The group and concern cannot both be wildcarded.
+    #
+    # Returns the input ID for this driver.  
+    #
+    # NOTE: If -undo is given, decrements the last_input counter for this
+    # driver, and returns nothing.  This is a stopgap measure to allow
+    # sat adjust and sat set to be undone.
 
-    method {sat set} {driver n g c sat} {
-        $self Log detail "sat set driver=$driver n=$n g=$g c=$c S=$sat"
+    method {sat set} {driver n g c sat {flag ""}} {
+        $self Log detail "sat set driver=$driver n=$n g=$g c=$c S=$sat $flag"
 
         # FIRST, check the inputs, and accumulate query terms
         set where ""
@@ -2043,7 +2068,13 @@ snit::type ::simlib::gram {
         # NEXT, recompute other outputs that depend on sat.ngc
         $self ComputeSatRollups
 
-        return
+        # NEXT, return the input ID, or decrement it.
+        if {$flag eq "-undo"} {
+            $self DriverDecrementInput $driver
+            return
+        } else {
+            return [$self DriverGetInput $driver]
+        }
     }
 
     # sat level driver ts n g c limit days ?options?
@@ -2585,6 +2616,8 @@ snit::type ::simlib::gram {
     # mag          Magnitude (a qmag value)
     #
     # Adjusts coop.nfg by the required amount, clamping it within bounds.
+    #
+    # Returns the input ID for this driver.  
 
     method {coop adjust} {driver n f g mag} {
         $self Log detail "coop adjust driver=$driver n=$n f=$f g=$g M=$mag"
@@ -2651,21 +2684,28 @@ snit::type ::simlib::gram {
         # NEXT, compute the cooperation roll-ups
         $self ComputeCoopRollups
 
-        return
+        return [$self DriverGetInput $driver]
     }
 
-    # coop set driver n f g coop
+    # coop set driver n f g coop ?-undo?
     #
     # driver       The driver ID
     # n            Neighborhood name, or "*" for all.
     # f            Civilian group name, or "*" for all.
     # g            Force group name, or "*" for all.
     # mag          Magnitude (a qmag value)
+    # -undo        Flag; decrements last_input instead of incrementing.
     #
     # Sets coop.nfg to the required amount.
+    #
+    # Returns the input ID for this driver.  
+    #
+    # NOTE: If -undo is given, decrements the last_input counter for this
+    # driver, and returns nothing.  This is a stopgap measure to allow
+    # coop adjust and coop set to be undone.
 
-    method {coop set} {driver n f g coop} {
-        $self Log detail "coop adjust driver=$driver n=$n f=$f g=$g C=$coop"
+    method {coop set} {driver n f g coop {flag ""}} {
+        $self Log detail "coop adjust driver=$driver n=$n f=$f g=$g C=$coop $flag"
 
         # FIRST, check the inputs, and accumulate query terms
         set where ""
@@ -2725,7 +2765,13 @@ snit::type ::simlib::gram {
         # NEXT, compute the cooperation roll-ups
         $self ComputeCoopRollups
 
-        return
+        # NEXT, return the input ID, or decrement it.
+        if {$flag eq "-undo"} {
+            $self DriverDecrementInput $driver
+            return
+        } else {
+            return [$self DriverGetInput $driver]
+        }
     }
 
     # coop level driver ts n f g limit days ?options?
