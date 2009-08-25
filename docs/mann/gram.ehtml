@@ -582,6 +582,18 @@ playbox-wide.<p>
 Returns the rolled-up with respect to concern <i>c</i>,
 playbox-wide.<p>
 
+<<defitem coop.nfg {$obj coop.nfg <i>n f g</i>}>>
+
+Returns civilian group <i>f</i>'s cooperation with force group <i>g</i>
+in neighborhood <i>n</i>.  Group <i>f</i> must reside in neighborhood
+<i>n</i>.<p>
+
+<<defitem coop.ng {$obj coop.ng <i>n g</i>}>>
+
+Returns the cooperation of neighborhood <i>n</i> with force group
+<i>g</i> (the rolled-up cooperation of the neighborhood groups with
+<i>g</i>).<p>
+
 <<defitem nbhoodGroups {$obj nbhoodGroups <i>nbhood</i>}>>
 
 Returns a list of the names of the CIV groups for which

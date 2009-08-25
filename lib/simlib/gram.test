@@ -425,12 +425,12 @@ namespace eval ::simlib::test {
         catch {jr destroy}
     }
 
-    # satNotTracked n g
+    # notResident n g
     #
     # n       A neighborhood name
     # g       A CIV group name
     #
-    # Sets the satisfaction to be not tracked for this ng.
+    # Sets the satisfaction and cooperation to be not tracked for this ng.
     # "jr init" should be called subsequently.
     #
     # NOTE: This is really ugly, because gram(n) assumes
@@ -438,7 +438,7 @@ namespace eval ::simlib::test {
     # effects cleanly, population really needs to be zero 
     # in the simdb(5) when gram(n) is created or initialized with -simdb.
     
-    proc satNotTracked {n g} {
+    proc notResident {n g} {
         # FIRST, get rid of the curves
         rdb eval {
             SELECT curve_id FROM gram_ngc
@@ -446,6 +446,16 @@ namespace eval ::simlib::test {
         } {
             rdb eval {
                 DELETE FROM gram_ngc    WHERE curve_id=$curve_id;
+                DELETE FROM gram_curves WHERE curve_id=$curve_id;
+            }
+        }
+        
+        rdb eval {
+            SELECT curve_id FROM gram_nfg
+            WHERE n=$n AND f=$g
+        } {
+            rdb eval {
+                DELETE FROM gram_nfg    WHERE curve_id=$curve_id;
                 DELETE FROM gram_curves WHERE curve_id=$curve_id;
             }
         }
@@ -8004,7 +8014,7 @@ I 0  7200 N1 SUNN QOL -3.00
     test sat_ngc-2.2 {ngc, group not resident} -setup {
         create
     } -body {
-        satNotTracked N1 SUNN
+        notResident N1 SUNN
         init
 
 
@@ -8013,68 +8023,6 @@ I 0  7200 N1 SUNN QOL -3.00
         cleanup
     } -result {0.0}
 
-    #-------------------------------------------------------------------
-    # sat.ngc
-
-    test sat_ngc-1.1 {Invalid nbhood} -setup {
-        create
-    } -body {
-        jr sat.ngc DUMMY SHIA AUT
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup
-    } -result {invalid value "DUMMY", should be one of: N1, N2}
-
-    test sat_ngc-1.2 {Invalid group} -setup {
-        create
-    } -body {
-        jr sat.ngc N2 DUMMY AUT
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup
-    } -result {invalid value "DUMMY", should be one of: KURD, SHIA, SUNN, ORGA, ORGB}
-
-    test sat_ngc-1.3 {Invalid concern} -setup {
-        create
-    } -body {
-        jr sat.ngc N2 SHIA DUMMY
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup
-    } -result {invalid value "DUMMY", should be one of: AUT, CUL, QOL, SFT, CAS, SVC}
-
-    test sat_ngc-1.4 {type mismatch} -setup {
-        create
-    } -body {
-        jr sat.ngc N2 SHIA CAS
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup
-    } -result {g and c must have the same group type, CIV or ORG}
-
-    test sat_ngc-2.1 {group resident} -setup {
-        create
-    } -body {
-        jr sat.ngc N1 SUNN AUT
-    } -cleanup {
-        cleanup
-    } -result {-80.0}
-
-    test sat_ngc-2.2 {group not resident} -setup {
-        create
-    } -body {
-        satNotTracked N1 SUNN
-        init
-
-
-        jr sat.ngc N1 SUNN AUT
-    } -cleanup {
-        cleanup
-    } -result {0.0}
 
     #-------------------------------------------------------------------
     # sat.ng
@@ -8110,7 +8058,7 @@ I 0  7200 N1 SUNN QOL -3.00
     test sat_ng-2.2 {group not resident} -setup {
         create
     } -body {
-        satNotTracked N1 SUNN
+        notResident N1 SUNN
         init
 
 
@@ -8256,6 +8204,90 @@ I 0  7200 N1 SUNN QOL -3.00
         cleanup
     } -result {-13.333333333333334}
 
+
+    #-------------------------------------------------------------------
+    # coop.nfg
+
+    test coop_nfg-1.1 {Invalid nbhood} -setup {
+        create
+    } -body {
+        jr coop.nfg DUMMY SHIA BLUE
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: N1, N2}
+
+    test coop_nfg-1.2 {Invalid civ group} -setup {
+        create
+    } -body {
+        jr coop.nfg N2 DUMMY BLUE
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: KURD, SHIA, SUNN}
+
+    test coop_nfg-1.3 {Invalid frc group} -setup {
+        create
+    } -body {
+        jr coop.nfg N2 SHIA DUMMY
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: BLUE, BRIT, OPFOR}
+
+    test coop_nfg-1.4 {f not resident} -setup {
+        create
+    } -body {
+        notResident N1 SUNN
+        jr coop.nfg N1 SUNN BLUE
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {Group SUNN does not reside in nbhood N1}
+
+    test coop_nfg-2.1 {Retrieve value} -setup {
+        create
+    } -body {
+        jr coop.nfg N1 SUNN BLUE
+    } -cleanup {
+        cleanup
+    } -result {50.0}
+
+
+    #-------------------------------------------------------------------
+    # coop.ng
+
+    test coop_ng-1.1 {Invalid nbhood} -setup {
+        create
+    } -body {
+        jr coop.ng DUMMY BLUE
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: N1, N2}
+
+    test coop_ng-1.2 {Invalid group} -setup {
+        create
+    } -body {
+        jr coop.ng N2 DUMMY
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid value "DUMMY", should be one of: BLUE, BRIT, OPFOR}
+
+    test coop_ng-2.1 {get value} -setup {
+        create
+    } -body {
+        jr coop.ng N1 BLUE
+    } -cleanup {
+        cleanup
+    } -result {50.0}
 
     #-------------------------------------------------------------------
     # nbhoodGroups

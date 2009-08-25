@@ -1876,6 +1876,53 @@ snit::type ::simlib::gram {
     }
 
     #-------------------------------------------------------------------
+    # Cooperation Queries
+
+    # coop.nfg
+    #
+    # n     A neighborhood name
+    # f     A CIV group name
+    # g     A FRC group name
+    #
+    # Returns the requested cooperation level.  Group f must reside
+    # in n.
+
+    method coop.nfg {n f g} {
+        $nbhoods validate $n
+        $cgroups validate $f
+        $fgroups validate $g
+
+        set result [$rdb onecolumn {
+            SELECT coop FROM gram_coop 
+            WHERE object=$dbid AND n=$n AND f=$f AND g=$g
+        }]
+
+        if {$result eq ""} {
+            error "Group $f does not reside in nbhood $n"
+        }
+
+        return $result
+    }
+
+
+    # coop.ng
+    #
+    # n     A neighborhood name
+    # g     A FRC group name
+    #
+    # Returns the requested cooperation roll-up.
+
+    method coop.ng {n g} {
+        $nbhoods validate $n
+        $fgroups validate $g
+
+        return [$rdb onecolumn {
+            SELECT coop FROM gram_frc_ng 
+            WHERE object=$dbid AND n=$n AND g=$g
+        }]
+    }
+
+    #-------------------------------------------------------------------
     # Satisfaction Adjustments, Level Inputs, and Slope Inputs
 
     # sat adjust driver n g c mag
