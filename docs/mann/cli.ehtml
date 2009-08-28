@@ -152,6 +152,11 @@ Returns the value of the specified <i>option</i>.<p>
 
 Deletes all text from the widget and prompts for the next command.<p>
 
+<<defitem get {$cli get ?-displaychars? -- <i>index1</i> ?<i>index2...</i>?}>>
+
+Gets the text from the CLI.  The command is delegated to the
+underlying Tk <<xref tk:text(n)>> widget.<p>
+
 <<defitem append {$cli append <i>text</i> ?<i>style</i>?}>>
 
 Appends text to the bottom of the widget in the specified style.

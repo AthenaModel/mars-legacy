@@ -19,9 +19,6 @@
 #    Tcl syntax, and won't try to execute them until the entire command
 #    is complete. 
 #
-#    TBD: If needed, add a "-tclsyntax" option; set to 0, CLI won't
-#    expect Tcl syntax.
-#
 #-----------------------------------------------------------------------
 
 
@@ -735,6 +732,8 @@ snit::widget ::marsgui::cli {
 
     #-------------------------------------------------------------------
     # Public Methods
+
+    delegate method get to log
 
     # append text ?style?
     #
