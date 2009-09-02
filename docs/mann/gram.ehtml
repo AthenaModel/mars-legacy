@@ -712,7 +712,7 @@ the <code>-undo</code> flag is a stopgap measure to allow Athena to
 use <<iref sat set>> to undo particular calls to <<iref sat adjust>>
 and <<iref sat set>>.<p>
 
-<<defitem {sat slope} {$obj sat slope <i>driver ts n g c slope limit</i> ?<i>options...</i>?}>>
+<<defitem {sat slope} {$obj sat slope <i>driver ts n g c slope</i> ?<i>options...</i>?}>>
 
 Schedules a satisfaction slope input.  The input is for
 the specific <i>driver</i>, and begins to take effect at time <i>ts</i>,
@@ -724,9 +724,7 @@ a direct effect in all neighborhoods.  Note that <i>g</i> and <i>c</i>
 must have the same group type, CIV or ORG.<p>
 
 The input has a nominal satisfaction change per day, the <i>slope</i>,
-and a maximum total satisfaction change, <i>limit</i>, both of which
-are <<xref simtypes(n) qmag>> values.   The <i>slope</i> and
-<i>limit</i> must have the same sign.<p>
+a <<xref simtypes(n) qmag>> value.<p>
 
 The input is decomposed into its direct effect on group <i>g</i>
 and its indirect effects on the other groups of the same type. Note
@@ -741,8 +739,6 @@ Once scheduled, a slope input remain active with the specified
 <i>slope</i> until one of the following things happens:<p>
 
 <ul>
-  <li> The <i>limit</i> is reached.<p>
-
   <li> A new input is entered for the same <i>driver</i>, <i>n</i>,
        <i>g</i>, <i>c</i>, and <i>cause</i>; the new <i>slope</i> then
        replaces the old <i>slope</i>.  If the <i>slope</i> is 0.0,
@@ -752,7 +748,7 @@ Once scheduled, a slope input remain active with the specified
   <li> The <i>driver</i> is cancelled.<p>
 </ul>
 
-The command returns an <i>esinput</i>, a serial number that increments
+The command returns an <i>input ID</i>, a serial number that increments
 with each input made for this <i>driver</i>.<p>
 
 The options are as follows:<p>
@@ -942,7 +938,7 @@ use <<iref coop set>> to undo particular calls to <<iref coop adjust>>
 and <<iref coop set>>.<p>
 
 
-<<defitem {coop slope} {$obj coop slope <i>driver ts n f g slope limit</i> ?<i>options...</i>?}>>
+<<defitem {coop slope} {$obj coop slope <i>driver ts n f g slope</i> ?<i>options...</i>?}>>
 
 Schedules a cooperation slope input.  The input is for
 the specific <i>driver</i>, and begins to take effect at time <i>ts</i>,
@@ -953,9 +949,7 @@ neighborhood, <i>n</i>, may also be "*", indicating that the input has
 a direct effect in all neighborhoods.<p>
 
 The input has a nominal cooperation change per day, the <i>slope</i>,
-and a maximum total cooperation change, <i>limit</i>, both of which
-are <<xref simtypes(n) qmag>> values.   The <i>slope</i> and
-<i>limit</i> must have the same sign.<p>
+a <<xref simtypes(n) qmag>> value.<p>
 
 The input is decomposed into its direct effect on <i>f</i>'s
 cooperation with group <i>g</i>, and its indirect effects on
@@ -966,8 +960,6 @@ Note that an input can have indirect effects in other neighborhood even if
 <i>f</i> has zero population in <i>n</i>.<p>
 
 <ul>
-  <li> The <i>limit</i> is reached.<p>
-
   <li> A new input is entered for the same <i>driver</i>, <i>n</i>,
        <i>f</i>, <i>g</i>, and <i>cause</i>; the new <i>slope</i> then
        replaces the old <i>slope</i>.  If the <i>slope</i> is 0.0,
@@ -977,7 +969,7 @@ Note that an input can have indirect effects in other neighborhood even if
   <li> The <i>driver</i> is cancelled.<p>
 </ul>
 
-The command returns an <i>esinput</i>, a serial number that increments
+The command returns an <i>input ID</i>, a serial number that increments
 with each input made for this <i>driver</i>.<p>
 
 The options are as follows:<p>
