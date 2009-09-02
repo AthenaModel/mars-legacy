@@ -10,6 +10,20 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.18, 2 September 2009</h3>
+
+This build contains a number of changes to gram(n) in support of
+Athena 1.0.14. In particular:<p>
+
+<ul>
+  <li> Bug 2234: gram(n): sat set, coop set
+  <li> Bug 2235: gram(n): "cancel -delete"
+  <li> Bug 2239: gram(n): Control of driver input count
+  <li> Bug 2243: gram(n): coop.nfg, coop.ng methods
+  <li> Bug 2257: gram(n): man page "sat slope" and "coop slope" entries
+  <li> Bug 2261: cli(n): delegate "get" to text(n) widget 
+</ul><p>
+
 <h3>Build 1.17, 10 August 2009</h3>
 
 This build integrates one small performance improvement from JRAM into
