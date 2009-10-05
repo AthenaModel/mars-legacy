@@ -419,6 +419,7 @@ snit::type app {
         # NEXT, delete any svn:externals
 
         svn propdel svn:externals .
+        svn commit -m "Deleted external link to Mars." .
 
         # NEXT, copy the version of Mars into the code base
         set clientMars [AddDomain $client(URL)/mars jpl.nasa.gov]
