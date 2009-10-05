@@ -10,6 +10,13 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.19, 5 October 2009 -- Athena 1.1</h3>
+
+This build supports the Athena 1.1 release.  It contains two changes,
+a fix to <<xref mars_link(1)>> and an updated to the <i>Mars Analyst's
+Guide</i>.  There are no code changes that affect clients.<p>
+
+
 <h3>Build 1.18, 2 September 2009</h3>
 
 This build contains a number of changes to gram(n) in support of
