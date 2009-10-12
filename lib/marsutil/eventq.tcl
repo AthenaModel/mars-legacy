@@ -74,9 +74,6 @@ snit::type ::marsutil::eventq {
 
         # NEXT, There is no RDB initially
         set rdb [myproc NullRDB]
-
-        # NEXT, Register this module's SQL schema
-        sqldocument register $type
     }
 
     #-------------------------------------------------------------------
@@ -213,7 +210,11 @@ snit::type ::marsutil::eventq {
     # Initialize the module.
 
     typemethod init {db} {
-        # FIRST, save the RDB
+        # FIRST, make sure the schema is defined.
+        require {$type in [$db sections]} \
+            "eventq(n) is not registered with database $db"
+
+        # NEXT, save the RDB
         set rdb $db
     }
 

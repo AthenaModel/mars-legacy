@@ -58,15 +58,9 @@ namespace eval ::marsutil::test {
     # cleanup
     #
     # This command cleans up after each test, returning the system
-    # to a known state: a clean registry and no database objects.
-    # It needs to be called only if the test changes either of these
-    # things.
+    # to a known state.
     
     proc cleanup {} {
-        # FIRST, reset the registry back to just sqldocument itself
-        set ::marsutil::sqldocument::registry ::marsutil::sqldocument
-
-        # NEXT, destroy all open database objects
         foreach instance [sqldocument info instances] {
             $instance destroy
         }
@@ -133,14 +127,6 @@ namespace eval ::marsutil::test {
         }
     }
 
-    # By default, sqldocument's registry will include all sqlsection(i) 
-    # modules in marsutil(n).  This means that its contents will change as
-    # as new modules are declared.  For testing, consequently, we want
-    # to start with a clean registry--then, we'll register things 
-    # ourselves.  So call cleanup to kick things off.
-
-    cleanup
-
     #-------------------------------------------------------------------
     # sqlsection schema
 
@@ -165,41 +151,6 @@ namespace eval ::marsutil::test {
     test sqlsection_functions-1.1 {Standard functions are defined} -body {
         sqldocument sqlsection functions
     } -result {error ::error format ::format joinlist ::join nonempty ::marsutil::sqldocument::NonEmpty percent ::marsutil::percent wallclock {::clock seconds}}
-
-    #-------------------------------------------------------------------
-    # register
-
-    test register-1.1 {Adds sqlsection to registry} -body {
-        sqldocument register ::foo
-        set ::marsutil::sqldocument::registry
-    } -cleanup {
-        cleanup
-    } -result {::marsutil::sqldocument ::foo}
-
-    test register-1.2 {Duplicate sections are ignored} -body {
-        sqldocument register ::foo
-        sqldocument register ::foo
-        sqldocument register ::foo
-        set ::marsutil::sqldocument::registry
-    } -cleanup {
-        cleanup
-    } -result {::marsutil::sqldocument ::foo}
-
-    #-------------------------------------------------------------------
-    # sections
-
-    test sections-1.1 {Base registry contains just sqldocument} -body {
-        sqldocument sections
-    } -cleanup {
-        cleanup
-    } -result {::marsutil::sqldocument}
-
-    test sections-1.2 {All registered sections are included} -body {
-        sqldocument register ::foo
-        sqldocument sections
-    } -cleanup {
-        cleanup
-    } -result {::marsutil::sqldocument ::foo}
 
     #-------------------------------------------------------------------
     # Constructor
@@ -239,6 +190,27 @@ namespace eval ::marsutil::test {
     } -cleanup {
         cleanup
     } -result {0 010000ZJAN70}
+
+    #-------------------------------------------------------------------
+    # register/sections
+
+    test register-1.1 {Adds sqlsection to registry} -body {
+        sqldocument db
+        db register ::foo
+        db sections
+    } -cleanup {
+        cleanup
+    } -result {::marsutil::sqldocument ::foo}
+
+    test register-1.2 {Duplicate sections are ignored} -body {
+        sqldocument db
+        db register ::foo
+        db register ::foo
+        db register ::foo
+        db sections
+    } -cleanup {
+        cleanup
+    } -result {::marsutil::sqldocument ::foo}
 
     #-------------------------------------------------------------------
     # open
@@ -345,11 +317,9 @@ namespace eval ::marsutil::test {
 
     # open-3.x: Temp Schema and Functions from other sections
     test open-3.1 {Temp schema defined} -body {
-        # FIRST, register an sqlsection with a temp schema
-        sqldocument register ::marsutil::test::testsection
-
-        # NEXT, open a document
+        # open a document and register a temp schema
         sqldocument db
+        db register ::marsutil::test::testsection
         db open :memory:
 
         db eval {SELECT type, name FROM sqlite_temp_master}
@@ -358,11 +328,10 @@ namespace eval ::marsutil::test {
     } -result {table temp}
 
     test open-3.2 {Functions defined} -body {
-        # FIRST, register an additional sqlsection with functions
-        sqldocument register ::marsutil::test::testsection
-
-        # NEXT, open a document
+        # NEXT, open a document and register an additional sqlsection 
+        # with functions
         sqldocument db
+        db register ::marsutil::test::testsection
         db open :memory:
 
         db onecolumn {SELECT concat('a b', 'c d')}
@@ -371,11 +340,10 @@ namespace eval ::marsutil::test {
     } -result {a b c d}
 
     test open-3.3 {Temp Data defined} -body {
-        # FIRST, register an additional sqlsection with temp data
-        sqldocument register ::marsutil::test::testsection
-
-        # NEXT, open a document
+        # NEXT, open a document and register an additional sqlsection 
+        # with temp data
         sqldocument db
+        db register ::marsutil::test::testsection
         db open :memory:
 
         db eval {SELECT d,e,f FROM temp}
@@ -414,8 +382,8 @@ namespace eval ::marsutil::test {
     } -result {database is locked}
 
     test clear-1.3 {Error: could not initialize database} -body {
-        sqldocument register ::marsutil::test::badsection
         sqldocument db
+        db register ::marsutil::test::badsection
         db open :memory:
         db clear
     } -returnCodes {
@@ -435,8 +403,8 @@ namespace eval ::marsutil::test {
     } -result {}
 
     test clear-1.5 {Section schema is defined} -body {
-        sqldocument register ::marsutil::test::testsection
         sqldocument db
+        db register ::marsutil::test::testsection
         db open :memory:
         db clear
 
@@ -446,8 +414,8 @@ namespace eval ::marsutil::test {
     } -result {perm}
 
     test clear-1.6 {Temp schema is still defined} -body {
-        sqldocument register ::marsutil::test::testsection
         sqldocument db
+        db register ::marsutil::test::testsection
         db open :memory:
         db clear
 
@@ -483,8 +451,8 @@ namespace eval ::marsutil::test {
     } -result {foo {}}
 
     test clear-1.10 {Schema tables are emptied} -body {
-        sqldocument register ::marsutil::test::testsection
         sqldocument db
+        db register ::marsutil::test::testsection
         db open :memory:
         db clear
 

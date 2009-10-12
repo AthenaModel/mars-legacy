@@ -42,6 +42,7 @@ namespace eval ::marsutil::test {
 
     # Create the RDB
     sqldocument rdb
+    rdb register ::marsutil::eventq
     rdb open :memory:
     rdb clear
 

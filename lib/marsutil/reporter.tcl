@@ -41,9 +41,6 @@ snit::type ::marsutil::reporter {
     typeconstructor {
         namespace import ::marsutil::*
 
-        # FIRST, Register self as an sqlsection(i) module
-        sqldocument register $type
-
         # NEXT, initialize the components
         set db    [myproc NullDB]
         set clock [myproc NullClock]
@@ -146,6 +143,9 @@ snit::type ::marsutil::reporter {
 
                     if {$db eq ""} {
                         set db [myproc NullDB]
+                    } else {
+                        require {$type in [$db sections]} \
+                            "reporter(n) is not registered with database $db"
                     }
                 }
 

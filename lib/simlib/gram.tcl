@@ -60,9 +60,6 @@ snit::type ::simlib::gram {
         namespace import ::marsutil::*
         namespace import ::simlib::*
 
-        # NEXT, Register this module's SQL schema
-        sqldocument register $type
-
         # NEXT, define the module's configuration parameters.
         # TBD: The types will need to be dealt with when gram(n)
         # is moved to Paxsim.
@@ -280,6 +277,9 @@ snit::type ::simlib::gram {
 
         set rdb $options(-rdb)
         assert {[info commands $rdb] ne ""}
+
+        require {$type in [$rdb sections]} \
+            "eventq(n) is not registered with database $rdb"
 
         # NEXT, initialize db
         array set db $initdb

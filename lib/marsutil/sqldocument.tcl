@@ -50,43 +50,6 @@ namespace eval ::marsutil:: {
 
 snit::type ::marsutil::sqldocument {
     #-------------------------------------------------------------------
-    # Type Constructor
-
-    typeconstructor {
-        # Register self as an sqlsection(i) module
-        $type register $type
-    }
-
-    #-------------------------------------------------------------------
-    # Type Variables
-
-    # List of registered sqlsection module names, in order of registration.
-    typevariable registry {}   
-
-    #-------------------------------------------------------------------
-    # Type Methods
-
-    # register section
-    #
-    # section     Fully qualified name of an sqlsection(i) module
-    #
-    # Registers the section for later use
-
-    typemethod register {section} {
-        if {[lsearch -exact $registry $section] == -1} {
-            lappend registry $section
-        }
-    }
-
-    # sections
-    #
-    # Returns a list of the names of the registered sections
-
-    typemethod sections {} {
-        return $registry
-    }
-
-    #-------------------------------------------------------------------
     # sqlsection(i)
     #
     # The following routines implement the module's sqlsection(i)
@@ -188,11 +151,16 @@ snit::type ::marsutil::sqldocument {
     # dbIsOpen      Flag: 1 if there is an open database, and 0
     #               otherwise.
     # dbFile        Name of the current database file, or ""
+    # registry      List of registered sqlsection module names,
+    #               in order of registration.
 
     variable info -array {
         dbIsOpen 0
         dbFile   {}
+        registry ::marsutil::sqldocument
     }
+
+
 
     #-------------------------------------------------------------------
     # Constructor
@@ -203,6 +171,30 @@ snit::type ::marsutil::sqldocument {
 
         # NEXT, process options
         $self configurelist $args
+    }
+
+
+    #-------------------------------------------------------------------
+    # Public Methods: sqlsection(i) registration
+
+    # register section
+    #
+    # section     Fully qualified name of an sqlsection(i) module
+    #
+    # Registers the section for later use
+
+    method register {section} {
+        if {$section ni $info(registry)} {
+            lappend info(registry) $section
+        }
+    }
+
+    # sections
+    #
+    # Returns a list of the names of the registered sections
+
+    method sections {} {
+        return $info(registry)
     }
 
 
@@ -312,7 +304,7 @@ snit::type ::marsutil::sqldocument {
         sqlib clear $db
 
         # NEXT, define persistent schema entities
-        foreach section $registry {
+        foreach section $info(registry) {
             set schema [$section sqlsection schema]
 
             if {$schema ne ""} {
@@ -343,7 +335,7 @@ snit::type ::marsutil::sqldocument {
     # and "clear", so that the temporary tables are always defined.
 
     method DefineTempSchema {} {
-        foreach section $registry {
+        foreach section $info(registry) {
             set schema [$section sqlsection tempschema]
 
             if {$schema ne ""} {
@@ -360,7 +352,7 @@ snit::type ::marsutil::sqldocument {
     # as required.
 
     method DefineTempData {} {
-        foreach section $registry {
+        foreach section $info(registry) {
             # FIRST, if the section does not define the tempdata 
             # subcommand, skip it.
             #
@@ -398,7 +390,7 @@ snit::type ::marsutil::sqldocument {
         }
 
         # NEXT, define functions defined in sqlsections.
-        foreach section $registry {
+        foreach section $info(registry) {
             foreach {name definition} [$section sqlsection functions] {
                 $db function $name $definition
             }
