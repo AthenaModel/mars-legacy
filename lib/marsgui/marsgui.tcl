@@ -18,6 +18,7 @@ package require marsutil
    
 package require Tk 8.5
 package require BWidget  1.8
+package require treectrl 2.2.6
 
 #-----------------------------------------------------------------------
 # Package Definition
@@ -52,5 +53,9 @@ source [file join $::marsgui::library paner.tcl]
 source [file join $::marsgui::library rotext.tcl]
 source [file join $::marsgui::library datagrid.tcl]
 source [file join $::marsgui::library scrollinglog.tcl]
+source [file join $::marsgui::library reportbrowser.tcl]
+source [file join $::marsgui::library reportviewer.tcl]
+source [file join $::marsgui::library reportviewerwin.tcl]
+source [file join $::marsgui::library rb_bintree.tcl]
 
 
