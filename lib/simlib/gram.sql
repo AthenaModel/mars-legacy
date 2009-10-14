@@ -19,11 +19,8 @@ CREATE TABLE gram_driver (
     --------------------------------------------------------------------
     -- Keys and Pointers
 
-    -- gram(n) object name; same as log component.
-    object        TEXT,
-
     -- Driver ID
-    driver        INTEGER,
+    driver        INTEGER PRIMARY KEY,
 
     --------------------------------------------------------------------
     -- Data
@@ -38,9 +35,7 @@ CREATE TABLE gram_driver (
     oneliner      TEXT DEFAULT 'unknown',
 
     -- Count of inputs entered for this driver
-    last_input    INTEGER DEFAULT 0,
-
-    PRIMARY KEY (object, driver)
+    last_input    INTEGER DEFAULT 0
 );
  
 
@@ -55,9 +50,6 @@ CREATE TABLE gram_curves (
     -- This curve_id uniquely identifies the curve and is
     -- set automatically when a curve is created.
     curve_id    INTEGER PRIMARY KEY,
-
-    -- gram(n) instance's log name
-    object      TEXT,
 
     -- Curve Type (used to implement scaling), 'SAT' or 'COOP'.
     curve_type  TEXT,
@@ -89,9 +81,6 @@ CREATE TABLE gram_effects (
     -- ID of this effect.  This ID is assigned automatically,
     -- and is globally unique.
     id         INTEGER PRIMARY KEY,
-
-    -- gram(n) object name; same as log component.
-    object     TEXT,
 
     -- ID of the gram_curve to which this effect contributes.
     curve_id   INTEGER,
@@ -183,7 +172,7 @@ CREATE TABLE gram_effects (
 
 -- This index speeds up most things involving effects.
 CREATE INDEX gram_effects_index
-ON gram_effects(object,curve_id,direct_id);
+ON gram_effects(curve_id,direct_id);
 
 -- This index speeds up termination and rescheduling (?)
 CREATE INDEX gram_effects_index_direct
@@ -194,9 +183,6 @@ ON gram_effects(direct_id,etype,driver,active,cause,prox);
 CREATE TABLE gram_values (
     --------------------------------------------------------------------
     -- Primary Key Fields
-
-    -- gram(n) object name; same as log component.
-    object     TEXT,
 
     -- Sim time of this contribution
     time       INTEGER,
@@ -210,7 +196,7 @@ CREATE TABLE gram_values (
     -- Value at this time.
     val        DOUBLE DEFAULT 0.0,
 
-    PRIMARY KEY(object,time,curve_id)
+    PRIMARY KEY(time,curve_id)
 );
 
 -- gram(n) Contribution History table
@@ -219,9 +205,6 @@ CREATE TABLE gram_values (
 CREATE TABLE gram_contribs (
     --------------------------------------------------------------------
     -- Primary Key Fields
-
-    -- gram(n) object name; same as log component.
-    object     TEXT,
 
     -- Sim time of this contribution
     time       INTEGER,
@@ -238,7 +221,7 @@ CREATE TABLE gram_contribs (
     -- Actual contribution made at this time.
     acontrib   DOUBLE DEFAULT 0.0,
 
-    PRIMARY KEY(object,time,driver,curve_id)
+    PRIMARY KEY(time,driver,curve_id)
 );
 
 
@@ -254,13 +237,10 @@ CREATE TABLE gram_n (
     -- Neighborhood ID
     n_id           INTEGER PRIMARY KEY,
 
-    -- gram(n) instance's log name
-    object         TEXT,
-
     --------------------------------------------------------------------
     -- Neighborhood identification
 
-    n              TEXT,    -- Name of nbhood
+    n              TEXT UNIQUE,    -- Name of nbhood
 
     --------------------------------------------------------------------
     -- Satisfaction Outputs
@@ -268,11 +248,7 @@ CREATE TABLE gram_n (
     -- Neighborhood n's current and initial mood
     -- (based on CIV groups only)
     sat            DOUBLE DEFAULT 0.0,   -- sat.n
-    sat0           DOUBLE DEFAULT 0.0,   -- sat0.n
-
-    -- Indicate that the names are unique,
-    -- and index on them for fast lookups
-    UNIQUE (object, n)
+    sat0           DOUBLE DEFAULT 0.0    -- sat0.n
 );
 
 
@@ -285,25 +261,18 @@ CREATE TABLE gram_g (
     -- Group ID
     g_id           INTEGER PRIMARY KEY,
 
-    -- gram(n) instance's log name
-    object         TEXT,
-
     --------------------------------------------------------------------
     -- Group identification
 
-    g              TEXT,    -- Name of pgroup
-    gtype          TEXT,    -- Group type, CIV or ORG or FRC
+    g              TEXT UNIQUE,  -- Name of pgroup
+    gtype          TEXT,         -- Group type, CIV or ORG or FRC
 
     --------------------------------------------------------------------
     -- Satisfaction Outputs: CIV and ORG only
 
     -- Group g's current and initial top-level mood
     sat            DOUBLE DEFAULT 0.0,   -- sat.g
-    sat0           DOUBLE DEFAULT 0.0,   -- sat0.g
-
-    -- Indicate that the indices are unique,
-    -- and index on them for fast lookups
-    UNIQUE (object, g)
+    sat0           DOUBLE DEFAULT 0.0    -- sat0.g
 );
 
 -- gram(n) "c" table.
@@ -315,25 +284,18 @@ CREATE TABLE gram_c (
     -- Group ID
     c_id           INTEGER PRIMARY KEY,
 
-    -- gram(n) instance's log name
-    object         TEXT,
-
     --------------------------------------------------------------------
     -- Concern identification
 
-    c              TEXT,    -- Name of concern
-    gtype          TEXT,    -- Concern type, CIV or ORG
+    c              TEXT UNIQUE,  -- Name of concern
+    gtype          TEXT,         -- Concern type, CIV or ORG
 
     --------------------------------------------------------------------
     -- Satisfaction Outputs
 
     -- Concern c's current and initial top-level composite
     sat            DOUBLE DEFAULT 0.0,   -- sat.c
-    sat0           DOUBLE DEFAULT 0.0,   -- sat0.c
-
-    -- Indicate that the indices are unique,
-    -- and index on them for fast lookups
-    UNIQUE (object, c)
+    sat0           DOUBLE DEFAULT 0.0    -- sat0.c
 );
 
 -- gram(n) "mn" table.
@@ -345,9 +307,6 @@ CREATE TABLE gram_mn (
 
     -- Neighborhood pair ID
     mn_id          INTEGER PRIMARY KEY,
-
-    -- gram(n) instance's log name
-    object         TEXT,
 
     --------------------------------------------------------------------
     -- Neighborhood identification
@@ -372,7 +331,7 @@ CREATE TABLE gram_mn (
 
     -- Indicate that the m,n coordinates are unique,
     -- and index on them for fast lookups
-    UNIQUE (object, m, n)
+    UNIQUE (m, n)
 );
        
 
@@ -385,9 +344,6 @@ CREATE TABLE gram_ng (
 
     -- Nbhood/Group ID
     ng_id          INTEGER PRIMARY KEY,
-
-    -- gram(n) instance's log name
-    object         TEXT,
 
     --------------------------------------------------------------------
     -- Neighborhood/group indices 
@@ -424,7 +380,7 @@ CREATE TABLE gram_ng (
 
     -- Indicate that the n,g coordinates are unique,
     -- and index on them for fast lookups
-    UNIQUE (object, n, g)
+    UNIQUE (n, g)
 );
 
 CREATE INDEX gram_ng_index_ng ON gram_ng(n,g);
@@ -439,9 +395,6 @@ CREATE TABLE gram_frc_ng (
 
     -- Nbhood/Group ID
     frc_ng_id      INTEGER PRIMARY KEY,
-
-    -- gram(n) instance's log name
-    object         TEXT,
 
     --------------------------------------------------------------------
     -- Neighborhood/group indices 
@@ -459,7 +412,7 @@ CREATE TABLE gram_frc_ng (
 
     -- Indicate that the n,g coordinates are unique,
     -- and index on them for fast lookups
-    UNIQUE (object, n, g)
+    UNIQUE (n, g)
 );
 
 CREATE INDEX gram_frc_ng_index_ng ON gram_frc_ng(n,g);
@@ -472,9 +425,6 @@ CREATE TABLE gram_nc (
 
     -- Nbhood/Concern ID
     nc_id          INTEGER PRIMARY KEY,
-
-    -- gram(n) instance's log name
-    object         TEXT,
 
     --------------------------------------------------------------------
     -- Neighborhood/Concern indices 
@@ -492,7 +442,7 @@ CREATE TABLE gram_nc (
 
     -- Indicate that the n,g coordinates are unique,
     -- and index on them for fast lookups
-    UNIQUE (object, n, c)
+    UNIQUE (n, c)
 );
 
 -- gram(n) "nfg" table.
@@ -510,9 +460,6 @@ CREATE TABLE gram_nfg (
     -- Cooperation curve_id, or null.
     curve_id    INTEGER,
 
-    -- gram(n) instance's log name
-    object      TEXT,
-
     --------------------------------------------------------------------
     -- Nbhood/Group Indices
 
@@ -528,7 +475,7 @@ CREATE TABLE gram_nfg (
 
     -- Indicate that the n,f,g coordinates are unique,
     -- and index on them for fast lookups
-    UNIQUE (object, n, f, g)
+    UNIQUE (n, f, g)
 );
 
 CREATE INDEX gram_nfg_index_curve_id 
@@ -543,9 +490,6 @@ CREATE TABLE gram_gc (
 
     -- Group/Concern ID
     gc_id     INTEGER PRIMARY KEY,
-
-    -- gram(n) instance's log name
-    object      TEXT,
 
     --------------------------------------------------------------------
     -- Identification
@@ -567,7 +511,7 @@ CREATE TABLE gram_gc (
 
     -- Indicate that the g,c coordinates are unique,
     -- and index on them for fast lookups
-    UNIQUE (object, g, c)
+    UNIQUE (g, c)
 );
 
 -- gram(n) "ngc" table.
@@ -591,9 +535,6 @@ CREATE TABLE gram_ngc (
     -- Satisfaction Curve ID from gram_curves; NULL if none!
     curve_id   UNIQUE,
 
-    -- gram(n) instance's log name
-    object      TEXT,
-
     --------------------------------------------------------------------
     -- Satisfaction Curve Indices
 
@@ -612,7 +553,7 @@ CREATE TABLE gram_ngc (
 
     -- Indicate that the n,g,c coordinates are unique,
     -- and index on them for fast lookups
-    UNIQUE (object, n, g, c)
+    UNIQUE (n, g, c)
 );
 
 CREATE INDEX gram_ngc_index_ng_id
@@ -626,8 +567,6 @@ CREATE INDEX gram_ngc_index_ngc ON gram_ngc(n,g,c);
 -- list of all satisfaction curves.
 CREATE VIEW gram_sat AS
 SELECT -- This instance
-       gram_ngc.object AS object, 
-
        -- Nbhood/group/concern ID
        ngc_id,
 
@@ -677,9 +616,6 @@ CREATE TABLE gram_sat_influence (
     --------------------------------------------------------------------
     -- Keys and Pointers
 
-    -- gram(n) instance's log name
-    object        TEXT,
-
     -- Index of the ng receiving the direct effect
     direct_ng     INTEGER,
 
@@ -703,19 +639,18 @@ CREATE TABLE gram_sat_influence (
     -- for effect on ng
     factor      DOUBLE,
 
-    PRIMARY KEY (object,direct_ng,influenced_ng)
+    PRIMARY KEY (direct_ng,influenced_ng)
 );
 
 -- gram_sat_influence_index: speeds up scheduling of effects
 CREATE INDEX gram_sat_influence_index 
-ON gram_sat_influence(object,direct_ng,prox);
+ON gram_sat_influence(direct_ng,prox);
 
 -- ngc influence view
 -- This view yields the values needed to schedule level and
 -- slope inputs.
 CREATE VIEW gram_sat_influence_view AS
 SELECT -- Influence Details
-       gram_sat_influence.object    AS object,
        gram_sat_influence.prox      AS prox,
        gram_sat_influence.delay     AS delay,
        gram_sat_influence.factor    AS factor,
@@ -745,7 +680,6 @@ JOIN gram_ngc AS curve
 CREATE VIEW gram_sat_effects AS
 SELECT -- Effect Identification
        gram_effects.id        AS id,
-       gram_effects.object    AS object,
        gram_effects.etype     AS etype,
        gram_effects.curve_id  AS curve_id,
        gram_effects.cause     AS cause,
@@ -793,7 +727,6 @@ AND   direct.ngc_id = gram_effects.direct_id;
 
 CREATE VIEW gram_sat_contribs AS
 SELECT -- History values
-       gram_contribs.object   AS object,
        gram_contribs.time     AS time,
        gram_contribs.driver   AS driver,
        gram_contribs.acontrib AS acontrib,
@@ -807,7 +740,6 @@ FROM gram_contribs JOIN gram_ngc USING (curve_id);
 
 CREATE VIEW gram_sat_values AS
 SELECT -- History values
-       gram_values.object    AS object,
        gram_values.time      AS time,
        gram_values.val       AS sat,
        gram_values.curve_id  AS curve_id,
@@ -825,10 +757,7 @@ FROM gram_values JOIN gram_ngc USING (curve_id);
 -- This view joins gram_nfg with gram_curves to give a complete
 -- list of all cooperation curves.
 CREATE VIEW gram_coop AS
-SELECT -- This instance
-       gram_nfg.object          AS object, 
-
-       -- Nbhood/group/group ID
+SELECT -- Nbhood/group/group ID
        gram_nfg.nfg_id          AS nfg_id,
 
        -- Cooperation Curve indices, etc.
@@ -864,7 +793,6 @@ END;
 CREATE VIEW gram_coop_effects AS
 SELECT -- Effect Identification
        gram_effects.id        AS id,
-       gram_effects.object    AS object,
        gram_effects.etype     AS etype,
        gram_effects.curve_id  AS curve_id,
        gram_effects.cause     AS cause,
@@ -913,7 +841,6 @@ AND   direct.nfg_id = gram_effects.direct_id;
 
 CREATE VIEW gram_coop_contribs AS
 SELECT -- History values
-       gram_contribs.object   AS object,
        gram_contribs.time     AS time,
        gram_contribs.driver   AS driver,
        gram_contribs.acontrib AS acontrib,
@@ -927,7 +854,6 @@ FROM gram_contribs JOIN gram_nfg USING (curve_id);
 
 CREATE VIEW gram_coop_values AS
 SELECT -- History values
-       gram_values.object    AS object,
        gram_values.time      AS time,
        gram_values.val       AS coop,
        gram_values.curve_id  AS curve_id,
@@ -951,9 +877,6 @@ FROM gram_values JOIN gram_nfg USING (curve_id);
 CREATE TABLE gram_coop_influence (
     --------------------------------------------------------------------
     -- Keys and Pointers
-
-    -- gram(n) instance's log name
-    object        TEXT,
 
     -- Name of the nbhood receiving the direct effect
     dn            TEXT,
@@ -983,17 +906,16 @@ CREATE TABLE gram_coop_influence (
     -- Magnitude factor (rel.mhg)
     factor      DOUBLE,
 
-    PRIMARY KEY (object,dn, dg, m, h)
+    PRIMARY KEY (dn, dg, m, h)
 );
 
 -- gram(n): Cooperation influence index
 CREATE INDEX gram_coop_influence_index
-ON gram_coop_influence(object, dn, dg, prox);
+ON gram_coop_influence(dn, dg, prox);
 
 -- gram(n) Cooperation influence view
 CREATE VIEW gram_coop_influence_view AS
-    SELECT INF.object        AS object,
-           INF.dn            AS dn,
+    SELECT INF.dn            AS dn,
            MF.g              AS df,
            INF.dg            AS dg,
            INF.m             AS m,
@@ -1005,9 +927,9 @@ CREATE VIEW gram_coop_influence_view AS
            NFG.nfg_id        AS direct_id,
            MFH.curve_id      AS curve_id
     FROM gram_coop_influence AS INF
-    JOIN gram_ng             AS MF  USING (object)
-    JOIN gram_nfg            AS NFG USING (object)
-    JOIN gram_nfg            AS MFH USING (object)
+    JOIN gram_ng             AS MF
+    JOIN gram_nfg            AS NFG
+    JOIN gram_nfg            AS MFH
     WHERE MF.n               = m
     AND   MF.sat_tracked     = 1
     AND   NFG.n              = dn

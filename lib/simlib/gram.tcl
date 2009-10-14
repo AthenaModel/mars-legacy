@@ -145,17 +145,16 @@ snit::type ::simlib::gram {
         near   2
         far    3
     }
+    
+    # array: gram instance by RDB
+    # This array tracks which RDBs are in use by gram instances; thus,
+    # if we create a new instance on an RDB that's already in use by
+    # a GRAM instance, we can throw an error.
+    
+    typevariable rdbTracker -array { }
 
     #-------------------------------------------------------------------
     # Options
-
-    # -dbid dbid
-    #
-    # The "dbid" is the string used to identify this instance of 
-    # gram(n) in the RDB.  It defaults to $self, the fully-qualified
-    # instance name.
-    option -dbid -readonly 1
-    
 
     # -rdb rdb
     #
@@ -243,9 +242,6 @@ snit::type ::simlib::gram {
     #-------------------------------------------------------------------
     # Other Variables
 
-    # This gram's identifier in rdb records.
-    variable dbid ""
-    
     # Non-checkpointed scalar data
     #
     # changed    1 if db() has changed, and 0 otherwise.
@@ -259,27 +255,31 @@ snit::type ::simlib::gram {
     # Constructor
 
     constructor {args} {
-        # FIRST, set the default dbid
-        set options(-dbid) $self
-
-        # NEXT, get the creation arguments.
+        # FIRST, get the creation arguments.
         $self configurelist $args
 
         # NEXT, verify that we have a load command
         assert {$options(-loadcmd) ne ""}
 
-        # NEXT, set the database ID variable accordingly.
-        set dbid $options(-dbid)
-
-        # NEXT, save components passed in as options
+        # NEXT, save the clock component
         set clock $options(-clock)
         assert {[info commands $clock] ne ""}
 
+        # NEXT, save the RDB component
         set rdb $options(-rdb)
         assert {[info commands $rdb] ne ""}
 
         require {$type in [$rdb sections]} \
-            "eventq(n) is not registered with database $rdb"
+            "gram(n) is not registered with database $rdb"
+        
+        if {[info exists rdbTracker($rdb)]} {
+            return -code error \
+                "RDB $rdb already in use by GRAM $rdbTracker($rdb)"
+        }
+        
+        set rdbTracker($rdb) $self
+
+        # TBD: Verify that no other instance is using this RDB.
 
         # NEXT, initialize db
         array set db $initdb
@@ -288,7 +288,10 @@ snit::type ::simlib::gram {
     }
 
     destructor {
-        catch {$self ClearTables}
+        catch {
+            unset -nocomplain rdbTracker($rdb)
+            $self ClearTables
+        }
     }
 
     #-------------------------------------------------------------------
@@ -383,13 +386,13 @@ snit::type ::simlib::gram {
 
         # NEXT, save initial values
         $rdb eval {
-            UPDATE gram_n      SET sat0  = sat  WHERE object=$dbid;
-            UPDATE gram_g      SET sat0  = sat  WHERE object=$dbid;
-            UPDATE gram_c      SET sat0  = sat  WHERE object=$dbid;
-            UPDATE gram_ng     SET sat0  = sat  WHERE object=$dbid;
-            UPDATE gram_nc     SET sat0  = sat  WHERE object=$dbid;
-            UPDATE gram_gc     SET sat0  = sat  WHERE object=$dbid;
-            UPDATE gram_frc_ng SET coop0 = coop WHERE object=$dbid;
+            UPDATE gram_n      SET sat0  = sat;
+            UPDATE gram_g      SET sat0  = sat;
+            UPDATE gram_c      SET sat0  = sat;
+            UPDATE gram_ng     SET sat0  = sat;
+            UPDATE gram_nc     SET sat0  = sat;
+            UPDATE gram_gc     SET sat0  = sat;
+            UPDATE gram_frc_ng SET coop0 = coop;
         }
 
         # NEXT, set the changed flag
@@ -467,22 +470,22 @@ snit::type ::simlib::gram {
 
     method ClearTables {} {
         $rdb eval {
-            DELETE FROM gram_curves         WHERE object=$dbid;
-            DELETE FROM gram_effects        WHERE object=$dbid;
-            DELETE FROM gram_contribs       WHERE object=$dbid;
-            DELETE FROM gram_values         WHERE object=$dbid;
-            DELETE FROM gram_n              WHERE object=$dbid;
-            DELETE FROM gram_g              WHERE object=$dbid;
-            DELETE FROM gram_c              WHERE object=$dbid;
-            DELETE FROM gram_mn             WHERE object=$dbid;
-            DELETE FROM gram_nfg            WHERE object=$dbid;
-            DELETE FROM gram_ng             WHERE object=$dbid;
-            DELETE FROM gram_frc_ng         WHERE object=$dbid;
-            DELETE FROM gram_nc             WHERE object=$dbid;
-            DELETE FROM gram_gc             WHERE object=$dbid;
-            DELETE FROM gram_ngc            WHERE object=$dbid;
-            DELETE FROM gram_sat_influence  WHERE object=$dbid;
-            DELETE FROM gram_coop_influence WHERE object=$dbid;
+            DELETE FROM gram_curves;
+            DELETE FROM gram_effects;
+            DELETE FROM gram_contribs;
+            DELETE FROM gram_values;
+            DELETE FROM gram_n;
+            DELETE FROM gram_g;
+            DELETE FROM gram_c;
+            DELETE FROM gram_mn;
+            DELETE FROM gram_nfg;
+            DELETE FROM gram_ng;
+            DELETE FROM gram_frc_ng;
+            DELETE FROM gram_nc;
+            DELETE FROM gram_gc;
+            DELETE FROM gram_ngc;
+            DELETE FROM gram_sat_influence;
+            DELETE FROM gram_coop_influence;
         }
     }
 
@@ -497,8 +500,8 @@ snit::type ::simlib::gram {
 
         foreach n $args {
             $rdb eval {
-                INSERT INTO gram_n(object,n)
-                VALUES($dbid,$n);
+                INSERT INTO gram_n(n)
+                VALUES($n);
             }
         }
 
@@ -518,8 +521,8 @@ snit::type ::simlib::gram {
 
         foreach {g gtype} $args {
             $rdb eval {
-                INSERT INTO gram_g(object,g,gtype)
-                VALUES($dbid,$g,$gtype);
+                INSERT INTO gram_g(g,gtype)
+                VALUES($g,$gtype);
             }
         }
 
@@ -539,8 +542,8 @@ snit::type ::simlib::gram {
 
         foreach {c gtype} $args {
             $rdb eval {
-                INSERT INTO gram_c(object,c,gtype)
-                VALUES($dbid,$c,$gtype);
+                INSERT INTO gram_c(c,gtype)
+                VALUES($c,$gtype);
             }
         }
 
@@ -560,24 +563,20 @@ snit::type ::simlib::gram {
         # FIRST, populate gram_nc.
         $rdb eval {
             INSERT INTO gram_nc(
-                object,
                 n,
                 c)
-            SELECT $dbid, n, c
-            FROM gram_n JOIN gram_c USING (object)
-            WHERE object=$dbid
+            SELECT n, c
+            FROM gram_n JOIN gram_c
             ORDER BY n, gtype, c;
         }
 
         # NEXT, populate gram_gc.
         $rdb eval {
             INSERT INTO gram_gc(
-                object,
                 g,
                 c)
-            SELECT $dbid, g, c
-            FROM gram_g JOIN gram_c USING (object,gtype)
-            WHERE object=$dbid
+            SELECT g, c
+            FROM gram_g JOIN gram_c USING (gtype)
             ORDER BY gtype, g, c
         }
 
@@ -586,18 +585,15 @@ snit::type ::simlib::gram {
 
         $rdb eval {
             INSERT INTO gram_mn(
-                object,
                 m,
                 n,
                 proximity,
                 effects_delay)
-            SELECT $dbid,
-                   M.n,
+            SELECT M.n,
                    N.n,
                    CASE WHEN M.n=N.n THEN 0 ELSE 2 END,
                    0.0
-            FROM gram_n AS M join gram_n AS N USING (object)
-            WHERE object=$dbid
+            FROM gram_n AS M join gram_n AS N
             ORDER BY M.n, N.n
         }
 
@@ -607,9 +603,8 @@ snit::type ::simlib::gram {
 
         $rdb eval {
             SELECT n, g, gtype
-            FROM gram_n JOIN gram_g USING (object)
-            WHERE object=$dbid
-            AND   gtype IN ('CIV', 'ORG')
+            FROM gram_n JOIN gram_g
+            WHERE gtype IN ('CIV', 'ORG')
             ORDER BY n, gtype, g
         } {
             # FIRST, Satisfaction is not tracked for CIVs unless 
@@ -624,23 +619,21 @@ snit::type ::simlib::gram {
             $rdb eval {
                 -- Note: ng_id is set automatically
                 INSERT INTO 
-                gram_ng(object, n, g, 
+                gram_ng(n, g, 
                         population, rollup_weight, effects_factor,
                         sat_tracked)
-                VALUES($dbid, $n, $g, 0, 1.0, 1.0, $sat_tracked)
+                VALUES($n, $g, 0, 1.0, 1.0, $sat_tracked)
             }
         }
 
         # NEXT, populate gram_frc_ng.
         $rdb eval {
             INSERT INTO gram_frc_ng(
-                object,
                 n,
                 g)
-            SELECT $dbid, n, g
-            FROM gram_n JOIN gram_g USING (object)
-            WHERE object=$dbid
-            AND   gtype = 'FRC'
+            SELECT n, g
+            FROM gram_n JOIN gram_g
+            WHERE gtype = 'FRC'
             ORDER BY n, g
         }
     }
@@ -665,7 +658,7 @@ snit::type ::simlib::gram {
 
             set mn_id [$rdb onecolumn {
                 SELECT mn_id FROM gram_mn
-                WHERE object=$dbid AND m=$m AND n=$n;
+                WHERE m=$m AND n=$n;
             }]
 
             require {$mn_id ne ""} "Invalid nbhood pair: $m $n"
@@ -695,7 +688,7 @@ snit::type ::simlib::gram {
         foreach {n g population rollup_weight effects_factor} $args {
             set ng_id [$rdb onecolumn {
                 SELECT ng_id FROM gram_ng 
-                WHERE object=$dbid AND n=$n AND g=$g
+                WHERE n=$n AND g=$g
             }]
 
             require {$ng_id ne ""} "Invalid nbgroup: $n $g"
@@ -738,24 +731,22 @@ snit::type ::simlib::gram {
                    c, 
                    gram_g.gtype AS gtype 
             FROM gram_ng 
-            JOIN gram_g USING (object, g)
+            JOIN gram_g USING (g)
             JOIN gram_c
-            WHERE gram_ng.object = $dbid
-            AND   gram_c.object  = $dbid
-            AND   gram_g.gtype   = gram_c.gtype
+            WHERE gram_g.gtype   = gram_c.gtype
             ORDER BY n, gram_g.gtype, g, c
         } {
             if {$sat_tracked} {
                 $rdb eval {
                     -- Note: curve_id is set automatically
-                    INSERT INTO gram_curves(object, curve_type, val0, val)
-                    VALUES($dbid, 'SAT', 0.0, 0.0);
+                    INSERT INTO gram_curves(curve_type, val0, val)
+                    VALUES('SAT', 0.0, 0.0);
 
                     -- Note: ngc_id is set automatically
                     INSERT INTO 
-                    gram_ngc(object, ng_id, curve_id, n, g, c,
+                    gram_ngc(ng_id, curve_id, n, g, c,
                              gtype, saliency, trend)
-                    VALUES($dbid, $ng_id, last_insert_rowid(),  $n, $g, $c, 
+                    VALUES($ng_id, last_insert_rowid(),  $n, $g, $c, 
                            $gtype, 1.0, 0.0);
                 }
 
@@ -763,8 +754,8 @@ snit::type ::simlib::gram {
                 $rdb eval {
                     -- Note: ngc_id is set automatically
                     INSERT INTO 
-                    gram_ngc(object, ng_id, n, g, c, gtype, saliency, trend)
-                    VALUES($dbid, $ng_id, $n, $g, $c, $gtype, 0.0, 0.0);
+                    gram_ngc(ng_id, n, g, c, gtype, saliency, trend)
+                    VALUES($ng_id, $n, $g, $c, $gtype, 0.0, 0.0);
                 }
             }
         }
@@ -775,20 +766,17 @@ snit::type ::simlib::gram {
         # otherwise.
         $rdb eval {
             INSERT INTO gram_nfg(
-                object,
                 n,
                 f,
                 g,
                 rel)
-            SELECT $dbid,
-                   gram_n.n AS n,
+            SELECT gram_n.n AS n,
                    F.g      AS f,
                    G.g      AS g,
                    CASE WHEN F.g=G.g THEN 1.0 ELSE 0.0 END
             FROM  gram_n 
-            JOIN  gram_g AS F USING (object)
-            JOIN  gram_g AS G USING (object)
-            WHERE gram_n.object=$dbid
+            JOIN  gram_g AS F
+            JOIN  gram_g AS G
             ORDER BY n, F.g, G.g
         }
 
@@ -797,10 +785,9 @@ snit::type ::simlib::gram {
                    gram_ng.g AS f,
                    G.g       AS g
             FROM gram_ng 
-            JOIN gram_g AS F USING (object) 
-            JOIN gram_g AS G USING (object)             
-            WHERE gram_ng.object=$dbid
-            AND   gram_ng.sat_tracked=1
+            JOIN gram_g AS F
+            JOIN gram_g AS G
+            WHERE gram_ng.sat_tracked=1
             AND   F.gtype = 'CIV'
             AND   G.gtype = 'FRC'
             AND   gram_ng.g = F.g
@@ -808,12 +795,12 @@ snit::type ::simlib::gram {
         } {
             $rdb eval {
                 -- Note: curve_id is set automatically.
-                INSERT INTO gram_curves(object, curve_type, val0, val)
-                VALUES($dbid, 'COOP', 50.0, 50.0);
+                INSERT INTO gram_curves(curve_type, val0, val)
+                VALUES('COOP', 50.0, 50.0);
 
                 UPDATE gram_nfg
                 SET curve_id = last_insert_rowid()
-                WHERE object=$dbid AND n=$n AND f=$f AND g=$g;
+                WHERE n=$n AND f=$f AND g=$g;
             }
         }
     }
@@ -834,7 +821,7 @@ snit::type ::simlib::gram {
             set curve_id [$rdb onecolumn {
                 SELECT curve_id 
                 FROM gram_ngc
-                WHERE object=$dbid AND n=$n AND g=$g AND c=$c;
+                WHERE n=$n AND g=$g AND c=$c;
             }]
 
             require {$curve_id ne ""} "No such sat curve: $n $g $c"
@@ -868,13 +855,12 @@ snit::type ::simlib::gram {
                    g,
                    total(saliency) AS saliency
             FROM gram_ngc
-            WHERE object=$dbid
             GROUP BY n,g
         } {
             $rdb eval {
                 UPDATE gram_ng
                 SET total_saliency=$saliency
-                WHERE object=$dbid AND n=$n AND g=$g
+                WHERE n=$n AND g=$g
             }
         }
     }
@@ -892,7 +878,7 @@ snit::type ::simlib::gram {
         foreach {n f g rel} $args {
             set nfg_id [$rdb onecolumn {
                 SELECT nfg_id FROM gram_nfg 
-                WHERE object=$dbid AND n=$n AND f=$f AND g=$g
+                WHERE n=$n AND f=$f AND g=$g
             }]
 
             require {$nfg_id ne ""} "Invalid relationship: $n $f $g"
@@ -921,7 +907,7 @@ snit::type ::simlib::gram {
             set curve_id [$rdb onecolumn {
                 SELECT curve_id 
                 FROM gram_nfg
-                WHERE object=$dbid AND n=$n AND f=$f AND g=$g;
+                WHERE n=$n AND f=$f AND g=$g;
             }]
 
             require {$curve_id ne ""} "No such coop curve: $n $f $g"
@@ -957,7 +943,6 @@ snit::type ::simlib::gram {
         # Nbhoods
         set values [$rdb eval {
             SELECT n FROM gram_n 
-            WHERE object=$dbid 
             ORDER BY n_id
         }]
 
@@ -966,8 +951,7 @@ snit::type ::simlib::gram {
         # CIV Groups
         set values [$rdb eval {
             SELECT g FROM gram_g 
-            WHERE  object=$dbid 
-            AND    gtype = 'CIV'
+            WHERE  gtype = 'CIV'
             ORDER BY g_id
         }]
 
@@ -976,8 +960,7 @@ snit::type ::simlib::gram {
         # CIV/ORG Groups
         set values [$rdb eval {
             SELECT g FROM gram_g 
-            WHERE  object=$dbid 
-            AND    gtype IN ('CIV','ORG')
+            WHERE  gtype IN ('CIV','ORG')
             ORDER BY g_id
         }]
 
@@ -986,8 +969,7 @@ snit::type ::simlib::gram {
         # FRC Groups
         set values [$rdb eval {
             SELECT g FROM gram_g 
-            WHERE  object=$dbid 
-            AND    gtype = 'FRC'
+            WHERE  gtype = 'FRC'
             ORDER BY g_id
         }]
 
@@ -996,7 +978,6 @@ snit::type ::simlib::gram {
         # Concerns
         set values [$rdb eval {
             SELECT c FROM gram_c
-            WHERE object=$dbid
             ORDER BY c_id
         }]
 
@@ -1026,8 +1007,8 @@ snit::type ::simlib::gram {
     method CreateLongTermTrends {} {
         # FIRST, create the Driver
         $rdb eval {
-            INSERT INTO gram_driver(object,driver,name,dtype,oneliner)
-            VALUES($dbid,0,"Trend","Trend","Satisfaction Long-Term Trend")
+            INSERT INTO gram_driver(driver,name,dtype,oneliner)
+            VALUES(0,"Trend","Trend","Satisfaction Long-Term Trend")
         }
 
         set input(driver)  0
@@ -1044,8 +1025,7 @@ snit::type ::simlib::gram {
         # NEXT, enter a slope effect for each ngc with a non-zero trend.
         $rdb eval {
             SELECT * FROM gram_ngc
-            WHERE object=$dbid
-            AND   trend != 0.0
+            WHERE trend != 0.0
         } row {
             set input(slope)     $row(trend)
 
@@ -1082,7 +1062,7 @@ snit::type ::simlib::gram {
             $rdb eval {
                 UPDATE gram_ng
                 SET population = $population
-                WHERE object=$dbid AND n=$n AND g=$g
+                WHERE n=$n AND g=$g
             }
         }
     }
@@ -1125,13 +1105,12 @@ snit::type ::simlib::gram {
         $rdb eval {
             SELECT COALESCE(max(driver) + 1, 1) AS nextDriver
             FROM gram_driver
-            WHERE object=$dbid
         } {}
 
         # NEXT, Create the new record
         $rdb eval {
-            INSERT INTO gram_driver(object,driver)
-            VALUES($dbid,$nextDriver)
+            INSERT INTO gram_driver(driver)
+            VALUES($nextDriver)
         }
 
         if {![dict exists $opts name]} {
@@ -1170,8 +1149,7 @@ snit::type ::simlib::gram {
         # FIRST, validate the driver
         if {[$rdb exists {
             SELECT driver FROM gram_driver
-            WHERE object=$dbid
-            AND   driver=$driver
+            WHERE driver=$driver
         }]} {
             return 1
         } else {
@@ -1227,7 +1205,7 @@ snit::type ::simlib::gram {
         $rdb eval "
             SELECT $column AS value
             FROM gram_driver
-            WHERE object=\$dbid AND driver=\$driver
+            WHERE driver=\$driver
         " {
             return $value
         }
@@ -1282,8 +1260,7 @@ snit::type ::simlib::gram {
             $rdb eval "
                 UPDATE gram_driver
                 SET $opt = \$val
-                WHERE object = \$dbid
-                AND   driver = \$driver
+                WHERE driver = \$driver
             "
         } 
     }
@@ -1296,10 +1273,10 @@ snit::type ::simlib::gram {
         $rdb onecolumn {
             UPDATE gram_driver
             SET last_input = last_input + 1
-            WHERE object = $dbid AND driver=$driver;
+            WHERE driver=$driver;
 
             SELECT last_input FROM gram_driver
-            WHERE object = $dbid AND driver=$driver;
+            WHERE driver=$driver;
         }
     }
 
@@ -1314,7 +1291,7 @@ snit::type ::simlib::gram {
         $rdb eval {
             UPDATE gram_driver
             SET last_input = last_input - 1
-            WHERE object = $dbid AND driver=$driver;
+            WHERE driver=$driver;
         }
 
         return
@@ -1334,7 +1311,6 @@ snit::type ::simlib::gram {
         # NEXT, clear the previous influence
         $rdb eval {
             DELETE FROM gram_sat_influence 
-            WHERE object=$dbid;
         }
 
         # NEXT, accumulate the combinations and save.  For every
@@ -1351,9 +1327,8 @@ snit::type ::simlib::gram {
 
         $rdb eval {
             INSERT INTO gram_sat_influence(
-                   object, direct_ng, influenced_ng, prox, delay, factor)
-            SELECT $dbid                                   AS object,
-                   dir_ng.ng_id                            AS direct_ng,
+                   direct_ng, influenced_ng, prox, delay, factor)
+            SELECT dir_ng.ng_id                            AS direct_ng,
                    inf_ng.ng_id                            AS influenced_ng,
                    CASE WHEN dir_ng.ng_id = inf_ng.ng_id 
                         THEN -1
@@ -1372,19 +1347,13 @@ snit::type ::simlib::gram {
             JOIN  gram_mn             -- proximity, delay
             JOIN  gram_nfg            -- Relationships
 
-            WHERE dir_ng.object      =  $dbid
-            AND   inf_ng.object      =  $dbid
-            AND   inf_ng.sat_tracked =  1
-            AND   dir_g.object       =  $dbid
+            WHERE inf_ng.sat_tracked =  1
             AND   dir_g.g            =  dir_ng.g
-            AND   inf_g.object       =  $dbid
             AND   inf_g.g            =  inf_ng.g
             AND   dir_g.gtype        =  inf_g.gtype
-            AND   gram_mn.object     =  $dbid
             AND   gram_mn.m          =  inf_ng.n
             AND   gram_mn.n          =  dir_ng.n
             AND   prox               <  3   -- Not remote!
-            AND   gram_nfg.object    =  $dbid
             AND   gram_nfg.n         =  inf_ng.n
             AND   gram_nfg.f         =  inf_ng.g
             AND   gram_nfg.g         =  dir_ng.g
@@ -1403,7 +1372,6 @@ snit::type ::simlib::gram {
         # NEXT, clear the previous influence
         $rdb eval {
             DELETE FROM gram_coop_influence 
-            WHERE object=$dbid;
         }
 
         # NEXT, accumulate the combinations and save.  For every
@@ -1428,11 +1396,10 @@ snit::type ::simlib::gram {
             MN.effects_delay   AS delay,
             MHG.rel            AS rel_mhg
             FROM gram_g   AS G
-            JOIN gram_g   AS H     USING (object)
-            JOIN gram_mn  AS MN    USING (object)
-            JOIN gram_nfg AS MHG   USING (object)
-            WHERE G.object           =  $dbid
-            AND   G.gtype            =  'FRC'
+            JOIN gram_g   AS H
+            JOIN gram_mn  AS MN
+            JOIN gram_nfg AS MHG
+            WHERE G.gtype            =  'FRC'
             AND   H.gtype            =  'FRC'
             AND   MN.proximity       <  3  -- Not remote!
             AND   MHG.n              =  m
@@ -1453,8 +1420,8 @@ snit::type ::simlib::gram {
             # NEXT, insert into gram_coop_influence
             $rdb eval {
                 INSERT INTO 
-                gram_coop_influence(object,dn,dg,m,h,prox,delay,factor)
-                VALUES($dbid, $dn, $dg, $m, $h, $prox, $delay, $rel_mhg)
+                gram_coop_influence(dn,dg,m,h,prox,delay,factor)
+                VALUES($dn, $dg, $m, $h, $prox, $delay, $rel_mhg)
             }
         }
     }
@@ -1529,15 +1496,14 @@ snit::type ::simlib::gram {
                        gram_sat.sat   * saliency*rollup_weight AS num,
                        gram_sat.slope * saliency*rollup_weight AS numslope,
                        saliency*rollup_weight                  AS denom
-                FROM gram_sat JOIN gram_ng USING (ng_id)
-                WHERE gram_sat.object = $dbid)
+                FROM gram_sat JOIN gram_ng USING (ng_id))
             GROUP BY g, c
         } {
             $rdb eval {
                 UPDATE gram_gc
                 SET sat   = $sat,
                     slope = $slope
-                WHERE object=$dbid AND g=$g and c=$c
+                WHERE g=$g and c=$c
             }
         }
     }
@@ -1556,7 +1522,7 @@ snit::type ::simlib::gram {
         $rdb eval {
             UPDATE gram_ng 
             SET sat = 0.0
-            WHERE object=$dbid AND sat_tracked = 0
+            WHERE sat_tracked = 0
         }
 
         # NEXT, compute the current values
@@ -1567,8 +1533,7 @@ snit::type ::simlib::gram {
                 SELECT ng_id, n, g, 
                        sat*saliency AS num,
                        saliency     AS denom
-                FROM gram_sat
-                WHERE object = $dbid)
+                FROM gram_sat)
             GROUP BY ng_id
         } {
             $rdb eval {
@@ -1594,14 +1559,13 @@ snit::type ::simlib::gram {
                        gram_sat.c                          AS c, 
                        gram_sat.sat*saliency*rollup_weight AS num,
                        saliency*rollup_weight              AS denom
-                FROM gram_sat JOIN gram_ng USING (ng_id)
-                WHERE gram_sat.object = $dbid)
+                FROM gram_sat JOIN gram_ng USING (ng_id))
             GROUP BY n, c
         } {
             $rdb eval {
                 UPDATE gram_nc
                 SET sat = $sat
-                WHERE object=$dbid AND n=$n and c=$c
+                WHERE n=$n and c=$c
             }
         }
     }
@@ -1619,14 +1583,13 @@ snit::type ::simlib::gram {
                        gram_sat.sat*saliency*rollup_weight AS num,
                        saliency*rollup_weight              AS denom
                 FROM gram_sat JOIN gram_ng USING (ng_id)
-                WHERE gram_sat.object = $dbid
-                AND   gram_sat.gtype = 'CIV')
+                WHERE gram_sat.gtype = 'CIV')
             GROUP BY n
         } {
             $rdb eval {
                 UPDATE gram_n
                 SET sat = $sat
-                WHERE object=$dbid AND n=$n
+                WHERE n=$n
             }
         }
     }
@@ -1643,14 +1606,13 @@ snit::type ::simlib::gram {
                 SELECT gram_sat.g                          AS g,
                        gram_sat.sat*saliency*rollup_weight AS num,
                        saliency*rollup_weight              AS denom
-                FROM gram_sat JOIN gram_ng USING (ng_id)
-                WHERE gram_sat.object = $dbid)
+                FROM gram_sat JOIN gram_ng USING (ng_id))
             GROUP BY g
         } {
             $rdb eval {
                 UPDATE gram_g
                 SET sat = $sat
-                WHERE object=$dbid AND g=$g
+                WHERE g=$g
             }
         }
     }
@@ -1669,14 +1631,13 @@ snit::type ::simlib::gram {
                 SELECT gram_sat.c                          AS c,
                        gram_sat.sat*saliency*rollup_weight AS num,
                        saliency*rollup_weight              AS denom
-                FROM gram_sat JOIN gram_ng USING (ng_id)
-                WHERE gram_sat.object = $dbid)
+                FROM gram_sat JOIN gram_ng USING (ng_id))
             GROUP BY c
         } {
             $rdb eval {
                 UPDATE gram_c
                 SET sat = $sat
-                WHERE object=$dbid AND c=$c
+                WHERE c=$c
             }
         }
     }
@@ -1718,16 +1679,14 @@ snit::type ::simlib::gram {
                    total(gram_coop.coop * gram_ng.population) AS num,
                    total(gram_ng.population)                  AS denom
             FROM gram_coop
-            JOIN gram_ng ON gram_coop.object = gram_ng.object
-                         AND gram_coop.n     = gram_ng.n
+            JOIN gram_ng ON  gram_coop.n     = gram_ng.n
                          AND gram_coop.f     = gram_ng.g
-            WHERE gram_coop.object=$dbid
             GROUP BY gram_coop.n, gram_coop.g
         } {
             $rdb eval {
                 UPDATE gram_frc_ng
                 SET coop = $num/$denom
-                WHERE object=$dbid AND n=$n AND g=$g
+                WHERE n=$n AND g=$g
             }
         }
     }
@@ -1751,7 +1710,7 @@ snit::type ::simlib::gram {
 
         set result [$rdb onecolumn {
             SELECT sat FROM gram_sat 
-            WHERE object=$dbid AND n=$n AND g=$g AND c=$c
+            WHERE n=$n AND g=$g AND c=$c
         }]
 
         if {$result eq ""} {
@@ -1760,7 +1719,7 @@ snit::type ::simlib::gram {
 
             require {[$rdb exists {
                 SELECT gc_id FROM gram_gc 
-                WHERE object=$dbid AND g=$g AND c=$c
+                WHERE g=$g AND c=$c
             }]} "g and c must have the same group type, CIV or ORG"
             
             set result 0.0
@@ -1783,7 +1742,7 @@ snit::type ::simlib::gram {
 
         return [$rdb onecolumn {
             SELECT sat FROM gram_ng 
-            WHERE object=$dbid AND n=$n AND g=$g
+            WHERE n=$n AND g=$g
         }]
     }
 
@@ -1800,7 +1759,7 @@ snit::type ::simlib::gram {
 
         return [$rdb onecolumn {
             SELECT sat FROM gram_nc 
-            WHERE object=$dbid AND n=$n AND c=$c
+            WHERE n=$n AND c=$c
         }]
     }
 
@@ -1818,7 +1777,7 @@ snit::type ::simlib::gram {
 
         set result [$rdb onecolumn {
             SELECT sat FROM gram_gc 
-            WHERE object=$dbid AND g=$g AND c=$c
+            WHERE g=$g AND c=$c
         }]
 
         # Only empty if g and c don't match
@@ -1840,7 +1799,7 @@ snit::type ::simlib::gram {
 
         return [$rdb onecolumn {
             SELECT sat FROM gram_n 
-            WHERE object=$dbid AND n=$n
+            WHERE n=$n
         }]
     }
 
@@ -1856,7 +1815,7 @@ snit::type ::simlib::gram {
 
         return [$rdb onecolumn {
             SELECT sat FROM gram_g 
-            WHERE object=$dbid AND g=$g
+            WHERE g=$g
         }]
     }
 
@@ -1871,7 +1830,7 @@ snit::type ::simlib::gram {
 
         return [$rdb onecolumn {
             SELECT sat FROM gram_c 
-            WHERE object=$dbid AND c=$c
+            WHERE c=$c
         }]
     }
 
@@ -1894,7 +1853,7 @@ snit::type ::simlib::gram {
 
         set result [$rdb onecolumn {
             SELECT coop FROM gram_coop 
-            WHERE object=$dbid AND n=$n AND f=$f AND g=$g
+            WHERE n=$n AND f=$f AND g=$g
         }]
 
         if {$result eq ""} {
@@ -1918,7 +1877,7 @@ snit::type ::simlib::gram {
 
         return [$rdb onecolumn {
             SELECT coop FROM gram_frc_ng 
-            WHERE object=$dbid AND n=$n AND g=$g
+            WHERE n=$n AND g=$g
         }]
     }
 
@@ -1944,7 +1903,7 @@ snit::type ::simlib::gram {
         $self Log detail "sat adjust driver=$driver n=$n g=$g c=$c M=$mag"
 
         # FIRST, check the inputs, and accumulate query terms
-        set where ""
+        set where [list]
 
         # driver
         $self driver validate $driver "Cannot sat adjust"
@@ -1952,19 +1911,19 @@ snit::type ::simlib::gram {
         # n
         if {$n ne "*"} {
             $nbhoods validate $n
-            append where "AND n = \$n "
+            lappend where "n = \$n "
         }
 
         # g
         if {$g ne "*"} {
             $cogroups validate $g
-            append where "AND g = \$g "
+            lappend where "g = \$g "
         }
 
         # c
         if {$c ne "*"} {
             $concerns validate $c
-            append where "AND c = \$c "
+            lappend where "c = \$c "
         }
 
         # g and c
@@ -1980,7 +1939,7 @@ snit::type ::simlib::gram {
         if {$g ne "*" && $c ne "*"} {
             require {[$rdb exists {
                 SELECT gc_id FROM gram_gc 
-                WHERE object=$dbid AND g=$g AND c=$c
+                WHERE g=$g AND c=$c
             }]} "g and c must have the same group type, CIV or ORG"
         }
 
@@ -1991,7 +1950,7 @@ snit::type ::simlib::gram {
         if {$n ne "*" && $g ne "*"} {
             require {[$rdb onecolumn {
                 SELECT sat_tracked FROM gram_ng
-                WHERE object=$dbid AND n=$n AND g=$g
+                WHERE n=$n AND g=$g
             }]} "satisfaction is not tracked for group $g in nbhood $n"
         }
 
@@ -2006,10 +1965,11 @@ snit::type ::simlib::gram {
         }
 
         # NEXT, do the query.
+        set where [join $where " AND "]
         $rdb eval "
             SELECT curve_id
             FROM gram_sat
-            WHERE object = \$dbid
+            WHERE 
             $where
         " {
             $self adjust $driver $curve_id $mag
@@ -2081,7 +2041,7 @@ snit::type ::simlib::gram {
         if {$g ne "*" && $c ne "*"} {
             require {[$rdb exists {
                 SELECT gc_id FROM gram_gc 
-                WHERE object=$dbid AND g=$g AND c=$c
+                WHERE g=$g AND c=$c
             }]} "g and c must have the same group type, CIV or ORG"
         }
 
@@ -2092,7 +2052,7 @@ snit::type ::simlib::gram {
         if {$n ne "*" && $g ne "*"} {
             require {[$rdb onecolumn {
                 SELECT sat_tracked FROM gram_ng
-                WHERE object=$dbid AND n=$n AND g=$g
+                WHERE n=$n AND g=$g
             }]} "satisfaction is not tracked for group $g in nbhood $n"
         }
 
@@ -2105,8 +2065,7 @@ snit::type ::simlib::gram {
         $rdb eval "
             SELECT curve_id, \$sat - sat AS mag
             FROM gram_sat
-            WHERE object = \$dbid
-            AND   mag != 0.0
+            WHERE mag != 0.0
             $where
         " {
             $self adjust $driver $curve_id $mag
@@ -2228,8 +2187,7 @@ snit::type ::simlib::gram {
             # within the proximity limit.
             $rdb eval {
                 SELECT * FROM gram_sat_influence_view
-                WHERE object = $dbid 
-                AND   dn     = $input(dn)
+                WHERE dn     = $input(dn)
                 AND   dg     = $input(dg)
                 AND   c      = $input(c)
                 AND   prox   < $plimit
@@ -2244,8 +2202,7 @@ snit::type ::simlib::gram {
             
             $rdb eval {
                 SELECT * FROM gram_sat_influence_view
-                WHERE object = $dbid 
-                AND   dn     = n
+                WHERE dn     = n
                 AND   dg     = $input(dg)
                 AND   c      = $input(c)
                 AND   prox   < $plimit
@@ -2357,8 +2314,7 @@ snit::type ::simlib::gram {
                     FROM gram_ngc     AS direct
                     JOIN gram_effects AS effect 
                          ON effect.direct_id = direct.ngc_id
-                    WHERE direct.object = $dbid
-                    AND   direct.n      = $input(dn) 
+                    WHERE direct.n      = $input(dn) 
                     AND   direct.g      = $input(dg) 
                     AND   direct.c      = $input(c)
                     AND   effect.etype  = 'S'
@@ -2391,8 +2347,7 @@ snit::type ::simlib::gram {
                 FROM gram_ngc     AS direct
                 JOIN gram_effects AS effect 
                      ON effect.direct_id = direct.ngc_id
-                WHERE direct.object =  $dbid
-                AND   direct.n      =  $input(dn) 
+                WHERE direct.n      =  $input(dn) 
                 AND   direct.g      =  $input(dg) 
                 AND   direct.c      =  $input(c)
                 AND   effect.etype  =  'S'
@@ -2408,8 +2363,7 @@ snit::type ::simlib::gram {
             # within the proximity limit.
             $rdb eval {
                 SELECT * FROM gram_sat_influence_view
-                WHERE object    = $dbid 
-                AND   dn        = $input(dn)
+                WHERE dn        = $input(dn)
                 AND   dg        = $input(dg)
                 AND   c         = $input(c)
                 AND   prox      < $plimit
@@ -2429,8 +2383,7 @@ snit::type ::simlib::gram {
                     FROM gram_ngc     AS direct
                     JOIN gram_effects AS effect 
                          ON effect.direct_id = direct.ngc_id
-                    WHERE direct.object =  $dbid
-                    AND   direct.g      =  $input(dg) 
+                    WHERE direct.g      =  $input(dg) 
                     AND   direct.c      =  $input(c)
                     AND   effect.etype  =  'S'
                     AND   effect.driver =  $input(driver)
@@ -2448,8 +2401,7 @@ snit::type ::simlib::gram {
 
             $rdb eval {
                 SELECT * FROM gram_sat_influence_view
-                WHERE object = $dbid 
-                AND   dn     = n
+                WHERE dn     = n
                 AND   dg     = $input(dg)
                 AND   c      = $input(c)
                 AND   prox   < $plimit
@@ -2596,16 +2548,15 @@ snit::type ::simlib::gram {
 
         # NEXT, Do the aggregation
         if {[llength $condList] > 0} {
-            set conditions "AND [join $condList { AND }]"
+            set conditions "WHERE [join $condList { AND }]"
         } else {
             set conditions ""
         }
 
         $rdb eval "
-            INSERT INTO gram_sat_drivers (object, driver, n, g, c, acontrib)
-            SELECT object, driver, n, g, c, total(acontrib) 
+            INSERT INTO gram_sat_drivers (driver, n, g, c, acontrib)
+            SELECT driver, n, g, c, total(acontrib) 
             FROM gram_sat_contribs
-            WHERE object=\$dbid
             $conditions
             GROUP BY driver, n, g, c
         "
@@ -2639,14 +2590,14 @@ snit::type ::simlib::gram {
                    gram_sat_drivers.g                      AS g, 
                    total(acontrib*saliency/total_saliency) AS mood
             FROM gram_sat_drivers
-            JOIN gram_ngc USING (object,n,g,c)
-            JOIN gram_ng  USING (object,n,g)
+            JOIN gram_ngc USING (n,g,c)
+            JOIN gram_ng  USING (n,g)
             GROUP BY driver, gram_sat_drivers.n, gram_sat_drivers.g
         } {
             $rdb eval {
                 INSERT INTO 
-                gram_sat_drivers(object,driver,n,g,c,acontrib)
-                VALUES($dbid,$driver,$n,$g,'mood',$mood)
+                gram_sat_drivers(driver,n,g,c,acontrib)
+                VALUES($driver,$n,$g,'mood',$mood)
             }
         }
     }
@@ -2670,7 +2621,7 @@ snit::type ::simlib::gram {
         $self Log detail "coop adjust driver=$driver n=$n f=$f g=$g M=$mag"
 
         # FIRST, check the inputs, and accumulate query terms
-        set where ""
+        set where [list]
 
         # driver
         $self driver validate $driver "Cannot coop adjust"
@@ -2678,19 +2629,19 @@ snit::type ::simlib::gram {
         # n
         if {$n ne "*"} {
             $nbhoods validate $n
-            append where "AND n = \$n "
+            lappend where "n = \$n "
         }
 
         # f
         if {$f ne "*"} {
             $cgroups validate $f
-            append where "AND f = \$f "
+            lappend where "f = \$f "
         }
 
         # g
         if {$g ne "*"} {
             $fgroups validate $g
-            append where "AND g = \$g "
+            lappend where "g = \$g "
         }
 
         # n and f
@@ -2702,7 +2653,7 @@ snit::type ::simlib::gram {
             # Or rename "sat_tracked"?
             require {[$rdb onecolumn {
                 SELECT sat_tracked FROM gram_ng
-                WHERE object=$dbid AND n=$n AND g=$f
+                WHERE n=$n AND g=$f
             }]} "cooperation is not tracked for group $f in nbhood $n"
         }
 
@@ -2719,10 +2670,13 @@ snit::type ::simlib::gram {
         # NEXT, do the query.  Note that we could do the adjustment
         # in a single UPDATE query, except that we need to save the
         # adjustment to the history.
+
+        set where [join $where " AND "]
+
         $rdb eval "
             SELECT curve_id
             FROM gram_coop
-            WHERE object = \$dbid
+            WHERE 
             $where
         " {
             $self adjust $driver $curve_id $mag
@@ -2787,7 +2741,7 @@ snit::type ::simlib::gram {
             # Or rename "sat_tracked"?
             require {[$rdb onecolumn {
                 SELECT sat_tracked FROM gram_ng
-                WHERE object=$dbid AND n=$n AND g=$f
+                WHERE n=$n AND g=$f
             }]} "cooperation is not tracked for group $f in nbhood $n"
         }
 
@@ -2802,8 +2756,7 @@ snit::type ::simlib::gram {
         $rdb eval "
             SELECT curve_id, \$coop - coop AS mag
             FROM gram_coop
-            WHERE object = \$dbid
-            AND   mag != 0.0
+            WHERE mag != 0.0
             $where
         " {
             $self adjust $driver $curve_id $mag
@@ -2883,8 +2836,7 @@ snit::type ::simlib::gram {
         # NEXT, Apply the effects_factor.nf to p and q.
         $rdb eval {
             SELECT effects_factor FROM gram_ng
-            WHERE object = $dbid
-            AND   n = $input(dn)
+            WHERE n = $input(dn)
             AND   g = $input(df);
         } {
             let input(p) {$opts(-p) * $effects_factor}
@@ -2934,8 +2886,7 @@ snit::type ::simlib::gram {
 
             $rdb eval {
                 SELECT * FROM gram_coop_influence_view
-                WHERE object    = $dbid
-                AND   dn        = $input(dn)
+                WHERE dn        = $input(dn)
                 AND   df        = $input(df)
                 AND   dg        = $input(dg)
                 AND   prox      < $plimit 
@@ -2950,8 +2901,7 @@ snit::type ::simlib::gram {
 
             $rdb eval {
                 SELECT * FROM gram_coop_influence_view
-                WHERE object    = $dbid
-                AND   dn        = m
+                WHERE dn        = m
                 AND   df        = $input(df)
                 AND   dg        = $input(dg)
                 AND   prox      < $plimit 
@@ -3028,8 +2978,7 @@ snit::type ::simlib::gram {
         # NEXT, Apply the effects_factor.nf to p and q.
         $rdb eval {
             SELECT effects_factor FROM gram_ng
-            WHERE object = $dbid
-            AND   n = $input(dn)
+            WHERE n = $input(dn)
             AND   g = $input(df);
         } {
             let input(p) {$opts(-p) * $effects_factor}
@@ -3072,8 +3021,7 @@ snit::type ::simlib::gram {
                     FROM gram_nfg     AS direct
                     JOIN gram_effects AS effect 
                          ON effect.direct_id = direct.nfg_id
-                    WHERE direct.object = $dbid
-                    AND   direct.n      = $input(dn) 
+                    WHERE direct.n      = $input(dn) 
                     AND   direct.f      = $input(df) 
                     AND   direct.g      = $input(dg) 
                     AND   effect.etype  = 'S'
@@ -3106,8 +3054,7 @@ snit::type ::simlib::gram {
                 FROM gram_nfg     AS direct
                 JOIN gram_effects AS effect 
                      ON effect.direct_id = direct.nfg_id
-                WHERE direct.object =  $dbid
-                AND   direct.n      =  $input(dn) 
+                WHERE direct.n      =  $input(dn) 
                 AND   direct.f      =  $input(df) 
                 AND   direct.g      =  $input(dg) 
                 AND   effect.etype  =  'S'
@@ -3123,8 +3070,7 @@ snit::type ::simlib::gram {
             # within the proximity limit.
             $rdb eval {
                 SELECT * FROM gram_coop_influence_view
-                WHERE object    = $dbid 
-                AND   dn        = $input(dn)
+                WHERE dn        = $input(dn)
                 AND   df        = $input(df)
                 AND   dg        = $input(dg)
                 AND   prox      < $plimit
@@ -3144,8 +3090,7 @@ snit::type ::simlib::gram {
                     FROM gram_nfg     AS direct
                     JOIN gram_effects AS effect 
                          ON effect.direct_id = direct.nfg_id
-                    WHERE direct.object =  $dbid
-                    AND   direct.f      =  $input(df) 
+                    WHERE direct.f      =  $input(df) 
                     AND   direct.g      =  $input(dg) 
                     AND   effect.etype  =  'S'
                     AND   effect.driver =  $input(driver)
@@ -3163,8 +3108,7 @@ snit::type ::simlib::gram {
 
             $rdb eval {
                 SELECT * FROM gram_coop_influence_view
-                WHERE object = $dbid 
-                AND   dn     = m
+                WHERE dn     = m
                 AND   df     = $input(df)
                 AND   dg     = $input(dg)
                 AND   prox   < $plimit
@@ -3197,8 +3141,7 @@ snit::type ::simlib::gram {
         $rdb eval {
             SELECT curve_id, curve_type, total(acontrib) AS actual
             FROM gram_contribs JOIN gram_curves USING (curve_id)
-            WHERE gram_contribs.object = $dbid
-            AND   driver = $driver
+            WHERE driver = $driver
             GROUP BY curve_id
         } {
             $rdb eval {
@@ -3222,8 +3165,7 @@ snit::type ::simlib::gram {
         $rdb eval {
             SELECT curve_id, time, acontrib AS actual
             FROM gram_contribs
-            WHERE object = $dbid
-            AND   driver = $driver
+            WHERE driver = $driver
         } {
             $rdb eval {
                 UPDATE OR IGNORE gram_values
@@ -3236,20 +3178,17 @@ snit::type ::simlib::gram {
         # NEXT, delete the effects and the contributions.
         $rdb eval {
             DELETE FROM gram_effects 
-            WHERE object = $dbid
-            AND   driver = $driver;
+            WHERE driver = $driver;
 
             DELETE FROM gram_contribs 
-            WHERE object = $dbid
-            AND   driver = $driver;
+            WHERE driver = $driver;
         }
 
         # NEXT, delete or mark the driver.
         if {$option eq "-delete"} {
             $rdb eval {
                 DELETE FROM gram_driver
-                WHERE object = $dbid
-                AND   driver = $driver
+                WHERE driver = $driver
             }
         } else {
             $rdb eval {
@@ -3258,8 +3197,7 @@ snit::type ::simlib::gram {
                     name       = "CANCELLED",
                     oneliner   = "",
                     last_input = 0
-                WHERE object = $dbid
-                AND   driver = $driver
+                WHERE driver = $driver
             }
         }
 
@@ -3297,8 +3235,7 @@ snit::type ::simlib::gram {
         $rdb eval {
             SELECT id, ts, te, cause, delay, future 
             FROM gram_effects
-            WHERE object = $dbid
-            AND   etype  = 'S'
+            WHERE etype  = 'S'
             AND   driver = $driver
             AND   active = 1
         } row {
@@ -3316,16 +3253,15 @@ snit::type ::simlib::gram {
 
     method CurvesInit {} {
         $rdb eval {
-            DELETE FROM gram_effects  WHERE object=$dbid;
-            DELETE FROM gram_contribs WHERE object=$dbid;
-            DELETE FROM gram_values   WHERE object=$dbid;
-            DELETE FROM gram_driver   WHERE object=$dbid;
+            DELETE FROM gram_effects;
+            DELETE FROM gram_contribs;
+            DELETE FROM gram_values;
+            DELETE FROM gram_driver;
 
             UPDATE gram_curves 
             SET val   = val0,
                 delta = 0.0,
-                slope = 0.0
-            WHERE object=$dbid;
+                slope = 0.0;
         }
 
         # NEXT the values as of this time.
@@ -3371,9 +3307,9 @@ snit::type ::simlib::gram {
 
                 $rdb eval {
                     INSERT OR IGNORE INTO
-                    gram_contribs(object, time, driver,
+                    gram_contribs(time, driver,
                                   curve_id, acontrib)
-                    VALUES($dbid, $db(time),
+                    VALUES($db(time),
                            $driver, $curve_id, 0.0);
 
                     UPDATE gram_contribs
@@ -3457,7 +3393,6 @@ snit::type ::simlib::gram {
         # NEXT, insert the data into gram_effects
         $rdb eval {
             INSERT INTO gram_effects(
-                object,
                 curve_id,
                 direct_id,
                 driver,
@@ -3472,7 +3407,6 @@ snit::type ::simlib::gram {
                 llimit
             )
             VALUES(
-                $dbid,
                 $effect(curve_id),
                 $effect(direct_id),
                 $input(driver),
@@ -3548,8 +3482,7 @@ snit::type ::simlib::gram {
         $rdb eval {
             SELECT id, active, cause, ts, te, future 
             FROM gram_effects
-            WHERE object=$dbid
-            AND etype='S'
+            WHERE etype='S'
             AND driver=$input(driver)
             AND curve_id=$effect(curve_id)
             AND direct_id=$effect(direct_id)
@@ -3608,7 +3541,6 @@ snit::type ::simlib::gram {
         # NEXT, Save the new effect.
         $rdb eval {
             INSERT INTO gram_effects(
-                object,
                 etype,
                 curve_id,
                 direct_id,
@@ -3622,7 +3554,6 @@ snit::type ::simlib::gram {
                 te
             )
             VALUES(
-                $dbid,
                 'S',
                 $effect(curve_id),
                 $effect(direct_id),
@@ -3707,9 +3638,8 @@ snit::type ::simlib::gram {
 
         $rdb eval {
             SELECT g
-            FROM gram_ng JOIN gram_g USING (object,g)
-            WHERE object       = $dbid
-            AND   n            = $nbhood
+            FROM gram_ng JOIN gram_g USING (g)
+            WHERE n            = $nbhood
             AND   sat_tracked  = 1
             AND   gram_g.gtype = 'CIV'
             ORDER BY g
@@ -3756,7 +3686,6 @@ snit::type ::simlib::gram {
         $rdb eval {
             UPDATE gram_curves
             SET delta = 0.0
-            WHERE object=$dbid;
         }
 
         # NEXT, Add the contributions of the level and slope effects.
@@ -3775,7 +3704,6 @@ snit::type ::simlib::gram {
             UPDATE gram_curves
             SET val   = max(min(val + delta, 100.0), -100.0),
                 slope = delta / $deltaDays
-            WHERE object=$dbid;
         }
 
         # NEXT, save the current values.
@@ -3798,8 +3726,7 @@ snit::type ::simlib::gram {
         $rdb eval {
             SELECT ts, te, llimit, tau, nominal, id, curve_type, val 
             FROM gram_effects JOIN gram_curves USING (curve_id)
-            WHERE gram_effects.object=$dbid
-            AND etype = 'L'
+            WHERE etype = 'L'
             AND active = 1 
             AND ts < $db(time)
             AND prox < $plimit
@@ -3862,8 +3789,7 @@ snit::type ::simlib::gram {
                    gram_curves.val AS val,
                    curve_type
             FROM gram_effects JOIN gram_curves USING (curve_id)
-            WHERE gram_effects.object=$dbid
-            AND etype='S'
+            WHERE etype='S'
             AND active = 1 
             AND ts <= $db(time)
             AND prox < $plimit
@@ -3947,8 +3873,7 @@ snit::type ::simlib::gram {
                     CASE WHEN ncontrib > 0 THEN ncontrib ELSE 0 END AS pos,
                     CASE WHEN ncontrib < 0 THEN ncontrib ELSE 0 END AS neg
              FROM gram_effects JOIN gram_curves USING (curve_id)
-             WHERE gram_effects.object=$dbid
-             AND active=1)
+             WHERE active=1)
             GROUP BY curve_id, cause
         } {
             # FIRST, get the scaling factor.
@@ -3990,8 +3915,7 @@ snit::type ::simlib::gram {
                    cause    AS cause,
                    ncontrib AS ncontrib
             FROM gram_effects
-            WHERE object    = $dbid
-            AND   active    = 1
+            WHERE active    = 1
             AND   ncontrib != 0.0
         } {
 
@@ -4033,8 +3957,7 @@ snit::type ::simlib::gram {
         $rdb eval {
             UPDATE gram_effects
             SET active = 0
-            WHERE object=$dbid 
-            AND active = 1
+            WHERE active = 1
             AND (
                 -- proxlimit has changed to exclude them, OR
                 (prox >= $plimit) OR 
@@ -4064,10 +3987,10 @@ snit::type ::simlib::gram {
 
         $rdb eval {
             INSERT INTO gram_contribs
-            SELECT $dbid, tlast, driver, curve_id,
+            SELECT tlast, driver, curve_id,
                    total(acontrib) as acontrib
             FROM gram_effects
-            WHERE object=$dbid AND tlast=$db(time) AND acontrib != 0.0
+            WHERE tlast=$db(time) AND acontrib != 0.0
             GROUP BY driver, curve_id
         }
     }
@@ -4091,15 +4014,14 @@ snit::type ::simlib::gram {
 
         set query {
             INSERT OR REPLACE
-            INTO gram_values(object, time, curve_id, val)
-            SELECT object, $db(time), curve_id, val
+            INTO gram_values(time, curve_id, val)
+            SELECT $db(time), curve_id, val
             FROM gram_curves
-            WHERE object=$dbid
         }
 
         if {$curve_id ne ""} {
             append query {
-                AND curve_id=$curve_id
+                WHERE curve_id=$curve_id
             }
         }
 
@@ -4185,8 +4107,8 @@ snit::type ::simlib::gram {
                    ngc_id,
                    curve_id
             FROM gram_sat
-            JOIN gram_g  USING (object,g)
-            WHERE object='$dbid'
+            JOIN gram_g  USING (g)
+            WHERE 1=1
             [tif {$civFlag}  {AND gram_g.gtype='CIV'}]
             [tif {$orgFlag}  {AND gram_g.gtype='ORG'}]
             [tif {$n ne "*"} {AND n='$n'}]
@@ -4230,8 +4152,7 @@ snit::type ::simlib::gram {
                    format('%6.2f',nominal),
                    format('%6.2f',actual)
             FROM gram_sat_effects
-            WHERE object='$dbid'
-            AND etype='L'
+            WHERE etype='L'
             AND active=1 AND driver GLOB '$driver'
             
             ORDER BY driver ASC, input ASC, 
@@ -4310,7 +4231,7 @@ snit::type ::simlib::gram {
                    curve_id
             }]
             FROM gram_coop
-            WHERE object='$dbid'
+            WHERE 1=1
             [tif {$n ne "*"} {AND n='$n'}]
             [tif {$f ne "*"} {AND f='$f'}]
             [tif {$g ne "*"} {AND g='$g'}]
@@ -4358,8 +4279,7 @@ snit::type ::simlib::gram {
                    format('%6.2f',nominal),
                    format('%6.2f',actual)
             FROM gram_coop_effects
-            WHERE object='$dbid'
-            AND etype='L'
+            WHERE etype='L'
             AND active=1 AND driver GLOB '$driver'
             
             ORDER BY driver ASC, input ASC, 
@@ -4403,8 +4323,7 @@ snit::type ::simlib::gram {
                    dg,
                    CASE WHEN prox=-1 THEN 'D' ELSE 'I' END
             FROM gram_sat_effects
-            WHERE object='$dbid' 
-            AND etype='L'
+            WHERE etype='L'
             AND active=1 
             AND n='$n' AND g='$g' AND c='$c'
             ORDER BY cause ASC, ts ASC, llimit DESC
@@ -4446,8 +4365,7 @@ snit::type ::simlib::gram {
                    dg,
                    CASE WHEN prox=-1 THEN 'D' ELSE 'I' END
             FROM gram_coop_effects
-            WHERE object='$dbid' 
-            AND etype='L'
+            WHERE etype='L'
             AND active=1 
             AND n='$n' AND f='$f' AND g='$g'
             ORDER BY cause ASC, ts ASC, llimit DESC
@@ -4507,8 +4425,7 @@ snit::type ::simlib::gram {
                    nominal,
                    actual
             FROM gram_sat_effects
-            WHERE object=$dbid 
-            AND etype='S'
+            WHERE etype='S'
             AND active=1 
             AND (($driver != '' AND driver = $driver) OR
                  ($driver =  '' AND driver > 0))
@@ -4635,8 +4552,7 @@ snit::type ::simlib::gram {
                    nominal,
                    actual
             FROM gram_coop_effects
-            WHERE object='$dbid' 
-            AND etype='S'
+            WHERE etype='S'
             AND active=1 
             AND driver GLOB '$driver'
             ORDER BY driver ASC, input ASC,
@@ -4749,8 +4665,7 @@ snit::type ::simlib::gram {
                    dg,
                    CASE WHEN prox=-1 THEN 'D' ELSE 'I' END
             FROM gram_sat_effects
-            WHERE object='$dbid' 
-            AND etype='S'
+            WHERE etype='S'
             AND active=1 
             AND n='$n' AND g='$g' AND c='$c'
             ORDER BY cause ASC, ts ASC, slope DESC
@@ -4793,8 +4708,7 @@ snit::type ::simlib::gram {
                    dg,
                    CASE WHEN prox=-1 THEN 'D' ELSE 'I' END
             FROM gram_coop_effects
-            WHERE object='$dbid' 
-            AND etype='S'
+            WHERE etype='S'
             AND active=1 
             AND n='$n' AND f='$f' AND g='$g'
             ORDER BY cause ASC, ts ASC, slope DESC
@@ -4829,7 +4743,7 @@ snit::type ::simlib::gram {
 
         require {[$rdb exists {
             SELECT gc_id FROM gram_gc 
-            WHERE object=$dbid AND g=$g AND c=$c
+            WHERE g=$g AND c=$c
         }]} "$parmtext must have the same group type, CIV or ORG"
     }
 

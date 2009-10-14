@@ -16,9 +16,6 @@
 -- gram_sat_drivers: Table populated by the "sat drivers" method
 
 CREATE TEMPORARY TABLE gram_sat_drivers (
-    -- Object
-    object        TEXT,
-
     -- Driver ID
     driver        INTEGER,
 
@@ -34,7 +31,7 @@ CREATE TEMPORARY TABLE gram_sat_drivers (
     -- Actual contribution
     acontrib      DOUBLE DEFAULT 0.0,
 
-    PRIMARY KEY (object, driver, n, g, c)
+    PRIMARY KEY (driver, n, g, c)
 );
 
 

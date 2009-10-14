@@ -110,8 +110,7 @@ namespace eval ::simlib::test {
             SELECT [join $tableLabels ,],
                    $table.$col1 - $temp.$col2 AS diff
             FROM $table JOIN $temp USING ($id)
-            WHERE $table.object='gram' 
-            AND abs($table.$col1 - $temp.$col2) > 0.00000001
+            WHERE abs($table.$col1 - $temp.$col2) > 0.00000001
         " row {
             set vec [list]
             foreach lab $labels {
@@ -143,8 +142,7 @@ namespace eval ::simlib::test {
             SELECT [join $labels ,],
                    $col1 - $col2 AS diff
             FROM $table
-            WHERE object='gram' 
-            AND abs($col1 - $col2) > 0.00000001
+            WHERE abs($col1 - $col2) > 0.00000001
         " row {
             set vec [list]
             foreach lab $labels {
@@ -236,7 +234,6 @@ namespace eval ::simlib::test {
     # Creates a pre-configured GRAM.  All gram options can be
     # used.
     #
-    # -dbid     Defaults to "gram"
     # -clock    Defaults to clock created for this test file
     # -rdb      Defaults to RDB created for this test file
     #
@@ -258,7 +255,6 @@ namespace eval ::simlib::test {
 
         set cmd [list \
                      gram jr \
-                     -dbid    gram                           \
                      -clock   [namespace current]::myclock   \
                      -rdb     [namespace current]::rdb       \
                      -loadcmd [namespace current]::LoadGram]
@@ -466,7 +462,7 @@ namespace eval ::simlib::test {
             UPDATE gram_ng 
             SET population  = 0.0,
                 sat_tracked = 0
-            WHERE object='gram' AND n=$n AND g=$g;
+            WHERE n=$n AND g=$g;
         }
     }
 
@@ -481,7 +477,7 @@ namespace eval ::simlib::test {
         cleanup
     } -result {}
 
-    test creation-1.2 {can create multiple instances} -body {
+    test creation-1.2 {cannot create multiple instances on one RDB} -body {
         create
 
         gram temp_jr \
@@ -490,10 +486,11 @@ namespace eval ::simlib::test {
             -rdb          [namespace current]::rdb      \
             -loadcmd      [namespace current]::LoadGram
         
+    } -returnCodes {
+        error
     } -cleanup {
-        temp_jr destroy
         cleanup
-    } -result {::simlib::test::temp_jr}
+    } -result {Error in constructor: RDB ::simlib::test::rdb already in use by GRAM ::simlib::test::jr}
 
 
     #-------------------------------------------------------------------
@@ -517,8 +514,7 @@ namespace eval ::simlib::test {
             }
 
             set count [rdb onecolumn "
-                SELECT count(object) FROM $table
-                WHERE object=\$dbid
+                SELECT count(rowid) FROM $table
             "]
 
             if {$count > 0} {
@@ -578,7 +574,6 @@ namespace eval ::simlib::test {
         rdb eval {
             SELECT count(curve_id) AS count
             FROM gram_curves
-            WHERE object='gram'
         } {}
 
         expr {$count > 0}
@@ -594,14 +589,12 @@ namespace eval ::simlib::test {
 
         set count1 [rdb onecolumn {
             SELECT count(mn_id) FROM gram_mn
-            WHERE object='gram'
-            AND proximity < $prox
+            WHERE proximity < $prox
         }]
 
         # NEXT, set all neighborhoods remote, and reinitialize
         rdb eval {
             UPDATE gram_mn SET proximity=$prox
-            WHERE object='gram'
         } {}
 
         jr init
@@ -609,8 +602,7 @@ namespace eval ::simlib::test {
         # NEXT, the number of non-remote nbhoods should still be 0
         set count2 [rdb onecolumn {
             SELECT count(mn_id) FROM gram_mn
-            WHERE object='gram'
-            AND proximity < $prox
+            WHERE proximity < $prox
         }]
 
         list [expr {$count1 > 0}] $count2
@@ -624,7 +616,6 @@ namespace eval ::simlib::test {
         # FIRST, set all neighborhoods remote, and reinitialize
         rdb eval {
             UPDATE gram_mn SET proximity=$prox
-            WHERE object='gram'
         } {}
 
         jr init
@@ -633,8 +624,7 @@ namespace eval ::simlib::test {
 
         set count1 [rdb onecolumn {
             SELECT count(mn_id) FROM gram_mn
-            WHERE object='gram'
-            AND proximity < $prox
+            WHERE proximity < $prox
         }]
 
         # NEXT, reload, and get the count.
@@ -642,8 +632,7 @@ namespace eval ::simlib::test {
 
         set count2 [rdb onecolumn {
             SELECT count(mn_id) FROM gram_mn
-            WHERE object='gram'
-            AND proximity < $prox
+            WHERE proximity < $prox
         }]
 
 
@@ -661,121 +650,121 @@ namespace eval ::simlib::test {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_curves WHERE object='gram'
+            SELECT * FROM gram_curves
         }]
     } -cleanup {
         cleanup
     } -result {
-curve_id object curve_type val0  val   delta slope 
--------- ------ ---------- ----- ----- ----- ----- 
-1        gram   SAT        0.0   0.0   0.0   0.0   
-2        gram   SAT        0.0   0.0   0.0   0.0   
-3        gram   SAT        0.0   0.0   0.0   0.0   
-4        gram   SAT        -80.0 -80.0 0.0   0.0   
-5        gram   SAT        40.0  40.0  0.0   0.0   
-6        gram   SAT        -40.0 -40.0 0.0   0.0   
-7        gram   SAT        -40.0 -40.0 0.0   0.0   
-8        gram   SAT        40.0  40.0  0.0   0.0   
-9        gram   SAT        -80.0 -80.0 0.0   0.0   
-10       gram   SAT        -80.0 -80.0 0.0   0.0   
-11       gram   SAT        -40.0 -40.0 0.0   0.0   
-12       gram   SAT        -80.0 -80.0 0.0   0.0   
-13       gram   SAT        0.0   0.0   0.0   0.0   
-14       gram   SAT        0.0   0.0   0.0   0.0   
-15       gram   SAT        0.0   0.0   0.0   0.0   
-16       gram   SAT        0.0   0.0   0.0   0.0   
-17       gram   SAT        0.0   0.0   0.0   0.0   
-18       gram   SAT        0.0   0.0   0.0   0.0   
-19       gram   SAT        0.0   0.0   0.0   0.0   
-20       gram   SAT        -80.0 -80.0 0.0   0.0   
-21       gram   SAT        40.0  40.0  0.0   0.0   
-22       gram   SAT        -40.0 -40.0 0.0   0.0   
-23       gram   SAT        -40.0 -40.0 0.0   0.0   
-24       gram   SAT        40.0  40.0  0.0   0.0   
-25       gram   SAT        -80.0 -80.0 0.0   0.0   
-26       gram   SAT        -80.0 -80.0 0.0   0.0   
-27       gram   SAT        -40.0 -40.0 0.0   0.0   
-28       gram   SAT        -80.0 -80.0 0.0   0.0   
-29       gram   SAT        0.0   0.0   0.0   0.0   
-30       gram   SAT        0.0   0.0   0.0   0.0   
-31       gram   SAT        0.0   0.0   0.0   0.0   
-32       gram   SAT        0.0   0.0   0.0   0.0   
-33       gram   COOP       50.0  50.0  0.0   0.0   
-34       gram   COOP       50.0  50.0  0.0   0.0   
-35       gram   COOP       50.0  50.0  0.0   0.0   
-36       gram   COOP       50.0  50.0  0.0   0.0   
-37       gram   COOP       50.0  50.0  0.0   0.0   
-38       gram   COOP       50.0  50.0  0.0   0.0   
-39       gram   COOP       50.0  50.0  0.0   0.0   
-40       gram   COOP       50.0  50.0  0.0   0.0   
-41       gram   COOP       50.0  50.0  0.0   0.0   
-42       gram   COOP       50.0  50.0  0.0   0.0   
-43       gram   COOP       50.0  50.0  0.0   0.0   
-44       gram   COOP       50.0  50.0  0.0   0.0   
-45       gram   COOP       50.0  50.0  0.0   0.0   
-46       gram   COOP       50.0  50.0  0.0   0.0   
-47       gram   COOP       50.0  50.0  0.0   0.0   
-48       gram   COOP       50.0  50.0  0.0   0.0   
-49       gram   COOP       50.0  50.0  0.0   0.0   
-50       gram   COOP       50.0  50.0  0.0   0.0   
+curve_id curve_type val0  val   delta slope 
+-------- ---------- ----- ----- ----- ----- 
+1        SAT        0.0   0.0   0.0   0.0   
+2        SAT        0.0   0.0   0.0   0.0   
+3        SAT        0.0   0.0   0.0   0.0   
+4        SAT        -80.0 -80.0 0.0   0.0   
+5        SAT        40.0  40.0  0.0   0.0   
+6        SAT        -40.0 -40.0 0.0   0.0   
+7        SAT        -40.0 -40.0 0.0   0.0   
+8        SAT        40.0  40.0  0.0   0.0   
+9        SAT        -80.0 -80.0 0.0   0.0   
+10       SAT        -80.0 -80.0 0.0   0.0   
+11       SAT        -40.0 -40.0 0.0   0.0   
+12       SAT        -80.0 -80.0 0.0   0.0   
+13       SAT        0.0   0.0   0.0   0.0   
+14       SAT        0.0   0.0   0.0   0.0   
+15       SAT        0.0   0.0   0.0   0.0   
+16       SAT        0.0   0.0   0.0   0.0   
+17       SAT        0.0   0.0   0.0   0.0   
+18       SAT        0.0   0.0   0.0   0.0   
+19       SAT        0.0   0.0   0.0   0.0   
+20       SAT        -80.0 -80.0 0.0   0.0   
+21       SAT        40.0  40.0  0.0   0.0   
+22       SAT        -40.0 -40.0 0.0   0.0   
+23       SAT        -40.0 -40.0 0.0   0.0   
+24       SAT        40.0  40.0  0.0   0.0   
+25       SAT        -80.0 -80.0 0.0   0.0   
+26       SAT        -80.0 -80.0 0.0   0.0   
+27       SAT        -40.0 -40.0 0.0   0.0   
+28       SAT        -80.0 -80.0 0.0   0.0   
+29       SAT        0.0   0.0   0.0   0.0   
+30       SAT        0.0   0.0   0.0   0.0   
+31       SAT        0.0   0.0   0.0   0.0   
+32       SAT        0.0   0.0   0.0   0.0   
+33       COOP       50.0  50.0  0.0   0.0   
+34       COOP       50.0  50.0  0.0   0.0   
+35       COOP       50.0  50.0  0.0   0.0   
+36       COOP       50.0  50.0  0.0   0.0   
+37       COOP       50.0  50.0  0.0   0.0   
+38       COOP       50.0  50.0  0.0   0.0   
+39       COOP       50.0  50.0  0.0   0.0   
+40       COOP       50.0  50.0  0.0   0.0   
+41       COOP       50.0  50.0  0.0   0.0   
+42       COOP       50.0  50.0  0.0   0.0   
+43       COOP       50.0  50.0  0.0   0.0   
+44       COOP       50.0  50.0  0.0   0.0   
+45       COOP       50.0  50.0  0.0   0.0   
+46       COOP       50.0  50.0  0.0   0.0   
+47       COOP       50.0  50.0  0.0   0.0   
+48       COOP       50.0  50.0  0.0   0.0   
+49       COOP       50.0  50.0  0.0   0.0   
+50       COOP       50.0  50.0  0.0   0.0   
     }
 
     test init-2.2 {initial contents: gram_driver} -setup {
         create -drivers 0
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_driver WHERE object='gram'
+            SELECT * FROM gram_driver
         }]
     } -cleanup {
         cleanup
     } -result {
-object driver dtype name  oneliner                     last_input 
------- ------ ----- ----- ---------------------------- ---------- 
-gram   0      Trend Trend Satisfaction Long-Term Trend 1          
+driver dtype name  oneliner                     last_input 
+------ ----- ----- ---------------------------- ---------- 
+0      Trend Trend Satisfaction Long-Term Trend 1          
     }
 
     test init-2.3 {initial contents: gram_effects} -setup {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_effects WHERE object='gram'
+            SELECT * FROM gram_effects
         }]
     } -cleanup {
         cleanup
     } -result {
-id object curve_id direct_id driver input etype cause prox ts te       active tlast ncontrib acontrib nominal actual days tau llimit delay slope future 
--- ------ -------- --------- ------ ----- ----- ----- ---- -- -------- ------ ----- -------- -------- ------- ------ ---- --- ------ ----- ----- ------ 
-1  gram   1        1         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
-2  gram   2        2         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
-3  gram   3        3         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
-4  gram   4        4         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
-5  gram   5        5         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
-6  gram   6        6         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
-7  gram   7        7         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
-8  gram   8        8         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
-9  gram   9        9         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
-10 gram   10       10        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
-11 gram   11       11        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
-12 gram   12       12        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
-13 gram   17       17        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
-14 gram   18       18        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
-15 gram   19       19        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
-16 gram   20       20        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
-17 gram   21       21        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
-18 gram   22       22        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
-19 gram   23       23        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
-20 gram   24       24        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
-21 gram   25       25        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
-22 gram   26       26        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
-23 gram   27       27        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
-24 gram   28       28        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+id curve_id direct_id driver input etype cause prox ts te       active tlast ncontrib acontrib nominal actual days tau llimit delay slope future 
+-- -------- --------- ------ ----- ----- ----- ---- -- -------- ------ ----- -------- -------- ------- ------ ---- --- ------ ----- ----- ------ 
+1  1        1         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+2  2        2         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+3  3        3         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+4  4        4         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+5  5        5         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
+6  6        6         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+7  7        7         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+8  8        8         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
+9  9        9         0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+10 10       10        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+11 11       11        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+12 12       12        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+13 17       17        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+14 18       18        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+15 19       19        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+16 20       20        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+17 21       21        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
+18 22       22        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -1.0         
+19 23       23        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+20 24       24        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     4.0          
+21 25       25        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+22 26       26        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -4.0         
+23 27       27        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
+24 28       28        0      1     S     TREND -1   0  99999999 1            0.0      0.0      0.0     0.0                    0     -8.0         
     }
 
     test init-2.4 {initial contents: gram_contribs} -setup {
         create
     } -body {
         rdb query {
-            SELECT * FROM gram_contribs WHERE object='gram'
+            SELECT * FROM gram_contribs
         }
     } -cleanup {
         cleanup
@@ -785,138 +774,138 @@ id object curve_id direct_id driver input etype cause prox ts te       active tl
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_values WHERE object='gram'
+            SELECT * FROM gram_values
         }]
     } -cleanup {
         cleanup
     } -result {
-object time curve_id val   
------- ---- -------- ----- 
-gram   0    1        0.0   
-gram   0    2        0.0   
-gram   0    3        0.0   
-gram   0    4        -80.0 
-gram   0    5        40.0  
-gram   0    6        -40.0 
-gram   0    7        -40.0 
-gram   0    8        40.0  
-gram   0    9        -80.0 
-gram   0    10       -80.0 
-gram   0    11       -40.0 
-gram   0    12       -80.0 
-gram   0    13       0.0   
-gram   0    14       0.0   
-gram   0    15       0.0   
-gram   0    16       0.0   
-gram   0    17       0.0   
-gram   0    18       0.0   
-gram   0    19       0.0   
-gram   0    20       -80.0 
-gram   0    21       40.0  
-gram   0    22       -40.0 
-gram   0    23       -40.0 
-gram   0    24       40.0  
-gram   0    25       -80.0 
-gram   0    26       -80.0 
-gram   0    27       -40.0 
-gram   0    28       -80.0 
-gram   0    29       0.0   
-gram   0    30       0.0   
-gram   0    31       0.0   
-gram   0    32       0.0   
-gram   0    33       50.0  
-gram   0    34       50.0  
-gram   0    35       50.0  
-gram   0    36       50.0  
-gram   0    37       50.0  
-gram   0    38       50.0  
-gram   0    39       50.0  
-gram   0    40       50.0  
-gram   0    41       50.0  
-gram   0    42       50.0  
-gram   0    43       50.0  
-gram   0    44       50.0  
-gram   0    45       50.0  
-gram   0    46       50.0  
-gram   0    47       50.0  
-gram   0    48       50.0  
-gram   0    49       50.0  
-gram   0    50       50.0  
+time curve_id val   
+---- -------- ----- 
+0    1        0.0   
+0    2        0.0   
+0    3        0.0   
+0    4        -80.0 
+0    5        40.0  
+0    6        -40.0 
+0    7        -40.0 
+0    8        40.0  
+0    9        -80.0 
+0    10       -80.0 
+0    11       -40.0 
+0    12       -80.0 
+0    13       0.0   
+0    14       0.0   
+0    15       0.0   
+0    16       0.0   
+0    17       0.0   
+0    18       0.0   
+0    19       0.0   
+0    20       -80.0 
+0    21       40.0  
+0    22       -40.0 
+0    23       -40.0 
+0    24       40.0  
+0    25       -80.0 
+0    26       -80.0 
+0    27       -40.0 
+0    28       -80.0 
+0    29       0.0   
+0    30       0.0   
+0    31       0.0   
+0    32       0.0   
+0    33       50.0  
+0    34       50.0  
+0    35       50.0  
+0    36       50.0  
+0    37       50.0  
+0    38       50.0  
+0    39       50.0  
+0    40       50.0  
+0    41       50.0  
+0    42       50.0  
+0    43       50.0  
+0    44       50.0  
+0    45       50.0  
+0    46       50.0  
+0    47       50.0  
+0    48       50.0  
+0    49       50.0  
+0    50       50.0  
     }
 
     test init-2.6 {initial contents: gram_n} -setup {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_n WHERE object='gram'
+            SELECT * FROM gram_n
         }]
     } -cleanup {
         cleanup
     } -result {
-n_id object n  sat   sat0  
----- ------ -- ----- ----- 
-1    gram   N1 -30.0 -30.0 
-2    gram   N2 -30.0 -30.0 
+n_id n  sat   sat0  
+---- -- ----- ----- 
+1    N1 -30.0 -30.0 
+2    N2 -30.0 -30.0 
     }
 
     test init-2.7 {initial contents: gram_g} -setup {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_g WHERE object='gram'
+            SELECT * FROM gram_g
             ORDER BY g_id
         }]
     } -cleanup {
         cleanup
     } -result {
-g_id object g     gtype sat   sat0  
----- ------ ----- ----- ----- ----- 
-1    gram   KURD  CIV   -20.0 -20.0 
-2    gram   SHIA  CIV   0.0   0.0   
-3    gram   SUNN  CIV   -70.0 -70.0 
-4    gram   BLUE  FRC   0.0   0.0   
-5    gram   BRIT  FRC   0.0   0.0   
-6    gram   OPFOR FRC   0.0   0.0   
-7    gram   ORGA  ORG   0.0   0.0   
-8    gram   ORGB  ORG   0.0   0.0   
+g_id g     gtype sat   sat0  
+---- ----- ----- ----- ----- 
+1    KURD  CIV   -20.0 -20.0 
+2    SHIA  CIV   0.0   0.0   
+3    SUNN  CIV   -70.0 -70.0 
+4    BLUE  FRC   0.0   0.0   
+5    BRIT  FRC   0.0   0.0   
+6    OPFOR FRC   0.0   0.0   
+7    ORGA  ORG   0.0   0.0   
+8    ORGB  ORG   0.0   0.0   
     }
 
     test init-2.8 {initial contents: gram_c} -setup {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_c WHERE object='gram'
+            SELECT * FROM gram_c
             ORDER BY c_id
         }]
     } -cleanup {
         cleanup
     } -result {
-c_id object c   gtype sat                 sat0                
----- ------ --- ----- ------------------- ------------------- 
-1    gram   AUT CIV   -13.333333333333334 -13.333333333333334 
-2    gram   CUL CIV   -40.0               -40.0               
-3    gram   QOL CIV   -26.666666666666668 -26.666666666666668 
-4    gram   SFT CIV   -40.0               -40.0               
-5    gram   CAS ORG   0.0                 0.0                 
-6    gram   SVC ORG   0.0                 0.0                 
+c_id c   gtype sat                 sat0                
+---- --- ----- ------------------- ------------------- 
+1    AUT CIV   -13.333333333333334 -13.333333333333334 
+2    CUL CIV   -40.0               -40.0               
+3    QOL CIV   -26.666666666666668 -26.666666666666668 
+4    SFT CIV   -40.0               -40.0               
+5    CAS ORG   0.0                 0.0                 
+6    SVC ORG   0.0                 0.0                 
     }
 
     test init-2.9 {initial contents: gram_mn} -setup {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_mn WHERE object='gram'
+            SELECT * FROM gram_mn
             ORDER BY mn_id
         }]
     } -cleanup {
         cleanup
     } -result {
-mn_id object m  n  proximity effects_delay 
------ ------ -- -- --------- ------------- 
-1     gram   N1 N1 0         0.0           
-2     gram   N1 N2 2         0.0           
-3     gram   N2 N1 2         0.0           
-4     gram   N2 N2 0         0.0           
+mn_id m  n  proximity effects_delay 
+----- -- -- --------- ------------- 
+1     N1 N1 0         0.0           
+2     N1 N2 2         0.0           
+3     N2 N1 2         0.0           
+4     N2 N2 0         0.0           
     }
 
     test init-2.10 {initial contents: gram_ng} -setup {
@@ -924,24 +913,24 @@ mn_id object m  n  proximity effects_delay
     } -body {
         # OK
         pprint [rdb query {
-            SELECT * FROM gram_ng WHERE object='gram'
+            SELECT * FROM gram_ng
             ORDER BY ng_id
         }]
     } -cleanup {
         cleanup
     } -result {
-ng_id object n  g    population rollup_weight effects_factor sat_tracked total_saliency sat   sat0  
------ ------ -- ---- ---------- ------------- -------------- ----------- -------------- ----- ----- 
-1     gram   N1 KURD 10000      1.0           1.0            1           4.0            -20.0 -20.0 
-2     gram   N1 SHIA 10000      1.0           1.0            1           4.0            0.0   0.0   
-3     gram   N1 SUNN 10000      1.0           1.0            1           4.0            -70.0 -70.0 
-4     gram   N1 ORGA 0          1.0           1.0            1           2.0            0.0   0.0   
-5     gram   N1 ORGB 0          1.0           1.0            1           2.0            0.0   0.0   
-6     gram   N2 KURD 10000      1.0           1.0            1           4.0            -20.0 -20.0 
-7     gram   N2 SHIA 10000      1.0           1.0            1           4.0            0.0   0.0   
-8     gram   N2 SUNN 10000      1.0           1.0            1           4.0            -70.0 -70.0 
-9     gram   N2 ORGA 0          1.0           1.0            1           2.0            0.0   0.0   
-10    gram   N2 ORGB 0          1.0           1.0            1           2.0            0.0   0.0   
+ng_id n  g    population rollup_weight effects_factor sat_tracked total_saliency sat   sat0  
+----- -- ---- ---------- ------------- -------------- ----------- -------------- ----- ----- 
+1     N1 KURD 10000      1.0           1.0            1           4.0            -20.0 -20.0 
+2     N1 SHIA 10000      1.0           1.0            1           4.0            0.0   0.0   
+3     N1 SUNN 10000      1.0           1.0            1           4.0            -70.0 -70.0 
+4     N1 ORGA 0          1.0           1.0            1           2.0            0.0   0.0   
+5     N1 ORGB 0          1.0           1.0            1           2.0            0.0   0.0   
+6     N2 KURD 10000      1.0           1.0            1           4.0            -20.0 -20.0 
+7     N2 SHIA 10000      1.0           1.0            1           4.0            0.0   0.0   
+8     N2 SUNN 10000      1.0           1.0            1           4.0            -70.0 -70.0 
+9     N2 ORGA 0          1.0           1.0            1           2.0            0.0   0.0   
+10    N2 ORGB 0          1.0           1.0            1           2.0            0.0   0.0   
     }
 
     test init-2.11 {initial contents: gram_nc} -setup {
@@ -949,168 +938,168 @@ ng_id object n  g    population rollup_weight effects_factor sat_tracked total_s
     } -body {
         # OK
         pprint [rdb query {
-            SELECT * FROM gram_nc WHERE object='gram'
+            SELECT * FROM gram_nc
             ORDER BY nc_id
         }]
     } -cleanup {
         cleanup
     } -result {
-nc_id object n  c   sat                 sat0                
------ ------ -- --- ------------------- ------------------- 
-1     gram   N1 AUT -13.333333333333334 -13.333333333333334 
-2     gram   N1 CUL -40.0               -40.0               
-3     gram   N1 QOL -26.666666666666668 -26.666666666666668 
-4     gram   N1 SFT -40.0               -40.0               
-5     gram   N1 CAS 0.0                 0.0                 
-6     gram   N1 SVC 0.0                 0.0                 
-7     gram   N2 AUT -13.333333333333334 -13.333333333333334 
-8     gram   N2 CUL -40.0               -40.0               
-9     gram   N2 QOL -26.666666666666668 -26.666666666666668 
-10    gram   N2 SFT -40.0               -40.0               
-11    gram   N2 CAS 0.0                 0.0                 
-12    gram   N2 SVC 0.0                 0.0                 
+nc_id n  c   sat                 sat0                
+----- -- --- ------------------- ------------------- 
+1     N1 AUT -13.333333333333334 -13.333333333333334 
+2     N1 CUL -40.0               -40.0               
+3     N1 QOL -26.666666666666668 -26.666666666666668 
+4     N1 SFT -40.0               -40.0               
+5     N1 CAS 0.0                 0.0                 
+6     N1 SVC 0.0                 0.0                 
+7     N2 AUT -13.333333333333334 -13.333333333333334 
+8     N2 CUL -40.0               -40.0               
+9     N2 QOL -26.666666666666668 -26.666666666666668 
+10    N2 SFT -40.0               -40.0               
+11    N2 CAS 0.0                 0.0                 
+12    N2 SVC 0.0                 0.0                 
     }
 
     test init-2.12 {initial contents: gram_nfg} -setup {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_nfg WHERE object='gram'
+            SELECT * FROM gram_nfg
             ORDER BY nfg_id
         }]
     } -cleanup {
         cleanup
     } -result {
-nfg_id curve_id object n  f     g     rel  
------- -------- ------ -- ----- ----- ---- 
-1               gram   N1 BLUE  BLUE  1.0  
-2               gram   N1 BLUE  BRIT  0.8  
-3               gram   N1 BLUE  KURD  0.0  
-4               gram   N1 BLUE  OPFOR -0.8 
-5               gram   N1 BLUE  ORGA  0.0  
-6               gram   N1 BLUE  ORGB  0.0  
-7               gram   N1 BLUE  SHIA  0.0  
-8               gram   N1 BLUE  SUNN  0.0  
-9               gram   N1 BRIT  BLUE  0.8  
-10              gram   N1 BRIT  BRIT  1.0  
-11              gram   N1 BRIT  KURD  0.0  
-12              gram   N1 BRIT  OPFOR -0.8 
-13              gram   N1 BRIT  ORGA  0.0  
-14              gram   N1 BRIT  ORGB  0.0  
-15              gram   N1 BRIT  SHIA  0.0  
-16              gram   N1 BRIT  SUNN  0.0  
-17     33       gram   N1 KURD  BLUE  0.6  
-18     34       gram   N1 KURD  BRIT  0.6  
-19              gram   N1 KURD  KURD  1.0  
-20     35       gram   N1 KURD  OPFOR -0.6 
-21              gram   N1 KURD  ORGA  0.0  
-22              gram   N1 KURD  ORGB  0.0  
-23              gram   N1 KURD  SHIA  0.6  
-24              gram   N1 KURD  SUNN  -0.6 
-25              gram   N1 OPFOR BLUE  -0.8 
-26              gram   N1 OPFOR BRIT  -0.8 
-27              gram   N1 OPFOR KURD  0.0  
-28              gram   N1 OPFOR OPFOR 1.0  
-29              gram   N1 OPFOR ORGA  0.0  
-30              gram   N1 OPFOR ORGB  0.0  
-31              gram   N1 OPFOR SHIA  0.0  
-32              gram   N1 OPFOR SUNN  0.0  
-33              gram   N1 ORGA  BLUE  0.0  
-34              gram   N1 ORGA  BRIT  0.0  
-35              gram   N1 ORGA  KURD  0.0  
-36              gram   N1 ORGA  OPFOR 0.0  
-37              gram   N1 ORGA  ORGA  1.0  
-38              gram   N1 ORGA  ORGB  0.0  
-39              gram   N1 ORGA  SHIA  0.0  
-40              gram   N1 ORGA  SUNN  0.0  
-41              gram   N1 ORGB  BLUE  0.0  
-42              gram   N1 ORGB  BRIT  0.0  
-43              gram   N1 ORGB  KURD  0.0  
-44              gram   N1 ORGB  OPFOR 0.0  
-45              gram   N1 ORGB  ORGA  0.0  
-46              gram   N1 ORGB  ORGB  1.0  
-47              gram   N1 ORGB  SHIA  0.0  
-48              gram   N1 ORGB  SUNN  0.0  
-49     36       gram   N1 SHIA  BLUE  0.3  
-50     37       gram   N1 SHIA  BRIT  0.3  
-51              gram   N1 SHIA  KURD  0.6  
-52     38       gram   N1 SHIA  OPFOR -0.3 
-53              gram   N1 SHIA  ORGA  0.0  
-54              gram   N1 SHIA  ORGB  0.0  
-55              gram   N1 SHIA  SHIA  1.0  
-56              gram   N1 SHIA  SUNN  0.0  
-57     39       gram   N1 SUNN  BLUE  -0.6 
-58     40       gram   N1 SUNN  BRIT  -0.6 
-59              gram   N1 SUNN  KURD  -0.6 
-60     41       gram   N1 SUNN  OPFOR 0.6  
-61              gram   N1 SUNN  ORGA  0.0  
-62              gram   N1 SUNN  ORGB  0.0  
-63              gram   N1 SUNN  SHIA  -0.3 
-64              gram   N1 SUNN  SUNN  1.0  
-65              gram   N2 BLUE  BLUE  1.0  
-66              gram   N2 BLUE  BRIT  0.8  
-67              gram   N2 BLUE  KURD  0.0  
-68              gram   N2 BLUE  OPFOR -0.8 
-69              gram   N2 BLUE  ORGA  0.0  
-70              gram   N2 BLUE  ORGB  0.0  
-71              gram   N2 BLUE  SHIA  0.0  
-72              gram   N2 BLUE  SUNN  0.0  
-73              gram   N2 BRIT  BLUE  0.8  
-74              gram   N2 BRIT  BRIT  1.0  
-75              gram   N2 BRIT  KURD  0.0  
-76              gram   N2 BRIT  OPFOR -0.8 
-77              gram   N2 BRIT  ORGA  0.0  
-78              gram   N2 BRIT  ORGB  0.0  
-79              gram   N2 BRIT  SHIA  0.0  
-80              gram   N2 BRIT  SUNN  0.0  
-81     42       gram   N2 KURD  BLUE  0.6  
-82     43       gram   N2 KURD  BRIT  0.6  
-83              gram   N2 KURD  KURD  1.0  
-84     44       gram   N2 KURD  OPFOR -0.6 
-85              gram   N2 KURD  ORGA  0.0  
-86              gram   N2 KURD  ORGB  0.0  
-87              gram   N2 KURD  SHIA  0.6  
-88              gram   N2 KURD  SUNN  -0.6 
-89              gram   N2 OPFOR BLUE  -0.8 
-90              gram   N2 OPFOR BRIT  -0.8 
-91              gram   N2 OPFOR KURD  0.0  
-92              gram   N2 OPFOR OPFOR 1.0  
-93              gram   N2 OPFOR ORGA  0.0  
-94              gram   N2 OPFOR ORGB  0.0  
-95              gram   N2 OPFOR SHIA  0.0  
-96              gram   N2 OPFOR SUNN  0.0  
-97              gram   N2 ORGA  BLUE  0.0  
-98              gram   N2 ORGA  BRIT  0.0  
-99              gram   N2 ORGA  KURD  0.0  
-100             gram   N2 ORGA  OPFOR 0.0  
-101             gram   N2 ORGA  ORGA  1.0  
-102             gram   N2 ORGA  ORGB  0.0  
-103             gram   N2 ORGA  SHIA  0.0  
-104             gram   N2 ORGA  SUNN  0.0  
-105             gram   N2 ORGB  BLUE  0.0  
-106             gram   N2 ORGB  BRIT  0.0  
-107             gram   N2 ORGB  KURD  0.0  
-108             gram   N2 ORGB  OPFOR 0.0  
-109             gram   N2 ORGB  ORGA  0.0  
-110             gram   N2 ORGB  ORGB  1.0  
-111             gram   N2 ORGB  SHIA  0.0  
-112             gram   N2 ORGB  SUNN  0.0  
-113    45       gram   N2 SHIA  BLUE  0.3  
-114    46       gram   N2 SHIA  BRIT  0.3  
-115             gram   N2 SHIA  KURD  0.6  
-116    47       gram   N2 SHIA  OPFOR -0.3 
-117             gram   N2 SHIA  ORGA  0.0  
-118             gram   N2 SHIA  ORGB  0.0  
-119             gram   N2 SHIA  SHIA  1.0  
-120             gram   N2 SHIA  SUNN  0.0  
-121    48       gram   N2 SUNN  BLUE  -0.6 
-122    49       gram   N2 SUNN  BRIT  -0.6 
-123             gram   N2 SUNN  KURD  -0.6 
-124    50       gram   N2 SUNN  OPFOR 0.6  
-125             gram   N2 SUNN  ORGA  0.0  
-126             gram   N2 SUNN  ORGB  0.0  
-127             gram   N2 SUNN  SHIA  -0.3 
-128             gram   N2 SUNN  SUNN  1.0  
+nfg_id curve_id n  f     g     rel  
+------ -------- -- ----- ----- ---- 
+1               N1 BLUE  BLUE  1.0  
+2               N1 BLUE  BRIT  0.8  
+3               N1 BLUE  KURD  0.0  
+4               N1 BLUE  OPFOR -0.8 
+5               N1 BLUE  ORGA  0.0  
+6               N1 BLUE  ORGB  0.0  
+7               N1 BLUE  SHIA  0.0  
+8               N1 BLUE  SUNN  0.0  
+9               N1 BRIT  BLUE  0.8  
+10              N1 BRIT  BRIT  1.0  
+11              N1 BRIT  KURD  0.0  
+12              N1 BRIT  OPFOR -0.8 
+13              N1 BRIT  ORGA  0.0  
+14              N1 BRIT  ORGB  0.0  
+15              N1 BRIT  SHIA  0.0  
+16              N1 BRIT  SUNN  0.0  
+17     33       N1 KURD  BLUE  0.6  
+18     34       N1 KURD  BRIT  0.6  
+19              N1 KURD  KURD  1.0  
+20     35       N1 KURD  OPFOR -0.6 
+21              N1 KURD  ORGA  0.0  
+22              N1 KURD  ORGB  0.0  
+23              N1 KURD  SHIA  0.6  
+24              N1 KURD  SUNN  -0.6 
+25              N1 OPFOR BLUE  -0.8 
+26              N1 OPFOR BRIT  -0.8 
+27              N1 OPFOR KURD  0.0  
+28              N1 OPFOR OPFOR 1.0  
+29              N1 OPFOR ORGA  0.0  
+30              N1 OPFOR ORGB  0.0  
+31              N1 OPFOR SHIA  0.0  
+32              N1 OPFOR SUNN  0.0  
+33              N1 ORGA  BLUE  0.0  
+34              N1 ORGA  BRIT  0.0  
+35              N1 ORGA  KURD  0.0  
+36              N1 ORGA  OPFOR 0.0  
+37              N1 ORGA  ORGA  1.0  
+38              N1 ORGA  ORGB  0.0  
+39              N1 ORGA  SHIA  0.0  
+40              N1 ORGA  SUNN  0.0  
+41              N1 ORGB  BLUE  0.0  
+42              N1 ORGB  BRIT  0.0  
+43              N1 ORGB  KURD  0.0  
+44              N1 ORGB  OPFOR 0.0  
+45              N1 ORGB  ORGA  0.0  
+46              N1 ORGB  ORGB  1.0  
+47              N1 ORGB  SHIA  0.0  
+48              N1 ORGB  SUNN  0.0  
+49     36       N1 SHIA  BLUE  0.3  
+50     37       N1 SHIA  BRIT  0.3  
+51              N1 SHIA  KURD  0.6  
+52     38       N1 SHIA  OPFOR -0.3 
+53              N1 SHIA  ORGA  0.0  
+54              N1 SHIA  ORGB  0.0  
+55              N1 SHIA  SHIA  1.0  
+56              N1 SHIA  SUNN  0.0  
+57     39       N1 SUNN  BLUE  -0.6 
+58     40       N1 SUNN  BRIT  -0.6 
+59              N1 SUNN  KURD  -0.6 
+60     41       N1 SUNN  OPFOR 0.6  
+61              N1 SUNN  ORGA  0.0  
+62              N1 SUNN  ORGB  0.0  
+63              N1 SUNN  SHIA  -0.3 
+64              N1 SUNN  SUNN  1.0  
+65              N2 BLUE  BLUE  1.0  
+66              N2 BLUE  BRIT  0.8  
+67              N2 BLUE  KURD  0.0  
+68              N2 BLUE  OPFOR -0.8 
+69              N2 BLUE  ORGA  0.0  
+70              N2 BLUE  ORGB  0.0  
+71              N2 BLUE  SHIA  0.0  
+72              N2 BLUE  SUNN  0.0  
+73              N2 BRIT  BLUE  0.8  
+74              N2 BRIT  BRIT  1.0  
+75              N2 BRIT  KURD  0.0  
+76              N2 BRIT  OPFOR -0.8 
+77              N2 BRIT  ORGA  0.0  
+78              N2 BRIT  ORGB  0.0  
+79              N2 BRIT  SHIA  0.0  
+80              N2 BRIT  SUNN  0.0  
+81     42       N2 KURD  BLUE  0.6  
+82     43       N2 KURD  BRIT  0.6  
+83              N2 KURD  KURD  1.0  
+84     44       N2 KURD  OPFOR -0.6 
+85              N2 KURD  ORGA  0.0  
+86              N2 KURD  ORGB  0.0  
+87              N2 KURD  SHIA  0.6  
+88              N2 KURD  SUNN  -0.6 
+89              N2 OPFOR BLUE  -0.8 
+90              N2 OPFOR BRIT  -0.8 
+91              N2 OPFOR KURD  0.0  
+92              N2 OPFOR OPFOR 1.0  
+93              N2 OPFOR ORGA  0.0  
+94              N2 OPFOR ORGB  0.0  
+95              N2 OPFOR SHIA  0.0  
+96              N2 OPFOR SUNN  0.0  
+97              N2 ORGA  BLUE  0.0  
+98              N2 ORGA  BRIT  0.0  
+99              N2 ORGA  KURD  0.0  
+100             N2 ORGA  OPFOR 0.0  
+101             N2 ORGA  ORGA  1.0  
+102             N2 ORGA  ORGB  0.0  
+103             N2 ORGA  SHIA  0.0  
+104             N2 ORGA  SUNN  0.0  
+105             N2 ORGB  BLUE  0.0  
+106             N2 ORGB  BRIT  0.0  
+107             N2 ORGB  KURD  0.0  
+108             N2 ORGB  OPFOR 0.0  
+109             N2 ORGB  ORGA  0.0  
+110             N2 ORGB  ORGB  1.0  
+111             N2 ORGB  SHIA  0.0  
+112             N2 ORGB  SUNN  0.0  
+113    45       N2 SHIA  BLUE  0.3  
+114    46       N2 SHIA  BRIT  0.3  
+115             N2 SHIA  KURD  0.6  
+116    47       N2 SHIA  OPFOR -0.3 
+117             N2 SHIA  ORGA  0.0  
+118             N2 SHIA  ORGB  0.0  
+119             N2 SHIA  SHIA  1.0  
+120             N2 SHIA  SUNN  0.0  
+121    48       N2 SUNN  BLUE  -0.6 
+122    49       N2 SUNN  BRIT  -0.6 
+123             N2 SUNN  KURD  -0.6 
+124    50       N2 SUNN  OPFOR 0.6  
+125             N2 SUNN  ORGA  0.0  
+126             N2 SUNN  ORGB  0.0  
+127             N2 SUNN  SHIA  -0.3 
+128             N2 SUNN  SUNN  1.0  
     }
 
     test init-2.13 {initial contents: gram_gc} -setup {
@@ -1118,76 +1107,76 @@ nfg_id curve_id object n  f     g     rel
     } -body {
         # OK
         pprint [rdb query {
-            SELECT * FROM gram_gc WHERE object='gram'
+            SELECT * FROM gram_gc
             ORDER BY gc_id
         }]
     } -cleanup {
         cleanup
     } -result {
-gc_id object g    c   sat   sat0  slope 
------ ------ ---- --- ----- ----- ----- 
-1     gram   KURD AUT 0.0   0.0   0.0   
-2     gram   KURD CUL 0.0   0.0   0.0   
-3     gram   KURD QOL 0.0   0.0   0.0   
-4     gram   KURD SFT -80.0 -80.0 0.0   
-5     gram   SHIA AUT 40.0  40.0  0.0   
-6     gram   SHIA CUL -40.0 -40.0 0.0   
-7     gram   SHIA QOL -40.0 -40.0 0.0   
-8     gram   SHIA SFT 40.0  40.0  0.0   
-9     gram   SUNN AUT -80.0 -80.0 0.0   
-10    gram   SUNN CUL -80.0 -80.0 0.0   
-11    gram   SUNN QOL -40.0 -40.0 0.0   
-12    gram   SUNN SFT -80.0 -80.0 0.0   
-13    gram   ORGA CAS 0.0   0.0   0.0   
-14    gram   ORGA SVC 0.0   0.0   0.0   
-15    gram   ORGB CAS 0.0   0.0   0.0   
-16    gram   ORGB SVC 0.0   0.0   0.0   
+gc_id g    c   sat   sat0  slope 
+----- ---- --- ----- ----- ----- 
+1     KURD AUT 0.0   0.0   0.0   
+2     KURD CUL 0.0   0.0   0.0   
+3     KURD QOL 0.0   0.0   0.0   
+4     KURD SFT -80.0 -80.0 0.0   
+5     SHIA AUT 40.0  40.0  0.0   
+6     SHIA CUL -40.0 -40.0 0.0   
+7     SHIA QOL -40.0 -40.0 0.0   
+8     SHIA SFT 40.0  40.0  0.0   
+9     SUNN AUT -80.0 -80.0 0.0   
+10    SUNN CUL -80.0 -80.0 0.0   
+11    SUNN QOL -40.0 -40.0 0.0   
+12    SUNN SFT -80.0 -80.0 0.0   
+13    ORGA CAS 0.0   0.0   0.0   
+14    ORGA SVC 0.0   0.0   0.0   
+15    ORGB CAS 0.0   0.0   0.0   
+16    ORGB SVC 0.0   0.0   0.0   
     }
 
     test init-2.14 {initial contents: gram_ngc} -setup {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_ngc WHERE object='gram'
+            SELECT * FROM gram_ngc
             ORDER BY ngc_id
         }]
     } -cleanup {
         cleanup
     } -result {
-ngc_id ng_id curve_id object n  g    c   gtype saliency trend 
------- ----- -------- ------ -- ---- --- ----- -------- ----- 
-1      1     1        gram   N1 KURD AUT CIV   1.0      -1.0  
-2      1     2        gram   N1 KURD CUL CIV   1.0      -1.0  
-3      1     3        gram   N1 KURD QOL CIV   1.0      -4.0  
-4      1     4        gram   N1 KURD SFT CIV   1.0      -4.0  
-5      2     5        gram   N1 SHIA AUT CIV   1.0      4.0   
-6      2     6        gram   N1 SHIA CUL CIV   1.0      -1.0  
-7      2     7        gram   N1 SHIA QOL CIV   1.0      -4.0  
-8      2     8        gram   N1 SHIA SFT CIV   1.0      4.0   
-9      3     9        gram   N1 SUNN AUT CIV   1.0      -8.0  
-10     3     10       gram   N1 SUNN CUL CIV   1.0      -4.0  
-11     3     11       gram   N1 SUNN QOL CIV   1.0      -8.0  
-12     3     12       gram   N1 SUNN SFT CIV   1.0      -8.0  
-13     4     13       gram   N1 ORGA CAS ORG   1.0      0.0   
-14     4     14       gram   N1 ORGA SVC ORG   1.0      0.0   
-15     5     15       gram   N1 ORGB CAS ORG   1.0      0.0   
-16     5     16       gram   N1 ORGB SVC ORG   1.0      0.0   
-17     6     17       gram   N2 KURD AUT CIV   1.0      -1.0  
-18     6     18       gram   N2 KURD CUL CIV   1.0      -1.0  
-19     6     19       gram   N2 KURD QOL CIV   1.0      -4.0  
-20     6     20       gram   N2 KURD SFT CIV   1.0      -4.0  
-21     7     21       gram   N2 SHIA AUT CIV   1.0      4.0   
-22     7     22       gram   N2 SHIA CUL CIV   1.0      -1.0  
-23     7     23       gram   N2 SHIA QOL CIV   1.0      -4.0  
-24     7     24       gram   N2 SHIA SFT CIV   1.0      4.0   
-25     8     25       gram   N2 SUNN AUT CIV   1.0      -8.0  
-26     8     26       gram   N2 SUNN CUL CIV   1.0      -4.0  
-27     8     27       gram   N2 SUNN QOL CIV   1.0      -8.0  
-28     8     28       gram   N2 SUNN SFT CIV   1.0      -8.0  
-29     9     29       gram   N2 ORGA CAS ORG   1.0      0.0   
-30     9     30       gram   N2 ORGA SVC ORG   1.0      0.0   
-31     10    31       gram   N2 ORGB CAS ORG   1.0      0.0   
-32     10    32       gram   N2 ORGB SVC ORG   1.0      0.0   
+ngc_id ng_id curve_id n  g    c   gtype saliency trend 
+------ ----- -------- -- ---- --- ----- -------- ----- 
+1      1     1        N1 KURD AUT CIV   1.0      -1.0  
+2      1     2        N1 KURD CUL CIV   1.0      -1.0  
+3      1     3        N1 KURD QOL CIV   1.0      -4.0  
+4      1     4        N1 KURD SFT CIV   1.0      -4.0  
+5      2     5        N1 SHIA AUT CIV   1.0      4.0   
+6      2     6        N1 SHIA CUL CIV   1.0      -1.0  
+7      2     7        N1 SHIA QOL CIV   1.0      -4.0  
+8      2     8        N1 SHIA SFT CIV   1.0      4.0   
+9      3     9        N1 SUNN AUT CIV   1.0      -8.0  
+10     3     10       N1 SUNN CUL CIV   1.0      -4.0  
+11     3     11       N1 SUNN QOL CIV   1.0      -8.0  
+12     3     12       N1 SUNN SFT CIV   1.0      -8.0  
+13     4     13       N1 ORGA CAS ORG   1.0      0.0   
+14     4     14       N1 ORGA SVC ORG   1.0      0.0   
+15     5     15       N1 ORGB CAS ORG   1.0      0.0   
+16     5     16       N1 ORGB SVC ORG   1.0      0.0   
+17     6     17       N2 KURD AUT CIV   1.0      -1.0  
+18     6     18       N2 KURD CUL CIV   1.0      -1.0  
+19     6     19       N2 KURD QOL CIV   1.0      -4.0  
+20     6     20       N2 KURD SFT CIV   1.0      -4.0  
+21     7     21       N2 SHIA AUT CIV   1.0      4.0   
+22     7     22       N2 SHIA CUL CIV   1.0      -1.0  
+23     7     23       N2 SHIA QOL CIV   1.0      -4.0  
+24     7     24       N2 SHIA SFT CIV   1.0      4.0   
+25     8     25       N2 SUNN AUT CIV   1.0      -8.0  
+26     8     26       N2 SUNN CUL CIV   1.0      -4.0  
+27     8     27       N2 SUNN QOL CIV   1.0      -8.0  
+28     8     28       N2 SUNN SFT CIV   1.0      -8.0  
+29     9     29       N2 ORGA CAS ORG   1.0      0.0   
+30     9     30       N2 ORGA SVC ORG   1.0      0.0   
+31     10    31       N2 ORGB CAS ORG   1.0      0.0   
+32     10    32       N2 ORGB SVC ORG   1.0      0.0   
     }
 
 
@@ -1195,302 +1184,302 @@ ngc_id ng_id curve_id object n  g    c   gtype saliency trend
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_sat WHERE object='gram'
+            SELECT * FROM gram_sat
             ORDER BY ngc_id
         }]
     } -cleanup {
         cleanup
     } -result {
-object ngc_id ng_id n  g    c   gtype saliency trend curve_id sat0  sat   delta slope 
------- ------ ----- -- ---- --- ----- -------- ----- -------- ----- ----- ----- ----- 
-gram   1      1     N1 KURD AUT CIV   1.0      -1.0  1        0.0   0.0   0.0   0.0   
-gram   2      1     N1 KURD CUL CIV   1.0      -1.0  2        0.0   0.0   0.0   0.0   
-gram   3      1     N1 KURD QOL CIV   1.0      -4.0  3        0.0   0.0   0.0   0.0   
-gram   4      1     N1 KURD SFT CIV   1.0      -4.0  4        -80.0 -80.0 0.0   0.0   
-gram   5      2     N1 SHIA AUT CIV   1.0      4.0   5        40.0  40.0  0.0   0.0   
-gram   6      2     N1 SHIA CUL CIV   1.0      -1.0  6        -40.0 -40.0 0.0   0.0   
-gram   7      2     N1 SHIA QOL CIV   1.0      -4.0  7        -40.0 -40.0 0.0   0.0   
-gram   8      2     N1 SHIA SFT CIV   1.0      4.0   8        40.0  40.0  0.0   0.0   
-gram   9      3     N1 SUNN AUT CIV   1.0      -8.0  9        -80.0 -80.0 0.0   0.0   
-gram   10     3     N1 SUNN CUL CIV   1.0      -4.0  10       -80.0 -80.0 0.0   0.0   
-gram   11     3     N1 SUNN QOL CIV   1.0      -8.0  11       -40.0 -40.0 0.0   0.0   
-gram   12     3     N1 SUNN SFT CIV   1.0      -8.0  12       -80.0 -80.0 0.0   0.0   
-gram   13     4     N1 ORGA CAS ORG   1.0      0.0   13       0.0   0.0   0.0   0.0   
-gram   14     4     N1 ORGA SVC ORG   1.0      0.0   14       0.0   0.0   0.0   0.0   
-gram   15     5     N1 ORGB CAS ORG   1.0      0.0   15       0.0   0.0   0.0   0.0   
-gram   16     5     N1 ORGB SVC ORG   1.0      0.0   16       0.0   0.0   0.0   0.0   
-gram   17     6     N2 KURD AUT CIV   1.0      -1.0  17       0.0   0.0   0.0   0.0   
-gram   18     6     N2 KURD CUL CIV   1.0      -1.0  18       0.0   0.0   0.0   0.0   
-gram   19     6     N2 KURD QOL CIV   1.0      -4.0  19       0.0   0.0   0.0   0.0   
-gram   20     6     N2 KURD SFT CIV   1.0      -4.0  20       -80.0 -80.0 0.0   0.0   
-gram   21     7     N2 SHIA AUT CIV   1.0      4.0   21       40.0  40.0  0.0   0.0   
-gram   22     7     N2 SHIA CUL CIV   1.0      -1.0  22       -40.0 -40.0 0.0   0.0   
-gram   23     7     N2 SHIA QOL CIV   1.0      -4.0  23       -40.0 -40.0 0.0   0.0   
-gram   24     7     N2 SHIA SFT CIV   1.0      4.0   24       40.0  40.0  0.0   0.0   
-gram   25     8     N2 SUNN AUT CIV   1.0      -8.0  25       -80.0 -80.0 0.0   0.0   
-gram   26     8     N2 SUNN CUL CIV   1.0      -4.0  26       -80.0 -80.0 0.0   0.0   
-gram   27     8     N2 SUNN QOL CIV   1.0      -8.0  27       -40.0 -40.0 0.0   0.0   
-gram   28     8     N2 SUNN SFT CIV   1.0      -8.0  28       -80.0 -80.0 0.0   0.0   
-gram   29     9     N2 ORGA CAS ORG   1.0      0.0   29       0.0   0.0   0.0   0.0   
-gram   30     9     N2 ORGA SVC ORG   1.0      0.0   30       0.0   0.0   0.0   0.0   
-gram   31     10    N2 ORGB CAS ORG   1.0      0.0   31       0.0   0.0   0.0   0.0   
-gram   32     10    N2 ORGB SVC ORG   1.0      0.0   32       0.0   0.0   0.0   0.0   
+ngc_id ng_id n  g    c   gtype saliency trend curve_id sat0  sat   delta slope 
+------ ----- -- ---- --- ----- -------- ----- -------- ----- ----- ----- ----- 
+1      1     N1 KURD AUT CIV   1.0      -1.0  1        0.0   0.0   0.0   0.0   
+2      1     N1 KURD CUL CIV   1.0      -1.0  2        0.0   0.0   0.0   0.0   
+3      1     N1 KURD QOL CIV   1.0      -4.0  3        0.0   0.0   0.0   0.0   
+4      1     N1 KURD SFT CIV   1.0      -4.0  4        -80.0 -80.0 0.0   0.0   
+5      2     N1 SHIA AUT CIV   1.0      4.0   5        40.0  40.0  0.0   0.0   
+6      2     N1 SHIA CUL CIV   1.0      -1.0  6        -40.0 -40.0 0.0   0.0   
+7      2     N1 SHIA QOL CIV   1.0      -4.0  7        -40.0 -40.0 0.0   0.0   
+8      2     N1 SHIA SFT CIV   1.0      4.0   8        40.0  40.0  0.0   0.0   
+9      3     N1 SUNN AUT CIV   1.0      -8.0  9        -80.0 -80.0 0.0   0.0   
+10     3     N1 SUNN CUL CIV   1.0      -4.0  10       -80.0 -80.0 0.0   0.0   
+11     3     N1 SUNN QOL CIV   1.0      -8.0  11       -40.0 -40.0 0.0   0.0   
+12     3     N1 SUNN SFT CIV   1.0      -8.0  12       -80.0 -80.0 0.0   0.0   
+13     4     N1 ORGA CAS ORG   1.0      0.0   13       0.0   0.0   0.0   0.0   
+14     4     N1 ORGA SVC ORG   1.0      0.0   14       0.0   0.0   0.0   0.0   
+15     5     N1 ORGB CAS ORG   1.0      0.0   15       0.0   0.0   0.0   0.0   
+16     5     N1 ORGB SVC ORG   1.0      0.0   16       0.0   0.0   0.0   0.0   
+17     6     N2 KURD AUT CIV   1.0      -1.0  17       0.0   0.0   0.0   0.0   
+18     6     N2 KURD CUL CIV   1.0      -1.0  18       0.0   0.0   0.0   0.0   
+19     6     N2 KURD QOL CIV   1.0      -4.0  19       0.0   0.0   0.0   0.0   
+20     6     N2 KURD SFT CIV   1.0      -4.0  20       -80.0 -80.0 0.0   0.0   
+21     7     N2 SHIA AUT CIV   1.0      4.0   21       40.0  40.0  0.0   0.0   
+22     7     N2 SHIA CUL CIV   1.0      -1.0  22       -40.0 -40.0 0.0   0.0   
+23     7     N2 SHIA QOL CIV   1.0      -4.0  23       -40.0 -40.0 0.0   0.0   
+24     7     N2 SHIA SFT CIV   1.0      4.0   24       40.0  40.0  0.0   0.0   
+25     8     N2 SUNN AUT CIV   1.0      -8.0  25       -80.0 -80.0 0.0   0.0   
+26     8     N2 SUNN CUL CIV   1.0      -4.0  26       -80.0 -80.0 0.0   0.0   
+27     8     N2 SUNN QOL CIV   1.0      -8.0  27       -40.0 -40.0 0.0   0.0   
+28     8     N2 SUNN SFT CIV   1.0      -8.0  28       -80.0 -80.0 0.0   0.0   
+29     9     N2 ORGA CAS ORG   1.0      0.0   29       0.0   0.0   0.0   0.0   
+30     9     N2 ORGA SVC ORG   1.0      0.0   30       0.0   0.0   0.0   0.0   
+31     10    N2 ORGB CAS ORG   1.0      0.0   31       0.0   0.0   0.0   0.0   
+32     10    N2 ORGB SVC ORG   1.0      0.0   32       0.0   0.0   0.0   0.0   
     }
 
     test init-2.16 {initial contents: gram_sat_influence} -setup {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_sat_influence WHERE object='gram'
-            ORDER BY object, direct_ng, influenced_ng
+            SELECT * FROM gram_sat_influence
+            ORDER BY direct_ng, influenced_ng
         }]
     } -cleanup {
         cleanup
     } -result {
-object direct_ng influenced_ng prox delay factor 
------- --------- ------------- ---- ----- ------ 
-gram   1         1             -1   0     1.0    
-gram   1         2             0    0     0.6    
-gram   1         3             0    0     -0.6   
-gram   1         6             2    0     1.0    
-gram   1         7             2    0     0.6    
-gram   1         8             2    0     -0.6   
-gram   2         1             0    0     0.6    
-gram   2         2             -1   0     1.0    
-gram   2         3             0    0     -0.3   
-gram   2         6             2    0     0.6    
-gram   2         7             2    0     1.0    
-gram   2         8             2    0     -0.3   
-gram   3         1             0    0     -0.6   
-gram   3         3             -1   0     1.0    
-gram   3         6             2    0     -0.6   
-gram   3         8             2    0     1.0    
-gram   4         4             -1   0     1.0    
-gram   4         9             2    0     1.0    
-gram   5         5             -1   0     1.0    
-gram   5         10            2    0     1.0    
-gram   6         1             2    0     1.0    
-gram   6         2             2    0     0.6    
-gram   6         3             2    0     -0.6   
-gram   6         6             -1   0     1.0    
-gram   6         7             0    0     0.6    
-gram   6         8             0    0     -0.6   
-gram   7         1             2    0     0.6    
-gram   7         2             2    0     1.0    
-gram   7         3             2    0     -0.3   
-gram   7         6             0    0     0.6    
-gram   7         7             -1   0     1.0    
-gram   7         8             0    0     -0.3   
-gram   8         1             2    0     -0.6   
-gram   8         3             2    0     1.0    
-gram   8         6             0    0     -0.6   
-gram   8         8             -1   0     1.0    
-gram   9         4             2    0     1.0    
-gram   9         9             -1   0     1.0    
-gram   10        5             2    0     1.0    
-gram   10        10            -1   0     1.0    
+direct_ng influenced_ng prox delay factor 
+--------- ------------- ---- ----- ------ 
+1         1             -1   0     1.0    
+1         2             0    0     0.6    
+1         3             0    0     -0.6   
+1         6             2    0     1.0    
+1         7             2    0     0.6    
+1         8             2    0     -0.6   
+2         1             0    0     0.6    
+2         2             -1   0     1.0    
+2         3             0    0     -0.3   
+2         6             2    0     0.6    
+2         7             2    0     1.0    
+2         8             2    0     -0.3   
+3         1             0    0     -0.6   
+3         3             -1   0     1.0    
+3         6             2    0     -0.6   
+3         8             2    0     1.0    
+4         4             -1   0     1.0    
+4         9             2    0     1.0    
+5         5             -1   0     1.0    
+5         10            2    0     1.0    
+6         1             2    0     1.0    
+6         2             2    0     0.6    
+6         3             2    0     -0.6   
+6         6             -1   0     1.0    
+6         7             0    0     0.6    
+6         8             0    0     -0.6   
+7         1             2    0     0.6    
+7         2             2    0     1.0    
+7         3             2    0     -0.3   
+7         6             0    0     0.6    
+7         7             -1   0     1.0    
+7         8             0    0     -0.3   
+8         1             2    0     -0.6   
+8         3             2    0     1.0    
+8         6             0    0     -0.6   
+8         8             -1   0     1.0    
+9         4             2    0     1.0    
+9         9             -1   0     1.0    
+10        5             2    0     1.0    
+10        10            -1   0     1.0    
     }
 
     test init-2.17 {initial contents: gram_sat_influence_view} -setup {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_sat_influence_view WHERE object='gram'
-            ORDER BY object, direct_ng, curve_id
+            SELECT * FROM gram_sat_influence_view
+            ORDER BY direct_ng, curve_id
         }]
     } -cleanup {
         cleanup
     } -result {
-object prox delay factor direct_ng direct_id dn dg   c   curve_id n  g    
------- ---- ----- ------ --------- --------- -- ---- --- -------- -- ---- 
-gram   -1   0     1.0    1         1         N1 KURD AUT 1        N1 KURD 
-gram   -1   0     1.0    1         2         N1 KURD CUL 2        N1 KURD 
-gram   -1   0     1.0    1         3         N1 KURD QOL 3        N1 KURD 
-gram   -1   0     1.0    1         4         N1 KURD SFT 4        N1 KURD 
-gram   0    0     0.6    1         1         N1 KURD AUT 5        N1 SHIA 
-gram   0    0     0.6    1         2         N1 KURD CUL 6        N1 SHIA 
-gram   0    0     0.6    1         3         N1 KURD QOL 7        N1 SHIA 
-gram   0    0     0.6    1         4         N1 KURD SFT 8        N1 SHIA 
-gram   0    0     -0.6   1         1         N1 KURD AUT 9        N1 SUNN 
-gram   0    0     -0.6   1         2         N1 KURD CUL 10       N1 SUNN 
-gram   0    0     -0.6   1         3         N1 KURD QOL 11       N1 SUNN 
-gram   0    0     -0.6   1         4         N1 KURD SFT 12       N1 SUNN 
-gram   2    0     1.0    1         1         N1 KURD AUT 17       N2 KURD 
-gram   2    0     1.0    1         2         N1 KURD CUL 18       N2 KURD 
-gram   2    0     1.0    1         3         N1 KURD QOL 19       N2 KURD 
-gram   2    0     1.0    1         4         N1 KURD SFT 20       N2 KURD 
-gram   2    0     0.6    1         1         N1 KURD AUT 21       N2 SHIA 
-gram   2    0     0.6    1         2         N1 KURD CUL 22       N2 SHIA 
-gram   2    0     0.6    1         3         N1 KURD QOL 23       N2 SHIA 
-gram   2    0     0.6    1         4         N1 KURD SFT 24       N2 SHIA 
-gram   2    0     -0.6   1         1         N1 KURD AUT 25       N2 SUNN 
-gram   2    0     -0.6   1         2         N1 KURD CUL 26       N2 SUNN 
-gram   2    0     -0.6   1         3         N1 KURD QOL 27       N2 SUNN 
-gram   2    0     -0.6   1         4         N1 KURD SFT 28       N2 SUNN 
-gram   0    0     0.6    2         5         N1 SHIA AUT 1        N1 KURD 
-gram   0    0     0.6    2         6         N1 SHIA CUL 2        N1 KURD 
-gram   0    0     0.6    2         7         N1 SHIA QOL 3        N1 KURD 
-gram   0    0     0.6    2         8         N1 SHIA SFT 4        N1 KURD 
-gram   -1   0     1.0    2         5         N1 SHIA AUT 5        N1 SHIA 
-gram   -1   0     1.0    2         6         N1 SHIA CUL 6        N1 SHIA 
-gram   -1   0     1.0    2         7         N1 SHIA QOL 7        N1 SHIA 
-gram   -1   0     1.0    2         8         N1 SHIA SFT 8        N1 SHIA 
-gram   0    0     -0.3   2         5         N1 SHIA AUT 9        N1 SUNN 
-gram   0    0     -0.3   2         6         N1 SHIA CUL 10       N1 SUNN 
-gram   0    0     -0.3   2         7         N1 SHIA QOL 11       N1 SUNN 
-gram   0    0     -0.3   2         8         N1 SHIA SFT 12       N1 SUNN 
-gram   2    0     0.6    2         5         N1 SHIA AUT 17       N2 KURD 
-gram   2    0     0.6    2         6         N1 SHIA CUL 18       N2 KURD 
-gram   2    0     0.6    2         7         N1 SHIA QOL 19       N2 KURD 
-gram   2    0     0.6    2         8         N1 SHIA SFT 20       N2 KURD 
-gram   2    0     1.0    2         5         N1 SHIA AUT 21       N2 SHIA 
-gram   2    0     1.0    2         6         N1 SHIA CUL 22       N2 SHIA 
-gram   2    0     1.0    2         7         N1 SHIA QOL 23       N2 SHIA 
-gram   2    0     1.0    2         8         N1 SHIA SFT 24       N2 SHIA 
-gram   2    0     -0.3   2         5         N1 SHIA AUT 25       N2 SUNN 
-gram   2    0     -0.3   2         6         N1 SHIA CUL 26       N2 SUNN 
-gram   2    0     -0.3   2         7         N1 SHIA QOL 27       N2 SUNN 
-gram   2    0     -0.3   2         8         N1 SHIA SFT 28       N2 SUNN 
-gram   0    0     -0.6   3         9         N1 SUNN AUT 1        N1 KURD 
-gram   0    0     -0.6   3         10        N1 SUNN CUL 2        N1 KURD 
-gram   0    0     -0.6   3         11        N1 SUNN QOL 3        N1 KURD 
-gram   0    0     -0.6   3         12        N1 SUNN SFT 4        N1 KURD 
-gram   -1   0     1.0    3         9         N1 SUNN AUT 9        N1 SUNN 
-gram   -1   0     1.0    3         10        N1 SUNN CUL 10       N1 SUNN 
-gram   -1   0     1.0    3         11        N1 SUNN QOL 11       N1 SUNN 
-gram   -1   0     1.0    3         12        N1 SUNN SFT 12       N1 SUNN 
-gram   2    0     -0.6   3         9         N1 SUNN AUT 17       N2 KURD 
-gram   2    0     -0.6   3         10        N1 SUNN CUL 18       N2 KURD 
-gram   2    0     -0.6   3         11        N1 SUNN QOL 19       N2 KURD 
-gram   2    0     -0.6   3         12        N1 SUNN SFT 20       N2 KURD 
-gram   2    0     1.0    3         9         N1 SUNN AUT 25       N2 SUNN 
-gram   2    0     1.0    3         10        N1 SUNN CUL 26       N2 SUNN 
-gram   2    0     1.0    3         11        N1 SUNN QOL 27       N2 SUNN 
-gram   2    0     1.0    3         12        N1 SUNN SFT 28       N2 SUNN 
-gram   -1   0     1.0    4         13        N1 ORGA CAS 13       N1 ORGA 
-gram   -1   0     1.0    4         14        N1 ORGA SVC 14       N1 ORGA 
-gram   2    0     1.0    4         13        N1 ORGA CAS 29       N2 ORGA 
-gram   2    0     1.0    4         14        N1 ORGA SVC 30       N2 ORGA 
-gram   -1   0     1.0    5         15        N1 ORGB CAS 15       N1 ORGB 
-gram   -1   0     1.0    5         16        N1 ORGB SVC 16       N1 ORGB 
-gram   2    0     1.0    5         15        N1 ORGB CAS 31       N2 ORGB 
-gram   2    0     1.0    5         16        N1 ORGB SVC 32       N2 ORGB 
-gram   2    0     1.0    6         17        N2 KURD AUT 1        N1 KURD 
-gram   2    0     1.0    6         18        N2 KURD CUL 2        N1 KURD 
-gram   2    0     1.0    6         19        N2 KURD QOL 3        N1 KURD 
-gram   2    0     1.0    6         20        N2 KURD SFT 4        N1 KURD 
-gram   2    0     0.6    6         17        N2 KURD AUT 5        N1 SHIA 
-gram   2    0     0.6    6         18        N2 KURD CUL 6        N1 SHIA 
-gram   2    0     0.6    6         19        N2 KURD QOL 7        N1 SHIA 
-gram   2    0     0.6    6         20        N2 KURD SFT 8        N1 SHIA 
-gram   2    0     -0.6   6         17        N2 KURD AUT 9        N1 SUNN 
-gram   2    0     -0.6   6         18        N2 KURD CUL 10       N1 SUNN 
-gram   2    0     -0.6   6         19        N2 KURD QOL 11       N1 SUNN 
-gram   2    0     -0.6   6         20        N2 KURD SFT 12       N1 SUNN 
-gram   -1   0     1.0    6         17        N2 KURD AUT 17       N2 KURD 
-gram   -1   0     1.0    6         18        N2 KURD CUL 18       N2 KURD 
-gram   -1   0     1.0    6         19        N2 KURD QOL 19       N2 KURD 
-gram   -1   0     1.0    6         20        N2 KURD SFT 20       N2 KURD 
-gram   0    0     0.6    6         17        N2 KURD AUT 21       N2 SHIA 
-gram   0    0     0.6    6         18        N2 KURD CUL 22       N2 SHIA 
-gram   0    0     0.6    6         19        N2 KURD QOL 23       N2 SHIA 
-gram   0    0     0.6    6         20        N2 KURD SFT 24       N2 SHIA 
-gram   0    0     -0.6   6         17        N2 KURD AUT 25       N2 SUNN 
-gram   0    0     -0.6   6         18        N2 KURD CUL 26       N2 SUNN 
-gram   0    0     -0.6   6         19        N2 KURD QOL 27       N2 SUNN 
-gram   0    0     -0.6   6         20        N2 KURD SFT 28       N2 SUNN 
-gram   2    0     0.6    7         21        N2 SHIA AUT 1        N1 KURD 
-gram   2    0     0.6    7         22        N2 SHIA CUL 2        N1 KURD 
-gram   2    0     0.6    7         23        N2 SHIA QOL 3        N1 KURD 
-gram   2    0     0.6    7         24        N2 SHIA SFT 4        N1 KURD 
-gram   2    0     1.0    7         21        N2 SHIA AUT 5        N1 SHIA 
-gram   2    0     1.0    7         22        N2 SHIA CUL 6        N1 SHIA 
-gram   2    0     1.0    7         23        N2 SHIA QOL 7        N1 SHIA 
-gram   2    0     1.0    7         24        N2 SHIA SFT 8        N1 SHIA 
-gram   2    0     -0.3   7         21        N2 SHIA AUT 9        N1 SUNN 
-gram   2    0     -0.3   7         22        N2 SHIA CUL 10       N1 SUNN 
-gram   2    0     -0.3   7         23        N2 SHIA QOL 11       N1 SUNN 
-gram   2    0     -0.3   7         24        N2 SHIA SFT 12       N1 SUNN 
-gram   0    0     0.6    7         21        N2 SHIA AUT 17       N2 KURD 
-gram   0    0     0.6    7         22        N2 SHIA CUL 18       N2 KURD 
-gram   0    0     0.6    7         23        N2 SHIA QOL 19       N2 KURD 
-gram   0    0     0.6    7         24        N2 SHIA SFT 20       N2 KURD 
-gram   -1   0     1.0    7         21        N2 SHIA AUT 21       N2 SHIA 
-gram   -1   0     1.0    7         22        N2 SHIA CUL 22       N2 SHIA 
-gram   -1   0     1.0    7         23        N2 SHIA QOL 23       N2 SHIA 
-gram   -1   0     1.0    7         24        N2 SHIA SFT 24       N2 SHIA 
-gram   0    0     -0.3   7         21        N2 SHIA AUT 25       N2 SUNN 
-gram   0    0     -0.3   7         22        N2 SHIA CUL 26       N2 SUNN 
-gram   0    0     -0.3   7         23        N2 SHIA QOL 27       N2 SUNN 
-gram   0    0     -0.3   7         24        N2 SHIA SFT 28       N2 SUNN 
-gram   2    0     -0.6   8         25        N2 SUNN AUT 1        N1 KURD 
-gram   2    0     -0.6   8         26        N2 SUNN CUL 2        N1 KURD 
-gram   2    0     -0.6   8         27        N2 SUNN QOL 3        N1 KURD 
-gram   2    0     -0.6   8         28        N2 SUNN SFT 4        N1 KURD 
-gram   2    0     1.0    8         25        N2 SUNN AUT 9        N1 SUNN 
-gram   2    0     1.0    8         26        N2 SUNN CUL 10       N1 SUNN 
-gram   2    0     1.0    8         27        N2 SUNN QOL 11       N1 SUNN 
-gram   2    0     1.0    8         28        N2 SUNN SFT 12       N1 SUNN 
-gram   0    0     -0.6   8         25        N2 SUNN AUT 17       N2 KURD 
-gram   0    0     -0.6   8         26        N2 SUNN CUL 18       N2 KURD 
-gram   0    0     -0.6   8         27        N2 SUNN QOL 19       N2 KURD 
-gram   0    0     -0.6   8         28        N2 SUNN SFT 20       N2 KURD 
-gram   -1   0     1.0    8         25        N2 SUNN AUT 25       N2 SUNN 
-gram   -1   0     1.0    8         26        N2 SUNN CUL 26       N2 SUNN 
-gram   -1   0     1.0    8         27        N2 SUNN QOL 27       N2 SUNN 
-gram   -1   0     1.0    8         28        N2 SUNN SFT 28       N2 SUNN 
-gram   2    0     1.0    9         29        N2 ORGA CAS 13       N1 ORGA 
-gram   2    0     1.0    9         30        N2 ORGA SVC 14       N1 ORGA 
-gram   -1   0     1.0    9         29        N2 ORGA CAS 29       N2 ORGA 
-gram   -1   0     1.0    9         30        N2 ORGA SVC 30       N2 ORGA 
-gram   2    0     1.0    10        31        N2 ORGB CAS 15       N1 ORGB 
-gram   2    0     1.0    10        32        N2 ORGB SVC 16       N1 ORGB 
-gram   -1   0     1.0    10        31        N2 ORGB CAS 31       N2 ORGB 
-gram   -1   0     1.0    10        32        N2 ORGB SVC 32       N2 ORGB 
+prox delay factor direct_ng direct_id dn dg   c   curve_id n  g    
+---- ----- ------ --------- --------- -- ---- --- -------- -- ---- 
+-1   0     1.0    1         1         N1 KURD AUT 1        N1 KURD 
+-1   0     1.0    1         2         N1 KURD CUL 2        N1 KURD 
+-1   0     1.0    1         3         N1 KURD QOL 3        N1 KURD 
+-1   0     1.0    1         4         N1 KURD SFT 4        N1 KURD 
+0    0     0.6    1         1         N1 KURD AUT 5        N1 SHIA 
+0    0     0.6    1         2         N1 KURD CUL 6        N1 SHIA 
+0    0     0.6    1         3         N1 KURD QOL 7        N1 SHIA 
+0    0     0.6    1         4         N1 KURD SFT 8        N1 SHIA 
+0    0     -0.6   1         1         N1 KURD AUT 9        N1 SUNN 
+0    0     -0.6   1         2         N1 KURD CUL 10       N1 SUNN 
+0    0     -0.6   1         3         N1 KURD QOL 11       N1 SUNN 
+0    0     -0.6   1         4         N1 KURD SFT 12       N1 SUNN 
+2    0     1.0    1         1         N1 KURD AUT 17       N2 KURD 
+2    0     1.0    1         2         N1 KURD CUL 18       N2 KURD 
+2    0     1.0    1         3         N1 KURD QOL 19       N2 KURD 
+2    0     1.0    1         4         N1 KURD SFT 20       N2 KURD 
+2    0     0.6    1         1         N1 KURD AUT 21       N2 SHIA 
+2    0     0.6    1         2         N1 KURD CUL 22       N2 SHIA 
+2    0     0.6    1         3         N1 KURD QOL 23       N2 SHIA 
+2    0     0.6    1         4         N1 KURD SFT 24       N2 SHIA 
+2    0     -0.6   1         1         N1 KURD AUT 25       N2 SUNN 
+2    0     -0.6   1         2         N1 KURD CUL 26       N2 SUNN 
+2    0     -0.6   1         3         N1 KURD QOL 27       N2 SUNN 
+2    0     -0.6   1         4         N1 KURD SFT 28       N2 SUNN 
+0    0     0.6    2         5         N1 SHIA AUT 1        N1 KURD 
+0    0     0.6    2         6         N1 SHIA CUL 2        N1 KURD 
+0    0     0.6    2         7         N1 SHIA QOL 3        N1 KURD 
+0    0     0.6    2         8         N1 SHIA SFT 4        N1 KURD 
+-1   0     1.0    2         5         N1 SHIA AUT 5        N1 SHIA 
+-1   0     1.0    2         6         N1 SHIA CUL 6        N1 SHIA 
+-1   0     1.0    2         7         N1 SHIA QOL 7        N1 SHIA 
+-1   0     1.0    2         8         N1 SHIA SFT 8        N1 SHIA 
+0    0     -0.3   2         5         N1 SHIA AUT 9        N1 SUNN 
+0    0     -0.3   2         6         N1 SHIA CUL 10       N1 SUNN 
+0    0     -0.3   2         7         N1 SHIA QOL 11       N1 SUNN 
+0    0     -0.3   2         8         N1 SHIA SFT 12       N1 SUNN 
+2    0     0.6    2         5         N1 SHIA AUT 17       N2 KURD 
+2    0     0.6    2         6         N1 SHIA CUL 18       N2 KURD 
+2    0     0.6    2         7         N1 SHIA QOL 19       N2 KURD 
+2    0     0.6    2         8         N1 SHIA SFT 20       N2 KURD 
+2    0     1.0    2         5         N1 SHIA AUT 21       N2 SHIA 
+2    0     1.0    2         6         N1 SHIA CUL 22       N2 SHIA 
+2    0     1.0    2         7         N1 SHIA QOL 23       N2 SHIA 
+2    0     1.0    2         8         N1 SHIA SFT 24       N2 SHIA 
+2    0     -0.3   2         5         N1 SHIA AUT 25       N2 SUNN 
+2    0     -0.3   2         6         N1 SHIA CUL 26       N2 SUNN 
+2    0     -0.3   2         7         N1 SHIA QOL 27       N2 SUNN 
+2    0     -0.3   2         8         N1 SHIA SFT 28       N2 SUNN 
+0    0     -0.6   3         9         N1 SUNN AUT 1        N1 KURD 
+0    0     -0.6   3         10        N1 SUNN CUL 2        N1 KURD 
+0    0     -0.6   3         11        N1 SUNN QOL 3        N1 KURD 
+0    0     -0.6   3         12        N1 SUNN SFT 4        N1 KURD 
+-1   0     1.0    3         9         N1 SUNN AUT 9        N1 SUNN 
+-1   0     1.0    3         10        N1 SUNN CUL 10       N1 SUNN 
+-1   0     1.0    3         11        N1 SUNN QOL 11       N1 SUNN 
+-1   0     1.0    3         12        N1 SUNN SFT 12       N1 SUNN 
+2    0     -0.6   3         9         N1 SUNN AUT 17       N2 KURD 
+2    0     -0.6   3         10        N1 SUNN CUL 18       N2 KURD 
+2    0     -0.6   3         11        N1 SUNN QOL 19       N2 KURD 
+2    0     -0.6   3         12        N1 SUNN SFT 20       N2 KURD 
+2    0     1.0    3         9         N1 SUNN AUT 25       N2 SUNN 
+2    0     1.0    3         10        N1 SUNN CUL 26       N2 SUNN 
+2    0     1.0    3         11        N1 SUNN QOL 27       N2 SUNN 
+2    0     1.0    3         12        N1 SUNN SFT 28       N2 SUNN 
+-1   0     1.0    4         13        N1 ORGA CAS 13       N1 ORGA 
+-1   0     1.0    4         14        N1 ORGA SVC 14       N1 ORGA 
+2    0     1.0    4         13        N1 ORGA CAS 29       N2 ORGA 
+2    0     1.0    4         14        N1 ORGA SVC 30       N2 ORGA 
+-1   0     1.0    5         15        N1 ORGB CAS 15       N1 ORGB 
+-1   0     1.0    5         16        N1 ORGB SVC 16       N1 ORGB 
+2    0     1.0    5         15        N1 ORGB CAS 31       N2 ORGB 
+2    0     1.0    5         16        N1 ORGB SVC 32       N2 ORGB 
+2    0     1.0    6         17        N2 KURD AUT 1        N1 KURD 
+2    0     1.0    6         18        N2 KURD CUL 2        N1 KURD 
+2    0     1.0    6         19        N2 KURD QOL 3        N1 KURD 
+2    0     1.0    6         20        N2 KURD SFT 4        N1 KURD 
+2    0     0.6    6         17        N2 KURD AUT 5        N1 SHIA 
+2    0     0.6    6         18        N2 KURD CUL 6        N1 SHIA 
+2    0     0.6    6         19        N2 KURD QOL 7        N1 SHIA 
+2    0     0.6    6         20        N2 KURD SFT 8        N1 SHIA 
+2    0     -0.6   6         17        N2 KURD AUT 9        N1 SUNN 
+2    0     -0.6   6         18        N2 KURD CUL 10       N1 SUNN 
+2    0     -0.6   6         19        N2 KURD QOL 11       N1 SUNN 
+2    0     -0.6   6         20        N2 KURD SFT 12       N1 SUNN 
+-1   0     1.0    6         17        N2 KURD AUT 17       N2 KURD 
+-1   0     1.0    6         18        N2 KURD CUL 18       N2 KURD 
+-1   0     1.0    6         19        N2 KURD QOL 19       N2 KURD 
+-1   0     1.0    6         20        N2 KURD SFT 20       N2 KURD 
+0    0     0.6    6         17        N2 KURD AUT 21       N2 SHIA 
+0    0     0.6    6         18        N2 KURD CUL 22       N2 SHIA 
+0    0     0.6    6         19        N2 KURD QOL 23       N2 SHIA 
+0    0     0.6    6         20        N2 KURD SFT 24       N2 SHIA 
+0    0     -0.6   6         17        N2 KURD AUT 25       N2 SUNN 
+0    0     -0.6   6         18        N2 KURD CUL 26       N2 SUNN 
+0    0     -0.6   6         19        N2 KURD QOL 27       N2 SUNN 
+0    0     -0.6   6         20        N2 KURD SFT 28       N2 SUNN 
+2    0     0.6    7         21        N2 SHIA AUT 1        N1 KURD 
+2    0     0.6    7         22        N2 SHIA CUL 2        N1 KURD 
+2    0     0.6    7         23        N2 SHIA QOL 3        N1 KURD 
+2    0     0.6    7         24        N2 SHIA SFT 4        N1 KURD 
+2    0     1.0    7         21        N2 SHIA AUT 5        N1 SHIA 
+2    0     1.0    7         22        N2 SHIA CUL 6        N1 SHIA 
+2    0     1.0    7         23        N2 SHIA QOL 7        N1 SHIA 
+2    0     1.0    7         24        N2 SHIA SFT 8        N1 SHIA 
+2    0     -0.3   7         21        N2 SHIA AUT 9        N1 SUNN 
+2    0     -0.3   7         22        N2 SHIA CUL 10       N1 SUNN 
+2    0     -0.3   7         23        N2 SHIA QOL 11       N1 SUNN 
+2    0     -0.3   7         24        N2 SHIA SFT 12       N1 SUNN 
+0    0     0.6    7         21        N2 SHIA AUT 17       N2 KURD 
+0    0     0.6    7         22        N2 SHIA CUL 18       N2 KURD 
+0    0     0.6    7         23        N2 SHIA QOL 19       N2 KURD 
+0    0     0.6    7         24        N2 SHIA SFT 20       N2 KURD 
+-1   0     1.0    7         21        N2 SHIA AUT 21       N2 SHIA 
+-1   0     1.0    7         22        N2 SHIA CUL 22       N2 SHIA 
+-1   0     1.0    7         23        N2 SHIA QOL 23       N2 SHIA 
+-1   0     1.0    7         24        N2 SHIA SFT 24       N2 SHIA 
+0    0     -0.3   7         21        N2 SHIA AUT 25       N2 SUNN 
+0    0     -0.3   7         22        N2 SHIA CUL 26       N2 SUNN 
+0    0     -0.3   7         23        N2 SHIA QOL 27       N2 SUNN 
+0    0     -0.3   7         24        N2 SHIA SFT 28       N2 SUNN 
+2    0     -0.6   8         25        N2 SUNN AUT 1        N1 KURD 
+2    0     -0.6   8         26        N2 SUNN CUL 2        N1 KURD 
+2    0     -0.6   8         27        N2 SUNN QOL 3        N1 KURD 
+2    0     -0.6   8         28        N2 SUNN SFT 4        N1 KURD 
+2    0     1.0    8         25        N2 SUNN AUT 9        N1 SUNN 
+2    0     1.0    8         26        N2 SUNN CUL 10       N1 SUNN 
+2    0     1.0    8         27        N2 SUNN QOL 11       N1 SUNN 
+2    0     1.0    8         28        N2 SUNN SFT 12       N1 SUNN 
+0    0     -0.6   8         25        N2 SUNN AUT 17       N2 KURD 
+0    0     -0.6   8         26        N2 SUNN CUL 18       N2 KURD 
+0    0     -0.6   8         27        N2 SUNN QOL 19       N2 KURD 
+0    0     -0.6   8         28        N2 SUNN SFT 20       N2 KURD 
+-1   0     1.0    8         25        N2 SUNN AUT 25       N2 SUNN 
+-1   0     1.0    8         26        N2 SUNN CUL 26       N2 SUNN 
+-1   0     1.0    8         27        N2 SUNN QOL 27       N2 SUNN 
+-1   0     1.0    8         28        N2 SUNN SFT 28       N2 SUNN 
+2    0     1.0    9         29        N2 ORGA CAS 13       N1 ORGA 
+2    0     1.0    9         30        N2 ORGA SVC 14       N1 ORGA 
+-1   0     1.0    9         29        N2 ORGA CAS 29       N2 ORGA 
+-1   0     1.0    9         30        N2 ORGA SVC 30       N2 ORGA 
+2    0     1.0    10        31        N2 ORGB CAS 15       N1 ORGB 
+2    0     1.0    10        32        N2 ORGB SVC 16       N1 ORGB 
+-1   0     1.0    10        31        N2 ORGB CAS 31       N2 ORGB 
+-1   0     1.0    10        32        N2 ORGB SVC 32       N2 ORGB 
     }
 
     test init-2.18 {initial contents: gram_sat_effects} -setup {
         create
     } -body {
         pprint [rdb query {
-            SELECT * FROM gram_sat_effects WHERE object='gram'
+            SELECT * FROM gram_sat_effects
         }]
     } -cleanup {
         cleanup
     } -result {
-id object etype curve_id cause direct_ngc active driver input prox ts te       tlast ncontrib acontrib nominal actual days tau llimit delay slope future n  g    c   sat   dn dg   
--- ------ ----- -------- ----- ---------- ------ ------ ----- ---- -- -------- ----- -------- -------- ------- ------ ---- --- ------ ----- ----- ------ -- ---- --- ----- -- ---- 
-1  gram   S     1        TREND 1          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N1 KURD AUT 0.0   N1 KURD 
-2  gram   S     2        TREND 2          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N1 KURD CUL 0.0   N1 KURD 
-3  gram   S     3        TREND 3          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 KURD QOL 0.0   N1 KURD 
-4  gram   S     4        TREND 4          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 KURD SFT -80.0 N1 KURD 
-5  gram   S     5        TREND 5          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N1 SHIA AUT 40.0  N1 SHIA 
-6  gram   S     6        TREND 6          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N1 SHIA CUL -40.0 N1 SHIA 
-7  gram   S     7        TREND 7          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 SHIA QOL -40.0 N1 SHIA 
-8  gram   S     8        TREND 8          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N1 SHIA SFT 40.0  N1 SHIA 
-9  gram   S     9        TREND 9          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN AUT -80.0 N1 SUNN 
-10 gram   S     10       TREND 10         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 SUNN CUL -80.0 N1 SUNN 
-11 gram   S     11       TREND 11         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN QOL -40.0 N1 SUNN 
-12 gram   S     12       TREND 12         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN SFT -80.0 N1 SUNN 
-13 gram   S     17       TREND 17         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N2 KURD AUT 0.0   N2 KURD 
-14 gram   S     18       TREND 18         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N2 KURD CUL 0.0   N2 KURD 
-15 gram   S     19       TREND 19         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 KURD QOL 0.0   N2 KURD 
-16 gram   S     20       TREND 20         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 KURD SFT -80.0 N2 KURD 
-17 gram   S     21       TREND 21         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N2 SHIA AUT 40.0  N2 SHIA 
-18 gram   S     22       TREND 22         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N2 SHIA CUL -40.0 N2 SHIA 
-19 gram   S     23       TREND 23         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 SHIA QOL -40.0 N2 SHIA 
-20 gram   S     24       TREND 24         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N2 SHIA SFT 40.0  N2 SHIA 
-21 gram   S     25       TREND 25         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN AUT -80.0 N2 SUNN 
-22 gram   S     26       TREND 26         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 SUNN CUL -80.0 N2 SUNN 
-23 gram   S     27       TREND 27         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN QOL -40.0 N2 SUNN 
-24 gram   S     28       TREND 28         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN SFT -80.0 N2 SUNN 
+id etype curve_id cause direct_ngc active driver input prox ts te       tlast ncontrib acontrib nominal actual days tau llimit delay slope future n  g    c   sat   dn dg   
+-- ----- -------- ----- ---------- ------ ------ ----- ---- -- -------- ----- -------- -------- ------- ------ ---- --- ------ ----- ----- ------ -- ---- --- ----- -- ---- 
+1  S     1        TREND 1          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N1 KURD AUT 0.0   N1 KURD 
+2  S     2        TREND 2          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N1 KURD CUL 0.0   N1 KURD 
+3  S     3        TREND 3          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 KURD QOL 0.0   N1 KURD 
+4  S     4        TREND 4          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 KURD SFT -80.0 N1 KURD 
+5  S     5        TREND 5          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N1 SHIA AUT 40.0  N1 SHIA 
+6  S     6        TREND 6          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N1 SHIA CUL -40.0 N1 SHIA 
+7  S     7        TREND 7          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 SHIA QOL -40.0 N1 SHIA 
+8  S     8        TREND 8          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N1 SHIA SFT 40.0  N1 SHIA 
+9  S     9        TREND 9          1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN AUT -80.0 N1 SUNN 
+10 S     10       TREND 10         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N1 SUNN CUL -80.0 N1 SUNN 
+11 S     11       TREND 11         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN QOL -40.0 N1 SUNN 
+12 S     12       TREND 12         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN SFT -80.0 N1 SUNN 
+13 S     17       TREND 17         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N2 KURD AUT 0.0   N2 KURD 
+14 S     18       TREND 18         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N2 KURD CUL 0.0   N2 KURD 
+15 S     19       TREND 19         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 KURD QOL 0.0   N2 KURD 
+16 S     20       TREND 20         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 KURD SFT -80.0 N2 KURD 
+17 S     21       TREND 21         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N2 SHIA AUT 40.0  N2 SHIA 
+18 S     22       TREND 22         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -1.0         N2 SHIA CUL -40.0 N2 SHIA 
+19 S     23       TREND 23         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 SHIA QOL -40.0 N2 SHIA 
+20 S     24       TREND 24         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     4.0          N2 SHIA SFT 40.0  N2 SHIA 
+21 S     25       TREND 25         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN AUT -80.0 N2 SUNN 
+22 S     26       TREND 26         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -4.0         N2 SUNN CUL -80.0 N2 SUNN 
+23 S     27       TREND 27         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN QOL -40.0 N2 SUNN 
+24 S     28       TREND 28         1      0      1     -1   0  99999999       0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN SFT -80.0 N2 SUNN 
     }
 
     test init-2.19 {initial contents: gram_sat_contribs} -setup {
         create
     } -body {
         rdb query {
-            SELECT * FROM gram_sat_contribs WHERE object='gram'
+            SELECT * FROM gram_sat_contribs
         }
     } -cleanup {
         cleanup
@@ -1502,32 +1491,32 @@ id object etype curve_id cause direct_ngc active driver input prox ts te       t
     } -body {
         # OK
         pprint [rdb query {
-            SELECT * FROM gram_coop WHERE object='gram'
+            SELECT * FROM gram_coop
             ORDER BY nfg_id
         }]
     } -cleanup {
         cleanup
     } -result {
-object nfg_id curve_id n  f    g     coop0 coop delta slope 
------- ------ -------- -- ---- ----- ----- ---- ----- ----- 
-gram   17     33       N1 KURD BLUE  50.0  50.0 0.0   0.0   
-gram   18     34       N1 KURD BRIT  50.0  50.0 0.0   0.0   
-gram   20     35       N1 KURD OPFOR 50.0  50.0 0.0   0.0   
-gram   49     36       N1 SHIA BLUE  50.0  50.0 0.0   0.0   
-gram   50     37       N1 SHIA BRIT  50.0  50.0 0.0   0.0   
-gram   52     38       N1 SHIA OPFOR 50.0  50.0 0.0   0.0   
-gram   57     39       N1 SUNN BLUE  50.0  50.0 0.0   0.0   
-gram   58     40       N1 SUNN BRIT  50.0  50.0 0.0   0.0   
-gram   60     41       N1 SUNN OPFOR 50.0  50.0 0.0   0.0   
-gram   81     42       N2 KURD BLUE  50.0  50.0 0.0   0.0   
-gram   82     43       N2 KURD BRIT  50.0  50.0 0.0   0.0   
-gram   84     44       N2 KURD OPFOR 50.0  50.0 0.0   0.0   
-gram   113    45       N2 SHIA BLUE  50.0  50.0 0.0   0.0   
-gram   114    46       N2 SHIA BRIT  50.0  50.0 0.0   0.0   
-gram   116    47       N2 SHIA OPFOR 50.0  50.0 0.0   0.0   
-gram   121    48       N2 SUNN BLUE  50.0  50.0 0.0   0.0   
-gram   122    49       N2 SUNN BRIT  50.0  50.0 0.0   0.0   
-gram   124    50       N2 SUNN OPFOR 50.0  50.0 0.0   0.0   
+nfg_id curve_id n  f    g     coop0 coop delta slope 
+------ -------- -- ---- ----- ----- ---- ----- ----- 
+17     33       N1 KURD BLUE  50.0  50.0 0.0   0.0   
+18     34       N1 KURD BRIT  50.0  50.0 0.0   0.0   
+20     35       N1 KURD OPFOR 50.0  50.0 0.0   0.0   
+49     36       N1 SHIA BLUE  50.0  50.0 0.0   0.0   
+50     37       N1 SHIA BRIT  50.0  50.0 0.0   0.0   
+52     38       N1 SHIA OPFOR 50.0  50.0 0.0   0.0   
+57     39       N1 SUNN BLUE  50.0  50.0 0.0   0.0   
+58     40       N1 SUNN BRIT  50.0  50.0 0.0   0.0   
+60     41       N1 SUNN OPFOR 50.0  50.0 0.0   0.0   
+81     42       N2 KURD BLUE  50.0  50.0 0.0   0.0   
+82     43       N2 KURD BRIT  50.0  50.0 0.0   0.0   
+84     44       N2 KURD OPFOR 50.0  50.0 0.0   0.0   
+113    45       N2 SHIA BLUE  50.0  50.0 0.0   0.0   
+114    46       N2 SHIA BRIT  50.0  50.0 0.0   0.0   
+116    47       N2 SHIA OPFOR 50.0  50.0 0.0   0.0   
+121    48       N2 SUNN BLUE  50.0  50.0 0.0   0.0   
+122    49       N2 SUNN BRIT  50.0  50.0 0.0   0.0   
+124    50       N2 SUNN OPFOR 50.0  50.0 0.0   0.0   
     }
 
     test init-2.21 {initial contents: gram_frc_ng} -setup {
@@ -1535,20 +1524,20 @@ gram   124    50       N2 SUNN OPFOR 50.0  50.0 0.0   0.0
     } -body {
         # OK
         pprint [rdb query {
-            SELECT * FROM gram_frc_ng WHERE object='gram'
+            SELECT * FROM gram_frc_ng
             ORDER BY frc_ng_id
         }]
     } -cleanup {
         cleanup
     } -result {
-frc_ng_id object n  g     coop coop0 
---------- ------ -- ----- ---- ----- 
-1         gram   N1 BLUE  50.0 50.0  
-2         gram   N1 BRIT  50.0 50.0  
-3         gram   N1 OPFOR 50.0 50.0  
-4         gram   N2 BLUE  50.0 50.0  
-5         gram   N2 BRIT  50.0 50.0  
-6         gram   N2 OPFOR 50.0 50.0  
+frc_ng_id n  g     coop coop0 
+--------- -- ----- ---- ----- 
+1         N1 BLUE  50.0 50.0  
+2         N1 BRIT  50.0 50.0  
+3         N1 OPFOR 50.0 50.0  
+4         N2 BLUE  50.0 50.0  
+5         N2 BRIT  50.0 50.0  
+6         N2 OPFOR 50.0 50.0  
     }
 
     #-------------------------------------------------------------------
@@ -1559,7 +1548,7 @@ frc_ng_id object n  g     coop coop0
     } -body {
         jr update population N1 KURD 1000 N1 SHIA 2000 N1 SUNN 3000
         pprint [rdb query {
-            SELECT n,g,population FROM gram_ng WHERE object='gram'
+            SELECT n,g,population FROM gram_ng
             ORDER BY ng_id
         }]
     } -cleanup {
@@ -1606,7 +1595,6 @@ N2 ORGB 0
         rdb eval {
             SELECT count(curve_id) AS count
             FROM gram_curves
-            WHERE object='gram'
         } {}
 
         set count
@@ -1635,7 +1623,7 @@ N2 ORGB 0
         rdb onecolumn {
             SELECT oneliner
             FROM gram_driver
-            WHERE object='gram' AND driver=$driver
+            WHERE driver=$driver
         }
     } -cleanup {
         cleanup
@@ -1648,7 +1636,7 @@ N2 ORGB 0
         rdb onecolumn {
             SELECT last_input
             FROM gram_driver
-            WHERE object='gram' AND driver=$driver
+            WHERE driver=$driver
         }
     } -cleanup {
         cleanup
@@ -1661,7 +1649,7 @@ N2 ORGB 0
         rdb onecolumn {
             SELECT dtype
             FROM gram_driver
-            WHERE object='gram' AND driver=$driver
+            WHERE driver=$driver
         }
     } -cleanup {
         cleanup
@@ -1851,7 +1839,7 @@ N2 ORGB 0
     } -body {
         rdb onecolumn {
             SELECT count(ngc_id) FROM gram_sat
-            WHERE object='gram' AND slope != 0.0
+            WHERE slope != 0.0
         }
     } -cleanup {
         cleanup
@@ -1865,13 +1853,12 @@ N2 ORGB 0
         rdb eval {
             UPDATE gram_sat
             SET sat0 = 0.0,
-                trend = 0.0
-            WHERE object='gram';
+                trend = 0.0;
 
             UPDATE gram_sat
             SET sat0 = -100,
                 trend = 20
-            WHERE object = 'gram' AND n='N2' AND g='KURD' AND c='QOL';
+            WHERE n='N2' AND g='KURD' AND c='QOL';
         }
 
         jr init
@@ -1892,12 +1879,11 @@ N2 ORGB 0
         rdb eval {
             UPDATE gram_sat
             SET sat0 = 0.0,
-                trend = 0.0
-            WHERE object='gram';
+                trend = 0.0;
 
             UPDATE gram_sat
             SET trend = 20
-            WHERE object = 'gram' AND n='N2' AND g='KURD' AND c='QOL';
+            WHERE n='N2' AND g='KURD' AND c='QOL';
         }
 
         jr init
@@ -1918,13 +1904,12 @@ N2 ORGB 0
         rdb eval {
             UPDATE gram_sat
             SET sat0 = 0.0,
-                trend = 0.0
-            WHERE object='gram';
+                trend = 0.0;
 
             UPDATE gram_sat
             SET sat0 = 100,
                 trend = -20
-            WHERE object = 'gram' AND n='N2' AND g='KURD' AND c='QOL'
+            WHERE n='N2' AND g='KURD' AND c='QOL'
         }
         jr init
 
@@ -1944,12 +1929,11 @@ N2 ORGB 0
         rdb eval {
             UPDATE gram_sat
             SET sat0 = 0.0,
-                trend = 0.0
-            WHERE object='gram';
+                trend = 0.0;
 
             UPDATE gram_sat
             SET trend = -20
-            WHERE object = 'gram' AND n='N2' AND g='KURD' AND c='QOL';
+            WHERE n='N2' AND g='KURD' AND c='QOL';
         }
 
         jr init
@@ -1974,8 +1958,7 @@ N2 ORGB 0
 
         rdb onecolumn {
             SELECT count(ngc_id) FROM gram_sat
-            WHERE object='gram' 
-            AND abs(slope - (sat - sat0)) > 0.00000001
+            WHERE abs(slope - (sat - sat0)) > 0.00000001
         }
     } -cleanup {
         cleanup
@@ -1996,9 +1979,8 @@ N2 ORGB 0
         # be the same as sat.ngc for all neighborhoods and groups.
         rdb eval {
             SELECT count(ngc_id)
-            FROM gram_sat JOIN gram_gc USING (object,g,c)
-            WHERE gram_sat.object = 'gram' 
-            AND   gram_sat.sat    != gram_gc.sat
+            FROM gram_sat JOIN gram_gc USING (g,c)
+            WHERE gram_sat.sat    != gram_gc.sat
         }
     } -cleanup {
         cleanup
@@ -2018,7 +2000,7 @@ N2 ORGB 0
     } -body {
         rdb onecolumn {
             SELECT count(gc_id) FROM gram_gc
-            WHERE object='gram' AND slope != 0.0
+            WHERE slope != 0.0
         }
     } -cleanup {
         cleanup
@@ -2040,9 +2022,8 @@ N2 ORGB 0
 
         rdb eval {
             SELECT count(ngc_id)
-            FROM gram_sat JOIN gram_gc USING (object,g,c)
-            WHERE gram_sat.object = 'gram' 
-            AND   gram_gc.sat = gram_gc.sat0 + gram_sat.slope
+            FROM gram_sat JOIN gram_gc USING (g,c)
+            WHERE gram_gc.sat = gram_gc.sat0 + gram_sat.slope
         }
     } -cleanup {
         cleanup
@@ -2058,8 +2039,7 @@ N2 ORGB 0
         # the current and initial toplevel satisfaction
         rdb onecolumn {
             SELECT count(gc_id) FROM gram_gc
-            WHERE object='gram'
-            AND abs(slope - (sat - sat0)) > 0.0000001
+            WHERE abs(slope - (sat - sat0)) > 0.0000001
         }
     } -cleanup {
         cleanup
@@ -2073,7 +2053,6 @@ N2 ORGB 0
     } -body {
         pprint [rdb query {
             SELECT n, g, sat FROM gram_ng
-            WHERE object='gram'
             ORDER BY ng_id
         }]
     } -cleanup {
@@ -2110,7 +2089,6 @@ N2 ORGB 0.0
 
         pprint [rdb query {
             SELECT n, g, format('%.1f',sat) FROM gram_ng
-            WHERE object='gram'
             ORDER BY ng_id
         }]
     } -cleanup {
@@ -2136,15 +2114,13 @@ N2 ORGB 0.0
         rdb eval {
             UPDATE gram_ngc
             SET saliency=0.5
-            WHERE object='gram'
-            AND n='N1' AND g='SHIA' AND c='AUT';
+            WHERE n='N1' AND g='SHIA' AND c='AUT';
         }
 
         jr init
         
         pprint [rdb query {
             SELECT n, g, format('%.1f',sat) FROM gram_ng
-            WHERE object='gram'
             ORDER BY ng_id
         }]
     } -cleanup {
@@ -2172,7 +2148,6 @@ N2 ORGB 0.0
     } -body {
         pprint [rdb query {
             SELECT n, c, format('%.1f',sat) FROM gram_nc
-            WHERE object='gram'
             ORDER BY nc_id
         }]
     } -cleanup {
@@ -2211,7 +2186,6 @@ N2 SVC 0.0
 
         pprint [rdb query {
             SELECT n, c, format('%.1f',sat) FROM gram_nc
-            WHERE object='gram'
             ORDER BY nc_id
         }]
     } -cleanup {
@@ -2239,15 +2213,13 @@ N2 SVC 0.0
         rdb eval {
             UPDATE gram_ngc
             SET saliency=0.5
-            WHERE object='gram'
-            AND n='N1' AND g='SHIA' AND c='AUT';
+            WHERE n='N1' AND g='SHIA' AND c='AUT';
         }
 
         jr init
         
         pprint [rdb query {
             SELECT n, c, format('%.1f',sat) FROM gram_nc
-            WHERE object='gram'
             ORDER BY nc_id
         }]
     } -cleanup {
@@ -2275,15 +2247,13 @@ N2 SVC 0.0
         rdb eval {
             UPDATE gram_ng
             SET rollup_weight=2.0
-            WHERE object='gram'
-            AND n='N1' AND g='SHIA';
+            WHERE n='N1' AND g='SHIA';
         }
 
         jr init
         
         pprint [rdb query {
             SELECT n, c, format('%.1f',sat) FROM gram_nc
-            WHERE object='gram'
             ORDER BY nc_id
         }]
     } -cleanup {
@@ -2314,7 +2284,6 @@ N2 SVC 0.0
         # Numbers checked by hand
         pprint [rdb query {
             SELECT n,format('%8.4f',sat) FROM gram_n
-            WHERE object='gram'
         }]
     } -cleanup {
         cleanup
@@ -2341,7 +2310,6 @@ N2 -30.0000
         # Numbers checked by hand
         pprint [rdb query {
             SELECT n,format('%8.4f',sat) FROM gram_n
-            WHERE object='gram'
         }]
     } -cleanup {
         cleanup
@@ -2358,8 +2326,7 @@ N2 -31.1500
         rdb eval {
             UPDATE gram_ngc
             SET saliency=0.5
-            WHERE object='gram'
-            AND n='N1' AND g='SHIA' AND c='AUT';
+            WHERE n='N1' AND g='SHIA' AND c='AUT';
         }
 
         jr init
@@ -2367,7 +2334,6 @@ N2 -31.1500
         # Numbers checked by hand
         pprint [rdb query {
             SELECT n,format('%8.4f',sat) FROM gram_n
-            WHERE object='gram'
         }]
     } -cleanup {
         cleanup
@@ -2384,8 +2350,7 @@ N2 -30.0000
         rdb eval {
             UPDATE gram_ng
             SET rollup_weight=2.0
-            WHERE object='gram'
-            AND n='N1' AND g='SHIA';
+            WHERE n='N1' AND g='SHIA';
         }
 
         jr init
@@ -2393,7 +2358,6 @@ N2 -30.0000
         # Numbers checked by hand
         pprint [rdb query {
             SELECT n,format('%8.4f',sat) FROM gram_n
-            WHERE object='gram'
         }]
     } -cleanup {
         cleanup
@@ -2413,7 +2377,6 @@ N2 -30.0000
         # Numbers checked by hand
         pprint [rdb query {
             SELECT g,format('%.4f',sat) FROM gram_g
-            WHERE object='gram'
             ORDER BY g_id
         }]
     } -cleanup {
@@ -2447,7 +2410,6 @@ ORGB  0.0000
         # Numbers checked by hand
         pprint [rdb query {
             SELECT g,format('%.4f',sat) FROM gram_g
-            WHERE object='gram'
             ORDER BY g_id
         }]
     } -cleanup {
@@ -2475,7 +2437,6 @@ ORGB  0.0000
         rdb eval {
             SELECT c, format('%.4f',sat) 
             FROM gram_c 
-            WHERE object='gram'
             ORDER BY c_id
         }
     } -cleanup {
@@ -2499,7 +2460,6 @@ ORGB  0.0000
         rdb eval {
             SELECT c, format('%.4f',sat) 
             FROM gram_c 
-            WHERE object='gram'
             ORDER BY c_id
         }
     } -cleanup {
@@ -2528,7 +2488,7 @@ ORGB  0.0000
     } -body {
         rdb onecolumn {
             SELECT count(nfg_id) FROM gram_coop
-            WHERE object='gram' AND slope != 0.0
+            WHERE slope != 0.0
         }
     } -cleanup {
         cleanup
@@ -2555,8 +2515,7 @@ ORGB  0.0000
 
         rdb onecolumn {
             SELECT count(nfg_id) FROM gram_coop
-            WHERE object='gram' 
-            AND slope != 0.0
+            WHERE slope != 0.0
         }
     } -cleanup {
         cleanup
@@ -2578,7 +2537,7 @@ ORGB  0.0000
 
         # Dump the history, skipping Driver 0, the long-term trend.
         pprint [rdb query {
-            SELECT object, time, driver, n, g, c,
+            SELECT time, driver, n, g, c,
                    format('%4.1f',acontrib) AS acontrib
             FROM gram_sat_contribs
             WHERE driver != 0
@@ -2586,20 +2545,20 @@ ORGB  0.0000
     } -cleanup {
         cleanup
     } -result {
-object time driver n  g    c   acontrib 
------- ---- ------ -- ---- --- -------- 
-gram   1440 1      N1 KURD QOL  3.0     
-gram   1440 1      N1 SHIA QOL  7.0     
-gram   1440 1      N1 SUNN QOL -0.9     
-gram   1440 2      N1 KURD SFT 10.8     
-gram   1440 2      N1 SHIA SFT  6.0     
-gram   1440 2      N1 SUNN SFT -0.6     
-gram   1440 3      N1 KURD CUL  3.0     
-gram   1440 3      N1 SHIA CUL  7.0     
-gram   1440 3      N1 SUNN CUL -0.3     
-gram   1440 4      N1 KURD AUT  3.0     
-gram   1440 4      N1 SHIA AUT  3.0     
-gram   1440 4      N1 SUNN AUT -0.3     
+time driver n  g    c   acontrib 
+---- ------ -- ---- --- -------- 
+1440 1      N1 KURD QOL  3.0     
+1440 1      N1 SHIA QOL  7.0     
+1440 1      N1 SUNN QOL -0.9     
+1440 2      N1 KURD SFT 10.8     
+1440 2      N1 SHIA SFT  6.0     
+1440 2      N1 SUNN SFT -0.6     
+1440 3      N1 KURD CUL  3.0     
+1440 3      N1 SHIA CUL  7.0     
+1440 3      N1 SUNN CUL -0.3     
+1440 4      N1 KURD AUT  3.0     
+1440 4      N1 SHIA AUT  3.0     
+1440 4      N1 SUNN AUT -0.3     
     }
 
     test table_gram_contribs-1.2 {sat contribs retained over time} -setup {
@@ -2612,7 +2571,7 @@ gram   1440 4      N1 SUNN AUT -0.3
         jr advance
 
         pprint [rdb query {
-            SELECT object, time, driver, n, g, c,
+            SELECT time, driver, n, g, c,
                    format('%4.1f',acontrib) AS acontrib
             FROM gram_sat_contribs
             WHERE driver != 0
@@ -2620,14 +2579,14 @@ gram   1440 4      N1 SUNN AUT -0.3
     } -cleanup {
         cleanup
     } -result {
-object time driver n  g    c   acontrib 
------- ---- ------ -- ---- --- -------- 
-gram   1440 1      N1 KURD QOL  6.0     
-gram   1440 1      N1 SHIA QOL 14.0     
-gram   1440 1      N1 SUNN QOL -1.8     
-gram   2880 1      N1 KURD QOL  5.9     
-gram   2880 1      N1 SHIA QOL 12.8     
-gram   2880 1      N1 SUNN QOL -1.6     
+time driver n  g    c   acontrib 
+---- ------ -- ---- --- -------- 
+1440 1      N1 KURD QOL  6.0     
+1440 1      N1 SHIA QOL 14.0     
+1440 1      N1 SUNN QOL -1.8     
+2880 1      N1 KURD QOL  5.9     
+2880 1      N1 SHIA QOL 12.8     
+2880 1      N1 SUNN QOL -1.6     
     }
 
     test table_gram_contribs-2.1 {coop contribs retained} -setup {
@@ -2640,21 +2599,21 @@ gram   2880 1      N1 SUNN QOL -1.6
         jr advance
 
         pprint [rdb query {
-            SELECT object, time, driver, n, f, g,
+            SELECT time, driver, n, f, g,
                    format('%4.1f',acontrib) AS acontrib
             FROM gram_coop_contribs
         }]
     } -cleanup {
         cleanup
     } -result {
-object time driver n  f    g     acontrib 
------- ---- ------ -- ---- ----- -------- 
-gram   1440 1      N1 SHIA BLUE   2.5     
-gram   1440 1      N1 SHIA BRIT   2.0     
-gram   1440 1      N1 SHIA OPFOR -2.0     
-gram   1440 3      N1 SHIA BLUE   0.0     
-gram   1440 3      N1 SHIA BRIT   0.5     
-gram   1440 3      N1 SHIA OPFOR  0.5     
+time driver n  f    g     acontrib 
+---- ------ -- ---- ----- -------- 
+1440 1      N1 SHIA BLUE   2.5     
+1440 1      N1 SHIA BRIT   2.0     
+1440 1      N1 SHIA OPFOR -2.0     
+1440 3      N1 SHIA BLUE   0.0     
+1440 3      N1 SHIA BRIT   0.5     
+1440 3      N1 SHIA OPFOR  0.5     
     }
 
     test table_gram_contribs-2.2 {coop contribs retained over time} -setup {
@@ -2667,21 +2626,21 @@ gram   1440 3      N1 SHIA OPFOR  0.5
         jr advance
 
         pprint [rdb query {
-            SELECT object, time, driver, n, f, g,
+            SELECT time, driver, n, f, g,
                    format('%4.1f',acontrib) AS acontrib
             FROM gram_coop_contribs
         }]
     } -cleanup {
         cleanup
     } -result {
-object time driver n  f    g     acontrib 
------- ---- ------ -- ---- ----- -------- 
-gram   360  1      N1 SHIA BLUE   3.4     
-gram   360  1      N1 SHIA BRIT   2.7     
-gram   360  1      N1 SHIA OPFOR -2.7     
-gram   720  1      N1 SHIA BLUE   1.0     
-gram   720  1      N1 SHIA BRIT   0.8     
-gram   720  1      N1 SHIA OPFOR -0.8     
+time driver n  f    g     acontrib 
+---- ------ -- ---- ----- -------- 
+360  1      N1 SHIA BLUE   3.4     
+360  1      N1 SHIA BRIT   2.7     
+360  1      N1 SHIA OPFOR -2.7     
+720  1      N1 SHIA BLUE   1.0     
+720  1      N1 SHIA BRIT   0.8     
+720  1      N1 SHIA OPFOR -0.8     
     }
 
     test table_gram_contribs-3.1 {contribs not retained on request} -setup {
@@ -2729,17 +2688,17 @@ gram   720  1      N1 SHIA OPFOR -0.8
         jr advance
 
         pprint [rdb query {
-            SELECT object, time, sat, n, g, c
+            SELECT time, sat, n, g, c
             FROM gram_sat_values
             WHERE curve_id = 1
         }]
     } -cleanup {
         cleanup
     } -result {
-object time sat  n  g    c   
------- ---- ---- -- ---- --- 
-gram   0    0.0  N1 KURD AUT 
-gram   1440 -1.0 N1 KURD AUT 
+time sat  n  g    c   
+---- ---- -- ---- --- 
+0    0.0  N1 KURD AUT 
+1440 -1.0 N1 KURD AUT 
     }
 
     test table_gram_values-1.3 {Coop values retained over time} -setup {
@@ -2749,17 +2708,17 @@ gram   1440 -1.0 N1 KURD AUT
         jr advance
 
         pprint [rdb query {
-            SELECT object, time, coop, n, f, g
+            SELECT time, coop, n, f, g
             FROM gram_coop_values
             WHERE curve_id = 33
         }]
     } -cleanup {
         cleanup
     } -result {
-object time coop n  f    g    
------- ---- ---- -- ---- ---- 
-gram   0    50.0 N1 KURD BLUE 
-gram   1440 50.0 N1 KURD BLUE 
+time coop n  f    g    
+---- ---- -- ---- ---- 
+0    50.0 N1 KURD BLUE 
+1440 50.0 N1 KURD BLUE 
     }
 
     test table_gram_values-1.4 {Values not retained on request} -setup {
@@ -2986,10 +2945,10 @@ gram   1440 50.0 N1 KURD BLUE
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  g    c   
------- ---- ------ -------- -------- -- ---- --- 
-gram   0    1      5.0      5        N1 SHIA AUT 
-gram   0    2      3.0      2        N1 KURD CUL 
+time driver acontrib curve_id n  g    c   
+---- ------ -------- -------- -- ---- --- 
+0    1      5.0      5        N1 SHIA AUT 
+0    2      3.0      2        N1 KURD CUL 
     }
 
     test sat_adjust-5.2 {multiple adjusts for one driver accumulate} -setup {
@@ -3001,9 +2960,9 @@ gram   0    2      3.0      2        N1 KURD CUL
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  g    c   
------- ---- ------ -------- -------- -- ---- --- 
-gram   0    1      8.0      2        N1 KURD CUL 
+time driver acontrib curve_id n  g    c   
+---- ------ -------- -------- -- ---- --- 
+0    1      8.0      2        N1 KURD CUL 
     }
 
     test sat_adjust-5.3 {Large positive adjustments are clamped} -setup {
@@ -3019,10 +2978,10 @@ gram   0    1      8.0      2        N1 KURD CUL
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  g    c   
------- ---- ------ -------- -------- -- ---- --- 
-gram   0    1      90.0     2        N1 KURD CUL 
-gram   0    2      10.0     2        N1 KURD CUL 
+time driver acontrib curve_id n  g    c   
+---- ------ -------- -------- -- ---- --- 
+0    1      90.0     2        N1 KURD CUL 
+0    2      10.0     2        N1 KURD CUL 
     }
 
     test sat_adjust-5.4 {Large negative adjustments are clamped} -setup {
@@ -3038,10 +2997,10 @@ gram   0    2      10.0     2        N1 KURD CUL
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  g    c   
------- ---- ------ -------- -------- -- ---- --- 
-gram   0    1      -90.0    2        N1 KURD CUL 
-gram   0    2      -10.0    2        N1 KURD CUL 
+time driver acontrib curve_id n  g    c   
+---- ------ -------- -------- -- ---- --- 
+0    1      -90.0    2        N1 KURD CUL 
+0    2      -10.0    2        N1 KURD CUL 
     }
 
     test sat_adjust-5.5 {Contribs is timestamped} -setup {
@@ -3062,10 +3021,10 @@ gram   0    2      -10.0    2        N1 KURD CUL
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  g    c   
------- ---- ------ -------- -------- -- ---- --- 
-gram   0    1      -20.0    2        N1 KURD CUL 
-gram   5    1      40.0     2        N1 KURD CUL 
+time driver acontrib curve_id n  g    c   
+---- ------ -------- -------- -- ---- --- 
+0    1      -20.0    2        N1 KURD CUL 
+5    1      40.0     2        N1 KURD CUL 
     }
 
     test sat_adjust-6.1 {gram_values is updated} -setup {
@@ -3264,10 +3223,10 @@ gram   5    1      40.0     2        N1 KURD CUL
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  g    c   
------- ---- ------ -------- -------- -- ---- --- 
-gram   0    1      -35.0    5        N1 SHIA AUT 
-gram   0    2      3.0      2        N1 KURD CUL 
+time driver acontrib curve_id n  g    c   
+---- ------ -------- -------- -- ---- --- 
+0    1      -35.0    5        N1 SHIA AUT 
+0    2      3.0      2        N1 KURD CUL 
     }
 
 
@@ -3569,8 +3528,7 @@ I 0  0  N2 SUNN QOL -0.03
         
         rdb eval {
             UPDATE gram_nfg SET rel=0.0 
-            WHERE object='gram'
-            AND f != g
+            WHERE f != g
         }
 
         init
@@ -3609,7 +3567,7 @@ I 720 864 N2 SUNN QOL -3.00
             UPDATE gram_ng 
             SET population  = 0.0,
                 sat_tracked = 0
-            WHERE object='gram' AND n='N1' AND g='SHIA'
+            WHERE n='N1' AND g='SHIA'
         }
 
         init
@@ -3637,7 +3595,7 @@ I 0  144 N1 SUNN QOL -1.50
             UPDATE gram_ng 
             SET population  = 0.0,
                 sat_tracked = 0
-            WHERE object='gram' AND n='N1' AND g='KURD'
+            WHERE n='N1' AND g='KURD'
         }
         
         init
@@ -3687,8 +3645,7 @@ I 0  144 N2 SUNN QOL -1.50
         rdb eval {
             UPDATE gram_mn
             SET proximity=$near
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init
@@ -3743,8 +3700,7 @@ I 0  144 N2 SUNN QOL -0.15
         rdb eval {
             UPDATE gram_mn
             SET proximity=$remote
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init
@@ -3774,8 +3730,7 @@ I 0  144 N1 SUNN QOL -1.50
         rdb eval {
             UPDATE gram_mn
             SET effects_delay = 1.0
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init
@@ -3807,7 +3762,6 @@ I 1440 1584 N2 SUNN QOL -0.15
         rdb eval {
             UPDATE gram_sat
             SET trend = 0.0
-            WHERE object='gram';
         }
         
         init
@@ -3832,7 +3786,6 @@ I 1440 1584 N2 SUNN QOL -0.15
         rdb eval {
             UPDATE gram_sat
             SET trend = 0.0
-            WHERE object='gram';
         }
         
         init
@@ -3955,7 +3908,7 @@ I 1440 1584 N2 SUNN QOL -0.15
         create
     } -body {
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_sat SET sat0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = 0.0}
         init
 
 
@@ -3991,7 +3944,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    6.09   6.093  1.1   N1 
         create
     } -body {
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_sat SET sat0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = 0.0}
         init
 
 
@@ -4031,7 +3984,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   2.162    5.99   1.292  1.1   N1 
         create
     } -body {
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_sat SET sat0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = 0.0}
         init
 
 
@@ -4062,7 +4015,7 @@ HOSCAP '            '              5.0   4.29   4.293    4.29   4.293  1.2   N1 
         create
     } -body {
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_sat SET sat0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = 0.0}
         init
 
 
@@ -4096,7 +4049,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  -3.0  -2.45  -2.452   -1.67  -1.669  1.1   N1 
     } -body {
         # Set sat0 to -50.0.  Positive effects should be multiplied by 1.5 and 
         # negative effects by 0.5.
-        rdb eval {UPDATE gram_sat SET sat0 = -50.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = -50.0}
         init
 
 
@@ -4448,7 +4401,7 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actu
             UPDATE gram_ng 
             SET population  = 0.0,
                 sat_tracked = 0
-            WHERE object='gram' AND n='N1' AND g='SHIA'
+            WHERE n='N1' AND g='SHIA'
         }
         
         init -trend no
@@ -4475,7 +4428,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
             UPDATE gram_ng 
             SET population  = 0.0,
                 sat_tracked = 0
-            WHERE object='gram' AND n='N1' AND g='SHIA'
+            WHERE n='N1' AND g='SHIA'
         }
         
         init -trend no
@@ -4522,8 +4475,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
         rdb eval {
             UPDATE gram_mn
             SET proximity=$near
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init -trend no
@@ -4577,8 +4529,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
         rdb eval {
             UPDATE gram_mn
             SET proximity=$remote
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init -trend no
@@ -4606,8 +4557,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
         rdb eval {
             UPDATE gram_ng
             SET effects_factor = 2.0
-            WHERE object='gram'
-            AND n='N1' AND g='KURD'
+            WHERE n='N1' AND g='KURD'
         }
 
         init -trend no
@@ -4638,8 +4588,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
         rdb eval {
             UPDATE gram_mn
             SET effects_delay = 1.0
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init -trend no
@@ -4670,8 +4619,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
         rdb eval {
             UPDATE gram_mn
             SET effects_delay = 1.0
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init -trend no
@@ -4843,7 +4791,7 @@ id ts  te       slope nominal actual
         create
 
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_sat SET sat0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = 0.0}
         init -trend no
     } -body {
         # Schedule two effects of differing strength but the same cause
@@ -4877,7 +4825,7 @@ CIVCAS 010000ZJAN70 n/a       10.0   5.00   5.000    3.33   3.333  1.1   N1 SHIA
         create
 
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_sat SET sat0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = 0.0}
         init 
     } -body {
         # Schedule two effects of differing strength but the same cause
@@ -4916,7 +4864,7 @@ TREND  '            '          4.0   2.00   1.000    1.96   0.965  0.1   N1 SHIA
         create
 
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_sat SET sat0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = 0.0}
         init -trend no
     } -body {
 
@@ -4947,7 +4895,7 @@ HOSCAP '            '          5.0   2.50   2.500    2.50   2.500  2.1   N1 SHIA
         create
 
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_sat SET sat0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = 0.0}
         init -trend no
     } -body {
         # Schedule effects on SHIA and KURD, and look at the indirect effects
@@ -4979,7 +4927,7 @@ CIVCAS 010000ZJAN70 n/a       -3.0  -1.50  -1.500   -1.00  -1.000  1.1   N1 SHIA
         create
 
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_sat SET sat0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = 0.0}
         init -trend no
     } -body {
         # Schedule chained effects
@@ -5367,24 +5315,24 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     } -cleanup {
         cleanup
     } -result {
-object driver n  g    c   acontrib 
------- ------ -- ---- --- -------- 
-gram   1      N1 KURD AUT 2.0      
-gram   1      N1 KURD QOL 4.0      
-gram   1      N1 SHIA AUT 6.0      
-gram   1      N1 SHIA QOL 8.0      
-gram   1      N2 KURD AUT 10.0     
-gram   1      N2 KURD QOL 12.0     
-gram   1      N2 SHIA AUT 14.0     
-gram   1      N2 SHIA QOL 16.0     
-gram   2      N1 KURD AUT -2.0     
-gram   2      N1 KURD QOL -4.0     
-gram   2      N1 SHIA AUT -6.0     
-gram   2      N1 SHIA QOL -8.0     
-gram   2      N2 KURD AUT -10.0    
-gram   2      N2 KURD QOL -12.0    
-gram   2      N2 SHIA AUT -14.0    
-gram   2      N2 SHIA QOL -16.0    
+driver n  g    c   acontrib 
+------ -- ---- --- -------- 
+1      N1 KURD AUT 2.0      
+1      N1 KURD QOL 4.0      
+1      N1 SHIA AUT 6.0      
+1      N1 SHIA QOL 8.0      
+1      N2 KURD AUT 10.0     
+1      N2 KURD QOL 12.0     
+1      N2 SHIA AUT 14.0     
+1      N2 SHIA QOL 16.0     
+2      N1 KURD AUT -2.0     
+2      N1 KURD QOL -4.0     
+2      N1 SHIA AUT -6.0     
+2      N1 SHIA QOL -8.0     
+2      N2 KURD AUT -10.0    
+2      N2 KURD QOL -12.0    
+2      N2 SHIA AUT -14.0    
+2      N2 SHIA QOL -16.0    
     }
 
     test sat_drivers-3.2 {-nbhood} -setup {
@@ -5396,16 +5344,16 @@ gram   2      N2 SHIA QOL -16.0
     } -cleanup {
         cleanup
     } -result {
-object driver n  g    c   acontrib 
------- ------ -- ---- --- -------- 
-gram   1      N1 KURD AUT 2.0      
-gram   1      N1 KURD QOL 4.0      
-gram   1      N1 SHIA AUT 6.0      
-gram   1      N1 SHIA QOL 8.0      
-gram   2      N1 KURD AUT -2.0     
-gram   2      N1 KURD QOL -4.0     
-gram   2      N1 SHIA AUT -6.0     
-gram   2      N1 SHIA QOL -8.0     
+driver n  g    c   acontrib 
+------ -- ---- --- -------- 
+1      N1 KURD AUT 2.0      
+1      N1 KURD QOL 4.0      
+1      N1 SHIA AUT 6.0      
+1      N1 SHIA QOL 8.0      
+2      N1 KURD AUT -2.0     
+2      N1 KURD QOL -4.0     
+2      N1 SHIA AUT -6.0     
+2      N1 SHIA QOL -8.0     
     }
 
     test sat_drivers-3.3 {-group} -setup {
@@ -5417,16 +5365,16 @@ gram   2      N1 SHIA QOL -8.0
     } -cleanup {
         cleanup
     } -result {
-object driver n  g    c   acontrib 
------- ------ -- ---- --- -------- 
-gram   1      N1 SHIA AUT 6.0      
-gram   1      N1 SHIA QOL 8.0      
-gram   1      N2 SHIA AUT 14.0     
-gram   1      N2 SHIA QOL 16.0     
-gram   2      N1 SHIA AUT -6.0     
-gram   2      N1 SHIA QOL -8.0     
-gram   2      N2 SHIA AUT -14.0    
-gram   2      N2 SHIA QOL -16.0    
+driver n  g    c   acontrib 
+------ -- ---- --- -------- 
+1      N1 SHIA AUT 6.0      
+1      N1 SHIA QOL 8.0      
+1      N2 SHIA AUT 14.0     
+1      N2 SHIA QOL 16.0     
+2      N1 SHIA AUT -6.0     
+2      N1 SHIA QOL -8.0     
+2      N2 SHIA AUT -14.0    
+2      N2 SHIA QOL -16.0    
     }
 
     test sat_drivers-3.4 {-concern} -setup {
@@ -5438,16 +5386,16 @@ gram   2      N2 SHIA QOL -16.0
     } -cleanup {
         cleanup
     } -result {
-object driver n  g    c   acontrib 
------- ------ -- ---- --- -------- 
-gram   1      N1 KURD AUT 2.0      
-gram   1      N1 SHIA AUT 6.0      
-gram   1      N2 KURD AUT 10.0     
-gram   1      N2 SHIA AUT 14.0     
-gram   2      N1 KURD AUT -2.0     
-gram   2      N1 SHIA AUT -6.0     
-gram   2      N2 KURD AUT -10.0    
-gram   2      N2 SHIA AUT -14.0    
+driver n  g    c   acontrib 
+------ -- ---- --- -------- 
+1      N1 KURD AUT 2.0      
+1      N1 SHIA AUT 6.0      
+1      N2 KURD AUT 10.0     
+1      N2 SHIA AUT 14.0     
+2      N1 KURD AUT -2.0     
+2      N1 SHIA AUT -6.0     
+2      N2 KURD AUT -10.0    
+2      N2 SHIA AUT -14.0    
     }
 
     test sat_drivers-3.5 {-start} -setup {
@@ -5459,24 +5407,24 @@ gram   2      N2 SHIA AUT -14.0
     } -cleanup {
         cleanup
     } -result {
-object driver n  g    c   acontrib 
------- ------ -- ---- --- -------- 
-gram   1      N1 KURD AUT 1.0      
-gram   1      N1 KURD QOL 2.0      
-gram   1      N1 SHIA AUT 3.0      
-gram   1      N1 SHIA QOL 4.0      
-gram   1      N2 KURD AUT 5.0      
-gram   1      N2 KURD QOL 6.0      
-gram   1      N2 SHIA AUT 7.0      
-gram   1      N2 SHIA QOL 8.0      
-gram   2      N1 KURD AUT -1.0     
-gram   2      N1 KURD QOL -2.0     
-gram   2      N1 SHIA AUT -3.0     
-gram   2      N1 SHIA QOL -4.0     
-gram   2      N2 KURD AUT -5.0     
-gram   2      N2 KURD QOL -6.0     
-gram   2      N2 SHIA AUT -7.0     
-gram   2      N2 SHIA QOL -8.0     
+driver n  g    c   acontrib 
+------ -- ---- --- -------- 
+1      N1 KURD AUT 1.0      
+1      N1 KURD QOL 2.0      
+1      N1 SHIA AUT 3.0      
+1      N1 SHIA QOL 4.0      
+1      N2 KURD AUT 5.0      
+1      N2 KURD QOL 6.0      
+1      N2 SHIA AUT 7.0      
+1      N2 SHIA QOL 8.0      
+2      N1 KURD AUT -1.0     
+2      N1 KURD QOL -2.0     
+2      N1 SHIA AUT -3.0     
+2      N1 SHIA QOL -4.0     
+2      N2 KURD AUT -5.0     
+2      N2 KURD QOL -6.0     
+2      N2 SHIA AUT -7.0     
+2      N2 SHIA QOL -8.0     
     }
 
     test sat_drivers-3.5 {-end} -setup {
@@ -5488,24 +5436,24 @@ gram   2      N2 SHIA QOL -8.0
     } -cleanup {
         cleanup
     } -result {
-object driver n  g    c   acontrib 
------- ------ -- ---- --- -------- 
-gram   1      N1 KURD AUT 1.0      
-gram   1      N1 KURD QOL 2.0      
-gram   1      N1 SHIA AUT 3.0      
-gram   1      N1 SHIA QOL 4.0      
-gram   1      N2 KURD AUT 5.0      
-gram   1      N2 KURD QOL 6.0      
-gram   1      N2 SHIA AUT 7.0      
-gram   1      N2 SHIA QOL 8.0      
-gram   2      N1 KURD AUT -1.0     
-gram   2      N1 KURD QOL -2.0     
-gram   2      N1 SHIA AUT -3.0     
-gram   2      N1 SHIA QOL -4.0     
-gram   2      N2 KURD AUT -5.0     
-gram   2      N2 KURD QOL -6.0     
-gram   2      N2 SHIA AUT -7.0     
-gram   2      N2 SHIA QOL -8.0     
+driver n  g    c   acontrib 
+------ -- ---- --- -------- 
+1      N1 KURD AUT 1.0      
+1      N1 KURD QOL 2.0      
+1      N1 SHIA AUT 3.0      
+1      N1 SHIA QOL 4.0      
+1      N2 KURD AUT 5.0      
+1      N2 KURD QOL 6.0      
+1      N2 SHIA AUT 7.0      
+1      N2 SHIA QOL 8.0      
+2      N1 KURD AUT -1.0     
+2      N1 KURD QOL -2.0     
+2      N1 SHIA AUT -3.0     
+2      N1 SHIA QOL -4.0     
+2      N2 KURD AUT -5.0     
+2      N2 KURD QOL -6.0     
+2      N2 SHIA AUT -7.0     
+2      N2 SHIA QOL -8.0     
     }
 
     test sat_drivers-3.6 {all options} -setup {
@@ -5517,10 +5465,10 @@ gram   2      N2 SHIA QOL -8.0
     } -cleanup {
         cleanup
     } -result {
-object driver n  g    c   acontrib 
------- ------ -- ---- --- -------- 
-gram   1      N2 SHIA AUT 7.0      
-gram   2      N2 SHIA AUT -7.0     
+driver n  g    c   acontrib 
+------ -- ---- --- -------- 
+1      N2 SHIA AUT 7.0      
+2      N2 SHIA AUT -7.0     
     }
 
     test sat_drivers-4.1 {-concern mood} -setup {
@@ -5534,14 +5482,14 @@ gram   2      N2 SHIA AUT -7.0
     } -cleanup {
         cleanup
     } -result {
-object driver n  g    c    acontrib 
------- ------ -- ---- ---- -------- 
-gram   1      N1 SHIA AUT  6.0      
-gram   1      N1 SHIA QOL  8.0      
-gram   2      N1 SHIA AUT  -6.0     
-gram   2      N1 SHIA QOL  -8.0     
-gram   1      N1 SHIA mood 3.5      
-gram   2      N1 SHIA mood -3.5     
+driver n  g    c    acontrib 
+------ -- ---- ---- -------- 
+1      N1 SHIA AUT  6.0      
+1      N1 SHIA QOL  8.0      
+2      N1 SHIA AUT  -6.0     
+2      N1 SHIA QOL  -8.0     
+1      N1 SHIA mood 3.5      
+2      N1 SHIA mood -3.5     
     }
 
     #-------------------------------------------------------------------
@@ -5684,10 +5632,10 @@ gram   2      N1 SHIA mood -3.5
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  f    g    
------- ---- ------ -------- -------- -- ---- ---- 
-gram   0    1      5.0      36       N1 SHIA BLUE 
-gram   0    2      3.0      33       N1 KURD BLUE 
+time driver acontrib curve_id n  f    g    
+---- ------ -------- -------- -- ---- ---- 
+0    1      5.0      36       N1 SHIA BLUE 
+0    2      3.0      33       N1 KURD BLUE 
     }
 
     test coop_adjust-4.2 {multiple adjusts for one driver accumulate} -setup {
@@ -5699,9 +5647,9 @@ gram   0    2      3.0      33       N1 KURD BLUE
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  f    g    
------- ---- ------ -------- -------- -- ---- ---- 
-gram   0    1      8.0      33       N1 KURD BLUE 
+time driver acontrib curve_id n  f    g    
+---- ------ -------- -------- -- ---- ---- 
+0    1      8.0      33       N1 KURD BLUE 
     }
 
     test coop_adjust-4.3 {Large positive adjustments are clamped} -setup {
@@ -5717,10 +5665,10 @@ gram   0    1      8.0      33       N1 KURD BLUE
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  f    g    
------- ---- ------ -------- -------- -- ---- ---- 
-gram   0    1      40.0     33       N1 KURD BLUE 
-gram   0    2      10.0     33       N1 KURD BLUE 
+time driver acontrib curve_id n  f    g    
+---- ------ -------- -------- -- ---- ---- 
+0    1      40.0     33       N1 KURD BLUE 
+0    2      10.0     33       N1 KURD BLUE 
     }
 
     test coop_adjust-4.4 {Large negative adjustments are clamped} -setup {
@@ -5736,10 +5684,10 @@ gram   0    2      10.0     33       N1 KURD BLUE
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  f    g    
------- ---- ------ -------- -------- -- ---- ---- 
-gram   0    1      -40.0    33       N1 KURD BLUE 
-gram   0    2      -10.0    33       N1 KURD BLUE 
+time driver acontrib curve_id n  f    g    
+---- ------ -------- -------- -- ---- ---- 
+0    1      -40.0    33       N1 KURD BLUE 
+0    2      -10.0    33       N1 KURD BLUE 
     }
 
     test coop_adjust-4.5 {Contribs is timestamped} -setup {
@@ -5756,10 +5704,10 @@ gram   0    2      -10.0    33       N1 KURD BLUE
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  f    g    
------- ---- ------ -------- -------- -- ---- ---- 
-gram   0    1      -20.0    33       N1 KURD BLUE 
-gram   5    1      40.0     33       N1 KURD BLUE 
+time driver acontrib curve_id n  f    g    
+---- ------ -------- -------- -- ---- ---- 
+0    1      -20.0    33       N1 KURD BLUE 
+5    1      40.0     33       N1 KURD BLUE 
     }
 
     test coop_adjust-5.1 {gram_values is updated} -setup {
@@ -5935,10 +5883,10 @@ gram   5    1      40.0     33       N1 KURD BLUE
     } -cleanup {
         cleanup
     } -result {
-object time driver acontrib curve_id n  f    g    
------- ---- ------ -------- -------- -- ---- ---- 
-gram   0    1      -45.0    36       N1 SHIA BLUE 
-gram   0    2      -47.0    33       N1 KURD BLUE 
+time driver acontrib curve_id n  f    g    
+---- ------ -------- -------- -- ---- ---- 
+0    1      -45.0    36       N1 SHIA BLUE 
+0    2      -47.0    33       N1 KURD BLUE 
     }
 
 
@@ -6237,8 +6185,7 @@ I 0  0  N2 KURD OPFOR -0.04
         
         rdb eval {
             UPDATE gram_nfg SET rel=0.0 
-            WHERE object='gram'
-            AND f != g
+            WHERE f != g
         }
 
         init
@@ -6277,7 +6224,7 @@ I 720 864 N2 KURD OPFOR -8.00
             UPDATE gram_ng 
             SET population  = 0.0,
                 sat_tracked = 0
-            WHERE object='gram' AND n='N1' AND g='SHIA'
+            WHERE n='N1' AND g='SHIA'
         }
 
         init
@@ -6301,8 +6248,7 @@ I 720 864 N2 KURD OPFOR -8.00
         rdb eval {
             UPDATE gram_mn
             SET proximity=$near
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init
@@ -6358,8 +6304,7 @@ I 0  144 N2 SHIA OPFOR -0.80
         rdb eval {
             UPDATE gram_mn
             SET proximity=$remote
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init
@@ -6389,8 +6334,7 @@ I 0  144 N1 SHIA OPFOR -8.00
         rdb eval {
             UPDATE gram_mn
             SET effects_delay = 1.0
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init
@@ -6552,7 +6496,7 @@ I 1440 1584 N2 SHIA OPFOR -0.80
         create
     } -body {
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_coop SET coop0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_coop SET coop0 = 0.0}
         init
 
 
@@ -6587,7 +6531,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    6.09   6.093  1.1   N1 
         create
     } -body {
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_sat SET sat0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_sat SET sat0 = 0.0}
         init
 
 
@@ -6626,7 +6570,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   2.162    3.00   0.653  1.1   N1 
         create
     } -body {
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_coop SET coop0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_coop SET coop0 = 0.0}
         init
 
 
@@ -6656,7 +6600,7 @@ HOSCAP '            '              5.0   4.29   4.293    4.29   4.293  1.2   N1 
         create
     } -body {
         # Set sat0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_coop SET coop0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_coop SET coop0 = 0.0}
         init
 
 
@@ -6984,7 +6928,7 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Nominal
             UPDATE gram_ng 
             SET population  = 0.0,
                 sat_tracked = 0
-            WHERE object='gram' AND n='N1' AND g='SHIA'
+            WHERE n='N1' AND g='SHIA'
         }
         
         init
@@ -7008,8 +6952,7 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Nominal
         rdb eval {
             UPDATE gram_mn
             SET proximity=$near
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init
@@ -7064,8 +7007,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
         rdb eval {
             UPDATE gram_mn
             SET proximity=$remote
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init
@@ -7094,8 +7036,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
         rdb eval {
             UPDATE gram_ng
             SET effects_factor = 2.0
-            WHERE object='gram'
-            AND n='N1' AND g='KURD'
+            WHERE n='N1' AND g='KURD'
         }
 
         init
@@ -7127,8 +7068,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
         rdb eval {
             UPDATE gram_mn
             SET effects_delay = 1.0
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init
@@ -7160,8 +7100,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
         rdb eval {
             UPDATE gram_mn
             SET effects_delay = 1.0
-            WHERE object='gram'
-            AND m='N2' AND n='N1'
+            WHERE m='N2' AND n='N1'
         }
 
         init
@@ -7332,7 +7271,7 @@ id ts  te       slope nominal actual
         create
     } -body {
         # Set coop0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_coop SET coop0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_coop SET coop0 = 0.0}
         init
 
 
@@ -7367,7 +7306,7 @@ CIVCAS 010000ZJAN70 n/a       10.0   5.00   5.000    3.33   3.333  1.1   N1 SHIA
         create
     } -body {
         # Set coop0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_coop SET coop0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_coop SET coop0 = 0.0}
         init
 
 
@@ -7406,7 +7345,7 @@ CIVCAS 010000ZJAN70 n/a       10.0   5.00   2.500    3.29   1.625  1.1   N1 SHIA
         create
     } -body {
         # Set coop0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_coop SET coop0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_coop SET coop0 = 0.0}
         init
 
 
@@ -7466,7 +7405,7 @@ CIVCAS 010000ZJAN70 n/a       -8.0  -4.00  -4.000   -1.00  -1.000  1.1   N1 SHIA
         create
     } -body {
         # Set coop0 to all zeros so that scaling is simple
-        rdb eval {UPDATE gram_coop SET coop0 = 0.0 WHERE object='gram'}
+        rdb eval {UPDATE gram_coop SET coop0 = 0.0}
         init
 
 
@@ -7705,7 +7644,6 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
         rdb eval {
             UPDATE gram_sat
             SET sat = 0.0
-            WHERE object='gram';
         }
 
         jr sat level 1 0 N1 SHIA SFT  10 1 
@@ -7737,7 +7675,6 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
         rdb eval {
             UPDATE gram_coop
             SET coop = 0.0
-            WHERE object='gram';
         }
 
         jr coop level 1 0 N1 SHIA BLUE  10 1 
@@ -7807,11 +7744,11 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
 
         # NEXT, get the set of drivers.
         rdb eval {
-            SELECT * FROM gram_driver WHERE object='gram' AND driver=0
+            SELECT * FROM gram_driver WHERE driver=0
         }
     } -cleanup {
         cleanup
-    } -result {gram 0 unknown CANCELLED {} 0}
+    } -result {0 unknown CANCELLED {} 0}
 
     test cancel-5.2 {cancel -delete deletes driver} -setup {
         create
@@ -7822,7 +7759,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
 
         # NEXT, get the set of drivers.
         rdb eval {
-            SELECT * FROM gram_driver WHERE object='gram' AND driver=0
+            SELECT * FROM gram_driver WHERE driver=0
         }
     } -cleanup {
         cleanup
@@ -8308,7 +8245,7 @@ I 0  7200 N1 SUNN QOL -3.00
             UPDATE gram_ng 
             SET population  = 0,
                 sat_tracked = 0
-            WHERE object='gram' AND g='KURD'
+            WHERE g='KURD'
         }
 
         init
