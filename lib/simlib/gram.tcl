@@ -2087,7 +2087,7 @@ snit::type ::simlib::gram {
     #
     # driver       driver ID
     # ts           Start time, integer ticks
-    # n            Neighborhood name, or "*"
+    # n            Neighborhood name
     # g            Group name
     # c            Concern name
     # limit        Magnitude of the effect (qmag)
@@ -2120,9 +2120,7 @@ snit::type ::simlib::gram {
             error "Start time is in the past: '$zulu'"
         }
 
-        if {$n ne "*"} {
-            $nbhoods validate $n
-        }
+        $nbhoods validate $n
 
         $self ValidateGC $g $c
 
@@ -2130,7 +2128,7 @@ snit::type ::simlib::gram {
         qduration validate $days
 
         # NEXT, validate the options
-        $self ParseInputOptions opts $args $n
+        $self ParseInputOptions opts $args
 
         # NEXT, normalize the input data.
 
@@ -2159,58 +2157,31 @@ snit::type ::simlib::gram {
             return $input(input)
         }
 
-        # NEXT, the input aims directly at a single neighborhood, or 
-        # at all neighborhoods.  In the former case we can have 
-        # indirect effects in near and far neighborhoods.  In the
-        # latter case, there are direct effects in every neighborhood,
-        # and the indirect effects in other neighborhoods are neglected.
-
+        # NEXT, schedule the effects in every influenced neighborhood
         set epsilon [$parm get gram.epsilon]
 
-        if {$n ne "*"} {
-            # ONE NEIGHBORHOOD
+        set plimit \
+            $proxlimit([$parm get gram.proxlimit])
 
-            # FIRST, schedule the effects in every influenced neighborhood
-            set plimit \
-                $proxlimit([$parm get gram.proxlimit])
+        # NEXT, use -p and -q to limit the proximity.
+        if {$input(q) == 0.0} {
+            set plimit [min $plimit $proxlimit(near)]
 
-            # NEXT, use -p and -q to limit the proximity.
-            if {$input(q) == 0.0} {
-                set plimit [min $plimit $proxlimit(near)]
-
-                if {$input(p) == 0.0} {
-                    set plimit [min $plimit $proxlimit(here)]
-                }
+            if {$input(p) == 0.0} {
+                set plimit [min $plimit $proxlimit(here)]
             }
+        }
 
-            # NEXT, schedule the effects in every influenced neighborhood
-            # within the proximity limit.
-            $rdb eval {
-                SELECT * FROM gram_sat_influence_view
-                WHERE dn     = $input(dn)
-                AND   dg     = $input(dg)
-                AND   c      = $input(c)
-                AND   prox   < $plimit
-            } effect {
-                $self ScheduleLevel input effect $epsilon
-            }
-        } else {
-            # ALL NEIGHBORHOODS
-
-            # FIRST, schedule the effects in each neighborhood
-            set plimit $proxlimit(here)
-            
-            $rdb eval {
-                SELECT * FROM gram_sat_influence_view
-                WHERE dn     = n
-                AND   dg     = $input(dg)
-                AND   c      = $input(c)
-                AND   prox   < $plimit
-            } effect {
-                set input(dn) $effect(dn)
-
-                $self ScheduleLevel input effect $epsilon
-            }
+        # NEXT, schedule the effects in every influenced neighborhood
+        # within the proximity limit.
+        $rdb eval {
+            SELECT * FROM gram_sat_influence_view
+            WHERE dn     = $input(dn)
+            AND   dg     = $input(dg)
+            AND   c      = $input(c)
+            AND   prox   < $plimit
+        } effect {
+            $self ScheduleLevel input effect $epsilon
         }
 
         return $input(input)
@@ -2221,7 +2192,7 @@ snit::type ::simlib::gram {
     #
     # driver       Driver ID
     # ts           Input start time, integer ticks
-    # n            Neighborhood name, or "*"
+    # n            Neighborhood name
     # g            Group name
     # c            Concern name
     # slope        Slope (change/day) of the effect (qmag)
@@ -2256,16 +2227,14 @@ snit::type ::simlib::gram {
             error "Start time is in the past: '$zulu'"
         }
 
-        if {$n ne "*"} {
-            $nbhoods validate $n
-        }
+        $nbhoods validate $n
 
         $self ValidateGC $g $c
 
         qmag validate $slope
 
         # NEXT, validate the options
-        $self ParseInputOptions opts $args $n
+        $self ParseInputOptions opts $args
 
         # NEXT, normalize the input data
         set input(driver)   $driver
@@ -2295,136 +2264,86 @@ snit::type ::simlib::gram {
             set input(cause) "D$input(driver)"
         }
 
-        # NEXT, the input aims directly at a single neighborhood, or 
-        # at all neighborhoods.  In the former case we can have 
-        # indirect effects in near and far neighborhoods.  In the
-        # latter case, there are direct effects in every neighborhood,
-        # and the indirect effects in other neighborhoods are neglected.
+        # NEXT, if the slope is 0, ignore it; otherwise,
+        # if there are effects on-going terminate all related
+        # chains.  Either way, we're done.
 
-        if {$n ne "*"} {
-            # ONE NEIGHBORHOOD
-
-            # FIRST, if the slope is 0, ignore it; otherwise,
-            # if there are effects on-going terminate all related
-            # chains.  Either way, we're done.
-
-            if {$input(slope) == 0.0} {
-                $rdb eval {
-                    SELECT id, ts, te, cause, delay, future 
-                    FROM gram_ngc     AS direct
-                    JOIN gram_effects AS effect 
-                         ON effect.direct_id = direct.ngc_id
-                    WHERE direct.n      = $input(dn) 
-                    AND   direct.g      = $input(dg) 
-                    AND   direct.c      = $input(c)
-                    AND   effect.etype  = 'S'
-                    AND   effect.driver = $input(driver)
-                    AND   effect.active = 1
-                    AND   effect.cause  = $input(cause)
-                } row {
-                    $self TerminateSlope input row
-                }
-
-                return $input(input)
-            }
-
-            # NEXT, get the de facto proximity limit.
-            set plimit \
-                $proxlimit([$parm get gram.proxlimit])
-
-            if {$input(q) == 0.0} {
-                if {$input(p) == 0.0} {
-                    set plimit [min $plimit $proxlimit(here)]
-                } else {
-                    set plimit [min $plimit $proxlimit(near)]
-                }
-            }
-
-            # NEXT, terminate existing slope chains which are outside
-            # the de facto proximity limit.
+        if {$input(slope) == 0.0} {
             $rdb eval {
                 SELECT id, ts, te, cause, delay, future 
                 FROM gram_ngc     AS direct
                 JOIN gram_effects AS effect 
                      ON effect.direct_id = direct.ngc_id
-                WHERE direct.n      =  $input(dn) 
-                AND   direct.g      =  $input(dg) 
-                AND   direct.c      =  $input(c)
-                AND   effect.etype  =  'S'
-                AND   effect.driver =  $input(driver)
-                AND   effect.active =  1
+                WHERE direct.n      = $input(dn) 
+                AND   direct.g      = $input(dg) 
+                AND   direct.c      = $input(c)
+                AND   effect.etype  = 'S'
+                AND   effect.driver = $input(driver)
+                AND   effect.active = 1
                 AND   effect.cause  = $input(cause)
-                AND   effect.prox   >= $plimit
             } row {
                 $self TerminateSlope input row
             }
 
-            # NEXT, schedule the effects in every influenced neighborhood
-            # within the proximity limit.
-            $rdb eval {
-                SELECT * FROM gram_sat_influence_view
-                WHERE dn        = $input(dn)
-                AND   dg        = $input(dg)
-                AND   c         = $input(c)
-                AND   prox      < $plimit
-            } chain {
-                $self ScheduleSlope input chain $epsilon
+            return $input(input)
+        }
+
+        # NEXT, get the de facto proximity limit.
+        set plimit \
+            $proxlimit([$parm get gram.proxlimit])
+
+        if {$input(q) == 0.0} {
+            if {$input(p) == 0.0} {
+                set plimit [min $plimit $proxlimit(here)]
+            } else {
+                set plimit [min $plimit $proxlimit(near)]
             }
-        } else {
-            # ALL NEIGHBORHOODS: -p and -q are ignored.
+        }
 
-            # FIRST, if the slope is 0, ignore it, unless effects
-            # are ongoing for this driver, in which case terminate all related
-            # chains.  Either way, we're done.
+        # NEXT, terminate existing slope chains which are outside
+        # the de facto proximity limit.
+        $rdb eval {
+            SELECT id, ts, te, cause, delay, future 
+            FROM gram_ngc     AS direct
+            JOIN gram_effects AS effect 
+                 ON effect.direct_id = direct.ngc_id
+            WHERE direct.n      =  $input(dn) 
+            AND   direct.g      =  $input(dg) 
+            AND   direct.c      =  $input(c)
+            AND   effect.etype  =  'S'
+            AND   effect.driver =  $input(driver)
+            AND   effect.active =  1
+            AND   effect.cause  = $input(cause)
+            AND   effect.prox   >= $plimit
+        } row {
+            $self TerminateSlope input row
+        }
 
-            if {$input(slope) == 0.0} {
-                $rdb eval {
-                    SELECT id, ts, te, cause, delay, future 
-                    FROM gram_ngc     AS direct
-                    JOIN gram_effects AS effect 
-                         ON effect.direct_id = direct.ngc_id
-                    WHERE direct.g      =  $input(dg) 
-                    AND   direct.c      =  $input(c)
-                    AND   effect.etype  =  'S'
-                    AND   effect.driver =  $input(driver)
-                    AND   effect.active =  1
-                    AND   effect.cause  = $input(cause)
-                } row {
-                    $self TerminateSlope input row
-                }
-
-                return $input(input)
-            }
-
-            # NEXT, schedule the effects in each neighborhood
-            set plimit $proxlimit(here)
-
-            $rdb eval {
-                SELECT * FROM gram_sat_influence_view
-                WHERE dn     = n
-                AND   dg     = $input(dg)
-                AND   c      = $input(c)
-                AND   prox   < $plimit
-            } chain {
-                set input(dn) $chain(dn)
-                $self ScheduleSlope input chain $epsilon
-            }
+        # NEXT, schedule the effects in every influenced neighborhood
+        # within the proximity limit.
+        $rdb eval {
+            SELECT * FROM gram_sat_influence_view
+            WHERE dn        = $input(dn)
+            AND   dg        = $input(dg)
+            AND   c         = $input(c)
+            AND   prox      < $plimit
+        } chain {
+            $self ScheduleSlope input chain $epsilon
         }
 
         return $input(input)
     }
 
-    # ParseInputOptions optsArray optsList n
+    # ParseInputOptions optsArray optsList
     #
     # optsArray      An array to receive the options
     # optsList       List of options and their values
-    # n              Nbhood name, or "*"
     #
     # Sets defaults, processes the optsList, validating each
     # entry, and puts the parsed values in the optsVar.  If
     # any values are invalid, an error is thrown.
 
-    method ParseInputOptions {optsArray optsList n} {
+    method ParseInputOptions {optsArray optsList} {
         upvar $optsArray opts
 
         array set opts {
@@ -2441,12 +2360,6 @@ snit::type ::simlib::gram {
                 -p -
                 -q {
                     rfraction validate $val
-
-                    if {$n eq "*" &&
-                        $val != 0.0
-                    } {
-                        error "$opt given, but n=\"*\""
-                    }
                         
                     set opts($opt) $val
                 }
@@ -2778,7 +2691,7 @@ snit::type ::simlib::gram {
     #
     # driver       Driver ID
     # ts           Start time, integer ticks
-    # n            Neighborhood name, or "*"
+    # n            Neighborhood name
     # f            Civilian group name
     # g            Force group name
     # limit        Magnitude of the effect (qmag)
@@ -2809,10 +2722,7 @@ snit::type ::simlib::gram {
             error "Start time is in the past: '$zulu'"
         }
 
-        if {$n ne "*"} {
-            $nbhoods validate $n
-        }
-
+        $nbhoods validate $n
         $cgroups validate $f
         $fgroups validate $g
 
@@ -2820,7 +2730,7 @@ snit::type ::simlib::gram {
         qduration validate $days
 
         # NEXT, validate the options
-        $self ParseInputOptions opts $args $n
+        $self ParseInputOptions opts $args
 
         # NEXT, normalize the input data.
 
@@ -2857,58 +2767,32 @@ snit::type ::simlib::gram {
             return $input(input)
         }
 
-        # NEXT, the input aims directly at a single neighborhood, or 
-        # at all neighborhoods.  In the former case we can have 
-        # indirect effects in near and far neighborhoods.  In the
-        # latter case, there are direct effects in every neighborhood,
-        # and the indirect effects in other neighborhoods are neglected.
-
+        # NEXT, schedule the effects in every influenced neighborhood
         set epsilon [$parm get gram.epsilon]
 
-        if {$n ne "*"} {
-            # ONE NEIGHBORHOOD
+        set plimit \
+            $proxlimit([$parm get gram.proxlimit])
 
-            # FIRST, schedule the effects in every influenced neighborhood
-            set plimit \
-                $proxlimit([$parm get gram.proxlimit])
+        # NEXT, use -p and -q to limit the proximity.
+        if {$input(q) == 0.0} {
+            set plimit [min $plimit $proxlimit(near)]
 
-            # NEXT, use -p and -q to limit the proximity.
-            if {$input(q) == 0.0} {
-                set plimit [min $plimit $proxlimit(near)]
-
-                if {$input(p) == 0.0} {
-                    set plimit [min $plimit $proxlimit(here)]
-                }
+            if {$input(p) == 0.0} {
+                set plimit [min $plimit $proxlimit(here)]
             }
+        }
 
-            # NEXT, schedule the effects in every influenced neighborhood
-            # within the proximity limit.
+        # NEXT, schedule the effects in every influenced neighborhood
+        # within the proximity limit.
 
-            $rdb eval {
-                SELECT * FROM gram_coop_influence_view
-                WHERE dn        = $input(dn)
-                AND   df        = $input(df)
-                AND   dg        = $input(dg)
-                AND   prox      < $plimit 
-            } effect {
-                $self ScheduleLevel input effect $epsilon
-            }
-        } else {
-            # ALL NEIGHBORHOODS
-
-            # FIRST, schedule the effects in each neighborhood
-            set plimit $proxlimit(here)
-
-            $rdb eval {
-                SELECT * FROM gram_coop_influence_view
-                WHERE dn        = m
-                AND   df        = $input(df)
-                AND   dg        = $input(dg)
-                AND   prox      < $plimit 
-            } effect {
-                set $input(dn) $effect(dn)
-                $self ScheduleLevel input effect $epsilon
-            }
+        $rdb eval {
+            SELECT * FROM gram_coop_influence_view
+            WHERE dn        = $input(dn)
+            AND   df        = $input(df)
+            AND   dg        = $input(dg)
+            AND   prox      < $plimit 
+        } effect {
+            $self ScheduleLevel input effect $epsilon
         }
 
         return $input(input)
@@ -2918,7 +2802,7 @@ snit::type ::simlib::gram {
     #
     # driver       Driver ID
     # ts           Start time, integer ticks
-    # n            Neighborhood name, or "*"
+    # n            Neighborhood name
     # f            Civilian group name
     # g            Force group name
     # slope        Slope (change/day) of the effect (qmag)
@@ -2951,17 +2835,14 @@ snit::type ::simlib::gram {
             error "Start time is in the past: '$zulu'"
         }
 
-        if {$n ne "*"} {
-            $nbhoods validate $n
-        }
-
+        $nbhoods validate $n
         $cgroups validate $f
         $fgroups validate $g
 
         qmag validate $slope
 
         # NEXT, validate the options
-        $self ParseInputOptions opts $args $n
+        $self ParseInputOptions opts $args
 
         # NEXT, normalize the input data
 
@@ -3002,120 +2883,71 @@ snit::type ::simlib::gram {
             set input(cause) "D$input(driver)"
         }
 
-        # NEXT, the input aims directly at a single neighborhood, or 
-        # at all neighborhoods.  In the former case we can have 
-        # indirect effects in near and far neighborhoods.  In the
-        # latter case, there are direct effects in every neighborhood,
-        # and the indirect effects in other neighborhoods are neglected.
+        # NEXT, if the slope is 0, ignore it, unless effects
+        # are ongoing for this driver, in which case terminate all related
+        # chains.  Either way, we're done.
 
-        if {$n ne "*"} {
-            # ONE NEIGHBORHOOD
-
-            # FIRST, if the slope is 0, ignore it, unless effects
-            # are ongoing for this driver, in which case terminate all related
-            # chains.  Either way, we're done.
-
-            if {$input(slope) == 0.0} {
-                $rdb eval {
-                    SELECT id, ts, te, cause, delay, future 
-                    FROM gram_nfg     AS direct
-                    JOIN gram_effects AS effect 
-                         ON effect.direct_id = direct.nfg_id
-                    WHERE direct.n      = $input(dn) 
-                    AND   direct.f      = $input(df) 
-                    AND   direct.g      = $input(dg) 
-                    AND   effect.etype  = 'S'
-                    AND   effect.driver = $input(driver)
-                    AND   effect.active = 1
-                    AND   effect.cause  = $input(cause)
-                } effect {
-                    $self TerminateSlope input effect
-                }
-
-                return $input(input)
-            }
-
-            # NEXT, get the de facto proximity limit.
-            set plimit \
-                $proxlimit([$parm get gram.proxlimit])
-
-            if {$input(q) == 0.0} {
-                if {$input(p) == 0.0} {
-                    set plimit [min $plimit $proxlimit(here)]
-                } else {
-                    set plimit [min $plimit $proxlimit(near)]
-                }
-            }
-
-            # NEXT, terminate existing slope chains which are outside
-            # the de facto proximity limit.
+        if {$input(slope) == 0.0} {
             $rdb eval {
                 SELECT id, ts, te, cause, delay, future 
                 FROM gram_nfg     AS direct
                 JOIN gram_effects AS effect 
                      ON effect.direct_id = direct.nfg_id
-                WHERE direct.n      =  $input(dn) 
-                AND   direct.f      =  $input(df) 
-                AND   direct.g      =  $input(dg) 
-                AND   effect.etype  =  'S'
-                AND   effect.driver =  $input(driver)
-                AND   effect.active =  1
+                WHERE direct.n      = $input(dn) 
+                AND   direct.f      = $input(df) 
+                AND   direct.g      = $input(dg) 
+                AND   effect.etype  = 'S'
+                AND   effect.driver = $input(driver)
+                AND   effect.active = 1
                 AND   effect.cause  = $input(cause)
-                AND   effect.prox   >= $plimit
             } effect {
                 $self TerminateSlope input effect
             }
 
-            # NEXT, schedule the effects in every influenced neighborhood
-            # within the proximity limit.
-            $rdb eval {
-                SELECT * FROM gram_coop_influence_view
-                WHERE dn        = $input(dn)
-                AND   df        = $input(df)
-                AND   dg        = $input(dg)
-                AND   prox      < $plimit
-            } effect {
-                $self ScheduleSlope input effect $epsilon
+            return $input(input)
+        }
+
+        # NEXT, get the de facto proximity limit.
+        set plimit \
+            $proxlimit([$parm get gram.proxlimit])
+
+        if {$input(q) == 0.0} {
+            if {$input(p) == 0.0} {
+                set plimit [min $plimit $proxlimit(here)]
+            } else {
+                set plimit [min $plimit $proxlimit(near)]
             }
-        } else {
-            # ALL NEIGHBORHOODS: -p and -q are ignored.
+        }
 
-            # FIRST, if the slope is 0, ignore it, unless effects
-            # are on-going for this driver, in which case terminate all related
-            # chains.  Either way, we're done.
+        # NEXT, terminate existing slope chains which are outside
+        # the de facto proximity limit.
+        $rdb eval {
+            SELECT id, ts, te, cause, delay, future 
+            FROM gram_nfg     AS direct
+            JOIN gram_effects AS effect 
+                 ON effect.direct_id = direct.nfg_id
+            WHERE direct.n      =  $input(dn) 
+            AND   direct.f      =  $input(df) 
+            AND   direct.g      =  $input(dg) 
+            AND   effect.etype  =  'S'
+            AND   effect.driver =  $input(driver)
+            AND   effect.active =  1
+            AND   effect.cause  = $input(cause)
+            AND   effect.prox   >= $plimit
+        } effect {
+            $self TerminateSlope input effect
+        }
 
-            if {$input(slope) == 0.0} {
-                $rdb eval {
-                    SELECT id, ts, te, cause, delay, future 
-                    FROM gram_nfg     AS direct
-                    JOIN gram_effects AS effect 
-                         ON effect.direct_id = direct.nfg_id
-                    WHERE direct.f      =  $input(df) 
-                    AND   direct.g      =  $input(dg) 
-                    AND   effect.etype  =  'S'
-                    AND   effect.driver =  $input(driver)
-                    AND   effect.active =  1
-                    AND   effect.cause  = $input(cause)
-                } effect {
-                    $self TerminateSlope input effect
-                }
-
-                return $input(input)
-            }
-
-            # NEXT, schedule the effects in each neighborhood
-            set plimit $proxlimit(here)
-
-            $rdb eval {
-                SELECT * FROM gram_coop_influence_view
-                WHERE dn     = m
-                AND   df     = $input(df)
-                AND   dg     = $input(dg)
-                AND   prox   < $plimit
-            } effect {
-                set input(dn) $effect(dn)
-                $self ScheduleSlope input effect $epsilon
-            }
+        # NEXT, schedule the effects in every influenced neighborhood
+        # within the proximity limit.
+        $rdb eval {
+            SELECT * FROM gram_coop_influence_view
+            WHERE dn        = $input(dn)
+            AND   df        = $input(df)
+            AND   dg        = $input(dg)
+            AND   prox      < $plimit
+        } effect {
+            $self ScheduleSlope input effect $epsilon
         }
 
         return $input(input)

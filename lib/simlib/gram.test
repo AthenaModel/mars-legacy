@@ -3440,25 +3440,8 @@ time driver acontrib curve_id n  g    c
         error
     } -result {invalid value, "DUMMY"}
 
-    test sat_level-1.18 {-p given when n=*} -setup {
-        create
-    } -body {
-        jr sat level 1 0 * SHIA QOL 5.0 0.1 -p 0.1
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup 
-    } -result {-p given, but n="*"}
-
-    test sat_level-1.19 {-q given when n=*} -setup {
-        create
-    } -body {
-        jr sat level 1 0 * SHIA QOL 5.0 0.1 -q 0.1
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup 
-    } -result {-q given, but n="*"}
+    # sat_level-1.18 OBSOLETE
+    # sat_level-1.19 OBSOLETE
 
     test sat_level-2.1 {schedule event for one n,g,c.} -setup {
         create
@@ -3475,23 +3458,7 @@ I 0  144 N2 SHIA QOL 3.00
 I 0  144 N2 SUNN QOL -3.00  
     }
 
-    test sat_level-2.2 {schedule event for multiple n.} -setup {
-        create
-    } -body {
-        jr sat level 1 0 * KURD QOL 5.0 0.1
-        dumpLevels
-    } -cleanup {
-        cleanup 
-    } -result {
-d ts te  n  g    c   llimit 
-- -- --- -- ---- --- ------ 
-D 0  144 N1 KURD QOL 5.00   
-I 0  144 N1 SHIA QOL 3.00   
-I 0  144 N1 SUNN QOL -3.00  
-D 0  144 N2 KURD QOL 5.00   
-I 0  144 N2 SHIA QOL 3.00   
-I 0  144 N2 SUNN QOL -3.00  
-    }
+    # sat_level-2.2 OBSOLETE
 
     test sat_level-2.3 {zero magnitude events are ignored} -setup {
         create
@@ -3615,26 +3582,7 @@ D 0  144 N1 SHIA QOL 5.00
 I 0  144 N1 SUNN QOL -1.50  
     }
 
-    test sat_level-2.9 {Direct effects in all neighborhoods} -setup {
-        create
-    } -body {
-        jr sat level 1 0 * SHIA QOL 5.0 0.1
-
-        # Expect direct effect on SHIA, indirect on others, in both 
-        # neighborhoods.
-        dumpLevels
-    } -cleanup {
-        cleanup 
-    } -result {
-d ts te  n  g    c   llimit 
-- -- --- -- ---- --- ------ 
-I 0  144 N1 KURD QOL 3.00   
-D 0  144 N1 SHIA QOL 5.00   
-I 0  144 N1 SUNN QOL -1.50  
-I 0  144 N2 KURD QOL 3.00   
-D 0  144 N2 SHIA QOL 5.00   
-I 0  144 N2 SUNN QOL -1.50  
-    }
+    # sat_level-2.9 OBSOLETE
 
     test sat_level-2.10 {Indirect effects in all nbhoods, N2 near} -setup {
         create
@@ -4310,25 +4258,8 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         error
     } -result {slope scheduled in decreasing time sequence: 5 < 10}
 
-    test sat_slope-1.18 {-p given when n=*} -setup {
-        create
-    } -body {
-        jr sat slope 1 0 * SHIA QOL 5.0 -p 0.1
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup 
-    } -result {-p given, but n="*"}
-
-    test sat_slope-1.19 {-q given when n=*} -setup {
-        create
-    } -body {
-        jr sat slope 1 0 * SHIA QOL 5.0 -q 0.1
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup 
-    } -result {-q given, but n="*"}
+    # sat_slope-1.18 OBSOLETE
+    # sat_slope-1.19 OBSOLETE
     
     # sat_slope-2.*: Scheduling
 
@@ -4347,26 +4278,9 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
 '     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -60.0   0.0     0.0  
     }
 
-    test sat_slope-2.2 {schedule slope for all n} -setup {
-        create -trend no
-    } -body {
-        jr sat slope 1 0 * KURD SFT 100.0
-        dumpSlopes
-    } -cleanup {
-        cleanup 
-    } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
-1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
-'     N2 '    '     D 010000ZJAN70 n/a      N2   KURD SFT 100.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  60.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -60.0   0.0     0.0  
-    }
+    # sat_slope-2.2 OBSOLETE
 
-
-    test sat_slope-2.3 {successive inputs for an driver stack} -setup {
+    test sat_slope-2.3 {successive inputs for a driver stack} -setup {
         create -trend no
     } -body {
         jr sat slope 1  0 N2 KURD SFT 100.0
@@ -4445,26 +4359,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
 '     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
     }
 
-    test sat_slope-2.6 {direct effects in all nbhoods} -setup {
-        create -trend no
-    } -body {
-        jr sat slope 1 0 * KURD SFT 100.0
-
-        # Expect direct effect on SHIA, indirect on others, in both 
-        # neighborhoods
-        dumpSlopes
-    } -cleanup {
-        cleanup 
-    } -result {
-Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
------ -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
-1.1   N1 KURD D1    D 010000ZJAN70 n/a      N1   KURD SFT 100.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SHIA SFT  60.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N1   SUNN SFT -60.0   0.0     0.0  
-'     N2 '    '     D 010000ZJAN70 n/a      N2   KURD SFT 100.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  60.0   0.0     0.0  
-'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -60.0   0.0     0.0  
-    }
+    # sat_slope-2.6 OBSOLETE
 
     test sat_slope-2.7 {Indirect effects in all nbhoods, N2 near} -setup {
         create
@@ -5058,31 +4953,9 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
         cleanup
     } -result {1 2 3 4 {3 4}}
 
-    test sat_slope-7.3 {Return input, case 3: all nbhoods, 0 limit} -setup {
-        create -trend no
-    } -body {
-        set a [jr sat slope 1 0 * SHIA SFT 0]
-        set b [jr sat slope 1 0 * SHIA QOL 0]
-        set c [rdb eval {SELECT DISTINCT input FROM gram_effects}]
+    # sat_slope-7.3 OBSOLETE
 
-        list $a $b $c
-    } -cleanup {
-        cleanup
-    } -result {1 2 {}}
-
-    test sat_slope-7.4 {Return input, case 4: all nbhoods, terminate} -setup {
-        create -trend no
-    } -body {
-        set a [jr sat slope 1 0 * SHIA SFT 10]
-        set b [jr sat slope 1 0 * SHIA QOL 10]
-        set c [jr sat slope 1 0 * SHIA SFT 0]
-        set d [jr sat slope 1 0 * SHIA QOL 0]
-        set e [rdb eval {SELECT DISTINCT input FROM gram_effects}]
-
-        list $a $b $c $d $e
-    } -cleanup {
-        cleanup
-    } -result {1 2 3 4 {3 4}}
+    # sat_slope-7.4 OBSOLETE
 
     test sat_slope-7.5 {Return input, case 5: nominal case} -setup {
         create -trend no
@@ -6094,26 +5967,8 @@ time driver acontrib curve_id n  f    g
         error
     } -result {invalid value, "DUMMY"}
 
-    test coop_level-1.17 {-p given when n=*} -setup {
-        create
-    } -body {
-        jr coop level 1 0 * SHIA BLUE 5.0 0.1 -p 0.1
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup 
-    } -result {-p given, but n="*"}
-
-    test coop_level-1.18 {-q given when n=*} -setup {
-        create
-    } -body {
-        jr coop level 1 0 * SHIA BLUE 5.0 0.1 -q 0.1
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup 
-    } -result {-q given, but n="*"}
-
+    # coop_level-1.17 OBSOLETE
+    # coop_level-1.18 OBSOLETE
 
     # 2.*: Scheduling
 
@@ -6132,23 +5987,7 @@ D 0  144 N2 KURD BRIT  10.00
 I 0  144 N2 KURD OPFOR -8.00  
     }
 
-    test coop_level-2.2 {schedule event for multiple n.} -setup {
-        create
-    } -body {
-        jr coop level 1 0 * KURD BRIT 5.0 0.1
-        dumpCoopLevels
-    } -cleanup {
-        cleanup 
-    } -result {
-d ts te  n  f    g     llimit 
-- -- --- -- ---- ----- ------ 
-I 0  144 N1 KURD BLUE  4.00   
-D 0  144 N1 KURD BRIT  5.00   
-I 0  144 N1 KURD OPFOR -4.00  
-I 0  144 N2 KURD BLUE  4.00   
-D 0  144 N2 KURD BRIT  5.00   
-I 0  144 N2 KURD OPFOR -4.00  
-    }
+    # coop_level-2.2 OBSOLETE
 
     test coop_level-2.3 {zero magnitude events are ignored} -setup {
         create
@@ -6837,25 +6676,8 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         error
     } -result {slope scheduled in decreasing time sequence: 5 < 10}
 
-    test coop_slope-1.17 {-p given when n=*} -setup {
-        create
-    } -body {
-        jr coop slope 1 0 * SHIA BLUE 5.0 -p 0.1
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup 
-    } -result {-p given, but n="*"}
-
-    test coop_slope-1.18 {-q given when n=*} -setup {
-        create
-    } -body {
-        jr coop slope 1 0 * SHIA BLUE 5.0 -q 0.1
-    } -returnCodes {
-        error
-    } -cleanup {
-        cleanup 
-    } -result {-q given, but n="*"}
+    # coop_slope-1.17 OBSOLETE
+    # coop_slope-1.18 OBSOLETE
     
     # coop_slope-2.*: Scheduling
 
@@ -6874,26 +6696,9 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
 '     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -80.0   0.0     0.0  
     }
 
-    test coop_slope-2.2 {schedule slope for all n} -setup {
-        create
-    } -body {
-        jr coop slope 1 0 * KURD BRIT 100.0
-        dumpCoopSlopes
-    } -cleanup {
-        cleanup 
-    } -result {
-Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
------ -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
-1.1   N1 KURD BRIT D1    I 010000ZJAN70 n/a      N1 KURD BLUE   80.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N1 KURD BRIT  100.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N1 KURD OPFOR -80.0   0.0     0.0  
-'     N2 '    '    '     I 010000ZJAN70 n/a      N2 KURD BLUE   80.0   0.0     0.0  
-'     '  '    '    '     D 010000ZJAN70 n/a      N2 KURD BRIT  100.0   0.0     0.0  
-'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -80.0   0.0     0.0  
-    }
+    # coop_slope-2.2 OBSOLETE
 
-
-    test coop_slope-2.3 {successive inputs for an driver stack} -setup {
+    test coop_slope-2.3 {successive inputs for a driver stack} -setup {
         create
     } -body {
         jr coop slope 1  0 N2 KURD BRIT 100.0
@@ -7535,31 +7340,8 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
         cleanup
     } -result {1 2 3 4 {3 4}}
 
-    test coop_slope-7.3 {Return input, case 3: all nbhoods, 0 limit} -setup {
-        create -trend no
-    } -body {
-        set a [jr coop slope 1 0 * SHIA BRIT 0]
-        set b [jr coop slope 1 0 * SHIA BLUE 0]
-        set c [rdb eval {SELECT DISTINCT input FROM gram_effects}]
-
-        list $a $b $c
-    } -cleanup {
-        cleanup
-    } -result {1 2 {}}
-
-    test coop_slope-7.4 {Return input, case 4: all nbhoods, terminate} -setup {
-        create -trend no
-    } -body {
-        set a [jr coop slope 1 0 * SHIA BRIT 10]
-        set b [jr coop slope 1 0 * SHIA BLUE 10]
-        set c [jr coop slope 1 0 * SHIA BRIT 0]
-        set d [jr coop slope 1 0 * SHIA BLUE 0]
-        set e [rdb eval {SELECT DISTINCT input FROM gram_effects}]
-
-        list $a $b $c $d $e
-    } -cleanup {
-        cleanup
-    } -result {1 2 3 4 {3 4}}
+    # coop_slope-7.3 OBSOLETE
+    # coop_slope-7.4 OBSOLETE
 
     test coop_slope-7.5 {Return input, case 5: nominal case} -setup {
         create

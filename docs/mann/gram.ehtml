@@ -635,10 +635,8 @@ Schedules a satisfaction level input.  The input is for
 the specific <i>driver</i>, and begins to take effect at time <i>ts</i>,
 which should be no earlier than the current simulation time.  It affects
 neighborhood <i>n</i>, CIV or ORG group <i>g</i> and CIV or ORG
-concern <i>c</i>, all of which are specified by name.  The
-neighborhood, <i>n</i>, may also be "*", indicating that the input has
-a direct effect in all neighborhoods.  Note that <i>g</i> and <i>c</i>
-must have the same group type, CIV or ORG.<p>
+concern <i>c</i>, all of which are specified by name.  Note that <i>g</i>
+and <i>c</i> must have the same group type, CIV or ORG.<p>
 
 The input has a maximum satisfaction change of <i>limit</i>
 (a <<xref simtypes(n) qmag>> value), and a
@@ -674,15 +672,13 @@ of valid causes should probably be set by the <<xref gram_loader(i)>>.
 
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
-<b>near</b> to neighborhood <i>n</i>.  Defaults to 0.0.  It is an
-error to specify this option if <i>n</i> is "*".<p>
+<b>near</b> to neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
 <<defopt {-q <i>factor</i>}>>
 
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
-<b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.  It is an
-error to specify this option if <i>n</i> is "*".<p>
+<b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
 <</deflist sat level options>>
 
@@ -718,9 +714,8 @@ Schedules a satisfaction slope input.  The input is for
 the specific <i>driver</i>, and begins to take effect at time <i>ts</i>,
 which should be no earlier than the current simulation time.  It affects
 neighborhood <i>n</i>, CIV or ORG group <i>g</i> and CIV or ORG
-concern <i>c</i>, all of which are specified by name.  The
-neighborhood, <i>n</i>, may also be "*", indicating that the input has
-a direct effect in all neighborhoods.  Note that <i>g</i> and <i>c</i>
+concern <i>c</i>, all of which are specified by name.
+Note that <i>g</i> and <i>c</i>
 must have the same group type, CIV or ORG.<p>
 
 The input has a nominal satisfaction change per day, the <i>slope</i>,
@@ -766,15 +761,13 @@ positive and maximum negative effects actually take effect.<p>
 
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
-<b>near</b> to neighborhood <i>n</i>.  Defaults to 0.0.  It is an
-error to specify this option if <i>n</i> is "*".<p>
+<b>near</b> to neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
 <<defopt {-q <i>factor</i>}>>
 
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
-<b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.  It is an
-error to specify this option if <i>n</i> is "*".<p>
+<b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
 <</deflist sat slope options>>
 
@@ -867,9 +860,7 @@ Schedules a cooperation level input.  The input is for
 the specific <i>driver</i>, and begins to take effect at time <i>ts</i>,
 which should be no earlier than the current simulation time.  It affects
 neighborhood <i>n</i>, CIV group <i>f</i> and FRC group <i>g</i>, all
-of which are specified by name.  The 
-neighborhood, <i>n</i>, may also be "*", indicating that the input has
-a direct effect in all neighborhoods.<p>
+of which are specified by name.<p>
 
 The input has a maximum cooperation change of <i>limit</i>
 (a <<xref simtypes(n) qmag>> value), and a
@@ -902,15 +893,13 @@ positive and maximum negative effects actually take effect.<p>
 
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
-<b>near</b> to neighborhood <i>n</i>.  Defaults to 0.0.  It is an
-error to specify this option if <i>n</i> is "*".<p>
+<b>near</b> to neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
 <<defopt {-q <i>factor</i>}>>
 
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
-<b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.  It is an
-error to specify this option if <i>n</i> is "*".<p>
+<b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
 <</deflist coop level options>>
 
@@ -944,9 +933,7 @@ Schedules a cooperation slope input.  The input is for
 the specific <i>driver</i>, and begins to take effect at time <i>ts</i>,
 which should be no earlier than the current simulation time.  It affects
 neighborhood <i>n</i>, CIV group <i>f</i> and FRC group <i>g</i>, all
-of which are specified by name.  The 
-neighborhood, <i>n</i>, may also be "*", indicating that the input has
-a direct effect in all neighborhoods.<p>
+of which are specified by name.<p>
 
 The input has a nominal cooperation change per day, the <i>slope</i>,
 a <<xref simtypes(n) qmag>> value.<p>
@@ -987,15 +974,13 @@ positive and maximum negative effects actually take effect.<p>
 
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
-<b>near</b> to neighborhood <i>n</i>.  Defaults to 0.0.  It is an
-error to specify this option if <i>n</i> is "*".<p>
+<b>near</b> to neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
 <<defopt {-q <i>factor</i>}>>
 
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
-<b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.  It is an
-error to specify this option if <i>n</i> is "*".<p>
+<b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
 <</deflist coop slope options>>
 
