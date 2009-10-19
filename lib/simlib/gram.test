@@ -3369,7 +3369,38 @@ time driver acontrib curve_id n  g    c
     } -result {invalid option: "-nonesuch"}
 
 
-    test sat_level-1.11 {Non-numeric -p} -setup {
+    test sat_level-1.11 {Non-numeric -s} -setup {
+        create
+    } -body {
+        jr sat level 1 0 N1 SHIA SFT 10.0 1 -s FOO
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
+
+    test sat_level-1.12 {Negative -s} -setup {
+        create
+    } -body {
+        jr sat level 1 0 N1 SHIA SFT 10.0 1 -s -0.1
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
+
+    test sat_level-1.13 {-s greater than 1.0} -setup {
+        create
+    } -body {
+        jr sat level 1 0 N1 SHIA SFT 10.0 1 -s 1.1
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
+
+
+    test sat_level-1.14 {Non-numeric -p} -setup {
         create
     } -body {
         jr sat level 1 0 N1 SHIA SFT 10.0 1 -p FOO
@@ -3379,7 +3410,7 @@ time driver acontrib curve_id n  g    c
         error
     } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
-    test sat_level-1.12 {Negative -p} -setup {
+    test sat_level-1.15 {Negative -p} -setup {
         create
     } -body {
         jr sat level 1 0 N1 SHIA SFT 10.0 1 -p -0.1
@@ -3389,7 +3420,7 @@ time driver acontrib curve_id n  g    c
         error
     } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
-    test sat_level-1.13 {-p greater than 1.0} -setup {
+    test sat_level-1.16 {-p greater than 1.0} -setup {
         create
     } -body {
         jr sat level 1 0 N1 SHIA SFT 10.0 1 -p 1.1
@@ -3400,7 +3431,7 @@ time driver acontrib curve_id n  g    c
     } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
 
-    test sat_level-1.14 {Non-numeric -q} -setup {
+    test sat_level-1.17 {Non-numeric -q} -setup {
         create
     } -body {
         jr sat level 1 0 N1 SHIA SFT 10.0 1 -q FOO
@@ -3410,7 +3441,7 @@ time driver acontrib curve_id n  g    c
         error
     } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
-    test sat_level-1.15 {Negative -q} -setup {
+    test sat_level-1.18 {Negative -q} -setup {
         create
     } -body {
         jr sat level 1 0 N1 SHIA SFT 10.0 1 -q -0.1
@@ -3420,7 +3451,7 @@ time driver acontrib curve_id n  g    c
         error
     } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
-    test sat_level-1.16 {-q greater than 1.0} -setup {
+    test sat_level-1.19 {-q greater than 1.0} -setup {
         create
     } -body {
         jr sat level 1 0 N1 SHIA SFT 10.0 1 -q 1.1
@@ -3430,7 +3461,7 @@ time driver acontrib curve_id n  g    c
         error
     } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
-    test sat_level-1.17 {invalid cause} -constraints cause -setup {
+    test sat_level-1.20 {invalid cause} -constraints cause -setup {
         create
     } -body {
         jr sat level 1 0 N1 SHIA SFT 10.0 1 -cause DUMMY
@@ -3439,9 +3470,6 @@ time driver acontrib curve_id n  g    c
     } -returnCodes {
         error
     } -result {invalid value, "DUMMY"}
-
-    # sat_level-1.18 OBSOLETE
-    # sat_level-1.19 OBSOLETE
 
     test sat_level-2.1 {schedule event for one n,g,c.} -setup {
         create
@@ -3458,7 +3486,20 @@ I 0  144 N2 SHIA QOL 3.00
 I 0  144 N2 SUNN QOL -3.00  
     }
 
-    # sat_level-2.2 OBSOLETE
+    test sat_level-2.2 {-s is 0.5} -setup {
+        create
+    } -body {
+        jr sat level 1 0 N2 KURD QOL 5.0 0.1 -s 0.5
+        dumpLevels
+    } -cleanup {
+        cleanup 
+    } -result {
+d ts te  n  g    c   llimit 
+- -- --- -- ---- --- ------ 
+D 0  144 N2 KURD QOL 5.00   
+I 0  144 N2 SHIA QOL 1.50   
+I 0  144 N2 SUNN QOL -1.50  
+    }
 
     test sat_level-2.3 {zero magnitude events are ignored} -setup {
         create
@@ -4087,7 +4128,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     #
     # sat_slope-1.*: Argument checking
     # sat_slope-2.*: Scheduling
-    # sat_slope-3.*: Affect on sat.ngc
+    # sat_slope-3.*: Effect on sat.ngc
     # sat_slope-4.*: Expiration
     # sat_slope-5.*: Tracking of contributions
     # sat_slope-6.*: Cause interactions
@@ -4176,8 +4217,37 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         error
     } -result {invalid option: "-nonesuch"}
 
+    test sat_slope-1.10 {Non-numeric -s} -setup {
+        create
+    } -body {
+        jr sat slope 1 0 N1 SHIA SFT 100.0 -s FOO
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
-    test sat_slope-1.10 {Non-numeric -p} -setup {
+    test sat_slope-1.11 {Negative -s} -setup {
+        create
+    } -body {
+        jr sat slope 1 0 N1 SHIA SFT 100.0 -s -0.1
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
+
+    test sat_slope-1.12 {-s greater than 1.0} -setup {
+        create
+    } -body {
+        jr sat slope 1 0 N1 SHIA SFT 100.0 -s 1.1
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
+
+    test sat_slope-1.13 {Non-numeric -p} -setup {
         create
     } -body {
         jr sat slope 1 0 N1 SHIA SFT 100.0 -p FOO
@@ -4187,7 +4257,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         error
     } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
-    test sat_slope-1.11 {Negative -p} -setup {
+    test sat_slope-1.14 {Negative -p} -setup {
         create
     } -body {
         jr sat slope 1 0 N1 SHIA SFT 100.0 -p -0.1
@@ -4197,7 +4267,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         error
     } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
-    test sat_slope-1.12 {-p greater than 1.0} -setup {
+    test sat_slope-1.15 {-p greater than 1.0} -setup {
         create
     } -body {
         jr sat slope 1 0 N1 SHIA SFT 100.0 -p 1.1
@@ -4207,7 +4277,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         error
     } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
-    test sat_slope-1.13 {Non-numeric -q} -setup {
+    test sat_slope-1.16 {Non-numeric -q} -setup {
         create
     } -body {
         jr sat slope 1 0 N1 SHIA SFT 100.0 -q FOO
@@ -4217,7 +4287,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         error
     } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
-    test sat_slope-1.14 {Negative -q} -setup {
+    test sat_slope-1.17 {Negative -q} -setup {
         create
     } -body {
         jr sat slope 1 0 N1 SHIA SFT 100.0 -q -0.1
@@ -4227,7 +4297,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         error
     } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
-    test sat_slope-1.15 {-q greater than 1.0} -setup {
+    test sat_slope-1.18 {-q greater than 1.0} -setup {
         create
     } -body {
         jr sat slope 1 0 N1 SHIA SFT 100.0 -q 1.1
@@ -4237,7 +4307,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         error
     } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
-    test sat_slope-1.16 {invalid cause} -constraints cause -setup {
+    test sat_slope-1.19 {invalid cause} -constraints cause -setup {
         create
     } -body {
         jr sat slope 1 0 N1 SHIA SFT 10.0 -cause DUMMY
@@ -4247,7 +4317,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         error
     } -result {invalid value, "DUMMY"}
 
-    test sat_slope-1.17 {slope scheduled for an driver in decreasing time sequence} -setup {
+    test sat_slope-1.20 {slope scheduled for an driver in decreasing time sequence} -setup {
         create
     } -body {
         jr sat slope 1 10 N1 SHIA SFT 10.0
@@ -4257,9 +4327,6 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     } -returnCodes {
         error
     } -result {slope scheduled in decreasing time sequence: 5 < 10}
-
-    # sat_slope-1.18 OBSOLETE
-    # sat_slope-1.19 OBSOLETE
     
     # sat_slope-2.*: Scheduling
 
@@ -4278,7 +4345,20 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
 '     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -60.0   0.0     0.0  
     }
 
-    # sat_slope-2.2 OBSOLETE
+    test sat_slope-2.2 {schedule slope for one n,g,c, -s 0.5} -setup {
+        create -trend no
+    } -body {
+        jr sat slope 1 0 N2 KURD SFT 100.0 -s 0.5
+        dumpSlopes
+    } -cleanup {
+        cleanup 
+    } -result {
+Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual 
+----- -- ---- ----- - ------------ -------- ---- ---- --- ----- ------- ------ 
+1.1   N2 KURD D1    D 010000ZJAN70 n/a      N2   KURD SFT 100.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SHIA SFT  30.0   0.0     0.0  
+'     '  '    '     I 010000ZJAN70 n/a      N2   SUNN SFT -30.0   0.0     0.0  
+    }
 
     test sat_slope-2.3 {successive inputs for a driver stack} -setup {
         create -trend no
@@ -5896,7 +5976,38 @@ time driver acontrib curve_id n  f    g
     } -result {invalid option: "-nonesuch"}
 
 
-    test coop_level-1.10 {Non-numeric -p} -setup {
+    test coop_level-1.10 {Non-numeric -s} -setup {
+        create
+    } -body {
+        jr coop level 1 0 N1 SHIA BLUE 10.0 1 -s FOO
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
+
+    test coop_level-1.11 {Negative -s} -setup {
+        create
+    } -body {
+        jr coop level 1 0 N1 SHIA BLUE 10.0 1 -s -0.1
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
+
+    test coop_level-1.12 {-s greater than 1.0} -setup {
+        create
+    } -body {
+        jr coop level 1 0 N1 SHIA BLUE 10.0 1 -s 1.1
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
+
+
+    test coop_level-1.13 {Non-numeric -p} -setup {
         create
     } -body {
         jr coop level 1 0 N1 SHIA BLUE 10.0 1 -p FOO
@@ -5906,7 +6017,7 @@ time driver acontrib curve_id n  f    g
         error
     } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
-    test coop_level-1.11 {Negative -p} -setup {
+    test coop_level-1.14 {Negative -p} -setup {
         create
     } -body {
         jr coop level 1 0 N1 SHIA BLUE 10.0 1 -p -0.1
@@ -5916,7 +6027,7 @@ time driver acontrib curve_id n  f    g
         error
     } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
-    test coop_level-1.12 {-p greater than 1.0} -setup {
+    test coop_level-1.15 {-p greater than 1.0} -setup {
         create
     } -body {
         jr coop level 1 0 N1 SHIA BLUE 10.0 1 -p 1.1
@@ -5927,7 +6038,7 @@ time driver acontrib curve_id n  f    g
     } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
 
-    test coop_level-1.13 {Non-numeric -q} -setup {
+    test coop_level-1.16 {Non-numeric -q} -setup {
         create
     } -body {
         jr coop level 1 0 N1 SHIA BLUE 10.0 1 -q FOO
@@ -5937,7 +6048,7 @@ time driver acontrib curve_id n  f    g
         error
     } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
-    test coop_level-1.14 {Negative -q} -setup {
+    test coop_level-1.17 {Negative -q} -setup {
         create
     } -body {
         jr coop level 1 0 N1 SHIA BLUE 10.0 1 -q -0.1
@@ -5947,7 +6058,7 @@ time driver acontrib curve_id n  f    g
         error
     } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
-    test coop_level-1.15 {-q greater than 1.0} -setup {
+    test coop_level-1.18 {-q greater than 1.0} -setup {
         create
     } -body {
         jr coop level 1 0 N1 SHIA BLUE 10.0 1 -q 1.1
@@ -5957,7 +6068,7 @@ time driver acontrib curve_id n  f    g
         error
     } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
-    test coop_level-1.16 {invalid cause} -constraints cause -setup {
+    test coop_level-1.19 {invalid cause} -constraints cause -setup {
         create
     } -body {
         jr coop level 1 0 N1 SHIA BLUE 10.0 1 -cause DUMMY
@@ -5966,9 +6077,6 @@ time driver acontrib curve_id n  f    g
     } -returnCodes {
         error
     } -result {invalid value, "DUMMY"}
-
-    # coop_level-1.17 OBSOLETE
-    # coop_level-1.18 OBSOLETE
 
     # 2.*: Scheduling
 
@@ -5987,7 +6095,20 @@ D 0  144 N2 KURD BRIT  10.00
 I 0  144 N2 KURD OPFOR -8.00  
     }
 
-    # coop_level-2.2 OBSOLETE
+    test coop_level-2.2 {schedule with -s 0.5} -setup {
+        create
+    } -body {
+        jr coop level 1 0 N2 KURD BRIT 10.0 0.1 -s 0.5
+        dumpCoopLevels
+    } -cleanup {
+        cleanup 
+    } -result {
+d ts te  n  f    g     llimit 
+- -- --- -- ---- ----- ------ 
+I 0  144 N2 KURD BLUE  4.00   
+D 0  144 N2 KURD BRIT  10.00  
+I 0  144 N2 KURD OPFOR -4.00  
+    }
 
     test coop_level-2.3 {zero magnitude events are ignored} -setup {
         create
@@ -6594,7 +6715,38 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     } -result {invalid option: "-nonesuch"}
 
 
-    test coop_slope-1.9 {Non-numeric -p} -setup {
+    test coop_slope-1.9 {Non-numeric -s} -setup {
+        create
+    } -body {
+        jr coop slope 1 0 N1 SHIA BRIT 100.0 -s FOO
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
+
+    test coop_slope-1.10 {Negative -s} -setup {
+        create
+    } -body {
+        jr coop slope 1 0 N1 SHIA BRIT 100.0 -s -0.1
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
+
+    test coop_slope-1.11 {-s greater than 1.0} -setup {
+        create
+    } -body {
+        jr coop slope 1 0 N1 SHIA BRIT 100.0 -s 1.1
+    } -cleanup {
+        cleanup 
+    } -returnCodes {
+        error
+    } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
+
+
+    test coop_slope-1.12 {Non-numeric -p} -setup {
         create
     } -body {
         jr coop slope 1 0 N1 SHIA BRIT 100.0 -p FOO
@@ -6604,7 +6756,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         error
     } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
-    test coop_slope-1.10 {Negative -p} -setup {
+    test coop_slope-1.13 {Negative -p} -setup {
         create
     } -body {
         jr coop slope 1 0 N1 SHIA BRIT 100.0 -p -0.1
@@ -6614,7 +6766,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         error
     } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
-    test coop_slope-1.11 {-p greater than 1.0} -setup {
+    test coop_slope-1.14 {-p greater than 1.0} -setup {
         create
     } -body {
         jr coop slope 1 0 N1 SHIA BRIT 100.0 -p 1.1
@@ -6625,7 +6777,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
 
-    test coop_slope-1.12 {Non-numeric -q} -setup {
+    test coop_slope-1.15 {Non-numeric -q} -setup {
         create
     } -body {
         jr coop slope 1 0 N1 SHIA BRIT 100.0 -q FOO
@@ -6635,7 +6787,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         error
     } -result {invalid value "FOO", should be a real number in range 0.0, 1.0}
 
-    test coop_slope-1.13 {Negative -q} -setup {
+    test coop_slope-1.16 {Negative -q} -setup {
         create
     } -body {
         jr coop slope 1 0 N1 SHIA BRIT 100.0 -q -0.1
@@ -6645,7 +6797,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         error
     } -result {invalid value "-0.1", should be a real number in range 0.0, 1.0}
 
-    test coop_slope-1.14 {-q greater than 1.0} -setup {
+    test coop_slope-1.17 {-q greater than 1.0} -setup {
         create
     } -body {
         jr coop slope 1 0 N1 SHIA BRIT 100.0 -q 1.1
@@ -6655,7 +6807,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         error
     } -result {invalid value "1.1", should be a real number in range 0.0, 1.0}
 
-    test coop_slope-1.15 {invalid cause} -constraints cause -setup {
+    test coop_slope-1.18 {invalid cause} -constraints cause -setup {
         create
     } -body {
         jr coop slope 1 0 N1 SHIA BRIT 10.0 -cause DUMMY
@@ -6665,7 +6817,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         error
     } -result {invalid value, "DUMMY"}
 
-    test coop_slope-1.16 {slope scheduled for an driver in decreasing time sequence} -setup {
+    test coop_slope-1.19 {slope scheduled for an driver in decreasing time sequence} -setup {
         create
     } -body {
         jr coop slope 1 10 N1 SHIA BRIT 10.0
@@ -6676,8 +6828,6 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         error
     } -result {slope scheduled in decreasing time sequence: 5 < 10}
 
-    # coop_slope-1.17 OBSOLETE
-    # coop_slope-1.18 OBSOLETE
     
     # coop_slope-2.*: Scheduling
 
@@ -6696,7 +6846,20 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
 '     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -80.0   0.0     0.0  
     }
 
-    # coop_slope-2.2 OBSOLETE
+    test coop_slope-2.2 {schedule slope with -s 0.5} -setup {
+        create
+    } -body {
+        jr coop slope 1 0 N2 KURD BRIT 100.0 -s 0.5
+        dumpCoopSlopes
+    } -cleanup {
+        cleanup 
+    } -result {
+Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Actual 
+----- -- ---- ---- ----- - ------------ -------- -- ---- ----- ----- ------- ------ 
+1.1   N2 KURD BRIT D1    I 010000ZJAN70 n/a      N2 KURD BLUE   40.0   0.0     0.0  
+'     '  '    '    '     D 010000ZJAN70 n/a      N2 KURD BRIT  100.0   0.0     0.0  
+'     '  '    '    '     I 010000ZJAN70 n/a      N2 KURD OPFOR -40.0   0.0     0.0  
+    }
 
     test coop_slope-2.3 {successive inputs for a driver stack} -setup {
         create

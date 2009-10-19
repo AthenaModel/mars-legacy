@@ -665,8 +665,11 @@ indirect effects with the same <i>cause</i> target a particular
 <i>n</i>, <i>g</i>, and <i>c</i>, only the maximum
 positive and maximum negative effects actually take effect.<p>
 
-TBD: in JNEM, this had to be an ecause(n) value.  However, the set
-of valid causes should probably be set by the <<xref gram_loader(i)>>.
+<<defopt {-s <i>factor</i>}>>
+
+A multiplicative factor between 0.0 and 1.0 inclusive; it determines
+the strength of indirect effects in neighborhood <i>n</i> itself.
+Defaults to 1.0.<p>
 
 <<defopt {-p <i>factor</i>}>>
 
@@ -756,6 +759,12 @@ Specifies the <i>cause</i> of this input.  When multiple direct and
 indirect effects with the same <i>cause</i> target a particular
 <i>n</i>, <i>g</i>, and <i>c</i>, only the maximum
 positive and maximum negative effects actually take effect.<p>
+
+<<defopt {-s <i>factor</i>}>>
+
+A multiplicative factor between 0.0 and 1.0 inclusive; it determines
+the strength of indirect effects in neighborhood <i>n</i> itself.
+Defaults to 1.0.<p>
 
 <<defopt {-p <i>factor</i>}>>
 
@@ -889,6 +898,12 @@ indirect effects with the same <i>cause</i> target a particular
 <i>n</i>, <i>f</i>, and <i>g</i>, only the maximum
 positive and maximum negative effects actually take effect.<p>
 
+<<defopt {-s <i>factor</i>}>>
+
+A multiplicative factor between 0.0 and 1.0 inclusive; it determines
+the strength of indirect effects in neighborhood <i>n</i> itself.
+Defaults to 1.0.<p>
+
 <<defopt {-p <i>factor</i>}>>
 
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
@@ -969,6 +984,12 @@ Specifies the <i>cause</i> of this input.  When multiple direct and
 indirect effects with the same <i>cause</i> target a particular
 <i>n</i>, <i>f</i>, and <i>g</i>, only the maximum
 positive and maximum negative effects actually take effect.<p>
+
+<<defopt {-s <i>factor</i>}>>
+
+A multiplicative factor between 0.0 and 1.0 inclusive; it determines
+the strength of indirect effects in neighborhood <i>n</i> itself.
+Defaults to 1.0.<p>
 
 <<defopt {-p <i>factor</i>}>>
 

@@ -17,14 +17,7 @@
 #    Note that the engine cannot "run" on its own; it expects to be
 #    embedded in a larger simulation which will control the advancement
 #    of simulation time and schedule GRAM level and slope inputs as needed.
-#
-# TBD:
-#
-#    * Would like a "-s" multiplier, for direct effects "here"; 
-#      defaults to 1.0, but can be set smaller, including to 0.
-#
-#    * Consider saving total saliency in gram_ng.
-#
+##
 #-----------------------------------------------------------------------
 
 namespace eval ::simlib:: {
@@ -1017,6 +1010,7 @@ snit::type ::simlib::gram {
         set input(ts)      $db(time)
         set input(p)       0.0
         set input(q)       0.0
+        set input(s)       1.0
 
         set chain(prox)    -1
         set chain(factor)  1.0
@@ -2095,6 +2089,7 @@ snit::type ::simlib::gram {
     #
     # Options: 
     #     -cause cause   Name of the cause of this input
+    #     -s factor      "here" indirect effects multiplier, defaults to 1.0
     #     -p factor      "near" indirect effects multiplier, defaults to 0
     #     -q factor      "far" indirect effects multiplier, defaults to 0
     #
@@ -2140,6 +2135,7 @@ snit::type ::simlib::gram {
         set input(ts)       $ts
         set input(days)     [qduration value $days]
         set input(llimit)   [qmag      value $limit]
+        set input(s)        $opts(-s)
         set input(p)        $opts(-p)
         set input(q)        $opts(-q)
 
@@ -2160,17 +2156,7 @@ snit::type ::simlib::gram {
         # NEXT, schedule the effects in every influenced neighborhood
         set epsilon [$parm get gram.epsilon]
 
-        set plimit \
-            $proxlimit([$parm get gram.proxlimit])
-
-        # NEXT, use -p and -q to limit the proximity.
-        if {$input(q) == 0.0} {
-            set plimit [min $plimit $proxlimit(near)]
-
-            if {$input(p) == 0.0} {
-                set plimit [min $plimit $proxlimit(here)]
-            }
-        }
+        set plimit [$self GetProxLimit $input(s) $input(p) $input(q)]
 
         # NEXT, schedule the effects in every influenced neighborhood
         # within the proximity limit.
@@ -2199,6 +2185,7 @@ snit::type ::simlib::gram {
     #
     # Options: 
     #     -cause cause   Name of the cause of this input
+    #     -s factor      "here" indirect effects multiplier, defaults to 1.0
     #     -p factor      "near" indirect effects multiplier, defaults to 0
     #     -q factor      "far" indirect effects multiplier, defaults to 0
     #
@@ -2244,6 +2231,7 @@ snit::type ::simlib::gram {
         set input(c)        $c
         set input(slope)    [qmag value $slope]
         set input(ts)       $ts
+        set input(s)        $opts(-s)
         set input(p)        $opts(-p)
         set input(q)        $opts(-q)
 
@@ -2289,16 +2277,7 @@ snit::type ::simlib::gram {
         }
 
         # NEXT, get the de facto proximity limit.
-        set plimit \
-            $proxlimit([$parm get gram.proxlimit])
-
-        if {$input(q) == 0.0} {
-            if {$input(p) == 0.0} {
-                set plimit [min $plimit $proxlimit(here)]
-            } else {
-                set plimit [min $plimit $proxlimit(near)]
-            }
-        }
+        set plimit [$self GetProxLimit $input(s) $input(p) $input(q)]
 
         # NEXT, terminate existing slope chains which are outside
         # the de facto proximity limit.
@@ -2348,6 +2327,7 @@ snit::type ::simlib::gram {
 
         array set opts {
             -cause ""
+            -s     1.0
             -p     0.0
             -q     0.0
         }
@@ -2357,6 +2337,7 @@ snit::type ::simlib::gram {
                 -cause {
                     set opts($opt) $val
                 }
+                -s -
                 -p -
                 -q {
                     rfraction validate $val
@@ -2699,6 +2680,7 @@ snit::type ::simlib::gram {
     #
     # Options: 
     #     -cause cause   Name of the cause of this input
+    #     -s factor      "here" indirect effects multiplier, defaults to 1.0
     #     -p factor      "near" indirect effects multiplier, defaults to 0
     #     -q factor      "far" indirect effects multiplier, defaults to 0
     #
@@ -2742,6 +2724,7 @@ snit::type ::simlib::gram {
         set input(ts)       $ts
         set input(days)     [qduration value $days]
         set input(llimit)   [qmag      value $limit]
+        set input(s)        $opts(-s)
 
         # NEXT, Apply the effects_factor.nf to p and q.
         $rdb eval {
@@ -2770,17 +2753,7 @@ snit::type ::simlib::gram {
         # NEXT, schedule the effects in every influenced neighborhood
         set epsilon [$parm get gram.epsilon]
 
-        set plimit \
-            $proxlimit([$parm get gram.proxlimit])
-
-        # NEXT, use -p and -q to limit the proximity.
-        if {$input(q) == 0.0} {
-            set plimit [min $plimit $proxlimit(near)]
-
-            if {$input(p) == 0.0} {
-                set plimit [min $plimit $proxlimit(here)]
-            }
-        }
+        set plimit [$self GetProxLimit $input(s) $input(p) $input(q)]
 
         # NEXT, schedule the effects in every influenced neighborhood
         # within the proximity limit.
@@ -2809,6 +2782,7 @@ snit::type ::simlib::gram {
     #
     # Options: 
     #     -cause cause   Name of the cause of this input
+    #     -s factor      "here" indirect effects multiplier, defaults to 1.0
     #     -p factor      "near" indirect effects multiplier, defaults to 0
     #     -q factor      "far" indirect effects multiplier, defaults to 0
     #
@@ -2853,6 +2827,7 @@ snit::type ::simlib::gram {
         set input(dg)       $g
         set input(slope)    [qmag value $slope]
         set input(ts)       $ts
+        set input(s)        $opts(-s)
         set input(p)        $opts(-p)
         set input(q)        $opts(-q)
 
@@ -2908,16 +2883,7 @@ snit::type ::simlib::gram {
         }
 
         # NEXT, get the de facto proximity limit.
-        set plimit \
-            $proxlimit([$parm get gram.proxlimit])
-
-        if {$input(q) == 0.0} {
-            if {$input(p) == 0.0} {
-                set plimit [min $plimit $proxlimit(here)]
-            } else {
-                set plimit [min $plimit $proxlimit(near)]
-            }
-        }
+        set plimit [$self GetProxLimit $input(s) $input(p) $input(q)]
 
         # NEXT, terminate existing slope chains which are outside
         # the de facto proximity limit.
@@ -3156,6 +3122,32 @@ snit::type ::simlib::gram {
         }
     }
 
+    # GetProxLimit s p q
+    #
+    # s     Here effects multiplier
+    # p     Near effects multiplier
+    # q     Far effects multiplier
+    #
+    # Returns the de factor proximity limit given the global
+    # proximity limit and the multipliers.
+
+    method GetProxLimit {s p q} {
+        set plimit $proxlimit([$parm get gram.proxlimit])
+        
+        if {$q == 0.0} {
+            if {$p == 0.0} {
+                if {$s == 0.0} {
+                    set plimit $proxlimit(none)
+                } else {
+                    set plimit [min $plimit $proxlimit(here)]
+                }
+            } else {
+                set plimit [min $plimit $proxlimit(near)]
+            }
+        }
+        
+        return $plimit
+    }
 
     # ScheduleLevel inputArray effectArray epsilon
     #
@@ -3166,6 +3158,7 @@ snit::type ::simlib::gram {
     #     ts         Start time, in ticks
     #     days       Realization time, in days (TBD: Should be ticks?)
     #     llimit     "level limit", the direct effect magnitude
+    #     s          Here effects multiplier
     #     p          Near effects multiplier
     #     q          Far effects multiplier
     # effectArray  Array of data about the current effect
@@ -3184,14 +3177,16 @@ snit::type ::simlib::gram {
         upvar 1 $effectArray effect
 
         # FIRST, determine the real llimit
-        if {$effect(prox) == 1} {
-            # Near.
-            let mult {$input(p) * $effect(factor)}
-        } elseif {$effect(prox) == 2} {
+        if {$effect(prox) == 2} {
             # Far
             let mult {$input(q) * $effect(factor)}
-        } else {
+        } elseif {$effect(prox) == 1} {
+            # Near
+            let mult {$input(p) * $effect(factor)}
+        } elseif {$effect(prox) == 0} {
             # Here
+            let mult {$input(s) * $effect(factor)}
+        } else {
             set mult $effect(factor)
         }
         
@@ -3265,6 +3260,7 @@ snit::type ::simlib::gram {
     #     cause      "Cause" of this input
     #     ts         Start time, in ticks
     #     slope      Slope, in nominal points/day
+    #     s          Here effects multiplier
     #     p          Near effects multiplier
     #	  q          Far effects multiplier
     # effectArray  Array of data about the current effect
@@ -3283,14 +3279,16 @@ snit::type ::simlib::gram {
         upvar 1 $effectArray effect
 
         # FIRST, determine the real slope.
-        if {$effect(prox) == 1} {
-            # Near.
-            let mult {$input(p) * $effect(factor)}
-        } elseif {$effect(prox) == 2} {
+        if {$effect(prox) == 2} {
             # Far
             let mult {$input(q) * $effect(factor)}
-        } else {
+        } elseif {$effect(prox) == 1} {
+            # Near
+            let mult {$input(p) * $effect(factor)}
+        } elseif {$effect(prox) == 0} {
             # Here
+            let mult {$input(s) * $effect(factor)}
+        } else {
             set mult $effect(factor)
         }
         
