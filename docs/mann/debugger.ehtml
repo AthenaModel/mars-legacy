@@ -57,8 +57,9 @@ If unset, the dialog will open in the current working directory.<p>
 <<defopt {-editorformatcmd <i>command</i>}>>
 
 Specifies the name of a command used to format an edited mod before saving
-it.  The command takes one additional argument, the code to format.<p>
-
+it.  The command takes two additional arguments, the file name and
+the code to format.  It should return the formatted text.  The
+application can use this to add boilerplate to the saved file.<p>
 
 <</deflist>>
 

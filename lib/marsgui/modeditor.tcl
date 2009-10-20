@@ -246,7 +246,7 @@ snit::widget ::marsgui::modeditor {
         set text [$editor get 1.0 "end - 1 chars"]
 
         if {$options(-formatcmd) ne ""} {
-            set text [{*}$options(-formatcmd) $text]
+            set text [{*}$options(-formatcmd) $filename $text]
         }
         
         set f [open $filename w]
