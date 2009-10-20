@@ -405,7 +405,7 @@ snit::type ::marsgui::messagebox {
 
         # NEXT, get the option values
         while {[llength $arglist] > 0} {
-            set opt [lshift arglist]
+            set opt [::marsutil::lshift arglist]
 
             switch -exact -- $opt {
                 -buttons       -
@@ -416,7 +416,7 @@ snit::type ::marsgui::messagebox {
                 -message       -
                 -parent        -
                 -title         {
-                    set opts($opt) [lshift arglist]
+                    set opts($opt) [::marsutil::lshift arglist]
                 }
                 default {
                     error "Unknown option: \"$opt\""

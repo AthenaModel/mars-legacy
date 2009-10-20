@@ -33,7 +33,19 @@ This module defines the following command:<p>
 Creates a new <<iref cmdbrowser>> widget named <i>pathName</i>.<p>
 
 The <<iref cmdbrowser>> widget may be created with the same options as
-the Tk <b>frame</b> widget<p>
+the Tk <b>frame</b> widget, along with the following:<p>
+
+<<deflist options>>
+
+<<defopt {-editcmd <i>command</i>}>>
+
+The browser's tool bar has an "Edit" button that is enabled when the
+user selects a proc from the tree of commands, provided that this
+callback is defined.  The <i>command</i> is a Tcl command expecting one
+additional argument, the name of the command.  It is up to the client
+to allow the user to edit the command in some way.<p>
+
+<</deflist>>
 
 <<section "INSTANCE COMMAND">>
 

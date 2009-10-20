@@ -20,14 +20,18 @@ a Tcl/Tk application.<p>
 At present, the ::marsgui::debugger provides the following features:<p>
 
 <ul>
-  <li> A <<xref cli(n)>> which  provides command-line access to the main Tcl
-       interpreter.<p>
+  <li> A <<xref cli(n)>> which  provides command-line access to the main
+       Tcl interpreter.<p>
 
   <li> A <<xref winbrowser(n)>>, which provides information on any
        window in the Tk window tree.<p>
 
   <li> A <<xref cmdbrowser(n)>>, which provides information on any
        command known to the Tcl interpreter.<p>
+       
+  <li> A <<xref modeditor(n)>>, which allows the user to edit code in
+       the running application, source it back in, and save it to disk
+       as a mod file.
 </ul><p>
 
 <<section OPTIONS>>
@@ -43,7 +47,18 @@ following:<p>
 <b>Read-only.</b>  The <i>flag</i> must be a Boolean value.  If it is
 true, the created window assumes that it is the main window in the
 application; closing the window will terminate the program.  The
-option defaults to false.
+option defaults to false.><p>
+
+<<defopt {-editordefaultdir <i>path</i>}>>
+
+Specifies the default directory for the editor tab's "File Save" dialog.
+If unset, the dialog will open in the current working directory.<p>
+
+<<defopt {-editorformatcmd <i>command</i>}>>
+
+Specifies the name of a command used to format an edited mod before saving
+it.  The command takes one additional argument, the code to format.<p>
+
 
 <</deflist>>
 
@@ -60,7 +75,7 @@ Creates a new toplevel debugger window named <i>pathName</i>.<p>
 
 <<defitem "debugger new" {debugger new <i>?options...?</i>}>>
 
-Creates a new toplevel debugger window.<p>
+Creates a new toplevel debugger window, with the specified options.<p>
 
 <</deflist commands>>
 

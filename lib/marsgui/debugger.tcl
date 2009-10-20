@@ -16,6 +16,9 @@
 #    * It would be nice to have buttons to automatically set the pane
 #      sizes in particular ways
 #
+#    * It would be nice to load a command found in the command browser
+#      into the mod editor with a buttonpush.
+#
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
@@ -35,8 +38,10 @@ snit::widget ::marsgui::debugger {
     #-------------------------------------------------------------------
     # Components
 
+    component tnb    ;# The tabbed notebook
     component wb     ;# The winbrowser
     component cb     ;# The cmdbrowser
+    component me     ;# The modeditor
     component cli    ;# The CLI shell
 
     #-------------------------------------------------------------------
@@ -44,6 +49,9 @@ snit::widget ::marsgui::debugger {
 
     # Delegate most options to the hull toplevel
     delegate option * to hull
+    
+    delegate option -editordefaultdir to me as -defaultdir
+    delegate option -editorformatcmd  to me as -formatcmd
 
     # -app flag
     #
@@ -57,8 +65,8 @@ snit::widget ::marsgui::debugger {
     # Constructor
 
     constructor {args} {
-        # FIRST, Handle the options.
-        $self configurelist $args
+        # FIRST, Handle the early options
+        set options(-app) [from args -app 0]
 
         # NEXT, create the menu bar
         set menubar [menu $win.menubar]
@@ -72,8 +80,8 @@ snit::widget ::marsgui::debugger {
             -label "New Debugger..." \
             -underline 0 \
             -accelerator "Ctrl+N" \
-            -command [mytypemethod new]
-        bind $win <Control-n> [mytypemethod new]
+            -command [mymethod NewDebugger]
+        bind $win <Control-n> [mymethod NewDebugger]
 
         if {$options(-app)} {
             $filemenu add command \
@@ -133,19 +141,11 @@ snit::widget ::marsgui::debugger {
             -showhandle 1
 
         # NEXT, create the tabbed notebook for the browsers
-        set tnb [ttk::notebook $win.paner.tnb \
-                     -height    300           \
-                     -padding   2             \
-                     -takefocus 1]
+        install tnb using ttk::notebook $win.paner.tnb \
+                     -height    300                    \
+                     -padding   2                      \
+                     -takefocus 1
         $win.paner add $tnb -sticky nsew -minsize 60
-
-        # NEXT, create the cmdbrowser
-        install cb using ::marsgui::cmdbrowser $tnb.cb
-
-        $tnb add $cb \
-            -sticky  nsew      \
-            -padding 2         \
-            -text    "Commands"
 
         # NEXT, create the winbrowser
         install wb using ::marsgui::winbrowser $tnb.wb
@@ -154,6 +154,23 @@ snit::widget ::marsgui::debugger {
             -sticky  nsew      \
             -padding 2         \
             -text    "Widgets"
+        
+        # NEXT, create the cmdbrowser
+        install cb using ::marsgui::cmdbrowser $tnb.cb \
+            -editcmd [mymethod EditCommand]
+
+        $tnb add $cb \
+            -sticky  nsew       \
+            -padding 2          \
+            -text    "Commands"
+
+        # NEXT, create the mod editor
+        install me using ::marsgui::modeditor $tnb.me
+        
+        $tnb add $me \
+            -sticky  nsew     \
+            -padding 2        \
+            -text    "Editor"
 
         # NEXT, create the CLI
         install cli using ::marsgui::cli $win.paner.cli \
@@ -180,6 +197,10 @@ snit::widget ::marsgui::debugger {
         if {$options(-app)} {
             wm protocol $win WM_DELETE_WINDOW [mymethod Exit]
         }
+        
+        # NEXT, set any other options.
+        $self configurelist $args
+        
 
         # NEXT, Allow the widget sizes to propagate to the toplevel, so
         # the window gets its default size; then turn off propagation.
@@ -192,6 +213,16 @@ snit::widget ::marsgui::debugger {
 
     #-------------------------------------------------------------------
     # Private Methods
+    
+    # NewDebugger
+    #
+    # Creates a new debugger window with the same options
+    
+    method NewDebugger {} {
+        debugger new \
+            -editordefaultdir [$self cget -editordefaultdir] \
+            -editorformatcmd  [$self cget -editorformatcmd]
+    }
 
     # Close
     #
@@ -226,6 +257,21 @@ snit::widget ::marsgui::debugger {
         $wb refresh
         $cb refresh
     }
+    
+    # EditCommand name
+    #
+    # name     A command name
+    #
+    # This is the cmdbrowser's -editcmd.  It loads the command into
+    # the editor.
+    
+    method EditCommand {name} {
+        # FIRST, show the editor
+        $tnb select $me
+        
+        # NEXT, grab the code.
+        $me grab $name
+    }
 
     #-------------------------------------------------------------------
     # Public typemethods
@@ -235,6 +281,7 @@ snit::widget ::marsgui::debugger {
     # Creates a new debugger window.
 
     typemethod new {args} {
+        puts "debugger new $args"
         $type create .%AUTO% {*}$args
     }
 }

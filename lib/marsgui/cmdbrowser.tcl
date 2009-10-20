@@ -60,6 +60,7 @@ snit::widget ::marsgui::cmdbrowser {
     # Components
 
     component bar        ;# The toolbar
+    component editbtn    ;# The Edit button.
     component tree       ;# The tree of window data
     component tnb        ;# Tabbed notebook for window data
 
@@ -67,6 +68,15 @@ snit::widget ::marsgui::cmdbrowser {
     # Options
 
     delegate option * to hull
+    
+    # -editcmd
+    #
+    # A command that takes one argument, the name of the command to
+    # edit.  Called when the "Edit" button is pressed; the command
+    # is the name of the currently selected command.
+    
+    option -editcmd \
+        -default ""
 
     #-------------------------------------------------------------------
     # Instance Variables
@@ -77,6 +87,7 @@ snit::widget ::marsgui::cmdbrowser {
     #
     # counter     Counter for node IDs
     # imports     1 if imported commands should be shown, and 0 otherwise.
+    # node        Current node command
 
     variable info -array {
         counter 0
@@ -85,6 +96,7 @@ snit::widget ::marsgui::cmdbrowser {
         alias   1
         bin     1
         bwid    0
+        node    {}
     }
 
     # Array of data for each browsed command, indexed by tree node ID.
@@ -102,43 +114,49 @@ snit::widget ::marsgui::cmdbrowser {
         # Toolbar
         install bar using ttk::frame $win.bar
 
-        ttk::checkbutton $bar.imports       \
-            -style    Toolbutton            \
-            -text     "Imports"             \
-            -variable [myvar info(imports)] \
+        ttk::checkbutton $bar.imports        \
+            -style    Toolbutton             \
+            -text     "Imports"              \
+            -variable [myvar info(imports)]  \
             -command  [mymethod Populate]
 
-        ttk::checkbutton $bar.wid           \
-            -style    Toolbutton            \
-            -text     "Widgets"             \
-            -variable [myvar info(wid)]     \
+        ttk::checkbutton $bar.wid            \
+            -style    Toolbutton             \
+            -text     "Widgets"              \
+            -variable [myvar info(wid)]      \
             -command  [mymethod Populate]
 
-        ttk::checkbutton $bar.alias         \
-            -style    Toolbutton            \
-            -text     "Aliases"             \
-            -variable [myvar info(alias)]   \
+        ttk::checkbutton $bar.alias          \
+            -style    Toolbutton             \
+            -text     "Aliases"              \
+            -variable [myvar info(alias)]    \
             -command  [mymethod Populate]
 
-        ttk::checkbutton $bar.bin           \
-            -style    Toolbutton            \
-            -text     "BinCmds"             \
-            -variable [myvar info(bin)]     \
+        ttk::checkbutton $bar.bin            \
+            -style    Toolbutton             \
+            -text     "BinCmds"              \
+            -variable [myvar info(bin)]      \
             -command  [mymethod Populate]
 
-        ttk::checkbutton $bar.bwid          \
-            -style    Toolbutton            \
-            -text     "BWid\#"              \
-            -variable [myvar info(bwid)]    \
+        ttk::checkbutton $bar.bwid           \
+            -style    Toolbutton             \
+            -text     "BWid\#"               \
+            -variable [myvar info(bwid)]     \
             -command  [mymethod Populate]
+        
+        ttk::button $bar.edit                \
+            -style    Toolbutton             \
+            -text     "Edit"                 \
+            -command  [mymethod EditCommand]
+        set editbtn $bar.edit
 
 
-        pack $win.bar.imports -side left -padx 1 -pady 1
-        pack $win.bar.wid     -side left -padx 1 -pady 1
-        pack $win.bar.alias   -side left -padx 1 -pady 1
-        pack $win.bar.bin     -side left -padx 1 -pady 1
-        pack $win.bar.bwid    -side left -padx 1 -pady 1
-
+        pack $win.bar.imports -side left  -padx 1 -pady 1
+        pack $win.bar.wid     -side left  -padx 1 -pady 1
+        pack $win.bar.alias   -side left  -padx 1 -pady 1
+        pack $win.bar.bin     -side left  -padx 1 -pady 1
+        pack $win.bar.bwid    -side left  -padx 1 -pady 1
+        pack $win.bar.edit    -side right -padx 1 -pady 1
 
         ScrolledWindow $win.paner.treesw  \
             -borderwidth 0                \
@@ -177,6 +195,18 @@ snit::widget ::marsgui::cmdbrowser {
 
         # NEXT, activate the first item.
         $tree selection set cmd1
+    }
+    
+    # EditCommand
+    #
+    # Called when the edit button is pressed.  Gets the current command
+    # name, and passes to the edit command.
+    
+    method EditCommand {} {
+        set cmd $cmds($info(node))
+        set name [dict get $cmd name]
+
+        callwith $options(-editcmd) $name
     }
 
     # AddPage name label
@@ -362,6 +392,7 @@ snit::widget ::marsgui::cmdbrowser {
         }
 
         # NEXT, display it.
+        set info(node) [lindex $nodes 0]
         $self DisplayNode [lindex $nodes 0]
     }
 
@@ -375,10 +406,16 @@ snit::widget ::marsgui::cmdbrowser {
     method DisplayNode {node} {
         set cmd $cmds($node)
         set name [dict get $cmd name]
+        
+        $editbtn configure -state disabled
 
         switch -exact -- [dict get $cmd ctype] {
             proc {
                 set text [getcode $name]
+                
+                if {$options(-editcmd) ne ""} {
+                    $editbtn configure -state normal
+                }
             }
 
             nse  -
