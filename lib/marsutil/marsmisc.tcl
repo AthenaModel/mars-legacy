@@ -843,6 +843,8 @@ proc ::marsutil::GetTypeMethod {objtype subcmd} {
     # Remove the Snit method prolog
     regsub {^.*\# END snit method prolog\n} $body {} body
 
+    set body [ReindentBody $body]
+
     return [list snit::typemethod $objtype $subcmd $arglist $body]
 }
 
@@ -872,8 +874,25 @@ proc ::marsutil::GetInstanceMethod {objtype subcmd} {
 
     # Remove the Snit method prolog
     regsub {^.*\# END snit method prolog\n} $body {} body
+    
+    set body [ReindentBody $body]
 
     return [list snit::method $objtype $subcmd $arglist $body]
+}
+
+# ReindentBody body
+#
+# body    The body of a proc or method
+#
+# Outdents the body, then re-indents it four spaces.
+
+proc ::marsutil::ReindentBody {body} {
+    set lines [list]
+    foreach line [split [outdent $body] \n] {
+        lappend lines "    $line"
+    }
+    
+    return "\n[join $lines \n]\n"
 }
 
 
