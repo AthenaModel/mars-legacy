@@ -31,6 +31,7 @@ marsgui(n) includes the following submodules:<p>
   <li> <<xref gradient(n)>> -- Color Gradient Computer</li>
   <li> <<xref logdisplay(n)>> -- Log Display Widget</li>
   <li> <<xref loglist(n)>> -- Log List Widget</li>
+  <li> <<xref messagebox(n)>> -- Message Box Dialog</i>
   <li> <<xref messageline(n)>> -- Message Line Widget</li>
   <li> <<xref paner(n)>> -- Paned Window Widget</li>
   <li> <<xref rotext(n)>> -- Read-only Text Widget</li>

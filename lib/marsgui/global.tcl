@@ -71,6 +71,14 @@ foreach fileName [glob [file join $::marsgui::library *.xbm]] {
     image create bitmap $imageName -file $fileName
 }
 
+namespace eval ::marsgui::icon:: {}
+
+foreach fileName [glob [file join $::marsgui::library *.gif]] {
+    set imageName "::marsgui::icon::[file rootname [file tail $fileName]]"
+    image create photo $imageName -file $fileName
+}
+
+
 #-------------------------------------------------------------------
 # Entry Widget Behavior
 #
