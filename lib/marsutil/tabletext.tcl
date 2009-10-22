@@ -453,7 +453,11 @@ snit::type ::marsutil::tabletext {
         if {[catch {
             $interp(field) eval $fields
         } result]} {
-            error "$info(rooterr), $result"
+            if {[string match {Error in*} $result]} {
+                error $result
+            } else {
+                error "$info(rooterr), $result"
+            }
         }
 
         # NEXT, verify that all required fields are present.
