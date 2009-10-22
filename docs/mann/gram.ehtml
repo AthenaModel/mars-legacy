@@ -252,17 +252,6 @@ See <<xref "DATABASE SCHEMA">>.<p>
 This option must be set at creation time, and cannot be changed
 thereafter.<p>
 
-<<defopt {-dbid <i>dbid</i>}>>
-
-Specifies the "database ID", a string used to identify this instance
-of GRAM in the run-time database.  It defaults to the object's
-fully-qualified command name.  This value will appear in the
-<b>object</b> column of every row of every table created by this
-object.<p>
-
-This option must be set at creation time, and cannot be changed
-thereafter.<p>
-
 <<defopt {-loadcmd <i>cmd</i>}>>
 
 Defines a command which will populate the GRAM tables with data.  The

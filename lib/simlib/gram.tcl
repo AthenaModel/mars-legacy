@@ -683,18 +683,27 @@ snit::type ::simlib::gram {
                 SELECT ng_id FROM gram_ng 
                 WHERE n=$n AND g=$g
             }]
+            
+            set gtype [$rdb onecolumn {
+                SELECT gtype FROM gram_g WHERE g=$g
+            }]
 
             require {$ng_id ne ""} "Invalid nbgroup: $n $g"
 
-            # TBD: Should verify that population is 0 if g is ORG.
-
+            if {$gtype eq "ORG"} {
+                require {$population == 0} \
+                    "ORG with non-zero population: $n $g $population"
+            }
+            
             $rdb eval {
                 UPDATE gram_ng
                 SET population     = $population,
                     rollup_weight  = $rollup_weight,
                     effects_factor = $effects_factor,
                     sat_tracked    = CASE 
-                        WHEN $population > 0 THEN 1 ELSE 0 
+                        WHEN $gtype = 'ORG' OR $population > 0
+                        THEN 1
+                        ELSE 0 
                     END
                 WHERE ng_id=$ng_id
             }

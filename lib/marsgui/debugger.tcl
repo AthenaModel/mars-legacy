@@ -281,7 +281,6 @@ snit::widget ::marsgui::debugger {
     # Creates a new debugger window.
 
     typemethod new {args} {
-        puts "debugger new $args"
         $type create .%AUTO% {*}$args
     }
 }

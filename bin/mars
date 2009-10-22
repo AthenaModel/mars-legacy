@@ -83,10 +83,17 @@ set metadata {
         applib   app_commit
         mode     gui
     }
+    
     doc {
         text     "Document Processor"
         applib   app_doc
         mode     cmdline
+    }
+    
+    gram {
+        text     "GRAM Workbench"
+        applib   app_gram
+        mode     gui
     }
 
     link {
