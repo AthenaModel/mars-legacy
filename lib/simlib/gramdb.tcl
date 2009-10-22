@@ -145,10 +145,12 @@ snit::type ::simlib::gramdb {
 
         $tt table gramdb_c                                  \
             -tablevalidator [mytypemethod Val_gramdb_c]
+        
         $tt field gramdb_c c -key                           \
             -validator [mytypemethod ValidateSymbolicName]
+
         $tt field gramdb_c gtype -required                  \
-            -validator [mytypemethod ValidateEnum egrouptype]
+            -validator [list $tt validate vtype egrouptype]
 
         #---------------------------------------------------------------
         # Table: gramdb_g
@@ -159,14 +161,16 @@ snit::type ::simlib::gramdb {
  
         $tt field gramdb_g g -key                                \
             -validator [mytypemethod ValidateSymbolicName]
+
         $tt field gramdb_g gtype                                 \
-            -validator [mytypemethod ValidateEnum egrouptype]
+            -validator [list $tt validate vtype egrouptype]
 
         # CIVs and ORGs only
         $tt field gramdb_g rollup_weight                        \
-            -validator [mytypemethod ValidateMagnitude]
+            -validator [list $tt validate vtype rmagnitude]
+        
         $tt field gramdb_g effects_factor                       \
-            -validator [mytypemethod ValidateMagnitude]
+            -validator [list $tt validate vtype rmagnitude]
 
         #---------------------------------------------------------------
         # Table: gramdb_n
@@ -185,30 +189,30 @@ snit::type ::simlib::gramdb {
             -recordvalidator [mytypemethod Val_gramdb_mn_record]
 
         $tt field gramdb_mn m -key                               \
-            -validator [mytypemethod ValidateField gramdb_n n]
+            -validator [list $tt validate foreign gramdb_n n]
         $tt field gramdb_mn n -key                               \
-            -validator [mytypemethod ValidateField gramdb_n n]
+            -validator [list $tt validate foreign gramdb_n n]
         $tt field gramdb_mn proximity                            \
-            -validator [mytypemethod ValidateEnum eproximity]
-        $tt field gramdb_mn effects_delay                      \
-            -validator [mytypemethod ValidateMagnitude]
+            -validator [list $tt validate vtype eproximity]
+        $tt field gramdb_mn effects_delay                        \
+            -validator [list $tt validate vtype rmagnitude]
 
 
 
         #---------------------------------------------------------------
         # Table: gramdb_ng
 
-        $tt table gramdb_ng -dependson {gramdb_n gramdb_g}         \
+        $tt table gramdb_ng -dependson {gramdb_n gramdb_g}       \
             -tablevalidator  [mytypemethod Val_gramdb_ng]
 
         $tt field gramdb_ng n -key                               \
-            -validator [mytypemethod ValidateField gramdb_n n]
+            -validator [list $tt validate foreign gramdb_n n]
         $tt field gramdb_ng g -key                               \
             -validator [mytypemethod ValidateCivOrgPgroup] 
         $tt field gramdb_ng rollup_weight                        \
-            -validator [mytypemethod ValidateMagnitude]
+            -validator [list $tt validate vtype rmagnitude]
         $tt field gramdb_ng effects_factor                       \
-            -validator [mytypemethod ValidateMagnitude]
+            -validator [list $tt validate vtype rmagnitude]
         $tt field gramdb_ng population -required                 \
             -validator [mytypemethod ValidateIntMagnitude]
 
@@ -222,7 +226,7 @@ snit::type ::simlib::gramdb {
         $tt field gramdb_gc g -key \
             -validator [mytypemethod ValidateCivOrgPgroup]
         $tt field gramdb_gc c -key \
-            -validator [mytypemethod ValidateField gramdb_c c]
+            -validator [list $tt validate foreign gramdb_c c]
 
         $tt field gramdb_gc sat0 \
             -validator [mytypemethod ValidateQuality qsat]
@@ -238,9 +242,9 @@ snit::type ::simlib::gramdb {
             -tablevalidator [mytypemethod Val_gramdb_fg]
 
         $tt field gramdb_fg f -key \
-            -validator [mytypemethod ValidateField gramdb_g g]
+            -validator [list $tt validate foreign gramdb_g g]
         $tt field gramdb_fg g -key \
-            -validator [mytypemethod ValidateField gramdb_g g]
+            -validator [list $tt validate foreign gramdb_g g]
 
         $tt field gramdb_fg rel \
             -validator [mytypemethod ValidateQuality qrel]
@@ -255,11 +259,11 @@ snit::type ::simlib::gramdb {
             -recordvalidator [mytypemethod Val_gramdb_ngc_record]
 
         $tt field gramdb_ngc n -key \
-            -validator [mytypemethod ValidateField gramdb_n n]
+            -validator [list $tt validate foreign gramdb_n n]
         $tt field gramdb_ngc g -key \
             -validator [mytypemethod ValidateCivOrgPgroup]
         $tt field gramdb_ngc c -key \
-            -validator [mytypemethod ValidateField gramdb_c c]
+            -validator [list $tt validate foreign gramdb_c c]
 
         $tt field gramdb_ngc sat0 \
             -validator [mytypemethod ValidateQuality qsat]
@@ -276,11 +280,11 @@ snit::type ::simlib::gramdb {
             -recordvalidator [mytypemethod Val_gramdb_nfg_record]
 
         $tt field gramdb_nfg n -key \
-            -validator [mytypemethod ValidateField gramdb_n n]
+            -validator [list $tt validate foreign gramdb_n n]
         $tt field gramdb_nfg f -key \
-            -validator [mytypemethod ValidateField gramdb_g g]
+            -validator [list $tt validate foreign gramdb_g g]
         $tt field gramdb_nfg g -key \
-            -validator [mytypemethod ValidateField gramdb_g g]
+            -validator [list $tt validate foreign gramdb_g g]
 
         $tt field gramdb_nfg rel \
             -validator [mytypemethod ValidateQuality qrel]
@@ -312,18 +316,6 @@ snit::type ::simlib::gramdb {
     }
 
 
-    # ValidateEnum enum db table value
-    #
-    # enum       An enum(n) object
-    #
-    # Value must be a valid value for the enum; the 
-    # equivalent short name is returned.
-
-    typemethod ValidateEnum {enum db table value} {
-        $enum validate $value
-        return [$enum name $value]
-    }
-
     # ValidateQuality qual db table value
     #
     # qual       An quality(n) object
@@ -338,45 +330,16 @@ snit::type ::simlib::gramdb {
 
 
     typemethod ValidateCivOrgPgroup {db table value} {
-        $db eval {SELECT gtype FROM gramdb_g WHERE g=$value} row {
+        $db eval {SELECT gtype FROM gramdb_g WHERE g=$value} {
 
-            require {$row(gtype) eq "CIV" || $row(gtype) eq "ORG"} \
-                "expected CIV or ORG group, got: \"$value\""
-
-            return $value
+            if {$gtype in {CIV ORG}} {
+                return $value
+            } else {
+                invalid "expected CIV or ORG group, got: \"$value\""
+            }
         }
 
-        error "unknown group: \"$value\""
-    }
-
-    # ValidateField otherTable field db table value
-    #
-    # otherTable     The name of some other table
-    # field          The name of a field in the other table
-    #
-    # The value must be a value found in the named field in the other
-    # table.  If it is, it is returned unchanged.
-
-    typemethod ValidateField {otherTable field db table value} {
-        $db eval "SELECT rowid FROM $otherTable WHERE $field=\$value" row {
-            return $value
-        }
-
-        error "unknown $otherTable $field: \"$value\""
-    }
-
-    # ValidateMagnitude db table value
-    #
-    # The value must be a numeric value (integer or decimal)
-    # greater than or equal to zero.
-
-    typemethod ValidateMagnitude {db table value} {
-        require {[string is double -strict $value]} \
-            "non-numeric input: \"$value\""
-        require {$value >= 0} \
-            "value is negative: \"$value\""
-
-        return $value
+        invalid "unknown group: \"$value\""
     }
 
     # ValidateIntMagnitude db table value
@@ -385,10 +348,14 @@ snit::type ::simlib::gramdb {
     # greater than or equal to zero.
 
     typemethod ValidateIntMagnitude {db table value} {
-        require {[string is integer -strict $value]} \
-            "non-integer input: \"$value\""
-        require {$value >= 0} \
-            "value is negative: \"$value\""
+        # TBD: Should use count, once count is updated.
+        if {![string is integer -strict $value]} {
+            invalid "non-integer input: \"$value\""
+        }
+            
+        if {$value < 0} {
+            invalid "value is negative: \"$value\""
+        }
 
         return $value
     }
@@ -399,9 +366,9 @@ snit::type ::simlib::gramdb {
     typemethod Val_gramdb_c {db table} {
         # Must have at least one concern of each type
         foreach gtype {CIV ORG} {
-            require {
-                [$db exists {SELECT c FROM gramdb_c WHERE gtype=$gtype}]
-            } "Zero concerns of type $gtype defined"
+            if {![$db exists {SELECT c FROM gramdb_c WHERE gtype=$gtype}]} {
+                invalid "Zero concerns of type $gtype defined"
+            }
         }
     }
 
@@ -411,9 +378,9 @@ snit::type ::simlib::gramdb {
     typemethod Val_gramdb_g {db table} {
         # Must have at least one of each type
         foreach gtype {CIV FRC ORG} {
-            require {
-                [$db exists {SELECT g FROM gramdb_g WHERE gtype=$gtype}]
-            } "Zero groups of type $gtype defined"
+            if {![$db exists {SELECT g FROM gramdb_g WHERE gtype=$gtype}]} {
+                invalid "Zero groups of type $gtype defined"
+            }
         }
     }
 
@@ -442,7 +409,7 @@ snit::type ::simlib::gramdb {
         
         foreach field $required($row(gtype)) {
             if {$row($field) eq ""} {
-                error "missing field: $field"
+                invalid "missing field: $field"
             }
         }
 
@@ -460,9 +427,9 @@ snit::type ::simlib::gramdb {
 
     typemethod Val_gramdb_n {db table} {
         # FIRST, We must have at least one neighborhood
-        require {
-            [$db exists {SELECT n FROM gramdb_n}]
-        } "no neighborhoods defined"
+        if {![$db exists {SELECT n FROM gramdb_n}]} {
+            invalid "no neighborhoods defined"
+        }
     }
 
     #-------------------------------------------------------------------
@@ -503,17 +470,20 @@ snit::type ::simlib::gramdb {
         $db eval "SELECT * FROM $table WHERE rowid=\$rowid" row {
             if {$row(proximity) ne ""} {
                 if {$row(m) eq $row(n)} {
-                    require {$row(proximity) eq "HERE"} \
-                        "mismatch, proximity must be HERE when m = n"
+                    if {$row(proximity) ne "HERE"} {
+                        invalid "mismatch, proximity must be HERE when m = n"
+                    }
                 } else {
-                    require {$row(proximity) ne "HERE"} \
-                        "mismatch, proximity must not be HERE when m != n"
+                    if {$row(proximity) eq "HERE"} {
+                        invalid "mismatch, proximity must not be HERE when m != n"
+                    }
                 }
             }
             
             if {$row(effects_delay) ne "" && $row(m) eq $row(n)} {
-                require {$row(effects_delay) == 0.0} \
-                    "effects_delay must be 0.0 when m = n"
+                if {$row(effects_delay) != 0.0} {
+                    invalid "effects_delay must be 0.0 when m = n"
+                }
             }
         }
     }
@@ -554,8 +524,9 @@ snit::type ::simlib::gramdb {
             WHERE gramdb_g.gtype = 'CIV'
             GROUP BY n
         } {
-            require {$sum > 0} \
-            "neighborhood $n contains no CIV gramdb_g with non-zero population"
+            if {$sum == 0} {
+                invalid "neighborhood $n contains no CIV gramdb_g with non-zero population"
+            }
         }
 
         # Ensure that each CIV pgroup has non-zero population in at
@@ -566,8 +537,9 @@ snit::type ::simlib::gramdb {
             WHERE gramdb_g.gtype = 'CIV'
             GROUP BY g
         } {
-            require {$sum > 0} \
-                "group $g has zero population in all neighborhoods"
+            if {$sum == 0} {
+                invalid "group $g has zero population in all neighborhoods"
+            }
         }
     }
 
@@ -605,8 +577,9 @@ snit::type ::simlib::gramdb {
             AND   gramdb_g.g = gramdb_gc.g
             AND   gramdb_c.c = gramdb_gc.c
         } {
-            require {$gtype eq $ctype} \
-                "mismatch, $g is $gtype, $c is $ctype"
+            if {$gtype ne $ctype} {
+                invalid "mismatch, $g is $gtype, $c is $ctype"
+            }
         }
     }
 
@@ -647,13 +620,15 @@ snit::type ::simlib::gramdb {
         $db eval "SELECT * FROM $table WHERE rowid=\$rowid" row {
             if {$row(f) eq $row(g)} {
                 if {$row(rel) ne ""} {
-                    require {$row(rel) eq 1.0} \
-                        "rel must be 1.0 when f = g"
+                    if {$row(rel) ne 1.0} {
+                        invalid "rel must be 1.0 when f = g"
+                    }
                 }
 
                 if {$row(coop0) ne ""} {
-                    require {$row(coop0) == 100.0} \
-                        "coop0 must be 100.0 when f = g"
+                    if {$row(coop0) != 100.0} {
+                        invalid "coop0 must be 100.0 when f = g"
+                    }
                 }
             }
         }
@@ -698,8 +673,9 @@ snit::type ::simlib::gramdb {
             JOIN gramdb_c USING (c)
             WHERE gramdb_ngc.ROWID=$rowid
         } {
-            require {$gtype eq $ctype} \
-                "mismatch, $g is $gtype, $c is $ctype"
+            if {$gtype ne $ctype} {
+                invalid "mismatch, $g is $gtype, $c is $ctype"
+            }
         }
     }
 
@@ -735,13 +711,15 @@ snit::type ::simlib::gramdb {
         $db eval "SELECT * FROM $table WHERE rowid=\$rowid" row {
             if {$row(f) eq $row(g)} {
                 if {$row(rel) ne ""} {
-                    require {$row(rel) eq 1.0} \
-                        "rel must be 1.0 when f = g"
+                    if {$row(rel) ne 1.0} {
+                        invalid "rel must be 1.0 when f = g"
+                    }
                 }
 
                 if {$row(coop0) ne ""} {
-                    require {$row(coop0) == 100.0} \
-                        "coop0 must be 100.0 when f = g"
+                    if {$row(coop0) == 100.0} {
+                        invalid "coop0 must be 100.0 when f = g"
+                    }
                 }
             }
         }
@@ -814,6 +792,16 @@ snit::type ::simlib::gramdb {
         $db clear
 
         return $db
+    }
+    
+    # invalid message
+    #
+    # message    An error string
+    #
+    # Throws the error with -errorcode INVALID
+    
+    proc invalid {message} {
+        return -code error -errorcode INVALID $message
     }
 }
 

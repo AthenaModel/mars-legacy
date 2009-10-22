@@ -26,7 +26,8 @@ namespace eval ::simlib:: {
         qsaliency      \
         qsat           \
         qtrend         \
-        rfraction
+        rfraction      \
+        rmagnitude
 }
 
 #-----------------------------------------------------------------------

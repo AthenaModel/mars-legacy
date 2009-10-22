@@ -430,6 +430,31 @@ This method is identical to <<iref loadfile>>, except that the input
 text is read from the string <i>dbtext</i>, rather than from a
 file.<p>
 
+<<defitem validate {$tt validate <i>subcommand</i> ?<i>args</i>? db table value</i>}>>
+
+These methods are for use as field <b>-validator</b> commands. Each one may
+have arguments which proceed the standard <i>db</i>, <i>table</i>, and
+<i>value</i> arguments; these are specified by the schema as part of the
+<b>-validator</b>.<p>
+
+<<deflist validate>>
+
+
+<<defitem "validate vtype" {$tt validate vtype <i>vtype db table value</i>}>>
+
+Validates a field given a validation type object.  The <i>vtype</i>
+must have a <b>validate</b> subcommand that takes one argument, the value
+to validate, and returns the value if valid and throws an error otherwise.
+Ideally, the <b>validate</b> subcommand should throw error code
+<b>INVALID</b>.<p>
+
+<<defitem "validate foreign" {$tt validate foreign <i>otherTable field db table value</i>}>>
+
+Verifies that the value being validated appears in the <i>field</i> column
+in some record in the <i>otherTable</i>.<p>
+
+<</deflist validate>>
+
 <</deflist instance>>
 
 <<section AUTHOR>>

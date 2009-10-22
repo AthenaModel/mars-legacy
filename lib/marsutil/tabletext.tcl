@@ -544,6 +544,48 @@ snit::type ::marsutil::tabletext {
 
         return $value
     }
+    
+    #-------------------------------------------------------------------
+    # Generic Field Validators
+    #
+    # All validators take at least three arguments:
+    #
+    # db         The SQLite3 or sqldocument(n) object
+    # table      The current table name
+    # value      The value to validate
+    #
+    # Some take additional arguments at the beginning of the argument
+    # list, to parameterize the validator.
+    
+
+    # validate vtype db table value
+    #
+    # vtype       An validation type object
+    #
+    # Value must be a valid value for the validation type.
+    # It is presumed that the type's validation command
+    # returns the value in canonical form.
+
+    method {validate vtype} {vtype db table value} {
+        return [$vtype validate $value]
+    }
+
+    # validate foreign otherTable field db table value
+    #
+    # otherTable  Name of another table
+    # field       Field name in that table
+    #
+    # Value must appear in the specified field of the specified
+    # table.  If found, the value is returned.
+
+    method {validate foreign} {otherTable field db table value} {
+        $db eval "SELECT rowid FROM $otherTable WHERE $field=\$value" {
+            return $value
+        }
+
+        return -code error -errorcode INVALID \
+            "unknown $otherTable $field: \"$value\""
+    }
 
     #-------------------------------------------------------------------
     # Accessor Methods
