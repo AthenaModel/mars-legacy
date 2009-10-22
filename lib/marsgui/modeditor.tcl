@@ -88,7 +88,7 @@ snit::widget ::marsgui::modeditor {
             -text "Code Name:"
         
         install codename using ttk::entry $bar.codename    \
-            -width 25                                      \
+            -width 60                                      \
             -font  TkFixedFont
         
         install grabbtn using ttk::button $bar.grabbtn     \
@@ -172,11 +172,13 @@ snit::widget ::marsgui::modeditor {
         
         set answer [messagebox popup \
                         -buttons {yes "Source the code" no "Please don't"} \
-                        -icon    question        \
-                        -title   "Are you sure?" \
-                        -parent  $win            \
-                        -default no              \
-                        -message $message]
+                        -icon          question          \
+                        -title         "Are you sure?"   \
+                        -parent        $win              \
+                        -default       no                \
+                        -ignoretag     ${type}::source   \
+                        -ignoredefault yes               \
+                        -message       $message]
         
         if {$answer eq "no"} {
             return
@@ -211,11 +213,13 @@ snit::widget ::marsgui::modeditor {
         
         set answer [messagebox popup \
                         -buttons {yes "Clear the editor" no "Leave it alone"} \
-                        -icon    question        \
-                        -title   "Are you sure?" \
-                        -parent  $win            \
-                        -default no              \
-                        -message $message]
+                        -icon          question         \
+                        -title         "Are you sure?"  \
+                        -parent        $win             \
+                        -default       no               \
+                        -ignoretag     ${type}::clear   \
+                        -ignoredefault yes              \
+                        -message       $message]
         
         if {$answer eq "no"} {
             return
@@ -303,16 +307,22 @@ snit::widget ::marsgui::modeditor {
             
             set answer [messagebox popup \
                             -buttons {yes "Grab it again" no "Never mind"} \
-                            -icon    question        \
-                            -title   "Are you sure?" \
-                            -parent  $win            \
-                            -default no              \
-                            -message $message]
+                            -icon          question        \
+                            -title         "Are you sure?" \
+                            -parent        $win            \
+                            -default       no              \
+                            -ignoretag     ${type}::grab   \
+                            -ignoredefault yes             \
+                            -message       $message]
             
             if {$answer eq "no"} {
                 return
             }
         }
+        
+        # NEXT, update the codename field to show it.
+        $codename delete 0 end
+        $codename insert 0 $name
         
         # NEXT, grab it.
         if {[catch {
