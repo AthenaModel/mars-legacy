@@ -724,7 +724,7 @@ snit::type ::simlib::gramdb {
             }
         }
     }
-
+    
     #-------------------------------------------------------------------
     # Public Type Methods: Loading data
 
@@ -778,6 +778,73 @@ snit::type ::simlib::gramdb {
         return
     }
   
+    # loader db gram
+    #
+    # db     An sqldocument(n) with gramdb(5) data
+    # gram   A gram(n)
+    #
+    # Loads the gramdb(5) data into the gram(n).  This command is
+    # intended to be used as a gram(n) -loadcmd, like this:
+    #
+    #   -loadcmd [list ::simlib::gramdb loader $db]
+    #
+    # where $db is the name of the sqldocument(n) containing the
+    # gramdb(5) data.
+    
+    typemethod loader {db gram} {
+        $gram load nbhoods {*}[$db eval {
+            SELECT n FROM gramdb_n
+            ORDER BY n
+        }]
+        
+        $gram load groups {*}[$db eval {
+            SELECT g, gtype FROM gramdb_g
+            ORDER BY gtype,g
+        }]
+
+        $gram load concerns {*}[$db eval {
+            SELECT c, gtype FROM gramdb_c
+            ORDER BY gtype,c
+        }]
+
+        $gram load nbrel {*}[$db eval {
+            SELECT m, n, proximity, effects_delay 
+            FROM gramdb_mn
+            ORDER BY m,n
+        }]
+
+        $gram load nbgroups {*}[$db eval {
+            SELECT n, g, population, rollup_weight, effects_factor
+            FROM gramdb_ng
+            ORDER BY n,g
+        }]
+
+        $gram load sat {*}[$db eval {
+            SELECT n, g, c, sat0, saliency, trend0
+            FROM gramdb_ngc JOIN gramdb_g USING (g)
+            ORDER BY n, gtype, g, c
+        }]
+
+        $gram load rel {*}[$db eval {
+            SELECT n, f, g, rel
+            FROM gramdb_nfg
+            ORDER BY n, f, g
+        }]
+
+        $gram load coop {*}[$db eval {
+            SELECT gramdb_nfg.n     AS n,
+                   gramdb_nfg.f     AS f,
+                   gramdb_nfg.g     AS g,
+                   gramdb_nfg.coop0 AS coop0
+            FROM gramdb_nfg
+            JOIN gramdb_g AS F ON (gramdb_nfg.f = F.g)
+            JOIN gramdb_g AS G ON (gramdb_nfg.g = G.g)
+            WHERE F.gtype = 'CIV'
+            AND   G.gtype = 'FRC'
+            ORDER BY n, f, g
+        }]
+    }
+
     #-------------------------------------------------------------------
     # Other Private Routines
 

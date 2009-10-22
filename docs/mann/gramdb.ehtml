@@ -52,6 +52,24 @@ database object when it is no longer needed.<p>
 Identical to <<iref loadfile>>, but parses <<xref gramdb(5)>> text from
 string <i>text</i> rather than a file.<p>
 
+<<defitem loader {gramdb loader <i>db gram</i>}>>
+
+Loads the <<xref gramdb(5)>> data found in the
+<<xref sqldocument(n)>> object <i>db</i> into <i>gram</i>, an
+instance of <<xref gram(n)>>.  This command is to be used as a
+<<xref gram(n)>> <b>-loadcmd</b>, like so:<p>
+
+<pre>
+gram ::mygram \
+    -loadcmd [list ::simlib::gramdb loader $db] \
+      .
+      .
+      .
+</pre>
+
+where <b>$db</b> is the name of the <<xref sqldocument(n)>> containing the
+data.  Note that calling it in any other way simply won't work.<p>
+
 <<defitem sqlsection {gramdb sqlsection <i>subcommand</i>}>>
 
 gramdb(n) is an <<xref sqlsection(i)>>, as it defines

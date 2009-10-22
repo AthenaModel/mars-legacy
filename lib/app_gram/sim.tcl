@@ -97,7 +97,7 @@ snit::type sim {
         if {[catch {sim InitGram} result]} {
             # Save the stack trace while we clean up
             set errInfo $::errorInfo
-            TBD sim CleanUp
+            sim CleanUp
 
             return -code error -errorinfo $errInfo $result
         }
@@ -137,75 +137,14 @@ snit::type sim {
     
     typemethod InitGram {} {
         set ram [gram ::ram \
-                     -clock        ::simclock             \
-                     -rdb          ::rdb                  \
-                     -logger       ::log                  \
-                     -logcomponent gram                   \
-                     -loadcmd      [mytypemethod GramLoader]]
+                     -clock        ::simclock                       \
+                     -rdb          ::rdb                            \
+                     -logger       ::log                            \
+                     -logcomponent gram                             \
+                     -loadcmd      {::simlib::gramdb loader ::rdb}]
         $ram init
     }
     
-    # GramLoader gram
-    #
-    # Loads the gramdb(5) data into GRAM.
-    #
-    # TBD: This should be a standard command in gramdb(n)
-    # LoadAram gram
-
-    typemethod GramLoader {gram} {
-        $gram load nbhoods {*}[rdb eval {
-            SELECT n FROM gramdb_n
-            ORDER BY n
-        }]
-        
-        $gram load groups {*}[rdb eval {
-            SELECT g, gtype FROM gramdb_g
-            ORDER BY gtype,g
-        }]
-
-        $gram load concerns {*}[rdb eval {
-            SELECT c, gtype FROM gramdb_c
-            ORDER BY gtype,c
-        }]
-
-        $gram load nbrel {*}[rdb eval {
-            SELECT m, n, proximity, effects_delay 
-            FROM gramdb_mn
-            ORDER BY m,n
-        }]
-
-        $gram load nbgroups {*}[rdb eval {
-            SELECT n, g, population, rollup_weight, effects_factor
-            FROM gramdb_ng
-            ORDER BY n,g
-        }]
-
-        $gram load sat {*}[rdb eval {
-            SELECT n, g, c, sat0, saliency, trend0
-            FROM gramdb_ngc JOIN gramdb_g USING (g)
-            ORDER BY n, gtype, g, c
-        }]
-
-        $gram load rel {*}[rdb eval {
-            SELECT n, f, g, rel
-            FROM gramdb_nfg
-            ORDER BY n, f, g
-        }]
-
-        $gram load coop {*}[rdb eval {
-            SELECT gramdb_nfg.n     AS n,
-                   gramdb_nfg.f     AS f,
-                   gramdb_nfg.g     AS g,
-                   gramdb_nfg.coop0 AS coop0
-            FROM gramdb_nfg
-            JOIN gramdb_g AS F ON (gramdb_nfg.f = F.g)
-            JOIN gramdb_g AS G ON (gramdb_nfg.g = G.g)
-            WHERE F.gtype = 'CIV'
-            AND   G.gtype = 'FRC'
-            ORDER BY n, f, g
-        }]
-    }
-
     # CleanUp
     #
     # Deletes the simulation objects to make way for new ones.
