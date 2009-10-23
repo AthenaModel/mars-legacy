@@ -31,9 +31,22 @@ snit::type app {
     typecomponent msgline           ;# The application message line.
     typecomponent rdb               ;# The runtime database, for nsat(n)
                                      # inputs.
-
+                                     
     #-------------------------------------------------------------------
-    # Application Initializer
+    # Type Variables
+    
+    # info array
+    #
+    #    ticks      Time now, in ticks
+    #    zulu       Time now, in zulu time
+    
+    typevariable info -array {
+        ticks 0000
+        zulu  ""
+    }
+
+    #===================================================================
+    # Application Initialization
 
     # init argv
     #
@@ -84,11 +97,14 @@ snit::type app {
         # NEXT, initialize the application.
         app CreateLogger               ;# Creates ::log, allowing logging
         app CreateRdb                  ;# Creates ::rdb.
-        # TBD: Just make these singleton types.
-        executiveType ::ex             ;# Create the command executive
-        sim init                       ;# Create the simulation manager
+        executive init                 ;# Initialize the command executive
+        sim init                       ;# Initialize the simulation manager
         app CreateMenuBar              ;# Create the application menus.
         app CreateGUI                  ;# Fill in the rest of the main window.
+
+        # NEXT, prepare to receive simulation events
+        notifier trace [myproc NotifierTrace]
+        notifier bind ::sim <Tick> ::app [mytypemethod SimTick]
 
         # NEXT, Allow the widget sizes to propagate to the toplevel, so
         # the window gets its default size; then turn off propagation.
@@ -99,20 +115,34 @@ snit::type app {
 
         # NEXT, load the database, if any.
         if {$gramdbFile ne ""} {
-            ex evalsafe [list load $gramdbFile]
+            executive evalsafe [list load $gramdbFile]
             $cli clear
         }
 
         # NEXT, run the initial script, if any.
         if {$initScript ne ""} {
-            ex evalsafe [list call $initScript]
+            executive evalsafe [list call $initScript]
             $cli clear
         }
 
         # NEXT, Ask the scrolling log to load the current log file.
         .paner.simlog load [log cget -logfile]
-
+        
         app puts "Welcome to GRAM Workbench!"
+    }
+    
+    # NotifierTrace subject event eargs objects
+    #
+    # A notifier(n) trace command
+
+    proc NotifierTrace {subject event eargs objects} {
+        set objects [join $objects ", "]
+        log detail notify "send $subject $event [list $eargs] to $objects"
+    }
+    
+    typemethod SimTick {} {
+        set info(ticks) [format %04d [simclock now]]
+        set info(zulu)  [simclock asZulu]
     }
 
     # usage
@@ -253,16 +283,47 @@ snit::type app {
         # And everything should stretch horizontally.
 
         grid rowconfigure . 0 -weight 0
-        grid rowconfigure . 1 -weight 1
+        grid rowconfigure . 1 -weight 0
         grid rowconfigure . 2 -weight 0
-        grid rowconfigure . 3 -weight 0
+        grid rowconfigure . 3 -weight 1
+        grid rowconfigure . 4 -weight 0
+        grid rowconfigure . 5 -weight 0
 
         grid columnconfigure . 0 -weight 1
 
         # ROW 0, add a separator
-        frame .sep0 -height 2 -relief sunken -borderwidth 2
+        ttk::separator .sep0 -orient horizontal
+        
+        # ROW 1, add a simulation tool bar
+        ttk::frame .bar
+        
+        ttk::label .bar.zululabel \
+            -text "Time:"
+        
+        ttk::label .bar.zulu                      \
+            -font         codefont                \
+            -width        12                      \
+            -textvariable [mytypevar info(zulu)]
 
-        # ROW 1, add the log/cli paner
+        ttk::label .bar.ticklabel \
+            -text "Tick:"
+        
+        ttk::label .bar.ticks                     \
+            -font         codefont                \
+            -width        4                       \
+            -anchor       e                       \
+            -textvariable [mytypevar info(ticks)]
+            
+        pack .bar.ticks     -side right
+        pack .bar.ticklabel -side right -padx {5 0}
+        pack .bar.zulu      -side right
+        pack .bar.zululabel -side right -padx {5 0}
+        
+        
+        # ROW 2, add a separator
+        ttk::separator .sep2 -orient horizontal
+        
+        # ROW 3, add the log/cli paner
         paner .paner -orient vertical -showhandle 1
         
         # NEXT, Create the Scrolling Log
@@ -282,22 +343,24 @@ snit::type app {
         set cli [cli .paner.shell \
                      -height 14                          \
                      -relief flat                        \
-                     -evalcmd {ex eval}                  \
+                     -evalcmd {executive eval}           \
                      -promptcmd [mytypemethod CliPrompt] \
-                     -commandlist [ex commands]]
+                     -commandlist [executive commands]]
         .paner add $cli -sticky nsew -minsize 60
 
-        # ROW 2, add a separator
-        frame .sep2 -height 2 -relief sunken -borderwidth 2
+        # ROW 4, add a separator
+        ttk::separator .sep4 -orient horizontal
 
-        # ROW 3, Create the Message line.
+        # ROW 5, Create the Message line.
         set msgline [messageline .msgline]
 
         # NEXT, manage all of the components.
-        grid .sep0     -sticky ew
-        grid .paner    -sticky nsew
-        grid .sep2     -sticky ew
-        grid .msgline  -sticky ew
+        grid .sep0    -row 0 -column 0   -sticky ew
+        grid .bar     -row 1 -column 0   -sticky ew
+        grid .sep2    -row 2 -column 0   -sticky ew
+        grid .paner   -row 3 -column 0   -sticky nsew
+        grid .sep4    -row 4 -column 0   -sticky ew
+        grid .msgline -row 5 -column 0   -sticky ew
     }
 
     #-------------------------------------------------------------------
@@ -356,7 +419,7 @@ snit::type app {
                       -title            "Load gramdb(5) File..."]
         
         if {$name ne ""} {
-            ex evalsafe [list load $name]
+            executive evalsafe [list load $name]
         }
     }
 
@@ -409,11 +472,7 @@ snit::type app {
     # in the prompt.
 
     typemethod CliPrompt {} {
-        if {[sim initialized]} {
-            return "[simclock asZulu]>"
-        } else {
-            return "gram>"
-        }
+        return ">"
     }
 
     #-------------------------------------------------------------------

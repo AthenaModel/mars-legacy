@@ -15,32 +15,31 @@
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
-# executiveType
+# executive
 
-snit::type executiveType {
-    #-------------------------------------------------------------------
-    # Components
-
-    component interp         ;# Interpreter used for processing commands.
-
-    #-------------------------------------------------------------------
-    # Instance Variables
-
-    variable stackTrace {}   ;# Traceback for last error.
-
-    #-------------------------------------------------------------------
-    # Constructor
+snit::type executive {
+    pragma -hasinstances no
     
-    constructor {args} {
-        log normal exec "Constructor"
+    #-------------------------------------------------------------------
+    # Type Components
 
-        # Uncomment the following line when the first option is defined.
-        # $self configurelist $args
+    typecomponent interp    ;# Interpreter used for processing commands.
+
+    #-------------------------------------------------------------------
+    # Type Variables
+
+    typevariable stackTrace {}   ;# Traceback for last error.
+
+    #-------------------------------------------------------------------
+    # Initialization
+    
+    typemethod init {} {
+        log normal exec "Initializing..."
 
         # FIRST, create the interpreter.  It's a safe interpreter but
         # most Tcl commands are retained, to allow scripting.  Allow
         # the "source" command.
-        install interp using smartinterp ${selfns}::interp -cli yes
+        set interp [smartinterp ${type}::interp -cli yes]
         $interp expose source
         $interp expose file
 
@@ -69,7 +68,7 @@ snit::type executiveType {
 
         # bgerrtrace
         $interp smartalias bgerrtrace 0 0 {} \
-            [mymethod bgerrtrace]
+            [mytypemethod bgerrtrace]
 
         # cancel
         $interp smartalias cancel 1 1 {driver} \
@@ -152,11 +151,11 @@ snit::type executiveType {
 
         # errtrace
         $interp smartalias errtrace 0 0 {} \
-            [mymethod errtrace]
+            [mytypemethod errtrace]
 
         # help
         $interp smartalias help 1 - {?-info? command...} \
-            [mymethod help]
+            [mytypemethod help]
 
         # load
         $interp smartalias load 1 1 {dbfile} \
@@ -252,18 +251,13 @@ snit::type executiveType {
     }
 
     #-------------------------------------------------------------------
-    # Private methods
-
-    # TBD
-
-    #-------------------------------------------------------------------
-    # Public methods
+    # Public type methods
 
     # help ?-info? command...
     #
     # Outputs the help for the command 
 
-    method help {args} {
+    typemethod help {args} {
         set getInfo 0
 
         if {[lindex $args 0] eq "-info"} {
@@ -285,7 +279,7 @@ snit::type executiveType {
     # Evaluate the script; throw an error or return the script's value.
     # Either way, log what happens. Ignore empty scripts.
 
-    method eval {script} {
+    typemethod eval {script} {
         if {[string trim $script] eq ""} {
             return
         }
@@ -310,8 +304,8 @@ snit::type executiveType {
     # Like eval, but swallows the return value or error (since
     # it's logged anyway).
 
-    method evalsafe {script} {
-        catch {$self eval $script}
+    typemethod evalsafe {script} {
+        catch {$type eval $script}
     }
 
     # commands
@@ -319,7 +313,7 @@ snit::type executiveType {
     # Returns a list of the commands defined in the Executive's 
     # interpreter
 
-    method commands {} {
+    typemethod commands {} {
         $interp eval {info commands}
     }
 
@@ -327,7 +321,7 @@ snit::type executiveType {
     #
     # returns the stack trace from the most recent evaluation error.
 
-    method errtrace {} {
+    typemethod errtrace {} {
         return $stackTrace
     }
 
@@ -335,7 +329,7 @@ snit::type executiveType {
     #
     # Returns the stack trace from the most recent bgerror
 
-    method bgerrtrace {} {
+    typemethod bgerrtrace {} {
         global bgErrorInfo
 
         return $bgErrorInfo

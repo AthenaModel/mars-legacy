@@ -257,7 +257,8 @@ snit::widget ::marsgui::loglist {
                 -cursor         left_ptr                      \
                 -width          $options(-width)              \
                 -height         $height                       \
-                -state          disabled
+                -state          disabled                      \
+                -font           codefont
 
             scrollbar $pane.appfrm.xbar1       \
                 -orient  horizontal            \
@@ -299,7 +300,8 @@ snit::widget ::marsgui::loglist {
             -cursor             left_ptr                 \
             -width              $options(-width)         \
             -height             $height                  \
-            -state              disabled
+            -state              disabled                 \
+            -font               codefont
             
         scrollbar $logfrm.xbar2            \
             -orient  horizontal            \

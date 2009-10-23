@@ -23,7 +23,6 @@ snit::type sim {
     typecomponent ram               ;# gram(n) 
 
     typecomponent nbhoods           ;# enum(n): all neighborhoods
-    # TBD: groups
     typecomponent pgroups           ;# enum(n): all pgroups
     typecomponent concerns          ;# enum(n): all concerns
 
@@ -77,7 +76,7 @@ snit::type sim {
 
         # NEXT, set the simulation clock
         simclock reset
-        simclock configure -t0 "100000ZJAN05"
+        simclock configure -t0 "100000ZJAN10"
 
         # NEXT, remember the complete set of enumerations
         # TBD: See if we can get rid of these.
@@ -105,6 +104,7 @@ snit::type sim {
         set gramflag 1
         log normal sim "Loaded gramdb $dbfile"
 
+        notifier send ::sim <Tick>
         return
     }
 
@@ -128,6 +128,7 @@ snit::type sim {
         simclock reset
         $ram init
 
+        notifier send ::sim <Tick>
         return 
     }
 
@@ -157,6 +158,7 @@ snit::type sim {
         set gramflag 0
 
         rdb clear
+        notifier send ::sim <Tick>
     }
 
     # stepsize ?ticks?
@@ -183,6 +185,7 @@ snit::type sim {
         simclock step $stepsize
         $ram advance
 
+        notifier send ::sim <Tick>
         return
     }
 
@@ -202,6 +205,7 @@ snit::type sim {
             simclock step $stepsize
 
             $ram advance
+            notifier send ::sim <Tick>
         }
 
         return
