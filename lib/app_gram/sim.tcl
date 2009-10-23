@@ -68,6 +68,9 @@ snit::type sim {
     typemethod load {dbfile} {
         # FIRST, clean up the old simulation data.
         sim CleanUp
+        
+        # NEXT, open a new log.
+        log newlog load
 
         # NEXT, load the dbfile
         log normal sim "Loading gramdb $dbfile"

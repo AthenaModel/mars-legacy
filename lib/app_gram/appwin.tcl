@@ -138,8 +138,11 @@ snit::widget appwin {
         notifier forget $self
     }
     
+    #===================================================================
+    # Menu Bar
+    
     #-------------------------------------------------------------------
-    # Menu Bar 
+    # Menu Bar: Creation
 
     # CreateMenuBar
     #
@@ -166,13 +169,13 @@ snit::widget appwin {
             -label "Load gramdb(5) File..." \
             -underline 0 \
             -accelerator "Ctrl+L" \
-            -command [mymethod LoadDatabase]
-        bind . <Control-l> [mymethod LoadDatabase]
+            -command [mymethod FileLoadGramdb]
+        bind . <Control-l> [mymethod FileLoadGramdb]
 
         $mnu add command \
-            -label "Save RDB File..." \
-            -underline 5 \
-            -command [mymethod SaveDatabase]
+                -label     "Save RDB File..."       \
+                -underline 5                        \
+                -command   [mymethod FileSaveRDB]]
         
         if {$options(-main)} {
             $mnu add command                               \
@@ -184,7 +187,7 @@ snit::widget appwin {
         $mnu add separator
 
         if {$options(-main)} {
-            $mnu add command                  \
+            $mnu add command                       \
                 -label       "Exit"                \
                 -underline   1                     \
                 -accelerator "Ctrl+Q"              \
@@ -192,7 +195,7 @@ snit::widget appwin {
             bind $win <Control-q> [list app exit]
             bind $win <Control-Q> [list app exit]
         } else {
-            $mnu add command                  \
+            $mnu add command                       \
                 -label       "Close Window"        \
                 -underline   6                     \
                 -accelerator "Ctrl+W"              \
@@ -270,6 +273,125 @@ snit::widget appwin {
     }
     
     #-------------------------------------------------------------------
+    # Menu Bar: Menu Item Handlers
+
+    # FileLoadGramdb
+    #
+    # Allows the user to select a gramdb(5) file via an OpenFile dialog;
+    # the file is then loaded.
+    
+    method FileLoadGramdb {} {
+        set name [tk_getOpenFile \
+                      -defaultextension ".gramdb"                 \
+                      -filetypes        {{gramdb(5) {.gramdb}}}   \
+                      -parent           .                         \
+                      -title            "Load gramdb(5) File..."]
+        
+        if {$name ne ""} {
+            executive evalsafe [list load $name]
+        }
+    }
+
+    # FileSaveRDB
+    #
+    # Allows the user to save a snapshot of the RDB to a file.
+    #
+    # TBD: We just shouldn't do this if there's no database.
+
+    method FileSaveRDB {} {
+        # FIRST, if there's no database loaded there's nothing to save.
+        if {![sim initialized]} {
+            app puts "No database to save."
+            bell
+            return
+        }
+        
+        set dbfile [sim dbfile]
+        set initialDir [file dirname $dbfile]
+        
+        set defaultName [file rootname [file tail $dbfile]].rdb
+        
+        set filename [tk_getSaveFile \
+                          -filetypes        {{"Run-time Database" {.rdb}}} \
+                          -initialfile      $defaultName     \
+                          -initialdir       $initialDir      \
+                          -defaultextension .rdb             \
+                          -title            "Save RDB As..." \
+                          -parent           .]
+
+        if {$filename eq ""} {
+            app puts "Cancelled."
+            return
+        }
+
+        if {[catch {
+            rdb saveas $filename
+        } result]} {
+            log warning app "Stack Trace:\n$::errorInfo"
+            log warning app "Error saving '$filename': $result"
+        } else {
+            log normal app "Saved '$filename'"
+        }
+    }
+
+
+    # FileSaveCLI
+    #
+    # Prompts the user to save the CLI scrollback buffer to disk
+    # as a text file.
+    #
+    # TBD: This has become a standard pattern (catch, try/finally,
+    # logging errors, etc).  Consider packaging it up as a standard
+    # save file mechanism.
+
+    method FileSaveCLI {} {
+        # FIRST, query for the file name.  If the file already
+        # exists, the dialog will automatically query whether to 
+        # overwrite it or not. Returns 1 on success and 0 on failure.
+
+        set filename [tk_getSaveFile                                   \
+                          -parent      $win                            \
+                          -title       "Save CLI Scrollback Buffer As" \
+                          -initialfile "cli.txt"                       \
+                          -filetypes   {
+                              {{Text File} {.txt} }
+                          }]
+
+        # NEXT, If none, they cancelled.
+        if {$filename eq ""} {
+            return 0
+        }
+
+        # NEXT, Save the CLI using this name
+        if {[catch {
+            try {
+                set f [open $filename w]
+                puts $f [$cli get 1.0 end]
+            } finally {
+                close $f
+            }
+        } result opts]} {
+            log warning app "Could not save CLI buffer: $result"
+            log error app [dict get $opts -errorinfo]
+            app error {
+                |<--
+                Could not save the CLI buffer to
+                
+                    $filename
+
+                $result
+            }
+            return
+        }
+
+        log normal scenario "Saved CLI Buffer to: $filename"
+
+        app puts "Saved CLI Buffer to [file tail $filename]"
+
+        return
+    }
+    
+    #===================================================================
     # Components
 
     # CreateComponents
@@ -396,24 +518,6 @@ snit::widget appwin {
         grid $win.status   -sticky ew
     }
 
-    # CliPrompt
-    #
-    # Returns a prompt string for the CLI
-
-    method CliPrompt {} {
-        return ">"
-    
-        # TBD: Need to update executive first
-        if {[executive usermode] eq "super"} {
-            return "super>"
-        } else {
-            return ">"
-        }
-    }
-
-    #-------------------------------------------------------------------
-    # Tab Management
-
     # AddTabs
     #
     # Adds all of the content tabs and subtabs to the window.
@@ -451,7 +555,54 @@ snit::widget appwin {
             }
         }
     }
+    
+    #-------------------------------------------------------------------
+    # Components: Event Handlers
 
+    # Reconfigure
+    #
+    # Reconfigure the window given the new scenario
+
+    method Reconfigure {} {
+        if {[sim dbfile] ne ""} {
+            wm title $win "[file tail [sim dbfile]] - GRAM Workbench"
+        } else {
+            wm title $win "GRAM Workbench"
+        }
+        $self SimTime
+    }
+
+    # SimTime
+    #
+    # This routine is called when the simulation time display has changed,
+    # either because the start date has changed, or the time has advanced.
+
+    method SimTime {} {
+        # Display current sim time.
+        set info(ticks) [format "%04d" [simclock now]]
+        set info(zulu)  [simclock asZulu]
+    }
+
+    # CliPrompt
+    #
+    # Returns a prompt string for the CLI
+
+    method CliPrompt {} {
+        return ">"
+    
+        # TBD: Need to update executive first
+        if {[executive usermode] eq "super"} {
+            return "super>"
+        } else {
+            return ">"
+        }
+    }
+    
+    #===================================================================
+    # Public Methods
+
+    #-------------------------------------------------------------------
+    # Tab Management
 
     # tab win tab
     #
@@ -477,7 +628,6 @@ snit::widget appwin {
             }
         }
     }
-    
    
     #-------------------------------------------------------------------
     # CLI history
@@ -509,149 +659,15 @@ snit::widget appwin {
         }
     }
 
-
-    #-------------------------------------------------------------------
-    # File Menu Handlers
-    # LoadDatabase
+    # cli clear
     #
-    # Allows the user to select a gramdb(5) file via an OpenFile dialog;
-    # the file is then loaded.
-    
-    method LoadDatabase {} {
-        set name [tk_getOpenFile \
-                      -defaultextension ".gramdb"                 \
-                      -filetypes        {{gramdb(5) {.gramdb}}}   \
-                      -parent           .                         \
-                      -title            "Load gramdb(5) File..."]
-        
-        if {$name ne ""} {
-            executive evalsafe [list load $name]
-        }
+    # Clears the contents of the CLI scrollback buffer
+
+    method {cli clear} {} {
+        require {$cli ne ""} "No CLI in this window: $win"
+
+        $cli clear
     }
-
-    # SaveDatabase
-    #
-    # Allows the user to save a snapshot of the RDB to a file.
-    #
-    # TBD: We just shouldn't do this if there's no database.
-
-    method SaveDatabase {} {
-        # FIRST, if there's no database loaded there's nothing to save.
-        if {![sim initialized]} {
-            app puts "No database to save."
-            bell
-            return
-        }
-        
-        set dbfile [sim dbfile]
-        set initialDir [file dirname $dbfile]
-        
-        set defaultName [file rootname [file tail $dbfile]].rdb
-        
-        set filename [tk_getSaveFile \
-                          -filetypes        {{Run-time Database {.rdb}}} \
-                          -initialfile      $defaultName     \
-                          -initialdir       $initialDir      \
-                          -defaultextension .rdb             \
-                          -title            "Save RDB As..." \
-                          -parent           .]
-
-        if {$filename eq ""} {
-            app puts "Cancelled."
-            return
-        }
-
-        if {[catch {
-            rdb saveas $filename
-        } result]} {
-            log warning app "Stack Trace:\n$::errorInfo"
-            log warning app "Error saving '$filename': $result"
-        } else {
-            log normal app "Saved '$filename'"
-        }
-    }
-
-
-    # FileSaveCLI
-    #
-    # Prompts the user to save the CLI scrollback buffer to disk
-    # as a text file.
-    #
-    # TBD: This has become a standard pattern (catch, try/finally,
-    # logging errors, etc).  Consider packaging it up as a standard
-    # save file mechanism.
-
-    method FileSaveCLI {} {
-        # FIRST, query for the file name.  If the file already
-        # exists, the dialog will automatically query whether to 
-        # overwrite it or not. Returns 1 on success and 0 on failure.
-
-        set filename [tk_getSaveFile                                   \
-                          -parent      $win                            \
-                          -title       "Save CLI Scrollback Buffer As" \
-                          -initialfile "cli.txt"                       \
-                          -filetypes   {
-                              {{Text File} {.txt} }
-                          }]
-
-        # NEXT, If none, they cancelled.
-        if {$filename eq ""} {
-            return 0
-        }
-
-        # NEXT, Save the CLI using this name
-        if {[catch {
-            try {
-                set f [open $filename w]
-                puts $f [$cli get 1.0 end]
-            } finally {
-                close $f
-            }
-        } result opts]} {
-            log warning app "Could not save CLI buffer: $result"
-            log error app [dict get $opts -errorinfo]
-            app error {
-                |<--
-                Could not save the CLI buffer to
-                
-                    $filename
-
-                $result
-            }
-            return
-        }
-
-        log normal scenario "Saved CLI Buffer to: $filename"
-
-        app puts "Saved CLI Buffer to [file tail $filename]"
-
-        return
-    }
-
-    #-------------------------------------------------------------------
-    # Notifier Event Handlers
-
-    # Reconfigure
-    #
-    # Reconfigure the window given the new scenario
-
-    method Reconfigure {} {
-        $self SimTime
-    }
-
-    # SimTime
-    #
-    # This routine is called when the simulation time display has changed,
-    # either because the start date has changed, or the time has advanced.
-
-    method SimTime {} {
-        # Display current sim time.
-        set info(ticks) [format "%04d" [simclock now]]
-        set info(zulu)  [simclock asZulu]
-    }
-
-    #-------------------------------------------------------------------
-    # Utility Methods
 
     # new ?option value...?
     #
@@ -686,13 +702,4 @@ snit::widget appwin {
         $msgline puts $text
     }
 
-    # cli clear
-    #
-    # Clears the contents of the CLI scrollback buffer
-
-    method {cli clear} {} {
-        require {$cli ne ""} "No CLI in this window: $win"
-
-        $cli clear
-    }
 }

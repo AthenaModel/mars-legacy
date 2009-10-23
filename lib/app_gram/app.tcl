@@ -95,6 +95,18 @@ snit::type app {
         executive init                 ;# Initialize the command executive
         sim init                       ;# Initialize the simulation manager
 
+        # NEXT, define global conditions
+        if 0 {
+            # statecontroller isn't in Mars yet.
+            namespace eval ::cond {
+                statecontroller dbloaded -events {
+                    ::sim <Reset>
+                } -condition {
+                    [::sim initialized]
+                }
+            }
+        }
+        
         # NEXT, Withdraw the default toplevel window, and create 
         # the main GUI window
         wm withdraw .
