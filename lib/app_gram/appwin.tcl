@@ -172,9 +172,9 @@ snit::widget appwin {
             -command [mymethod FileLoadGramdb]
         bind . <Control-l> [mymethod FileLoadGramdb]
 
-        $mnu add command \
-                -label     "Save RDB File..."       \
-                -underline 5                        \
+        cond::dbloaded control \
+            [menuitem $mnu command "Save RDB File..." \
+                -underline 5                          \
                 -command   [mymethod FileSaveRDB]]
         
         if {$options(-main)} {

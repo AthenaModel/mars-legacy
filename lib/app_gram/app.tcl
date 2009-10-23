@@ -96,14 +96,12 @@ snit::type app {
         sim init                       ;# Initialize the simulation manager
 
         # NEXT, define global conditions
-        if 0 {
-            # statecontroller isn't in Mars yet.
-            namespace eval ::cond {
-                statecontroller dbloaded -events {
-                    ::sim <Reset>
-                } -condition {
-                    [::sim initialized]
-                }
+        namespace eval ::cond {
+            statecontroller dbloaded -events {
+                ::app <Init>
+                ::sim <Reset>
+            } -condition {
+                [::sim initialized]
             }
         }
         
@@ -118,6 +116,8 @@ snit::type app {
         # NEXT, load the database, if any.
         if {$gramdbFile ne ""} {
             executive evalsafe [list load $gramdbFile]
+        } else {
+            notifier send ::app <Init>
         }
 
         # NEXT, run the initial script, if any.
