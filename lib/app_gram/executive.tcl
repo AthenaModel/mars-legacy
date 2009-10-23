@@ -84,12 +84,12 @@ snit::type executive {
 
         # coop level
         $interp smartalias {coop level} 6 - \
-            {zulutime n f g limit days ?option value...?} \
+            {zulu n f g limit days ?option value...?} \
             [list ::sim coop level]
 
         # coop slope
-        $interp smartalias {coop slope} 6 - \
-            {zulutime n f g slope limit ?option value...?} \
+        $interp smartalias {coop slope} 5 - \
+            {zulu n f g slope ?option value...?} \
             [list ::sim coop slope]
 
         # debug
@@ -228,17 +228,17 @@ snit::type executive {
 
         # sat adjust
         $interp smartalias {sat adjust} 4 - \
-            {nbhood pgroup concern mag ?options...?} \
+            {n g c mag ?options...?} \
             [list ::sim sat adjust]
 
         # sat level
         $interp smartalias {sat level} 6 - \
-            {zulutime nbhood pgroup concern limit days ?option value...?} \
+            {zulu n g c limit days ?option value...?} \
             [list ::sim sat level]
 
         # sat slope
-        $interp smartalias {sat slope} 6 - \
-            {zulutime nbhood pgroup concern slope limit ?option value...?} \
+        $interp smartalias {sat slope} 5 - \
+            {zulu n g c slope ?option value...?} \
             [list ::sim sat slope]
 
         # step
@@ -322,6 +322,7 @@ snit::type executive {
     # returns the stack trace from the most recent evaluation error.
 
     typemethod errtrace {} {
+        log warning exec "errtrace: $stackTrace"
         return $stackTrace
     }
 
@@ -331,8 +332,13 @@ snit::type executive {
 
     typemethod bgerrtrace {} {
         global bgErrorInfo
-
-        return $bgErrorInfo
+        
+        if {[info exists bgErrorInfo]} {
+            log error exec "bgerrtrace: $bgErrorInfo"
+            return $bgErrorInfo
+        } else {
+            return "No bgerrors so far."
+        }
     }
 }
 

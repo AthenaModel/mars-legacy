@@ -19,11 +19,10 @@ snit::type sim {
     #-------------------------------------------------------------------
     # Type Components
 
-    typecomponent parmdb            ;# TBD
     typecomponent ram               ;# gram(n) 
 
     typecomponent nbhoods           ;# enum(n): all neighborhoods
-    typecomponent pgroups           ;# enum(n): all pgroups
+    typecomponent groups           ;# enum(n): all groups
     typecomponent concerns          ;# enum(n): all concerns
 
     #-------------------------------------------------------------------
@@ -40,8 +39,6 @@ snit::type sim {
     typemethod init {} {
         log normal sim "Initializing..."
         
-        # TBD: Delegate parm to GRAM's parmdb
-
         # Initialize the GRAM component to NullGram, so that
         # commands delegated to it are handled before it is
         # created.
@@ -87,7 +84,7 @@ snit::type sim {
             SELECT n,n FROM gramdb_n
         }]]
         
-        set pgroups  [enum %AUTO% [rdb eval {
+        set groups  [enum %AUTO% [rdb eval {
             SELECT g,g FROM gramdb_g
         }]]
         
@@ -129,6 +126,7 @@ snit::type sim {
     
     typemethod reset {} {
         simclock reset
+        log newlog reset
         $ram init
 
         notifier send ::sim <Reset>
@@ -214,130 +212,78 @@ snit::type sim {
         return
     }
 
-    # sat adjust nbhood pgroup concern mag ?options?
+    # TBD: Move these to executive!
+    
+    # sat adjust n g c mag ?options?
     #
-    # nbhood        The targeted neighborhood, or "*"
-    # pgroup        The targeted pgroup, or "*"
-    # concern       The affected concern, or "*"
-    # mag           magnitude (qmag)
+    # n        The targeted neighborhood, or "*"
+    # g        The targeted group, or "*"
+    # c        The affected concern, or "*"
+    # mag      magnitude (qmag)
     #
     # -driver       Driver ID.  Defaults to next.
     #
     # Adjusts the specified satisfaction by the specified amount.
-    # 
-    # * pgroup and concern cannot both be *
-    #
-    # TBD: Improve error messages
 
-    typemethod {sat adjust} {nbhood pgroup concern mag args} {
-        require {$gramflag} "simulation uninitialized"
-
-        if {$nbhood ne "*"} {
-            set nbhood [$nbhoods validate $nbhood]
-        }
-
-        if {$pgroup ne "*"} {
-            set pgroup [$pgroups validate $pgroup]
-        }
-
-        if {$concern ne "*"} {
-            set concern [$concerns validate $concern]
-        }
-
-        if {$pgroup eq "*" && $concern eq "*"} {
-            error "cannot wildcard both pgroup and concern"
-        }
-
-        # NEXT, get the Driver ID
+    typemethod {sat adjust} {n g c mag args} {
+        # FIRST, get the Driver ID
         set driver [sim GetDriver args]
 
         if {[llength $args] > 0} {
             error "Unknown option: [lshift args]"
         }
 
-        # Acquire the desired gram(n) object
-        log normal sim "adjust driver=$driver n=$nbhood g=$pgroup c=$concern M=$mag"
-
-        sim ValidateGC $pgroup $concern
-
-        $ram sat adjust \
-            $driver $nbhood $pgroup $concern $mag
+        $ram sat adjust $driver $n $g $c $mag
     }
 
-    # sat level zulutime nbhood pgroup concern limit days ?options?
+    # sat level zulu n g c limit days ?options?
     #
-    # zulutime      Time the event occurs
-    # nbhood        The targeted neighborhood, or "*"
-    # pgroup        The targeted pgroup
-    # concern       The affected concern
-    # limit         Nominal magnitude (qmag)
-    # days          Realization time in days (qduration)
+    # zulu      Time the event occurs
+    # g         The targeted group
+    # c         The affected concern
+    # limit     Nominal magnitude (qmag)
+    # days      Realization time in days (qduration)
     #
     # Options: 
     #     -driver driver  Driver ID; defaults to next ID
+    #     -s factor       "here" multiplier, defaults to 1
     #     -p factor       "near" indirect effects multiplier, defaults to 0
-    #     -q factor       "far" indirect effects multiplier, defaults to 1
+    #     -q factor       "far" indirect effects multiplier, defaults to 0
     #
     # Schedule a level input the specified time.
 
-    typemethod {sat level} {zulutime nbhood pgroup concern limit days args} {
-        require {$gramflag} "simulation uninitialized"
-
-        if {$nbhood ne "*"} {
-            set nbhood [$nbhoods validate $nbhood]
-        }
-
-        set pgroup  [$pgroups validate $pgroup]
-        set concern [$concerns validate $concern]
-
-        # Acquire the desired gram(n) object
-        sim ValidateGC $pgroup $concern
-
-        set ts [simclock fromZulu $zulutime]
+    typemethod {sat level} {zulu n g c limit days args} {
+        set ts [simclock fromZulu $zulu]
 
         set driver [sim GetDriver args]
 
-        eval $ram sat level \
-            $driver $ts $nbhood $pgroup $concern $limit $days $args
+        $ram sat level $driver $ts $n $g $c $limit $days {*}$args
 
         return
     }
 
-    # sat slope zulutime pgroup concern slope limit ?options...?
+    # sat slope zulu n g c slope ?options...?
     #
-    # zulutime      Time the event occurs
-    # nbhood        The targeted neighborhood, or "*"
-    # pgroup        The targeted pgroup
-    # concern       The affected concern
-    # slope         change/day (qmag)
-    # limit         maximum change, +/- (qmag)
+    # zulu      Time the event occurs
+    # n         The targeted neighborhood, or "*"
+    # g         The targeted group
+    # c         The affected concern
+    # slope     change/day (qmag)
     #
     # Options: 
-    #     -driver driver Driver ID; defaults to next ID
-    #     -p factor      "near" indirect effects multiplier, defaults to 0
-    #     -q factor      "far" indirect effects multiplier, defaults to 1
+    #     -driver driver  Driver ID; defaults to next ID
+    #     -s factor       "here" multiplier, defaults to 1
+    #     -p factor       "near" indirect effects multiplier, defaults to 0
+    #     -q factor       "far" indirect effects multiplier, defaults to 0
     #
     # Schedule a slope input at the specified time.
 
-    typemethod {sat slope} {zulutime nbhood pgroup concern slope limit args} {
-        require {$gramflag} "simulation uninitialized"
-
-        if {$nbhood ne "*"} {
-            set nbhood [$nbhoods validate $nbhood]
-        }
-
-        set pgroup [$pgroups validate $pgroup]
-        set concern [$concerns validate $concern]
-
-        # Acquire the desired gram(n) object
-        sim ValidateGC $pgroup $concern
-
-        set ts [simclock fromZulu $zulutime]
+    typemethod {sat slope} {zulu n g c slope args} {
+        set ts [simclock fromZulu $zulu]
 
         set driver [sim GetDriver args]
 
-        eval $ram sat slope \
-            $driver $ts $nbhood $pgroup $concern $slope $limit $args
+        $ram sat slope $driver $ts $n $g $c $slope {*}$args
 
         return
     }
@@ -354,35 +300,18 @@ snit::type sim {
     # Adjusts the specified cooperation by the specified amount.
 
     typemethod {coop adjust} {n f g mag args} {
-        require {$gramflag} "simulation uninitialized"
-
-        if {$n ne "*"} {
-            set n [$nbhoods validate $n]
-        }
-
-        if {$f ne "*"} {
-            set f [$pgroups validate $f]
-        }
-
-        if {$g ne "*"} {
-            set g [$pgroups validate $g]
-        }
-
         set driver [sim GetDriver args]
 
         if {[llength $args] > 0} {
             error "Unknown option: [lshift args]"
         }
 
-        # Acquire the desired gram(n) object
-        log normal sim "coop adjust driver=$driver n=$n f=$f g=$g M=$mag"
-
         $ram coop adjust $driver $n $f $g $mag
     }
 
     # coop level zulutime n f g limit days ?options?
     #
-    # zulutime      Time the event occurs
+    # zulu          Time the event occurs
     # n             The targeted neighborhood, or "*"
     # f             The targeted civilian group
     # g             The targeted force group
@@ -392,62 +321,44 @@ snit::type sim {
     # Options: 
     #     -driver driver  Driver ID; defaults to next ID
     #     -cause cause    Sets the cause for this input.
+    #     -s factor       "here" multiplier, defaults to 1
     #     -p factor       "near" indirect effects multiplier, defaults to 0
-    #     -q factor       "far" indirect effects multiplier, defaults to 1
+    #     -q factor       "far" indirect effects multiplier, defaults to 0
     #
     # Schedule a level input at the specified time.
 
-    typemethod {coop level} {zulutime n f g limit days args} {
-        require {$gramflag} "simulation uninitialized"
-
-        if {$n ne "*"} {
-            set n [$nbhoods validate $n]
-        }
-
-        set f [$pgroups validate $f]
-        set g [$pgroups validate $g]
-
-
-        set ts [simclock fromZulu $zulutime]
+    typemethod {coop level} {zulu n f g limit days args} {
+        set ts [simclock fromZulu $zulu]
 
         set driver [sim GetDriver args]
 
-        eval $ram coop level $driver $ts $n $f $g $limit $days $args
+        $ram coop level $driver $ts $n $f $g $limit $days {*}$args
 
         return
     }
 
-    # coop slope zulutime n f g slope limit ?options...?
+    # coop slope zulu n f g slope limit ?options...?
     #
-    # zulutime      Time the event occurs
+    # zulu          Time the event occurs
     # n             The targeted neighborhood, or "*"
     # f             The targeted civilian group
     # g             The targeted force group
     # slope         change/day (qmag)
-    # limit         maximum change, +/- (qmag)
     #
     # Options: 
-    #     -driver driver Driver ID; defaults to next ID
-    #     -p factor      "near" indirect effects multiplier, defaults to 0
-    #     -q factor      "far" indirect effects multiplier, defaults to 1
+    #     -driver driver  Driver ID; defaults to next ID
+    #     -s factor       "here" multiplier, defaults to 1
+    #     -p factor       "near" indirect effects multiplier, defaults to 0
+    #     -q factor       "far" indirect effects multiplier, defaults to 1
     #
     # Schedule a slope input at the specified time.
 
-    typemethod {coop slope} {zulutime n f g slope limit args} {
-        require {$gramflag} "simulation uninitialized"
-
-        if {$n ne "*"} {
-            set n [$nbhoods validate $n]
-        }
-
-        set f [$pgroups validate $f]
-        set g [$pgroups validate $g]
-
-        set ts [simclock fromZulu $zulutime]
+    typemethod {coop slope} {zulu n f g slope args} {
+        set ts [simclock fromZulu $zulu]
 
         set driver [sim GetDriver args]
 
-        eval $ram coop slope $driver $ts $n $f $g $slope $limit $args
+        $ram coop slope $driver $ts $n $f $g $slope {*}$args
 
         return
     }
@@ -471,12 +382,12 @@ snit::type sim {
     #-------------------------------------------------------------------
     # parmdb(5) typemethods
 
-    delegate typemethod {parm set}   to parmdb
-    delegate typemethod {parm get}   to parmdb
-    delegate typemethod {parm list}  to parmdb
-    delegate typemethod {parm names} to parmdb
-    delegate typemethod {parm save}  to parmdb
-    delegate typemethod {parm load}  to parmdb
+    delegate typemethod {parm set}   using {gram parm %m}
+    delegate typemethod {parm get}   using {gram parm %m}
+    delegate typemethod {parm list}  using {gram parm %m}
+    delegate typemethod {parm names} using {gram parm %m}
+    delegate typemethod {parm save}  using {gram parm %m}
+    delegate typemethod {parm load}  using {gram parm %m}
 
     #-------------------------------------------------------------------
     # Time Conversion typemethods
@@ -502,9 +413,13 @@ snit::type sim {
         }
     }
 
+
+    #-------------------------------------------------------------------
+    # Utility Methods and Procs
+
     # ValidateGC g c
     #
-    # g       A valid pgroup short name, or *
+    # g       A valid group short name, or *
     # c       A valid concern short name, or *
     #
     # Verifies that g and c have the same type. "*" is allowed for 
@@ -516,20 +431,16 @@ snit::type sim {
 
             set gtype [rdb concern $c type]
         } elseif {$c eq "*"} {
-            set g [$pgroups name $g]
+            set g [$groups name $g]
 
-            set gtype [rdb pgroup $g type]
+            set gtype [rdb group $g type]
         } else {
-            set g [$pgroups name $g]
+            set g [$groups name $g]
             set c [$concerns name $c]
 
             set gtype [rdb grouptype $g $c]
         }
     }
-
-    #-------------------------------------------------------------------
-    # Utility Methods and Procs
-
     # GetDriver argvar
     #
     # Plucks -driver from an option/value list (if present).
@@ -542,9 +453,9 @@ snit::type sim {
         set driver [from arglist -driver ""]
 
         if {$driver eq ""} {
-            set driver [ram driver add]
+            set driver [$ram driver add]
         } else {
-            ram driver validate $driver
+            $ram driver validate $driver
         }
 
         return $driver
