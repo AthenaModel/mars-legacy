@@ -48,12 +48,14 @@ snit::widget ::marsgui::messageline {
     
     constructor {args} {
         # FIRST, Create the text widget
-        install display using text $win.display             \
-            -height             1                           \
+        install display using text $win.display                 \
+            -height             1                               \
             -background         $::marsgui::defaultBackground   \
-            -wrap               none                        \
-            -font               messagefont                 \
-            -state              disabled
+            -wrap               none                            \
+            -font               messagefont                     \
+            -state              disabled                        \
+            -borderwidth        0                               \
+            -highlightthickness 0
                             
         grid $display -sticky nsew
         grid columnconfigure $win 0 -weight  1

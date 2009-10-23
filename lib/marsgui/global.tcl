@@ -113,9 +113,19 @@ ttk::style theme settings alt {
     # Set the alt theme to use the same background as Tk.  This makes
     # Tile at least minimally useable
     ttk::style configure . -background $::marsgui::defaultBackground
+    ttk::style map TNotebook.Tab \
+        -background [list selected $::marsgui::defaultBackground]
 }
 
-# Now, use the alt theme for tile widgets.
+ttk::style theme settings clam {
+    # Set the alt theme to use the same background as Tk.  This makes
+    # Tile at least minimally useable
+    ttk::style configure . -background $::marsgui::defaultBackground
+    ttk::style map TNotebook.Tab \
+        -background [list selected $::marsgui::defaultBackground]
+}
+
+# Now, use the alt theme for ttk widgets.
 ttk::style theme use alt
 
 # All widgets

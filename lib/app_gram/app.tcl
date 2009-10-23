@@ -84,50 +84,35 @@ snit::type app {
             app usage
             exit 1
         }
-
-        # NEXT, set the window title.
-        wm title . "GRAM Workbench"
-
-        # NEXT, when the main window is destroyed, exit.
-        wm protocol . WM_DELETE_WINDOW [list app exit]
-
-        # NEXT, allow the developer to pop up the debugger window.
-        bind . <Control-F12> [list debugger new]
+        
+        # NEXT, allow the developer to pop up the debugger window
+        # no matter what window they are in.
+        bind all <Control-F12> [list debugger new]
 
         # NEXT, initialize the application.
         app CreateLogger               ;# Creates ::log, allowing logging
         app CreateRdb                  ;# Creates ::rdb.
         executive init                 ;# Initialize the command executive
         sim init                       ;# Initialize the simulation manager
-        app CreateMenuBar              ;# Create the application menus.
-        app CreateGUI                  ;# Fill in the rest of the main window.
+
+        # NEXT, Withdraw the default toplevel window, and create 
+        # the main GUI window
+        wm withdraw .
+        appwin .main -main yes
 
         # NEXT, prepare to receive simulation events
         notifier trace [myproc NotifierTrace]
-        notifier bind ::sim <Tick> ::app [mytypemethod SimTick]
-
-        # NEXT, Allow the widget sizes to propagate to the toplevel, so
-        # the window gets its default size; then turn off propagation.
-        # From here on out, the user is in control of the size of the
-        # window.
-        update idletasks
-        grid propagate . off
 
         # NEXT, load the database, if any.
         if {$gramdbFile ne ""} {
             executive evalsafe [list load $gramdbFile]
-            $cli clear
         }
 
         # NEXT, run the initial script, if any.
         if {$initScript ne ""} {
             executive evalsafe [list call $initScript]
-            $cli clear
         }
 
-        # NEXT, Ask the scrolling log to load the current log file.
-        .paner.simlog load [log cget -logfile]
-        
         app puts "Welcome to GRAM Workbench!"
     }
     
@@ -140,11 +125,6 @@ snit::type app {
         log detail notify "send $subject $event [list $eargs] to $objects"
     }
     
-    typemethod SimTick {} {
-        set info(ticks) [format %04d [simclock now]]
-        set info(zulu)  [simclock asZulu]
-    }
-
     # usage
     #
     # Display command line syntax.
@@ -163,14 +143,14 @@ snit::type app {
     # Creates the logger, ::log, for this application
 
     typemethod CreateLogger {} {
-        # TBD: For now, create a subdirectory of the cwd
         set logdir [file normalize [file join . log app_gram]]
         
         file mkdir $logdir
         
         logger ::log \
-            -simclock ::simclock \
-            -logdir   $logdir
+            -simclock ::simclock                              \
+            -logdir    $logdir                                \
+            -newlogcmd [list notifier send $type <AppLogNew>]
 
         log normal app "mars_gram(1)"
     }
@@ -187,6 +167,92 @@ snit::type app {
         rdb clear
     }
 
+    #-------------------------------------------------------------------
+    # Public Typemethods
+
+    # puts text
+    #
+    # text     A text string
+    #
+    # Writes the text to the message line of the topmost appwin.
+
+    typemethod puts {text} {
+        set topwin [app topwin]
+
+        if {$topwin ne ""} {
+            $topwin puts $text
+        }
+    }
+
+    # error text
+    #
+    # text       A tsubst'd text string
+    #
+    # Displays the error in a message box
+
+    typemethod error {text} {
+        set topwin [app topwin]
+
+        if {$topwin ne ""} {
+            uplevel 1 [list [app topwin] error $text]
+        } else {
+            error $text
+        }
+    }
+
+    # exit ?text?
+    #
+    # Optional error message, tsubst'd
+    #
+    # Exits the program
+
+    typemethod exit {{text ""}} {
+        # FIRST, output the text.
+        if {$text ne ""} {
+            puts [uplevel 1 [list tsubst $text]]
+        }
+
+        # NEXT, save the CLI history, if any.
+        .main savehistory
+    
+        # NEXT, exit
+        exit
+    }
+
+    # topwin ?subcommand...?
+    #
+    # subcommand    A subcommand of the topwin, as one argument or many
+    #
+    # If there's no subcommand, returns the name of the topmost appwin.
+    # Otherwise, delegates the subcommand to the top win.  If there is
+    # no top win, this is a noop.
+
+    typemethod topwin {args} {
+        # FIRST, determine the topwin
+        set topwin ""
+
+        foreach w [lreverse [wm stackorder .]] {
+            if {[winfo class $w] eq "Appwin"} {
+                set topwin $w
+                break
+            }
+        }
+
+        if {[llength $args] == 0} {
+            return $topwin
+        } elseif {[llength $args] == 1} {
+            set args [lindex $args 0]
+        }
+
+        return [$topwin {*}$args]
+    }
+    
+    #---------------------------------------------------------------
+    # Obsolete code
+    #
+    # These routines are obsolete, but are left here as a memory
+    # jog until I decide what to do with these capabilities.
+    
     # CreateMenuBar
     #
     # Creates the application menu bar and its menus.
@@ -221,150 +287,7 @@ snit::type app {
             -command [mytypemethod OpenScript]
         bind . <Control-O> [mytypemethod OpenScript]
 
-        $filemenu add command \
-            -label "Load gramdb(5) File..." \
-            -underline 0 \
-            -accelerator "Ctrl+L" \
-            -command [mytypemethod LoadDatabase]
-        bind . <Control-l> [mytypemethod LoadDatabase]
-
-        $filemenu add command \
-            -label "Save RDB File..." \
-            -underline 5 \
-            -command [mytypemethod SaveDatabase]
-
-        $filemenu add separator
-        
-        $filemenu add command \
-            -label "Exit" \
-            -underline 1 \
-            -accelerator "Ctrl+Q" \
-            -command [mytypemethod exit]
-        bind . <Control-q> [mytypemethod exit]
-
-        # NEXT, create the Edit menu
-        set editmenu [menu $menu.edit]
-        .menubar add cascade -label "Edit" -underline 0 -menu $editmenu
-        
-        $editmenu add command \
-            -label "Cut" \
-            -underline 2 \
-            -accelerator "Ctrl+X" \
-            -command {event generate [focus] <<Cut>>}
-
-        $editmenu add command \
-            -label "Copy" \
-            -underline 0 \
-            -accelerator "Ctrl+C" \
-            -command {event generate [focus] <<Copy>>}
-        
-        $editmenu add command \
-            -label "Paste" \
-            -underline 0 \
-            -accelerator "Ctrl+V" \
-            -command {event generate [focus] <<Paste>>}
-        
-        $editmenu add separator
-        
-        $editmenu add command \
-            -label "Select All" \
-            -underline 7 \
-            -accelerator "Ctrl+Shift+A" \
-            -command {event generate [focus] <<SelectAll>>}
     }
-
-    # CreateGUI
-    #
-    # Create the rest of the application's main window GUI
-
-    typemethod CreateGUI {} {
-        # FIRST, prepare the grid.  The scrolling log/shell paner
-        # should stretch vertically on resize; the others shouldn't.
-        # And everything should stretch horizontally.
-
-        grid rowconfigure . 0 -weight 0
-        grid rowconfigure . 1 -weight 0
-        grid rowconfigure . 2 -weight 0
-        grid rowconfigure . 3 -weight 1
-        grid rowconfigure . 4 -weight 0
-        grid rowconfigure . 5 -weight 0
-
-        grid columnconfigure . 0 -weight 1
-
-        # ROW 0, add a separator
-        ttk::separator .sep0 -orient horizontal
-        
-        # ROW 1, add a simulation tool bar
-        ttk::frame .bar
-        
-        ttk::label .bar.zululabel \
-            -text "Time:"
-        
-        ttk::label .bar.zulu                      \
-            -font         codefont                \
-            -width        12                      \
-            -textvariable [mytypevar info(zulu)]
-
-        ttk::label .bar.ticklabel \
-            -text "Tick:"
-        
-        ttk::label .bar.ticks                     \
-            -font         codefont                \
-            -width        4                       \
-            -anchor       e                       \
-            -textvariable [mytypevar info(ticks)]
-            
-        pack .bar.ticks     -side right
-        pack .bar.ticklabel -side right -padx {5 0}
-        pack .bar.zulu      -side right
-        pack .bar.zululabel -side right -padx {5 0}
-        
-        
-        # ROW 2, add a separator
-        ttk::separator .sep2 -orient horizontal
-        
-        # ROW 3, add the log/cli paner
-        paner .paner -orient vertical -showhandle 1
-        
-        # NEXT, Create the Scrolling Log
-        scrollinglog .paner.simlog                            \
-            -height        14                                 \
-            -logcmd        [list app puts]                    \
-            -loglevel      "debug"                            \
-            -relief        flat                               \
-            -showloglist   yes                                \
-            -rootdir       [file normalize [file join . log]] \
-            -defaultappdir app_gram
-        .paner add .paner.simlog -sticky nsew -minsize 60
-
-        log configure -overflowcmd {.paner.simlog load}
-
-        # NEXT, Create the Executive shell
-        set cli [cli .paner.shell \
-                     -height 14                          \
-                     -relief flat                        \
-                     -evalcmd {executive eval}           \
-                     -promptcmd [mytypemethod CliPrompt] \
-                     -commandlist [executive commands]]
-        .paner add $cli -sticky nsew -minsize 60
-
-        # ROW 4, add a separator
-        ttk::separator .sep4 -orient horizontal
-
-        # ROW 5, Create the Message line.
-        set msgline [messageline .msgline]
-
-        # NEXT, manage all of the components.
-        grid .sep0    -row 0 -column 0   -sticky ew
-        grid .bar     -row 1 -column 0   -sticky ew
-        grid .sep2    -row 2 -column 0   -sticky ew
-        grid .paner   -row 3 -column 0   -sticky nsew
-        grid .sep4    -row 4 -column 0   -sticky ew
-        grid .msgline -row 5 -column 0   -sticky ew
-    }
-
-    #-------------------------------------------------------------------
-    # Callbacks: Menu Items
 
     # NewScript
     #
@@ -406,107 +329,6 @@ snit::type app {
         [app NewScript] open
     }
 
-    # LoadDatabase
-    #
-    # Allows the user to select a gramdb(5) file via an OpenFile dialog;
-    # the file is then loaded.
-    
-    typemethod LoadDatabase {} {
-        set name [tk_getOpenFile \
-                      -defaultextension ".gramdb"                 \
-                      -filetypes        {{gramdb(5) {.gramdb}}}   \
-                      -parent           .                         \
-                      -title            "Load gramdb(5) File..."]
-        
-        if {$name ne ""} {
-            executive evalsafe [list load $name]
-        }
-    }
-
-    # SaveDatabase
-    #
-    # Allows the user to save a snapshot of the RDB to a file.
-
-    typemethod SaveDatabase {} {
-        # FIRST, if there's no database loaded there's nothing to save.
-        if {![sim initialized]} {
-            app puts "No database to save."
-            bell
-            return
-        }
-        
-        set dbfile [sim dbfile]
-        set initialDir [file dirname $dbfile]
-        
-        set defaultName [file rootname [file tail $dbfile]].rdb
-        
-        set filename [tk_getSaveFile \
-                          -filetypes        {{Run-time Database {.rdb}}} \
-                          -initialfile      $defaultName     \
-                          -initialdir       $initialDir      \
-                          -defaultextension .rdb             \
-                          -title            "Save RDB As..." \
-                          -parent           .]
-
-        if {$filename eq ""} {
-            app puts "Cancelled."
-            return
-        }
-
-        if {[catch {
-            $rdb saveas $filename
-        } result]} {
-            log warning app "Stack Trace:\n$::errorInfo"
-            log warning app "Error saving '$filename': $result"
-        } else {
-            log normal app "Saved '$filename'"
-        }
-    }
-
-    #-------------------------------------------------------------------
-    # Other GUI Callbacks
-
-    # CliPrompt
-    #
-    # cli -promptcmd procedure.  Gets the simulation time and puts it
-    # in the prompt.
-
-    typemethod CliPrompt {} {
-        return ">"
-    }
-
-    #-------------------------------------------------------------------
-    # Public Typemethods
-
-    # Delegated typemethods
-    delegate typemethod puts to msgline
-
-    # fatal args
-    #
-    # args     One or more fatal error messages.  The messages are logged
-    #          and written to standard output.  Halts with exit code 1.
-
-    typemethod fatal {args} {
-        # Write to stdout first, in case we can't write to the log.
-        foreach msg $args {
-            puts $msg
-        }
-        
-        foreach msg $args {
-            log fatal app $msg
-        }
-        
-        app exit 1
-    }
-
-    # exit ?num?
-    #
-    # Exit the application cleanly
-
-    typemethod exit {{num 0}} {
-        catch {rdb close}
-        exit $num
-    }
 }
 
 #-------------------------------------------------------------------

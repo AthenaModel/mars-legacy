@@ -104,7 +104,7 @@ snit::type sim {
         set gramflag 1
         log normal sim "Loaded gramdb $dbfile"
 
-        notifier send ::sim <Tick>
+        notifier send ::sim <Reset>
         return
     }
 
@@ -128,7 +128,7 @@ snit::type sim {
         simclock reset
         $ram init
 
-        notifier send ::sim <Tick>
+        notifier send ::sim <Reset>
         return 
     }
 
@@ -158,7 +158,7 @@ snit::type sim {
         set gramflag 0
 
         rdb clear
-        notifier send ::sim <Tick>
+        notifier send ::sim <Reset>
     }
 
     # stepsize ?ticks?
@@ -185,7 +185,7 @@ snit::type sim {
         simclock step $stepsize
         $ram advance
 
-        notifier send ::sim <Tick>
+        notifier send ::sim <Time>
         return
     }
 
@@ -205,7 +205,7 @@ snit::type sim {
             simclock step $stepsize
 
             $ram advance
-            notifier send ::sim <Tick>
+            notifier send ::sim <Time>
         }
 
         return
