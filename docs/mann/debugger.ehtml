@@ -78,6 +78,11 @@ Creates a new toplevel debugger window named <i>pathName</i>.<p>
 
 Creates a new toplevel debugger window, with the specified options.<p>
 
+<<defitem "debugger debug" {debugger debug ?<i>command...</i>?}>>
+
+Pops up a debugger, creating one if necessary, and attempts to load
+<i>command...</i> into the debugger's mod editor.<p>
+
 <</deflist commands>>
 
 <<section "INSTANCE COMMAND">>
@@ -91,6 +96,11 @@ Sets the values of the specified <i>options</i>.<p>
 <<defitem cget {$debugger cget <i>option</i>}>>
 
 Returns the value of the specified <i>option</i>.<p>
+
+<<defitem edit {$debugger edit <i>command</i>}>>
+
+Loads the <i>command</i>'s definition into the debugger's
+mod editor.<p>
 
 <</deflist>>
 

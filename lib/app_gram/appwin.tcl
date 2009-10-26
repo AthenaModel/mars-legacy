@@ -333,7 +333,7 @@ snit::widget appwin {
 
     method FileSaveRDB {} {
         # FIRST, if there's no database loaded there's nothing to save.
-        if {![sim initialized]} {
+        if {![sim dbloaded]} {
             app puts "No database to save."
             bell
             return
@@ -453,13 +453,21 @@ snit::widget appwin {
 
         # ROW 1, add a simulation toolbar
         ttk::frame $win.toolbar
-        
-        ttk::button $win.toolbar.step   \
-            -style Toolbutton           \
-            -image ${type}::icon::step  \
-            -command [list executive evalsafe step]
-        cond::dbloaded control $win.toolbar.step
 
+        if {$options(-main)} {
+            ttk::button $win.toolbar.step   \
+                -style Toolbutton           \
+                -image ${type}::icon::step  \
+                -command [list executive evalsafe step]
+            cond::dbloaded control $win.toolbar.step
+            
+            DynamicHelp::add $win.toolbar.step \
+                -text "Advance time one step"
+
+
+            pack $win.toolbar.step      -side left
+        }
+        
         ttk::label $win.toolbar.zululabel \
             -text "Time:"
         
@@ -477,7 +485,6 @@ snit::widget appwin {
             -anchor       e                       \
             -textvariable [myvar info(ticks)]
 
-        pack $win.toolbar.step      -side left
         pack $win.toolbar.ticks     -side right
         pack $win.toolbar.ticklabel -side right -padx {5 0}
         pack $win.toolbar.zulu      -side right

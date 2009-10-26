@@ -71,8 +71,8 @@ snit::type executive {
             [mytypemethod bgerrtrace]
 
         # cancel
-        $interp smartalias cancel 1 1 {driver} \
-            [list ::sim cancel]
+        $interp smartalias cancel 1 2 {driver ?-delete?} \
+            [mytypemethod cancel]
 
         # coop
         $interp ensemble coop
@@ -93,8 +93,8 @@ snit::type executive {
             [list ::sim coop slope]
 
         # debug
-        $interp smartalias debug 0 0 {} \
-            [list ::marsgui::debugger new]
+        $interp smartalias debug 0 - {?command...?} \
+            [list ::marsgui::debugger debug]
 
         # dump
         $interp ensemble dump
@@ -111,16 +111,14 @@ snit::type executive {
             [list ::sim dump coop levels]
 
         # dump coop level
-        # TBD: need to uppercase n,f,g
         $interp smartalias {dump coop level} 3 3 {n f g} \
             [list ::sim dump coop level]
 
         # dump coop slopes
-        $interp smartalias {dump coop slopes} 0 1 {?inputId?} \
+        $interp smartalias {dump coop slopes} 0 1 {?driver?} \
             [list ::sim dump coop slopes]
 
         # dump coop slope
-        # TBD: need to uppercase n,f,g
         $interp smartalias {dump coop slope} 3 3 {n f g} \
             [list ::sim dump coop slope]
 
@@ -132,16 +130,14 @@ snit::type executive {
             [list ::sim dump sat levels]
 
         # dump sat level
-        # TBD: need to uppercase n,g,c
         $interp smartalias {dump sat level} 3 3 {n g c} \
             [list ::sim dump sat level]
 
         # dump sat slopes
-        $interp smartalias {dump sat slopes} 0 1 {?inputId?} \
+        $interp smartalias {dump sat slopes} 0 1 {?driver?} \
             [list ::sim dump sat slopes]
 
         # dump sat slope
-        # TBD: need to uppercase n,g,c
         $interp smartalias {dump sat slope} 3 3 {n g c} \
             [list ::sim dump sat slope]
 
@@ -174,27 +170,31 @@ snit::type executive {
 
         # parm get
         $interp smartalias {parm get} 1 1 {parm} \
-            [list ::sim parm get]
+            [list ::parmdb get]
 
         # parm set
         $interp smartalias {parm set} 2 2 {parm value} \
-            [list ::sim parm set]
+            [list ::parmdb set]
 
         # parm names
         $interp smartalias {parm names} 0 1 {?pattern?} \
-            [list ::sim parm names]
+            [list ::parmdb names]
 
         # parm list
         $interp smartalias {parm list} 0 1 {?pattern?} \
-            [list ::sim parm list]
-
-        # parm save
-        $interp smartalias {parm save} 1 1 {filename} \
-            [list ::sim parm save]
+            [list ::parmdb list]
 
         # parm load
-        $interp smartalias {parm load} 1 1 {filename} \
-            [list ::sim parm load]
+        $interp smartalias {parm load} 0 0 {} \
+            [list ::parmdb load]
+
+        # parm reset
+        $interp smartalias {parm reset} 0 0 {} \
+            [list ::parmdb reset]
+
+        # parm save
+        $interp smartalias {parm save} 0 0 {} \
+            [list ::parmdb save]
 
         # rdb
         $interp ensemble rdb
@@ -242,12 +242,13 @@ snit::type executive {
             [list ::sim sat slope]
 
         # step
-        $interp smartalias step 0 0 {} \
+        $interp smartalias step 0 1 {?ticks?} \
             [list ::sim step]
 
-        # stepsize
-        $interp smartalias stepsize 0 1 {?ticks?} \
-            [list ::sim stepsize]
+        # unload
+        $interp smartalias unload 0 0 {} \
+            [list ::sim unload]
+        
     }
 
     #-------------------------------------------------------------------
@@ -325,6 +326,12 @@ snit::type executive {
         log warning exec "errtrace: $stackTrace"
         return $stackTrace
     }
+    
+    #-------------------------------------------------------------------
+    # Executive Command Implementations
+    #
+    # The following typemethods exist only to implement executive
+    # commands.
 
     # bgerrtrace
     #

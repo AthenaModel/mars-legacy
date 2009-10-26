@@ -210,6 +210,25 @@ snit::widget ::marsgui::debugger {
         grid propagate $win off
 
     }
+    
+    #-------------------------------------------------------------------
+    # Public Methods
+    
+    # edit name
+    #
+    # name     A command name
+    #
+    # This is the cmdbrowser's -editcmd.  It loads the command into
+    # the editor.
+    
+    method edit {name} {
+        # FIRST, show the editor
+        $tnb select $me
+        
+        # NEXT, grab the code.
+        $me grab $name
+    }
+
 
     #-------------------------------------------------------------------
     # Private Methods
@@ -258,20 +277,6 @@ snit::widget ::marsgui::debugger {
         $cb refresh
     }
     
-    # EditCommand name
-    #
-    # name     A command name
-    #
-    # This is the cmdbrowser's -editcmd.  It loads the command into
-    # the editor.
-    
-    method EditCommand {name} {
-        # FIRST, show the editor
-        $tnb select $me
-        
-        # NEXT, grab the code.
-        $me grab $name
-    }
 
     #-------------------------------------------------------------------
     # Public typemethods
@@ -283,6 +288,31 @@ snit::widget ::marsgui::debugger {
     typemethod new {args} {
         $type create .%AUTO% {*}$args
     }
+    
+    # debug ?command...?
+    #
+    # command     A command, to be loaded into the debugger's
+    #             mod editor.
+    #
+    # Pops up the most recent, or creates a new one,
+    # debugger, and loads the command into the editor.
+    
+    typemethod debug {args} {
+        set dbg [lindex [$type info instances] end]
+        
+        if {$dbg eq ""} {
+            set dbg [$type new]
+        } else {
+            wm withdraw $dbg
+            wm deiconify $dbg
+            raise $dbg
+        }
+        
+        if {[llength $args] > 0} {
+            $dbg edit $args
+        }
+    }
+
 }
 
 

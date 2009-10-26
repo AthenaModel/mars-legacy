@@ -47,6 +47,7 @@ namespace import ::simlib::*
 source [file join $::app_gram::library app.tcl      ]
 source [file join $::app_gram::library appwin.tcl   ]
 source [file join $::app_gram::library executive.tcl]
+source [file join $::app_gram::library parmdb.tcl   ]
 source [file join $::app_gram::library sim.tcl      ]
 
 

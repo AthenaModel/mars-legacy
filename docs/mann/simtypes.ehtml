@@ -147,6 +147,12 @@ Numerically, <<iref rfraction>> values range from
 <<rfraction cget -min>> to <<rfraction cget -max>> 
 and are formatted as "<<rfraction cget -format>>".<p>
 
+<<defitem rmagnitude rmagnitude>>
+
+This <<xref range(n)>> defines the set of valid real magnitudes.
+Numerically, <<iref rmagnitude>> values range upwards from
+<<rmagnitude cget -min>> and are formatted as
+"<<rmagnitude cget -format>>".<p>
 
 <</deflist>>
 

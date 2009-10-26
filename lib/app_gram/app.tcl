@@ -93,6 +93,7 @@ snit::type app {
         app CreateLogger               ;# Creates ::log, allowing logging
         app CreateRdb                  ;# Creates ::rdb.
         executive init                 ;# Initialize the command executive
+        parmdb init                    ;# Initialize the parameter database
         sim init                       ;# Initialize the simulation manager
 
         # NEXT, define global conditions
@@ -101,7 +102,7 @@ snit::type app {
                 ::app <Init>
                 ::sim <Reset>
             } -condition {
-                [::sim initialized]
+                [::sim dbloaded]
             }
         }
         
@@ -224,8 +225,9 @@ snit::type app {
             puts [uplevel 1 [list tsubst $text]]
         }
 
-        # NEXT, save the CLI history, if any.
+        # NEXT, save preferences and parameters.
         .main savehistory
+        parmdb save
     
         # NEXT, exit
         exit
