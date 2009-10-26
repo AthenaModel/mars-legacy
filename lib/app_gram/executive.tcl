@@ -56,8 +56,16 @@ snit::type executive {
             
             return [rdb query $query]
         }
-
-
+        
+        $interp proc profile {args} {
+            set time [lindex [time {
+                set result [{*}$args]  
+            } 1] 0]
+            
+            log "profile: $time usec, $args"
+            
+            return $result
+        }
 
         # NEXT, install the executive commands
 
@@ -83,13 +91,13 @@ snit::type executive {
             [list ::sim coop adjust]
 
         # coop level
-        $interp smartalias {coop level} 6 - \
-            {zulu n f g limit days ?option value...?} \
+        $interp smartalias {coop level} 5 - \
+            {n f g limit days ?option value...?} \
             [list ::sim coop level]
 
         # coop slope
-        $interp smartalias {coop slope} 5 - \
-            {zulu n f g slope ?option value...?} \
+        $interp smartalias {coop slope} 4 - \
+            {n f g slope ?option value...?} \
             [list ::sim coop slope]
 
         # debug
@@ -172,6 +180,10 @@ snit::type executive {
         $interp smartalias {parm get} 1 1 {parm} \
             [list ::parmdb get]
 
+        # parm help
+        $interp smartalias {parm help} 1 1 {parm} \
+            [mytypemethod parm_help]
+
         # parm set
         $interp smartalias {parm set} 2 2 {parm value} \
             [list ::parmdb set]
@@ -232,18 +244,23 @@ snit::type executive {
             [list ::sim sat adjust]
 
         # sat level
-        $interp smartalias {sat level} 6 - \
-            {zulu n g c limit days ?option value...?} \
+        $interp smartalias {sat level} 5 - \
+            {n g c limit days ?option value...?} \
             [list ::sim sat level]
 
         # sat slope
-        $interp smartalias {sat slope} 5 - \
-            {zulu n g c slope ?option value...?} \
+        $interp smartalias {sat slope} 4 - \
+            {n g c slope ?option value...?} \
             [list ::sim sat slope]
 
         # step
         $interp smartalias step 0 1 {?ticks?} \
             [list ::sim step]
+        
+        # super
+        $interp smartalias super 1 - {arg ?arg...?} \
+            [myproc super]
+
 
         # unload
         $interp smartalias unload 0 0 {} \
@@ -347,6 +364,38 @@ snit::type executive {
             return "No bgerrors so far."
         }
     }
+    
+    # parm_help parm
+    #
+    # parm     The name of a parameter
+    #
+    # Returns help information for the parameter.
+    
+    typemethod parm_help {parm} {
+        # FIRST, get the docstring
+        set doc [parmdb docstring $parm]
+        
+        # NEXT, strip HTML.
+        regsub -all -- {<p>} $doc "\n\n" doc
+        regsub -all -- {<[^<]+>} $doc "" doc
+        
+        # NEXT, replace entities
+        set doc [string map {&lt; < &gt; > &amp; &} $doc]
+        
+        return $doc
+    }
+    
+    #---------------------------------------------------------------
+    # Procs
+
+    # super args
+    #
+    # Executes args as a command in the global namespace
+
+    proc super {args} {
+        namespace eval :: $args
+    }
+
 }
 
 

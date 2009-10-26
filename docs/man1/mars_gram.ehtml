@@ -203,11 +203,9 @@ driver by specifying the <i>driver</i>.<p>
 
 <</deflist coop adjust options>>
 
-<<defitem "coop level" {coop level <i>zulu n f g limit days</i> ?<i>option value...</i>?}>>
+<<defitem "coop level" {coop level <i>n f g limit days</i> ?<i>option value...</i>?}>>
 
-Schedules a cooperation level input.  The input begins at time
-<i>zulu</i>, which is a Zulu-time string no earlier than the
-current simulation time.  It affects neighborhood <i>n</i>, CIV
+Schedules a cooperation level input affecting neighborhood <i>n</i>, CIV
 group <i>f</i> and FRC group <i>g</i>, all of which are
 specified by name.<p>
 
@@ -252,13 +250,19 @@ A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
 <b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
+<<defopt {-zulu <i>zulutime</i>}>>
+<<defopt {-tick <i>ticks</i>}>>
+
+Specifies the start time of the input as a Zulu-time string, or as a time
+in ticks. <b>-zulu</b> takes precedence over <b>-tick</b>; however
+specified, the time must be no later than the current simulation time. If
+neither is given, the input starts immediately.<p>
+
 <</deflist coop level options>>
 
-<<defitem {coop slope} {coop slope <i>zulu n f g slope</i> ?<i>options...</i>?}>>
+<<defitem {coop slope} {coop slope <i>n f g slope</i> ?<i>options...</i>?}>>
 
-Schedules a cooperation slope input.  The input begins at time
-<i>zulu</i>, which is a Zulu-time string no earlier than the
-current simulation time.  It affects 
+Schedules a cooperation slope input affecting affecting
 neighborhood <i>n</i>, CIV group <i>f</i> and FRC group <i>g</i>, all
 of which are specified by name.<p>
 
@@ -299,6 +303,14 @@ the strength of indirect effects in neighborhoods which are
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
 <b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
+
+<<defopt {-zulu <i>zulutime</i>}>>
+<<defopt {-tick <i>ticks</i>}>>
+
+Specifies the start time of the input as a Zulu-time string, or as a time
+in ticks. <b>-zulu</b> takes precedence over <b>-tick</b>; however
+specified, the time must be no later than the current simulation time. If
+neither is given, the input starts immediately.<p>
 
 <</deflist coop slope options>>
 
@@ -517,15 +529,9 @@ at start up.<p>
 
 Retrieves the value of the named parameter.<p>
 
-<<defitem {parm set} {parm set <i>parm value</i>}>>
+<<defitem {parm help} {parm help <i>parm</i>}>>
 
-Sets the value of the named parameter, which must be valid.<p>
-
-<<defitem {parm names} {parm names ?<i>pattern</i>?}>>
-
-Returns a list of the parameter names, in alphabetical order, which
-match the specified wildcard pattern; if no <i>pattern</i> is
-specified, all names will be returned.<p>
+Retrieves the documentation string for the parameter.<p>
 
 <<defitem {parm list} {parm list ?<i>pattern</i>?}>>
 
@@ -539,6 +545,16 @@ specified, all parameters will be returned.<p>
 Loads the parameter set from "~/.mars_gram/parmdb.defaults"; this also
 happens automatically at start up.<p>
 
+<<defitem {parm names} {parm names ?<i>pattern</i>?}>>
+
+Returns a list of the parameter names, in alphabetical order, which
+match the specified wildcard pattern; if no <i>pattern</i> is
+specified, all names will be returned.<p>
+
+<<defitem {parm set} {parm set <i>parm value</i>}>>
+
+Sets the value of the named parameter, which must be valid.<p>
+
 <<defitem {parm reset} {parm reset}>>
 
 Resets all parameters to their default values.<p>
@@ -549,6 +565,11 @@ Saves the parameter set to "~/.mars_gram/parmdb.defaults";  this also
 happens automatically at shut down.<p>
 
 <</deflist parm>>
+
+<<defitem profile {profile <i>command</i> ?<i>args...</i>?}>>
+
+Executes the command and times its execution. The time in microseconds and
+the command are logged, and the command's result is returned.<p.
 
 <<defitem "rdb" {rdb <i>subcommand</i> ?<i>args...</i>?}>>
 
@@ -631,11 +652,9 @@ driver by specifying the <i>driver</i>.<p>
 
 <</deflist sat adjust options>>
 
-<<defitem {sat level} {sat level <i>zulu n g c limit days</i> ?<i>options...</i>?}>>
+<<defitem {sat level} {sat level <i>n g c limit days</i> ?<i>options...</i>?}>>
 
-Schedules a satisfaction level input.  The input begins at time
-<i>zulu</i>, which is a Zulu-time string no earlier than the
-current simulation time.  It affects
+Schedules a satisfaction level input affecting 
 neighborhood <i>n</i>, CIV or ORG group <i>g</i> and CIV or ORG
 concern <i>c</i>, all of which are specified by name. Note that <i>g</i>
 and <i>c</i> must have the same group type, CIV or ORG.<p>
@@ -680,13 +699,19 @@ A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
 <b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
+<<defopt {-zulu <i>zulutime</i>}>>
+<<defopt {-tick <i>ticks</i>}>>
+
+Specifies the start time of the input as a Zulu-time string, or as a time
+in ticks. <b>-zulu</b> takes precedence over <b>-tick</b>; however
+specified, the time must be no later than the current simulation time. If
+neither is given, the input starts immediately.<p>
+
 <</deflist sat level options>>
 
-<<defitem {sat slope} {sat slope <i>zulu g c slope limit</i> ?<i>options...</i>?}>>
+<<defitem {sat slope} {sat slope <i>n g c slope limit</i> ?<i>options...</i>?}>>
 
-Schedules a satisfaction slope input.  The input begins at time
-<i>zulu</i>, which is a Zulu-time string no earlier than the
-current simulation time.  It affects
+Schedules a satisfaction slope input affecting
 neighborhood <i>n</i>, CIV or ORG group <i>g</i> and CIV or ORG
 concern <i>c</i>, all of which are specified by name. Note that <i>g</i>
 and <i>c</i> must have the same group type, CIV or ORG.<p>
@@ -729,9 +754,32 @@ A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
 <b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
+<<defopt {-zulu <i>zulutime</i>}>>
+<<defopt {-tick <i>ticks</i>}>>
+
+Specifies the start time of the input as a Zulu-time string, or as a time
+in ticks. <b>-zulu</b> takes precedence over <b>-tick</b>; however
+specified, the time must be no later than the current simulation time. If
+neither is given, the input starts immediately.<p>
+
 <</deflist sat slope options>>
 
 <</deflist sat>>
+
+<<defitem select {select <i>sql...</i>}>>
+
+Executes the SQL query and returns the results in tabular form.
+This is simply a wrapper around <<iref rdb query>>; compare
+
+<pre>
+  &gt; select * from gramdb_n
+</pre>
+
+with
+
+<pre>
+  &gt; rdb query {select * from gramdb_n}
+</pre><p>
 
 <<defitem set {set <i>variable value</i>}>>
 
@@ -741,6 +789,12 @@ Assigns a <i>value</i> to a named <i>variable</i>.<p>
 
 Advances simulation time by the specified number of <i>ticks</i>, if
 given; otherwise, by <b>sim.stepSize</b> ticks, nominally 5.<p>
+
+<<defitem super {super <i>args...</i>}>>
+
+Concatenates its arguments into a single command, and executes
+that command in the context of the application rather than in the
+GRAM Workbench executive.<p>
 
 <<defitem unload {unload}>>
 

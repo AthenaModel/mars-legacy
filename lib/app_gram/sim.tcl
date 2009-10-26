@@ -266,9 +266,8 @@ snit::type sim {
         $ram coop adjust $driver $n $f $g $mag
     }
 
-    # coop level zulutime n f g limit days ?options?
+    # coop level n f g limit days ?options?
     #
-    # zulu          Time the event occurs
     # n             The targeted neighborhood, or "*"
     # f             The targeted civilian group
     # g             The targeted force group
@@ -281,22 +280,22 @@ snit::type sim {
     #     -s factor       "here" multiplier, defaults to 1
     #     -p factor       "near" indirect effects multiplier, defaults to 0
     #     -q factor       "far" indirect effects multiplier, defaults to 0
+    #     -zulu zulu      Start time, as a zulu-time
+    #     -tick ticks     Start time, in ticks
     #
-    # Schedule a level input at the specified time.
+    # Schedule a level input at the specified time, which defaults to now.
 
-    typemethod {coop level} {zulu n f g limit days args} {
-        set ts [simclock fromZulu $zulu]
-
+    typemethod {coop level} {n f g limit days args} {
         set driver [sim GetDriver args]
+        set ts     [sim GetStartTime args]
 
         $ram coop level $driver $ts $n $f $g $limit $days {*}$args
 
         return
     }
 
-    # coop slope zulu n f g slope limit ?options...?
+    # coop slope n f g slope limit ?options...?
     #
-    # zulu          Time the event occurs
     # n             The targeted neighborhood, or "*"
     # f             The targeted civilian group
     # g             The targeted force group
@@ -307,13 +306,14 @@ snit::type sim {
     #     -s factor       "here" multiplier, defaults to 1
     #     -p factor       "near" indirect effects multiplier, defaults to 0
     #     -q factor       "far" indirect effects multiplier, defaults to 1
+    #     -zulu zulu      Start time, as a zulu-time
+    #     -tick ticks     Start time, in ticks
     #
     # Schedule a slope input at the specified time.
 
-    typemethod {coop slope} {zulu n f g slope args} {
-        set ts [simclock fromZulu $zulu]
-
+    typemethod {coop slope} {n f g slope args} {
         set driver [sim GetDriver args]
+        set ts     [sim GetStartTime args]
 
         $ram coop slope $driver $ts $n $f $g $slope {*}$args
 
@@ -342,9 +342,8 @@ snit::type sim {
         $ram sat adjust $driver $n $g $c $mag
     }
 
-    # sat level zulu n g c limit days ?options?
+    # sat level n g c limit days ?options?
     #
-    # zulu      Time the event occurs
     # g         The targeted group
     # c         The affected concern
     # limit     Nominal magnitude (qmag)
@@ -355,22 +354,22 @@ snit::type sim {
     #     -s factor       "here" multiplier, defaults to 1
     #     -p factor       "near" indirect effects multiplier, defaults to 0
     #     -q factor       "far" indirect effects multiplier, defaults to 0
+    #     -zulu zulu      Start time, as a zulu-time
+    #     -tick ticks     Start time, in ticks
     #
     # Schedule a level input the specified time.
 
-    typemethod {sat level} {zulu n g c limit days args} {
-        set ts [simclock fromZulu $zulu]
-
+    typemethod {sat level} {n g c limit days args} {
         set driver [sim GetDriver args]
+        set ts     [sim GetStartTime args]
 
         $ram sat level $driver $ts $n $g $c $limit $days {*}$args
 
         return
     }
 
-    # sat slope zulu n g c slope ?options...?
+    # sat slope n g c slope ?options...?
     #
-    # zulu      Time the event occurs
     # n         The targeted neighborhood, or "*"
     # g         The targeted group
     # c         The affected concern
@@ -381,13 +380,14 @@ snit::type sim {
     #     -s factor       "here" multiplier, defaults to 1
     #     -p factor       "near" indirect effects multiplier, defaults to 0
     #     -q factor       "far" indirect effects multiplier, defaults to 0
+    #     -zulu zulu      Start time, as a zulu-time
+    #     -tick ticks     Start time, in ticks
     #
     # Schedule a slope input at the specified time.
 
-    typemethod {sat slope} {zulu n g c slope args} {
-        set ts [simclock fromZulu $zulu]
-
+    typemethod {sat slope} {n g c slope args} {
         set driver [sim GetDriver args]
+        set ts     [sim GetStartTime args]
 
         $ram sat slope $driver $ts $n $g $c $slope {*}$args
 
@@ -413,6 +413,34 @@ snit::type sim {
 
         return $driver
     }
+    
+    # GetStartTime argvar
+    #
+    # argvar     Name of a variable containing an argument list
+    #
+    # Plucks the named options and their values from
+    # the argument variable and validates them.
+    #
+    #   -zulu     A valid zulu-time
+    #   -tick     A time in ticks
+    #
+    # If either option is given, returns the number of ticks.
+    # Otherwise, returns [simclock now].
+
+    typemethod GetStartTime {argvar} {
+        upvar $argvar arglist
+
+        set zulu [from arglist -zulu ""]
+
+        if {$zulu ne ""} {
+            set ts [simclock fromZulu $zulu]
+        } else {
+            set ts [from arglist -tick [simclock now]]
+        }
+
+        return $ts
+    }
+
 
     # NullGram args....
     #
