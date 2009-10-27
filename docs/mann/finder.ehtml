@@ -139,7 +139,7 @@ a finder(n) to a <<xref rotext(n)>> displaying an arbitrary text file.
         -yscrollcommand     [list .yscroll set]      \
         -foundcmd           [list .bar.finder found]
 
-    scrollbar .yscroll                \
+    ttk::scrollbar .yscroll           \
         -orient vertical              \
         -command [list .rotext yview]
 

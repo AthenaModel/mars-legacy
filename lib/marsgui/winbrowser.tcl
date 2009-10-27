@@ -54,20 +54,31 @@ snit::widget ::marsgui::winbrowser {
             -orient     horizontal \
             -showhandle 1
 
-        ScrolledWindow $win.paner.treesw  \
-            -borderwidth 0                \
-            -auto        horizontal
+        ttk::frame $win.paner.treesw
         $win.paner add $win.paner.treesw -sticky nsew -minsize 60
 
-        install tree using Tree $win.paner.treesw.tree \
-            -background     white                      \
-            -width          40                         \
-            -borderwidth    0                          \
-            -deltay         16                         \
-            -takefocus      1                          \
-            -selectcommand  [mymethod SelectWindow]
+        install tree using Tree $win.paner.treesw.tree     \
+            -background     white                          \
+            -width          40                             \
+            -borderwidth    0                              \
+            -deltay         16                             \
+            -takefocus      1                              \
+            -selectcommand  [mymethod SelectWindow]        \
+            -yscrollcommand [list $win.paner.treesw.y set] \
+            -xscrollcommand [list $win.paner.treesw.x set]
 
-        $win.paner.treesw setwidget $tree
+        ttk::scrollbar $win.paner.treesw.y \
+            -command [list $tree yview]
+        ttk::scrollbar $win.paner.treesw.x \
+            -orient  horizontal            \
+            -command [list $tree xview]
+
+        grid columnconfigure $win.paner.treesw 0 -weight 1
+        grid rowconfigure    $win.paner.treesw 0 -weight 1
+        
+        grid $win.paner.treesw.tree -row 0 -column 0 -sticky nsew
+        grid $win.paner.treesw.y    -row 0 -column 1 -sticky ns
+        grid $win.paner.treesw.x    -row 1 -column 0 -sticky ew
 
         install tnb using ttk::notebook $win.paner.tnb \
             -padding   2 \
@@ -102,22 +113,35 @@ snit::widget ::marsgui::winbrowser {
     method AddPage {name} {
         set sw $tnb.${name}sw
 
-        ScrolledWindow $sw \
-            -borderwidth 0          \
-            -auto        horizontal
+        ttk::frame $sw
 
         $tnb add $sw \
             -sticky  nsew     \
             -padding 2        \
             -text    $name
 
-        set pages($name) [rotext $sw.text \
-                              -width              50       \
-                              -height             15       \
-                              -font               codefont \
-                              -highlightthickness 1]
+        set pages($name) \
+            [rotext $sw.text \
+                -width              50                \
+                -height             15                \
+                -font               codefont          \
+                -highlightthickness 1                 \
+                -yscrollcommand     [list $sw.y set]  \
+                -xscrollcommand     [list $sw.x set]]
 
-        $sw setwidget $pages($name)
+        ttk::scrollbar $sw.y \
+            -command [list $sw.text yview]
+        ttk::scrollbar $sw.x \
+            -orient  horizontal            \
+            -command [list $sw.text xview]
+        
+        grid columnconfigure $sw 0 -weight 1
+        grid rowconfigure    $sw 0 -weight 1
+        
+        grid $sw.text -row 0 -column 0 -sticky nsew
+        grid $sw.y    -row 0 -column 1 -sticky ns
+        grid $sw.x    -row 1 -column 0 -sticky ew
+
     }
 
 
@@ -334,6 +358,7 @@ snit::widget ::marsgui::winbrowser {
         $pages($page) del 1.0 end
         $pages($page) ins 1.0 $text
         $pages($page) see 1.0
+        $pages($page) yview moveto 0
     }
 }
 

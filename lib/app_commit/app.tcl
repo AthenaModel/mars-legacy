@@ -116,27 +116,31 @@ snit::type app {
             set height 4
         }
 
-        ScrolledWindow .f.changes \
-            -relief      flat      \
-            -borderwidth 1         \
-            -auto        both
+        ttk::frame .f.changes \
+            -borderwidth 1
             
-        set changelist [listbox .f.changes.list                      \
-                            -font               {Courier 10}         \
-                            -foreground         black                \
-                            -background         white                \
-                            -borderwidth        1                    \
-                            -activestyle        none                 \
-                            -selectmode         extended             \
-                            -width              80                   \
-                            -height             $height              \
-                            -listvariable       [mytypevar changes]  \
-                            -highlightthickness 0]
+        set changelist \
+            [listbox .f.changes.list                      \
+                -font               {Courier 10}         \
+                -foreground         black                \
+                -background         white                \
+                -borderwidth        1                    \
+                -activestyle        none                 \
+                -selectmode         extended             \
+                -width              80                   \
+                -height             $height              \
+                -listvariable       [mytypevar changes]  \
+                -highlightthickness 0                    \
+                -yscrollcommand     [list .f.changes.yscroll set]]
+        
+        ttk::scrollbar .f.changes.yscroll \
+            -command [list .f.changes.list yview]
+        
+        pack .f.changes.yscroll -side right -fill y -expand yes
+        pack .f.changes.list -fill both -expand yes
 
         $changelist see 0
         bind $changelist <1> [list focus %W]
-
-        .f.changes setwidget $changelist
 
         # Row 4: Separator
         ttk::separator .f.sep4 -orient horizontal
@@ -150,23 +154,28 @@ snit::type app {
         pack .f.cmtbar.label -side left  -padx 2
 
         # Row 6: Comment box
-        ScrolledWindow .f.comments \
-            -relief      flat      \
-            -borderwidth 1         \
-            -auto        both
-            
-        set commentbox [text .f.comments.text                \
-                            -width              80           \
-                            -height             16           \
-                            -background         white        \
-                            -foreground         black        \
-                            -highlightthickness 0            \
-                            -borderwidth        1            \
-                            -relief             sunken       \
-                            -font               {Courier 10} \
-                            -wrap               none]
+        ttk::frame .f.comments \
+            -borderwidth 1
+                    
+        set commentbox \
+            [text .f.comments.text                \
+                -width              80           \
+                -height             16           \
+                -background         white        \
+                -foreground         black        \
+                -highlightthickness 0            \
+                -borderwidth        1            \
+                -relief             sunken       \
+                -font               {Courier 10} \
+                -wrap               none         \
+                -yscrollcommand     [list .f.comments.yscroll set]]
 
-        .f.comments setwidget .f.comments.text
+        ttk::scrollbar .f.comments.yscroll \
+            -command [list .f.comments.text yview]
+        
+        pack .f.comments.yscroll -side right -fill y -expand yes
+        pack .f.comments.text -fill both -expand yes
+        
 
         # Grid the components into the frame
         grid .f.bar        -row 0 -column 0 -padx 2 -pady 2 -sticky ew
