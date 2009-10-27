@@ -107,9 +107,8 @@ snit::widget ::marsgui::cmdbrowser {
 
     constructor {args} {
         # FIRST, create the widgets
-        ::marsgui::paner $win.paner \
-            -orient     horizontal \
-            -showhandle 1
+        ttk::panedwindow $win.paner \
+            -orient     horizontal
 
         # Toolbar
         install bar using ttk::frame $win.bar
@@ -159,7 +158,7 @@ snit::widget ::marsgui::cmdbrowser {
         pack $win.bar.edit    -side right -padx 1 -pady 1
 
         ttk::frame $win.paner.treesw
-        $win.paner add $win.paner.treesw -sticky nsew -minsize 60
+        $win.paner add $win.paner.treesw
 
         install tree using Tree $win.paner.treesw.tree     \
             -background     white                          \
@@ -188,7 +187,7 @@ snit::widget ::marsgui::cmdbrowser {
         install tnb using ttk::notebook $win.paner.tnb \
             -padding   2 \
             -takefocus 1
-        $win.paner add $tnb -sticky nsew -minsize 60
+        $win.paner add $tnb
 
         $self AddPage code
 

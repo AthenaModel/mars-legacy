@@ -37,7 +37,7 @@ snit::widgetadaptor ::marsgui::paner {
 
     constructor {args} {
         # FIRST, install the hull
-        # TBD: Put this in global.tcl
+        # TBD: Put this in global.tcl?
         installhull [panedwindow $win         \
                          -relief       flat   \
                          -borderwidth  0      \

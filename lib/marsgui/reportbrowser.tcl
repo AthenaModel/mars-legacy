@@ -174,24 +174,24 @@ snit::widget ::marsgui::reportbrowser {
         frame $win.sep1 -height 2 -relief sunken -borderwidth 2
 
         # ROW 2, the left/right paner
-        paner $win.lr \
+        ttk::panedwindow $win.lr \
             -orient horizontal
 
         # Add bintree on the left.  TBD: Options needed?
         install bintree using ::marsgui::rb_bintree $win.lr.bintree
-        $win.lr add $win.lr.bintree -sticky nsew -minsize 60
+        $win.lr add $win.lr.bintree
 
         # Right-hand pane: top/bottom paner
         # TBD: Feed defaults back into paner(n).
-        paner $win.lr.tb           \
+        ttk::panedwindow $win.lr.tb           \
             -orient vertical
-        $win.lr add $win.lr.tb -sticky nsew -minsize 60
+        $win.lr add $win.lr.tb
 
         # List pane
         frame $win.lr.tb.top \
             -borderwidth 0 \
             -relief flat
-        $win.lr.tb add $win.lr.tb.top -sticky nsew -minsize 60
+        $win.lr.tb add $win.lr.tb.top
 
         install replist using listbox $win.lr.tb.top.reports \
             -exportselection 0 \
@@ -215,7 +215,7 @@ snit::widget ::marsgui::reportbrowser {
         # Report Text pane
         install viewer using ::marsgui::reportviewer $win.lr.tb.bottom \
             -height 10
-        $win.lr.tb add $win.lr.tb.bottom -sticky nsew -minsize 60
+        $win.lr.tb add $win.lr.tb.bottom
 
         # NEXT, manage all of the components.
         grid $win.bar  -sticky ew

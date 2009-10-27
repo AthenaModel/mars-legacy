@@ -50,12 +50,11 @@ snit::widget ::marsgui::winbrowser {
 
     constructor {args} {
         # FIRST, create the widgets
-        ::marsgui::paner $win.paner \
-            -orient     horizontal \
-            -showhandle 1
+        ttk::panedwindow $win.paner \
+            -orient horizontal
 
         ttk::frame $win.paner.treesw
-        $win.paner add $win.paner.treesw -sticky nsew -minsize 60
+        $win.paner add $win.paner.treesw
 
         install tree using Tree $win.paner.treesw.tree     \
             -background     white                          \
@@ -83,7 +82,7 @@ snit::widget ::marsgui::winbrowser {
         install tnb using ttk::notebook $win.paner.tnb \
             -padding   2 \
             -takefocus 1
-        $win.paner add $tnb -sticky nsew -minsize 60
+        $win.paner add $tnb
 
         $self AddPage winfo
         $self AddPage options

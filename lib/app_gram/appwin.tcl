@@ -432,7 +432,7 @@ snit::widget appwin {
     # Creates the main window's components
 
     method CreateComponents {} {
-        # FIRST, prepare the grid.  The scrolling log/shell paner
+        # FIRST, prepare the grid.  The scrolling log/shell panedwindow
         # should stretch vertically on resize; the others shouldn't.
         # And everything should stretch horizontally.
 
@@ -499,14 +499,11 @@ snit::widget appwin {
         # a CLI underneath.  Otherwise, we get just the content
         # notebook.
         if {$options(-main)} {
-            paner $win.paner -orient vertical -showhandle 1
+            ttk::panedwindow $win.paner -orient vertical
             install content using ttk::notebook $win.paner.content \
                 -padding 2 
 
-            $win.paner add $content \
-                -sticky  nsew       \
-                -minsize 120        \
-                -stretch always
+            $win.paner add $content -weight 1
 
             set row3 $win.paner
         } else {
@@ -547,10 +544,7 @@ snit::widget appwin {
                 -promptcmd [mymethod CliPrompt]     \
                 -evalcmd   [list ::executive eval]
             
-            $win.paner add $win.paner.cli \
-                -sticky  nsew             \
-                -minsize 60               \
-                -stretch never
+            $win.paner add $win.paner.cli -weight 0
 
             # Load the CLI command history
             $self LoadCliHistory

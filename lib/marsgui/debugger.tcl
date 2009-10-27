@@ -136,16 +136,15 @@ snit::widget ::marsgui::debugger {
 
 
         # NEXT, create the paner
-        ::marsgui::paner $win.paner \
-            -orient     vertical \
-            -showhandle 1
+        ttk::panedwindow $win.paner \
+            -orient vertical
 
         # NEXT, create the tabbed notebook for the browsers
         install tnb using ttk::notebook $win.paner.tnb \
                      -height    300                    \
                      -padding   2                      \
                      -takefocus 1
-        $win.paner add $tnb -sticky nsew -minsize 60
+        $win.paner add $tnb
 
         # NEXT, create the winbrowser
         install wb using ::marsgui::winbrowser $tnb.wb
@@ -178,7 +177,7 @@ snit::widget ::marsgui::debugger {
             -promptcmd [mymethod GetPrompt] \
             -commandlist [info commands]
 
-        $win.paner add $cli -sticky nsew -minsize 60
+        $win.paner add $cli
 
         # NEXT, grid everything.
         grid rowconfigure    $win 0 -weight 1

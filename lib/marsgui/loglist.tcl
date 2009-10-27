@@ -242,13 +242,13 @@ snit::widget ::marsgui::loglist {
         # Applist -- optional list of application subdirectories
         if {$options(-showapplist)} {
             # Paner which contains the applist and loglist
-            set pane [paner $win.paner -orient vertical]
+            set pane [ttk::panedwindow $win.paner -orient vertical]
 
             # Split the overall height
             set height [expr $options(-height) / 2]
             
             frame $pane.appfrm -borderwidth 0
-            $pane add $pane.appfrm -sticky nsew
+            $pane add $pane.appfrm
             
             install applist using text $pane.appfrm.applist   \
                 -wrap           none                          \
@@ -286,7 +286,7 @@ snit::widget ::marsgui::loglist {
 
             # Loglist: list of logfiles
             set logfrm [frame $pane.logfrm -borderwidth 0]
-            $pane add $logfrm -sticky nsew
+            $pane add $logfrm
         } else {
             # In the simple case, loglist is a direct child of the hull
             set logfrm [frame $win.logfrm -borderwidth 0]

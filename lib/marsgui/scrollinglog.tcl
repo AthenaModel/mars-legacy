@@ -152,7 +152,7 @@ snit::widget ::marsgui::scrollinglog {
         # NEXT, Name the log display based on the parent
         if {$options(-showloglist)} {
             # Paner to contain the loglist and log
-            set paner [paner $win.paner -orient horizontal -showhandle 1]
+            set paner [ttk::panedwindow $win.paner -orient horizontal]
 
             set dlogName $paner.dlog
         } else {
@@ -241,8 +241,8 @@ snit::widget ::marsgui::scrollinglog {
             frame $win.sep -height 2 -relief sunken -borderwidth 2
             pack  $win.sep -side top -fill x
 
-            $paner add $loglist -minsize 25 -sticky nsew 
-            $paner add $log     -minsize 30 -sticky nsew
+            $paner add $loglist
+            $paner add $log
             
             pack $paner -side top -fill both -expand 1
         } else {

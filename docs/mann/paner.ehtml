@@ -11,6 +11,8 @@ namespace import ::marsgui::*
 
 <<section DESCRIPTION>>
 
+<b>This module appears to be obsolete.  Prefer ttk::panedwindow.</b><p>
+
 <<xref marsgui(n)>> contains general-purpose (i.e.,
 non-application-specific) GUI code for use in Mars.<p>
 
