@@ -11,17 +11,6 @@
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
-# Scaling
-#
-# For some reason, tk scaling is defaulting to 2.37660818713; it clearly
-# ought to be 1.0.  Apparently, this is a common problem on Linux; the
-# X server doesn't really know what its pixel resolution is.
-#
-# TBD: This may no longer be a problem.
-#
-# tk scaling 1.0
-
-#-----------------------------------------------------------------------
 # Cut, Copy, and Paste; Undo and Redo
 #
 # This code updates the standard Tk bindings for X so that
@@ -101,20 +90,57 @@ bind Entry <<Paste>> {
 }
 
 #-----------------------------------------------------------------------
-# Option Database Settings
+# Text Widget Behavior
 #
-# This section redefines a number of option database settings to give
-# a better default appearance.
+# The same thing applies to the Text Widget; pasting doesn't delete the
+# selection.  Here the code is in the tk_textPaste command, which is
+# patched below to fix the behavior.
 
+proc ::tk_textPaste w {
+    global tcl_platform
+    if {![catch {::tk::GetSelection $w CLIPBOARD} sel]} {
+	set oldSeparator [$w cget -autoseparators]
+	if {$oldSeparator} {
+	    $w configure -autoseparators 0
+	    $w edit separator
+	}
+
+        # WHD: The next line used to execute only for non-x11 platforms.        
+        catch { $w delete sel.first sel.last }
+        
+	$w insert insert $sel
+	if {$oldSeparator} {
+	    $w edit separator
+	    $w configure -autoseparators 1
+	}
+    }
+}
+
+#-----------------------------------------------------------------------
+# Ttk Theme Settings
+#
+# The standard Tk widgets get their basic color scheme from the Xrdb.
+# This section redefines a number of Ttk theme settings so that the
+# Ttk widgets match.
+#
+# Alternatively, we could set up the option database to match the
+# the background of the theme use choose.
+
+if 0 {
 set ::marsgui::defaultBackground [. cget -background]
 
-# Tile Theme Settings
+# Ttk Theme Settings
 ttk::style theme settings alt {
     # Set the alt theme to use the same background as Tk.  This makes
-    # Tile at least minimally useable
+    # Tttk at least minimally useable
     ttk::style configure . -background $::marsgui::defaultBackground
     ttk::style map TNotebook.Tab \
         -background [list selected $::marsgui::defaultBackground]
+    
+    ttk::style configure TScrollbar \
+        -background $::marsgui::defaultBackground
+    ttk::style map TScrollbar \
+        -background [list disabled $::marsgui::defaultBackground]
 }
 
 ttk::style theme settings clam {
@@ -124,79 +150,65 @@ ttk::style theme settings clam {
     ttk::style map TNotebook.Tab \
         -background [list selected $::marsgui::defaultBackground]
 }
+}
 
 # Now, use the alt theme for ttk widgets.
-ttk::style theme use alt
+ttk::style theme use clam
 
-# All widgets
-option add *selectBorderWidth 0
+#-----------------------------------------------------------------------
+# Option Database Settings
+#
+# This section redefines a number of option database settings to give
+# a better default appearance.
+#
+# FIRST, get the default background from the style; we'll configure
+# the classic widgets to use it.
+
+set ::marsgui::defaultBackground [ttk::style configure . -background]
+set ::marsgui::activeBackground  [ttk::style lookup . -background active]
+
+option add *background                      $::marsgui::defaultBackground
 
 # menu widget
-option add *Menu.activeBackground  "royal blue"
-option add *Menu.activeForeground  white
-option add *Menu.activeBorderWidth 0                
-option add *Menu.borderWidth       1
-option add *Menu.tearOff           no
-option add *Menu.font              TkDefaultFont
-
-# frame widget
-option add *Frame.borderWidth  1
-option add *Frame.relief       raised
-
-# label widget
-option add *Label.font                    TkDefaultFont
+option add *Menu.tearOff                    no
 
 # button widget
-option add *Button.activeBackground       $::marsgui::defaultBackground
-option add *Button.borderWidth            1
-option add *Button.font                   TkDefaultFont
-
-# menubutton widget
-option add *Menubutton.font               TkDefaultFont
+option add *Button.activeBackground         $marsgui::activeBackground
+option add *Button.highlightThickness       0
 
 # checkbutton widget
-option add *Checkbutton.activeBackground  $::marsgui::defaultBackground
-option add *Checkbutton.selectColor       $::marsgui::defaultBackground
-option add *Checkbutton.borderWidth       1
-option add *Checkbutton.font              TkDefaultFont
+option add *Checkbutton.activeBackground    $marsgui::activeBackground
+option add *Checkbutton.borderWidth         0
+option add *Checkbutton.highlightThickness  0
 
 # radiobutton widget
-option add *Radiobutton.activeBackground  $::marsgui::defaultBackground
-option add *Radiobutton.selectColor       $::marsgui::defaultBackground
-option add *Radiobutton.borderWidth       1
-option add *Radiobutton.font              TkDefaultFont
+option add *Radiobutton.activeBackground    $::marsgui::activeBackground
+option add *Radiobutton.borderWidth         0
+option add *Radiobutton.highlightThickness  0
 
 # scrollbar widget
-option add *Scrollbar.activeBackground    $::marsgui::defaultBackground
-option add *Scrollbar.elementBorderWidth  1
-option add *Scrollbar.borderWidth         1
-option add *Scrollbar.width               10
+option add *Scrollbar.activeBackground      $::marsgui::activeBackground
+option add *Scrollbar.width                 14
 
 # text widget
-option add *Text.setGrid            false
-option add *Text.foreground         black
-option add *Text.background         white
-option add *Text.selectBorderWidth  0
-option add *Text.relief             flat
-option add *Text.borderWidth        0
+option add *Text.setGrid                    false
+option add *Text.foreground                 black
+option add *Text.background                 white
+option add *Text.relief                     flat
+option add *Text.borderWidth                0
 
 # listbox widget
-option add *Listbox.setGrid            false
-option add *Listbox.foreground         black
-option add *Listbox.background         white
-option add *Listbox.borderWidth        1
-option add *Listbox.selectBorderWidth  0
-option add *Listbox.font               TkDefaultFont
+option add *Listbox.setGrid                 false
+option add *Listbox.foreground              black
+option add *Listbox.background              white
 
 # entry widget
 option add *Entry.foreground  black
 option add *Entry.background  white
-option add *Entry.borderWidth 1
 
 # spinbox widget
 option add *Spinbox.background white
 option add *Spinbox.foreground black
-option add *Spinbox.borderWidth 1
 option add *Spinbox.repeatInterval 15
 
 # BWidget ComboBox widget
@@ -205,10 +217,26 @@ option add *ComboBox*Entry.foreground  black
 option add *ComboBox.borderWidth       1
 option add *ComboBox*selectBackground  white
 option add *ComboBox*selectForeground  black
-option add *ComboBox*selectBorderWidth 0
 
 #BWidget dynamic help (tool tip) defaults
 DynamicHelp::configure -background #FFFF99
+
+# WHD, 10/27/09: These settings are commented out.  They date
+# from the earliest JNEM GUI, and appear to no longer be needed.  If
+# you're reading this comment, you can probably just delete them.
+
+# All widgets
+# option add *selectBorderWidth 0
+
+# menu widget
+# option add *Menu.activeBackground  "royal blue"
+# option add *Menu.activeForeground  white
+# option add *Menu.borderWidth  1
+# option add *Menu.activeBorderWidth 0                
+
+# frame widget
+# option add *Frame.borderWidth  1
+# option add *Frame.relief       raised
 
 
 
