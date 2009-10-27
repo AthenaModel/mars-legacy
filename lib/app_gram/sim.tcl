@@ -85,6 +85,7 @@ snit::type sim {
         log normal sim "Loaded gramdb $dbfile"
 
         notifier send ::sim <Reset>
+        notifier send ::sim <Load>
         return
     }
 
@@ -132,6 +133,7 @@ snit::type sim {
 
         rdb clear
         notifier send ::sim <Reset>
+        notifier send ::sim <Unload>
     }
     
     #-------------------------------------------------------------------
