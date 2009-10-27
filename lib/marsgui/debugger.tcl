@@ -157,7 +157,7 @@ snit::widget ::marsgui::debugger {
         
         # NEXT, create the cmdbrowser
         install cb using ::marsgui::cmdbrowser $tnb.cb \
-            -editcmd [mymethod EditCommand]
+            -editcmd [mymethod edit]
 
         $tnb add $cb \
             -sticky  nsew       \
