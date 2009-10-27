@@ -204,8 +204,8 @@ snit::widget ::marsgui::reportbrowser {
             -highlightthickness 1
         bind $replist <1> {focus %W}
 
-        scrollbar $win.lr.tb.top.yscroll \
-            -orient vertical \
+        ttk::scrollbar $win.lr.tb.top.yscroll \
+            -orient  vertical                 \
             -command [list $replist yview]
        
         grid columnconfigure $win.lr.tb.top 0 -weight 1
@@ -528,6 +528,7 @@ snit::widget ::marsgui::reportbrowser {
     method CreateSearchBox {w} {
         frame $w                       \
             -relief             sunken \
+            -borderwidth        1      \
             -highlightcolor     black  \
             -highlightthickness 1
 

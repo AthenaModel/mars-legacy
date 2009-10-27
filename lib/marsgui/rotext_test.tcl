@@ -36,7 +36,7 @@ rotext .rotext                          \
     -yscrollcommand [list .yscroll set] \
     -foundcmd [list .bar.finder found]
 
-scrollbar .yscroll                \
+ttk::scrollbar .yscroll                \
     -orient vertical              \
     -command [list .rotext yview]
 
@@ -44,11 +44,7 @@ pack .yscroll -side right -fill y
 pack .rotext -side right -fill both -expand 1
 
 # NEXT, load some text into the rotext
-set f [open ../../docs/man1/jnem_sim.ehtml]
-
-.rotext ins end [read $f]
-
-close $f
+.rotext ins end [readfile rotext_test.tcl]
 
 .rotext see 1.0
 

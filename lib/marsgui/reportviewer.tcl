@@ -93,12 +93,12 @@ snit::widget ::marsgui::reportviewer {
             -xscrollcommand [list $win.xscroll set]
 
         # NEXT, create the scrollbasrs.
-        scrollbar $win.yscroll \
-            -orient vertical \
+        ttk::scrollbar $win.yscroll \
+            -orient  vertical       \
             -command [list $reptext yview]
 
-        scrollbar $win.xscroll \
-            -orient horizontal \
+        ttk::scrollbar $win.xscroll \
+            -orient  horizontal     \
             -command [list $reptext xview]
 
         # NEXT, layout the widgets

@@ -260,11 +260,11 @@ snit::widget ::marsgui::loglist {
                 -state          disabled                      \
                 -font           codefont
 
-            scrollbar $pane.appfrm.xbar1       \
+            ttk::scrollbar $pane.appfrm.xbar1  \
                 -orient  horizontal            \
                 -command [list $applist xview]
             
-            scrollbar $pane.appfrm.ybar1       \
+            ttk::scrollbar $pane.appfrm.ybar1  \
                 -orient  vertical              \
                 -command [list $applist yview]
 
@@ -303,11 +303,11 @@ snit::widget ::marsgui::loglist {
             -state              disabled                 \
             -font               codefont
             
-        scrollbar $logfrm.xbar2            \
+        ttk::scrollbar $logfrm.xbar2       \
             -orient  horizontal            \
             -command [list $loglist xview]
                 
-        scrollbar $logfrm.ybar2            \
+        ttk::scrollbar $logfrm.ybar2       \
             -orient  vertical              \
             -command [list $loglist yview]
 

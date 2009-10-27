@@ -154,13 +154,11 @@ snit::widget ::marsgui::logdisplay {
                 -command      [mymethod GetNewEntries 1]
         }
 
-        scrollbar $win.xbar                   \
-            -borderwidth 1                    \
+        ttk::scrollbar $win.xbar              \
             -orient      horizontal           \
             -command     [list $rotext xview]
                 
-        scrollbar $win.ybar                   \
-            -borderwidth 1                    \
+        ttk::scrollbar $win.ybar              \
             -orient      vertical             \
             -command     [list $rotext yview]
     

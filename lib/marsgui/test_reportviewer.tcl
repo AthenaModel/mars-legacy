@@ -17,6 +17,7 @@ package require marsgui
 namespace import marsutil::* marsgui::* 
 
 sqldocument db -clock ::marsutil::simclock
+db register ::marsutil::reporter
 db open :memory:
 db clear
 

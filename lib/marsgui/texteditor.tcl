@@ -167,11 +167,11 @@ snit::widget ::marsgui::texteditor {
             -yscrollcommand [list $win.yscroll set] \
             -xscrollcommand [list $win.xscroll set]
 
-        scrollbar $win.yscroll \
+        ttk::scrollbar $win.yscroll \
             -orient vertical \
             -command [list $text yview]
 
-        scrollbar $win.xscroll \
+        ttk::scrollbar $win.xscroll \
             -orient horizontal \
             -command [list $text xview]
 

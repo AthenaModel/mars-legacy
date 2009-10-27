@@ -66,6 +66,7 @@ proc Tick {} {
 }
 
 sqldocument db -clock ::marsutil::simclock
+db register ::marsutil::reporter
 db open :memory:
 db clear
 

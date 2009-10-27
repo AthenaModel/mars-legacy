@@ -68,7 +68,7 @@ snit::widget ::marsgui::rb_bintree {
         $tree item style set root tree style1
 
         # NEXT, create the scrollbar
-        scrollbar $win.yscroll          \
+        ttk::scrollbar $win.yscroll     \
             -orient  vertical           \
             -command [list $tree yview]
 

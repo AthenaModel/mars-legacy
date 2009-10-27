@@ -118,41 +118,8 @@ proc ::tk_textPaste w {
 
 #-----------------------------------------------------------------------
 # Ttk Theme Settings
-#
-# The standard Tk widgets get their basic color scheme from the Xrdb.
-# This section redefines a number of Ttk theme settings so that the
-# Ttk widgets match.
-#
-# Alternatively, we could set up the option database to match the
-# the background of the theme use choose.
 
-if 0 {
-set ::marsgui::defaultBackground [. cget -background]
-
-# Ttk Theme Settings
-ttk::style theme settings alt {
-    # Set the alt theme to use the same background as Tk.  This makes
-    # Tttk at least minimally useable
-    ttk::style configure . -background $::marsgui::defaultBackground
-    ttk::style map TNotebook.Tab \
-        -background [list selected $::marsgui::defaultBackground]
-    
-    ttk::style configure TScrollbar \
-        -background $::marsgui::defaultBackground
-    ttk::style map TScrollbar \
-        -background [list disabled $::marsgui::defaultBackground]
-}
-
-ttk::style theme settings clam {
-    # Set the alt theme to use the same background as Tk.  This makes
-    # Tile at least minimally useable
-    ttk::style configure . -background $::marsgui::defaultBackground
-    ttk::style map TNotebook.Tab \
-        -background [list selected $::marsgui::defaultBackground]
-}
-}
-
-# Now, use the alt theme for ttk widgets.
+# Use the clam theme for ttk widgets.
 ttk::style theme use clam
 
 #-----------------------------------------------------------------------
@@ -161,8 +128,9 @@ ttk::style theme use clam
 # This section redefines a number of option database settings to give
 # a better default appearance.
 #
-# FIRST, get the default background from the style; we'll configure
-# the classic widgets to use it.
+# FIRST, get the default background and active background colors
+# from the Ttk theme; we'll configure the classic widgets to use it
+# as appropriate.
 
 set ::marsgui::defaultBackground [ttk::style configure . -background]
 set ::marsgui::activeBackground  [ttk::style lookup . -background active]

@@ -1,5 +1,6 @@
 package require snit
 package require marsgui
+namespace import marsgui::*
 
 paner .pv -orient vertical
 
@@ -13,7 +14,7 @@ proc textpane {w} {
     for {set i 1} {$i <= 100} {incr i} {
         $w.t insert end "$w, line $i\n"
     }
-    scrollbar $w.s -command [list $w.t yview]
+    ttk::scrollbar $w.s -command [list $w.t yview]
     pack $w.s -side right -fill y 
     pack $w.t -side right -fill both -expand 1
 }

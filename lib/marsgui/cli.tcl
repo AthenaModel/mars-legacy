@@ -157,7 +157,7 @@ snit::widget ::marsgui::cli {
             -relief             sunken  \
             -yscrollcommand     [list $win.yscroll set]
 
-        scrollbar $win.yscroll \
+        ttk::scrollbar $win.yscroll \
             -orient  vertical \
             -command [list $log yview]
 
