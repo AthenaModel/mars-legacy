@@ -33,7 +33,7 @@ namespace eval ::marsgui:: {
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::marsgui::filter {
+snit::widgetadaptor ::marsgui::filter {
     #-------------------------------------------------------------------
     # Type Constructor
 
@@ -52,12 +52,6 @@ snit::widget ::marsgui::filter {
     }
 
 
-    #-------------------------------------------------------------------
-    # Components
-
-    component entry       ;# The command entry in which they enter the
-                           # search string.
-    
     #-------------------------------------------------------------------
     # Options
 
@@ -101,86 +95,78 @@ snit::widget ::marsgui::filter {
     # Constructor & Destructor
     
     constructor {args} {
-        # FIRST, configure the hull to look like a sunken entry.
-        $hull configure                 \
-            -relief             sunken  \
-            -borderwidth        1       \
-            -highlightcolor     black   \
-            -highlightthickness 1       \
-            -pady               2
+        # FIRST, create the commandentry
+        installhull using commandentry          \
+            -clearbtn    1                      \
+            -changecmd   [mymethod EntryChange] \
+            -returncmd   [mymethod EntryReturn]
+        
+        # NEXT, get the commandentry's frame, so we can put stuff in it.
+        set f [$hull frame]
             
         # NEXT, Create the -type menu.
-        menubutton $win.type                            \
-            -relief           flat                      \
-            -borderwidth      0                         \
-            -activebackground $::marsgui::defaultBackground \
-            -image            ::marsgui::filter_icon        \
-            -menu             $win.type.menu
+        set menu $f.type.menu
+        ttk::menubutton $f.type                \
+            -style   Entrybutton.Toolbutton    \
+            -image   ::marsgui::icon::filter16 \
+            -menu    $menu
         
-        menu $win.type.menu  \
-            -tearoff      0  \
-            -borderwidth  1
+        pack $f.type \
+            -before [lindex [pack slaves $f] 0] \
+            -side   left
         
-        $win.type.menu add radio                   \
+        DynamicHelp::add $f.type \
+            -text "Filter Options Menu"
+                
+        menu $menu
+        
+        $menu add radio                            \
             -label    "Exact"                      \
             -variable [myvar options(-filtertype)] \
             -value    "exact"                      \
             -command  [mymethod FilterNow]
 
-        $win.type.menu add radio                   \
+        $menu add radio                            \
             -label    "Incremental"                \
             -variable [myvar options(-filtertype)] \
             -value    "incremental"                \
             -command  [mymethod FilterNow]
             
-        $win.type.menu add radio                   \
+        $menu add radio                            \
             -label    "Wildcard"                   \
             -variable [myvar options(-filtertype)] \
             -value    "wildcard"                   \
             -command  [mymethod FilterNow]
 
 
-        $win.type.menu add radio                   \
+        $menu add radio                            \
             -label    "Regexp"                     \
             -variable [myvar options(-filtertype)] \
             -value    "regexp"                     \
             -command  [mymethod FilterNow]
             
-        $win.type.menu add separator
+        $menu add separator
 
-        $win.type.menu add check                   \
+        $menu add check                            \
             -label    "Ignore Case"                \
             -variable [myvar options(-ignorecase)] \
             -onvalue  yes                          \
             -offvalue no                           \
             -command  [mymethod FilterNow]
             
-        $win.type.menu add separator
+        $menu add separator
 
-        $win.type.menu add radio           \
+        $menu add radio                    \
             -label    "Include Matches"    \
             -variable [myvar inclusive]    \
             -value    yes                  \
             -command  [mymethod FilterNow]
             
-        $win.type.menu add radio           \
+        $menu add radio                    \
             -label    "Exclude Matches"    \
             -variable [myvar inclusive]    \
             -value    no                   \
             -command  [mymethod FilterNow]
-            
-        # Install the filter field.
-        install entry using ::marsgui::commandentry $win.entry  \
-            -background         $::marsgui::defaultBackground   \
-            -highlightthickness 0                           \
-            -borderwidth        0                           \
-            -clearbtn           1                           \
-            -changecmd          [mymethod EntryChange]      \
-            -returncmd          [mymethod EntryReturn]                    
-                                  
-        grid $win.type $entry -sticky nsew -padx 2
-
-        grid columnconfigure $win 1 -weight 1
             
         # Save the constructor options.
         $self configurelist $args
@@ -216,7 +202,7 @@ snit::widget ::marsgui::filter {
     # Set up to check strings against the filter conditions, and 
     # execute the -filtercmd
     method FilterNow {} {
-        set target [string trim [$entry get]]
+        set target [string trim [$hull get]]
         
         if {$target eq ""} {
             set targetRegexp ""
@@ -242,7 +228,7 @@ snit::widget ::marsgui::filter {
             # Check the regexp for errors.  On error, write a message
             # using the -msgcmd.
             if {[catch {regexp -- $targetRegexp dummy} result]} {
-                $self Message "invalid $options(-filtertype): \"[$entry get]\""
+                $self Message "invalid $options(-filtertype): \"[$hull get]\""
                 bell
                 return
             }

@@ -93,8 +93,8 @@ snit::widget ::marsgui::cmdbrowser {
         counter 0
         imports 0
         wid     0
-        alias   1
-        bin     1
+        alias   0
+        bin     0
         bwid    0
         node    {}
     }

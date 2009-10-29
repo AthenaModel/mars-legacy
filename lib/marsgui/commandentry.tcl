@@ -31,19 +31,12 @@ namespace eval ::marsgui:: {
 # Widget Definition
 
 snit::widget ::marsgui::commandentry {
-    #-------------------------------------------------------------------
-    # Type Constructor
-
-    typeconstructor {
-        # Add defaults to the option database
-        option add *Commandentry.borderWidth        1
-        option add *Commandentry.relief             flat
-        option add *Commandentry.highlightThickness 1
-    }
-
+    hulltype ttk::frame
+        
     #-------------------------------------------------------------------
     # Components
 
+    component bgframe   ;# The bgframe widget
     component entry     ;# The actual Tk entry widget.
     component clearbtn  ;# The clear button
     
@@ -83,12 +76,9 @@ snit::widget ::marsgui::commandentry {
     # Specifies the maximum number of commands to save in the history
     # stack.
     option -history -default 20
-
+    
     # Delegate border-related options to the hull
     delegate option -borderwidth         to hull
-    delegate option -highlightbackground to hull
-    delegate option -highlightcolor      to hull
-    delegate option -highlightthickness  to hull
     delegate option -relief              to hull
     
     # Delegate all remaining options to the entry, as they can be used
@@ -112,27 +102,41 @@ snit::widget ::marsgui::commandentry {
     # Constructor & Destructor
     
     constructor {args} {
+        # FIRST, configure the hull
+        $hull configure         \
+            -borderwidth 1      \
+            -relief      sunken
+        
+        # NEXT, add a background frame to hold the other components
+        install bgframe using frame $win.bgframe \
+            -background white
+        pack $bgframe -fill both -expand yes
+        
         # FIRST, Install the entry component.
-        install entry as entry $win.entry \
-            -borderwidth        0         \
-            -highlightthickness 0         \
-            -textvariable       [myvar contents]
-
+        install entry as entry $bgframe.entry \
+            -textvariable       [myvar contents] \
+            -relief             flat             \
+            -borderwidth        0                \
+            -highlightthickness 0                \
+            -background         white
         
         # NEXT, Save the constructor options.
         $self configurelist $args
-
+        
         # NEXT, create the clear button
         if {$options(-clearbtn)} {
-            install clearbtn using button $win.clear      \
-                -bitmap       @$::marsgui::library/clear.xbm  \
-                -command      [mymethod ClearEntry]       \
-                -relief       flat                        \
-                -borderwidth  0                           \
+            install clearbtn using ttk::button $bgframe.clear \
+                -image        {
+                    ::marsgui::icon::clear11
+                    disabled ::marsgui::icon::clear11d }    \
+                -command      [mymethod ClearEntry]         \
+                -style        Entrybutton.Toolbutton        \
                 -state        disabled
 
-            pack $clearbtn -side right -padx 2
+            pack $bgframe.clear -side right -padx 2
         }
+
+        pack $bgframe.entry -fill x -expand yes
         
         # NEXT, assign the key bindings.
         bind $entry <KeyRelease-Return> [mymethod execute]
@@ -144,13 +148,10 @@ snit::widget ::marsgui::commandentry {
 
         # NEXT, support the <<SelectAll>> protocol
         bind $entry <<SelectAll>>       [mymethod SelectAll]
-        
-        # NEXT, lay out the entry.
-        pack $entry -fill x -expand 1
     }
 
     # Destructor: Not needed
-
+    
     #-------------------------------------------------------------------
     # Private Methods
 
@@ -306,6 +307,15 @@ snit::widget ::marsgui::commandentry {
     
     #-------------------------------------------------------------------
     # Public Methods
+    
+    # frame
+    #
+    # Returns the frame containing the Tk entry and clear button;
+    # Other controls can then be inserted into it.
+    
+    method frame {} {
+        return $bgframe
+    }
     
     # set text
     #

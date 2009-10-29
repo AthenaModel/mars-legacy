@@ -122,6 +122,10 @@ proc ::tk_textPaste w {
 # Use the clam theme for ttk widgets.
 ttk::style theme use clam
 
+# Entrybutton.Toolbutton: A style for buttons used in entries.
+ttk::style configure Entrybutton.Toolbutton -background white
+ttk::style map Entrybutton.Toolbutton -background {disabled white}
+
 #-----------------------------------------------------------------------
 # Option Database Settings
 #

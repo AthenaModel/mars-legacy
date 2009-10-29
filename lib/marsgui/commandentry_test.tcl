@@ -1,6 +1,8 @@
 package require marsgui
 namespace import ::marsgui::*
 
+debugger new
+
 proc returncmd {text} {
     puts "-returncmd <$text>"
 }
@@ -16,16 +18,15 @@ proc changecmd {text} {
     puts "-changecmd <$text>"
 }
 
-button .set \
+ttk::button .set \
     -text "Set!" \
     -command [list .ce set "Howdy!"]
 
-button .clear \
+ttk::button .clear \
     -text "Clear!" \
     -command [list .ce clear]
 
 commandentry .ce \
-    -background $::marsgui::defaultBackground \
     -clearbtn 1 \
     -keycmd keycmd \
     -returncmd returncmd \
@@ -33,7 +34,7 @@ commandentry .ce \
 
 pack .set -side left
 pack .clear -side right
-pack .ce
+pack .ce -padx 5 -pady 5
 
 
 

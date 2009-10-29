@@ -34,11 +34,133 @@ namespace eval ::marsgui:: {
 #-----------------------------------------------------------------------
 # Widget Definition
 
-snit::widget ::marsgui::finder {
+snit::widgetadaptor ::marsgui::finder {
+    #-------------------------------------------------------------------
+    # Type Constructor
+    
+    typeconstructor {
+        # FIRST, create icons used just by this widget
+        namespace eval ${type}::icon {}
+
+        mkiconPair ${type}::icon::first {
+            XX......X
+            XX.....XX
+            XX....XXX
+            XX...XXXX
+            XX..XXXXX
+            XX.XXXXXX
+            XX.XXXXXX
+            XX..XXXXX
+            XX...XXXX
+            XX....XXX
+            XX.....XX
+            XX......X
+        }
+
+        mkiconPair ${type}::icon::prev {
+            .....X
+            ....XX
+            ...XXX
+            ..XXXX
+            .XXXXX
+            XXXXXX
+            XXXXXX
+            .XXXXX
+            ..XXXX
+            ...XXX
+            ....XX
+            .....X
+        }
+
+        mkiconPair ${type}::icon::next {
+            X.....
+            XX....
+            XXX...
+            XXXX..
+            XXXXX.
+            XXXXXX
+            XXXXXX
+            XXXXX.
+            XXXX..
+            XXX...
+            XX....
+            X.....
+        }
+
+        mkiconPair ${type}::icon::last {
+            X......XX
+            XX.....XX
+            XXX....XX
+            XXXX...XX
+            XXXXX..XX
+            XXXXXX.XX
+            XXXXXX.XX
+            XXXXX..XX
+            XXXX...XX
+            XXX....XX
+            XX.....XX
+            X......XX
+        }
+
+        mkiconPair ${type}::icon::prevlog {
+            .....X.....
+            ....XXX....
+            ...XXXXX...
+            ..XXXXXXX..
+            .XXXXXXXXX.
+            XXXXXXXXXXX
+            ...........
+            .....X.....
+            ....XXX....
+            ...XXXXX...
+            ..XXXXXXX..
+            .XXXXXXXXX.
+            XXXXXXXXXXX
+        }
+
+        mkiconPair ${type}::icon::nextlog {
+            XXXXXXXXXXX
+            .XXXXXXXXX.
+            ..XXXXXXX..
+            ...XXXXX...
+            ....XXX....
+            .....X.....
+            ...........
+            XXXXXXXXXXX
+            .XXXXXXXXX.
+            ..XXXXXXX..
+            ...XXXXX...
+            ....XXX....
+            .....X.....
+        }
+
+        mkiconPair ${type}::icon::stop {
+            XXXXXXXX
+            XXXXXXXX
+            XXXXXXXX
+            XXXXXXXX
+            XXXXXXXX
+            XXXXXXXX
+            XXXXXXXX
+            XXXXXXXX
+        }
+    }
+    
+    proc mkiconPair {name pixels} {
+        mkicon $name    $pixels [list . trans X black]
+        mkicon ${name}d $pixels [list . trans X gray]
+    }
+    
+    proc getIcon {name} {
+        list ::marsgui::finder::icon::$name \
+            disabled ::marsgui::finder::icon::${name}d
+    }
+
+
     #-------------------------------------------------------------------
     # Components
-
-    component entry      ;# The commandentry(n)
+    
+    component f    ;# The commandentry's frame
     
     #-------------------------------------------------------------------
     # Options
@@ -82,7 +204,6 @@ snit::widget ::marsgui::finder {
         -configuremethod MultiColChanged
     
     # Delegate all other options to the hull
-    delegate option -width to entry
     delegate option * to hull
     
     #-------------------------------------------------------------------
@@ -95,56 +216,49 @@ snit::widget ::marsgui::finder {
     # Constructor
     
     constructor {args} {
-        # FIRST, set the hull defaults
-        $hull configure                 \
-            -relief             sunken  \
-            -borderwidth        1       \
-            -highlightcolor     black   \
-            -highlightthickness 1
-
-        # NEXT, Create the entry, options are delegated to it.
-        install entry using ::marsgui::commandentry $win.entry    \
-            -clearbtn           yes                           \
-            -changecmd          [mymethod TargetChanged]      \
-            -returncmd          [mymethod DoSearch]           \
-            -background         $::marsgui::defaultBackground     \
-            -highlightthickness 0                             \
-            -borderwidth        0
+        # FIRST, Create the entry, options are delegated to it.
+        installhull using ::marsgui::commandentry         \
+            -clearbtn           yes                       \
+            -changecmd          [mymethod TargetChanged]  \
+            -returncmd          [mymethod DoSearch]       \
 
         # NEXT, Save the constructor options.
         $self configurelist $args
         
-        # NEXT, create the magnifying glass menu.
-        menubutton $win.type                            \
-            -relief           flat                      \
-            -borderwidth      0                         \
-            -activebackground $::marsgui::defaultBackground \
-            -image            ::marsgui::search_icon        \
-            -menu             $win.type.menu
+        # NEXT, get the commandentry's frame, so we can put stuff in it.
+        install f using $hull frame
+            
+        # NEXT, Create the magnifying glass menu.
+        set menu $f.type.menu
+        ttk::menubutton $f.type                \
+            -style   Entrybutton.Toolbutton    \
+            -image   ::marsgui::icon::search16 \
+            -menu    $menu
         
-        menu $win.type.menu   \
-            -tearoff        0 \
-            -borderwidth    1
-        
-        $win.type.menu add radio                     \
+        DynamicHelp::add $f.type \
+            -text "Search Options Menu"
+                
+        menu $menu
+
+        $menu add radio                              \
             -label      "Incremental"                \
             -variable   [myvar options(-targettype)] \
             -value      "incremental"                \
             -command    [mymethod TargetTypeChanged]
             
-        $win.type.menu add radio                     \
+        $menu add radio                              \
             -label      "Exact"                      \
             -variable   [myvar options(-targettype)] \
             -value      "exact"                      \
             -command    [mymethod TargetTypeChanged]
             
-        $win.type.menu add radio                     \
+        $menu add radio                              \
             -label      "Wildcard"                   \
             -variable   [myvar options(-targettype)] \
             -value      "wildcard"                   \
             -command    [mymethod TargetTypeChanged]
             
-        $win.type.menu add radio                     \
+        $menu add radio                              \
             -label      "Regexp"                     \
             -variable   [myvar options(-targettype)] \
             -value      "regexp"                     \
@@ -152,94 +266,86 @@ snit::widget ::marsgui::finder {
 
         # If searchback will be enabled, provide the multi-column option
         if {$options(-loglist) ne ""} {
-            $win.type.menu add separator
+            $menu add separator
 
-            $win.type.menu add checkbutton             \
+            $menu add checkbutton                      \
                 -label      "Multi-column Searchback"  \
                 -variable   [myvar options(-multicol)] \
                 -command    [mymethod MultiColChanged] 
         }
 
-        button $win.first                                       \
-            -relief         flat                                \
-            -borderwidth    0                                   \
-            -bitmap         @$::marsgui::library/button_first.xbm   \
-            -state          disabled                            \
-            -command        [mymethod GoToFirst]
+        ttk::button $f.first                    \
+            -style    Entrybutton.Toolbutton    \
+            -image    [getIcon first]           \
+            -state    disabled                  \
+            -command  [mymethod GoToFirst]
 
-        button $win.prev                                        \
-            -relief         flat                                \
-            -borderwidth    0                                   \
-            -bitmap         @$::marsgui::library/button_prev.xbm    \
-            -state          disabled                            \
-            -command        [mymethod GoToPrev]
+        ttk::button $f.prev                     \
+            -style    Entrybutton.Toolbutton    \
+            -image    [getIcon prev]            \
+            -state    disabled                  \
+            -command  [mymethod GoToPrev]
 
-        button $win.next                                        \
-            -relief         flat                                \
-            -borderwidth    0                                   \
-            -bitmap         @$::marsgui::library/button_next.xbm    \
-            -state          disabled                            \
-            -command        [mymethod GoToNext]
+        ttk::button $f.next                     \
+            -style    Entrybutton.Toolbutton    \
+            -image    [getIcon next]            \
+            -state    disabled                  \
+            -command  [mymethod GoToNext]
 
-        button $win.last                                        \
-            -relief         flat                                \
-            -borderwidth    0                                   \
-            -bitmap         @$::marsgui::library/button_last.xbm    \
-            -state          disabled                            \
-            -command        [mymethod GoToLast]
-                                    
-        label $win.status                       \
+        ttk::button $f.last                     \
+            -style    Entrybutton.Toolbutton    \
+            -image    [getIcon last]            \
+            -state    disabled                  \
+            -command  [mymethod GoToLast]
+
+        label $f.status                         \
+            -background     white               \
             -textvariable   [varname status]    \
             -relief         flat                \
             -width          15                  \
             -state          disabled
         
         if {$options(-loglist) ne ""} {
-        
-            button $win.prevlog                                     \
-                -relief         flat                                \
-                -borderwidth    0                                   \
-                -bitmap         @$::marsgui::library/button_2up.xbm     \
-                -state          disabled                            \
-                -command        [mymethod SearchLogs earlier]
+            ttk::button $f.prevlog                      \
+                -style    Entrybutton.Toolbutton        \
+                -image    [getIcon prevlog]             \
+                -state    disabled                      \
+                -command  [mymethod SearchLogs earlier]
 
-            button $win.stop                                        \
-                -relief         flat                                \
-                -borderwidth    0                                   \
-                -bitmap         @$::marsgui::library/button_stop.xbm    \
-                -state          disabled                            \
-                -command        [mymethod StopSearch]
-
-            button $win.nextlog                                     \
-                -relief         flat                                \
-                -borderwidth    0                                   \
-                -bitmap         @$::marsgui::library/button_2down.xbm   \
-                -state          disabled                            \
-                -command        [mymethod SearchLogs later]           
+            ttk::button $f.stop                         \
+                -style    Entrybutton.Toolbutton        \
+                -image    [getIcon stop]                \
+                -state    disabled                      \
+                -command  [mymethod StopSearch]
+            
+            ttk::button $f.nextlog                      \
+                -style    Entrybutton.Toolbutton        \
+                -image    [getIcon nextlog]             \
+                -state    disabled                      \
+                -command  [mymethod SearchLogs later]
         }     
     
-        # NEXT, Lay out the widgets.
+        # NEXT, Lay out the components
+        pack forget {*}[pack slaves $f]
+        pack $f.type -side left
 
-        # Column layout variable.
-        set c -1
-        
-        grid $win.type  -row 0 -column [incr c] 
-        grid $entry     -row 0 -column [incr c] -padx 4
+        pack $f.last   -side right -padx {0 2}
+        pack $f.next   -side right
+        pack $f.prev   -side right
+        pack $f.first  -side right
+        pack $f.status -side right
         
         # Add the loglist search controls if needed
         if {$options(-loglist) ne ""} {
-            grid $win.prevlog    -row 0  -column [incr c]
-            grid $win.stop       -row 0  -column [incr c]
-            grid $win.nextlog    -row 0  -column [incr c]
+            pack $f.nextlog -side right
+            pack $f.stop    -side right
+            pack $f.prevlog -side right -padx {4 0}
         }
         
-        grid $win.status   -row 0  -column [incr c]
-        grid $win.first    -row 0  -column [incr c]
-        grid $win.prev     -row 0  -column [incr c]
-        grid $win.next     -row 0  -column [incr c]
-        grid $win.last     -row 0  -column [incr c]
-                        
-        grid $win -sticky ew        
+        pack $f.clear -side right
+        pack $f.entry -fill x -expand yes
+        
+        return
     }
 
     #-------------------------------------------------------------------
@@ -263,7 +369,7 @@ snit::widget ::marsgui::finder {
     # configure.  Executes a new search.
 
     method TargetTypeChanged {} {
-        $entry execute
+        $hull execute
     }
 
     # TargetChanged text
@@ -275,18 +381,18 @@ snit::widget ::marsgui::finder {
     method TargetChanged {text} {
         # FIRST, Check for emptiness.
         if {[string is space $text]} {
-            $entry clear
+            $hull clear
             set text ""
         }
 
         # NEXT, Enable/disable the clear button and file search buttons.
         if {$options(-loglist) ne ""} {
             if {$text eq ""} {
-                $win.prevlog  configure -state disabled
-                $win.nextlog  configure -state disabled
+                $f.prevlog  configure -state disabled
+                $f.nextlog  configure -state disabled
             } else {
-                $win.prevlog  configure -state normal
-                $win.nextlog  configure -state normal
+                $f.prevlog  configure -state normal
+                $f.nextlog  configure -state normal
             }
         }
 
@@ -305,7 +411,7 @@ snit::widget ::marsgui::finder {
     method DoSearch {target} {
         # FIRST, Ignore empty targets.
         if {[string is space $target]} {
-            $entry clear
+            $hull clear
 
             set target ""
         }
@@ -314,7 +420,7 @@ snit::widget ::marsgui::finder {
         # validity.
         if {$options(-targettype) eq "regexp"} {
             if {[catch {regexp -- $target dummy} result]} {
-                $self Message "invalid regexp: \"[$entry get]\""
+                $self Message "invalid regexp: \"[$hull get]\""
                 bell
                 return
             }
@@ -367,7 +473,7 @@ snit::widget ::marsgui::finder {
     # If the search hits, execute the same search in the logdisplay.
     method SearchLogs {direction} {
         # Get the current target; return if it's empty.
-        if {[set target [$entry get]] eq ""} {return}
+        if {[set target [$hull get]] eq ""} {return}
         
         # Incremental searches are actually exact searches.
         if {$options(-targettype) eq "incremental"} {
@@ -382,16 +488,16 @@ snit::widget ::marsgui::finder {
         # If doing regexp check the target pattern validity first
         if {$options(-targettype) eq "regexp"} {
             if {[catch {regexp -- $target dummy} result]} {
-                $self Message "invalid regexp: \"[$entry get]\""
+                $self Message "invalid regexp: \"[$hull get]\""
                 bell
                 return
             }
         }
 
         # Enable the stop button; disable the search buttons.
-        $win.stop     configure -state normal
-        $win.prevlog  configure -state disabled
-        $win.nextlog  configure -state disabled
+        $f.stop     configure -state normal
+        $f.prevlog  configure -state disabled
+        $f.nextlog  configure -state disabled
         
         # Execute the search.
         if {[$options(-loglist) searchlogs $direction $target $searchType]} {
@@ -399,9 +505,9 @@ snit::widget ::marsgui::finder {
         }
         
         # Disable the stop button; enable the search buttons.
-        $win.stop     configure -state disabled 
-        $win.prevlog  configure -state normal
-        $win.nextlog  configure -state normal
+        $f.stop     configure -state disabled 
+        $f.prevlog  configure -state normal
+        $f.nextlog  configure -state normal
     }
     
     # StopSearch
@@ -417,10 +523,10 @@ snit::widget ::marsgui::finder {
     #
     # Set the state of the navigation buttons.
     method SetNavButtons {state} {
-        $win.first  configure -state $state
-        $win.prev   configure -state $state
-        $win.next   configure -state $state
-        $win.last   configure -state $state
+        $f.first  configure -state $state
+        $f.prev   configure -state $state
+        $f.next   configure -state $state
+        $f.last   configure -state $state
     }
 
     # Message msg
@@ -447,15 +553,15 @@ snit::widget ::marsgui::finder {
         if {$count == 0} {
             set status "0 of 0"
 
-            if {[$entry get] eq ""} {
-                $win.status configure -state disabled
+            if {[$hull get] eq ""} {
+                $f.status configure -state disabled
 
                 if {$options(-loglist) ne ""} {
-                    $win.prevlog configure -state disabled
-                    $win.nextlog configure -state disabled
+                    $f.prevlog configure -state disabled
+                    $f.nextlog configure -state disabled
                 }
             } else {
-                $win.status configure -state normal
+                $f.status configure -state normal
             }
 
             $self SetNavButtons disabled
@@ -464,7 +570,7 @@ snit::widget ::marsgui::finder {
         } else {
             let line {$instance + 1}
             set status "$line of $count"
-            $win.status configure -state normal
+            $f.status configure -state normal
 
             if {$count > 0} {
                 $self SetNavButtons normal

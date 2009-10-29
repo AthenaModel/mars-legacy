@@ -526,24 +526,32 @@ snit::widget ::marsgui::reportbrowser {
     # Creates a search box in the toolbar.
 
     method CreateSearchBox {w} {
-        frame $w                       \
-            -relief             sunken \
-            -borderwidth        1      \
-            -highlightcolor     black  \
-            -highlightthickness 1
+        # FIRST, Create the commandentry
+        commandentry $w \
+            -width              30                          \
+            -clearbtn           1                           \
+            -changecmd          [mymethod SearchCheckEmpty] \
+            -returncmd          [mymethod SearchDoSearch]
+        
+        # NEXT, Create the menu button, and put it at the beginning.
+        set f [$w frame]
+        
+        set menu $f.menubtn.menu
+
+        ttk::menubutton $f.menubtn                \
+            -style  Entrybutton.Toolbutton        \
+            -image  ::marsgui::icon::filter16     \
+            -menu   $menu
+        
+        pack $f.menubtn \
+            -before [lindex [pack slaves $f] 0] \
+            -side   left                        \
+            -padx   2
+
+        DynamicHelp::add $f.menubtn \
+            -text "Search Options Menu"
 
         # The search-type menu
-        set menu $w.menubtn.menu
-
-        menubutton $w.menubtn                           \
-            -relief           flat                      \
-            -borderwidth      0                         \
-            -activebackground $::marsgui::defaultBackground \
-            -image            ::marsgui::filter_icon        \
-            -menu             $menu
-
-        DynamicHelp::add $w.menubtn \
-            -text "Search Options Menu"
         menu $menu
 
         $menu add radio \
@@ -557,20 +565,6 @@ snit::widget ::marsgui::reportbrowser {
             -variable [myvar searchInfo(TitleOnlyFlag)] \
             -value 1 \
             -command [mymethod SearchAgain]
-
-        # The entry field
-        commandentry $w.entry \
-            -highlightthickness 0                           \
-            -borderwidth        0                           \
-            -background         $::marsgui::defaultBackground   \
-            -width              30                          \
-            -clearbtn           1                           \
-            -changecmd          [mymethod SearchCheckEmpty] \
-            -returncmd          [mymethod SearchDoSearch]
-
-        # Lay out the controls.
-        pack $w.menubtn -side left  -padx 2 -pady 1
-        pack $w.entry   -side left  -padx 2 -pady 1 -fill x -expand 1
 
         return $w
     }
@@ -623,7 +617,7 @@ snit::widget ::marsgui::reportbrowser {
     # Deletes the search text.
 
     method SearchClear {} {
-        $search.entry clear
+        $search clear
 
         if {$searchInfo(QueryString) ne ""} {
             set searchInfo(QueryString) {}
@@ -636,7 +630,7 @@ snit::widget ::marsgui::reportbrowser {
     # Does another search, taking changed settings into account.
 
     method SearchAgain {} {
-        $self SearchDoSearch [$search.entry get]
+        $self SearchDoSearch [$search get]
     }
 
     #-------------------------------------------------------------------
