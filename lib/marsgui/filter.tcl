@@ -108,7 +108,7 @@ snit::widgetadaptor ::marsgui::filter {
         set menu $f.type.menu
         ttk::menubutton $f.type                \
             -style   Entrybutton.Toolbutton    \
-            -image   ::marsgui::icon::filter16 \
+            -image   ::marsgui::icon::filter   \
             -menu    $menu
         
         pack $f.type \

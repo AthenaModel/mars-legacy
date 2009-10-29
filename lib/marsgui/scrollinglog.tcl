@@ -24,21 +24,12 @@ namespace eval ::marsgui:: {
 # Widget Definition
 
 snit::widget ::marsgui::scrollinglog {
+    hulltype ttk::frame
+    
     #-------------------------------------------------------------------
     # Type Constructor
 
     typeconstructor {
-        # Add defaults to the option database
-        option add *Scrollinglog.borderWidth        1
-        option add *Scrollinglog.relief             flat
-        option add *Scrollinglog.background         white
-        option add *Scrollinglog.Foreground         black
-        option add *Scrollinglog.font               codefont
-        option add *Scrollinglog.width              80
-        option add *Scrollinglog.height             24
-        option add *Scrollinglog.insertWidth        0
-        option add *Scrollinglog.hullbackground     $::marsgui::defaultBackground
-
         namespace import ::marsutil::logger  ;# need log levels
     }
 
@@ -48,7 +39,6 @@ snit::widget ::marsgui::scrollinglog {
     # Options delegated to the hull
     delegate option -borderwidth    to hull
     delegate option -relief         to hull
-    delegate option -hullbackground to hull as -background
     delegate option *               to hull
 
     # Options delegated to the logdisplay widget
@@ -59,8 +49,8 @@ snit::widget ::marsgui::scrollinglog {
     delegate option -width              to log
     delegate option -foreground         to log
     delegate option -background         to log
-    delegate option {-insertbackground insertBackground Foreground} to log
-    delegate option {-insertwidth insertWidth InsertWidth}          to log
+    delegate option -insertbackground   to log
+    delegate option -insertwidth        to log
 
     # Options we'd like to delegate to loglist but can't since loglist is
     # optional.  They'll be "propagated" instead.
@@ -120,14 +110,8 @@ snit::widget ::marsgui::scrollinglog {
     constructor {args} {        
         # FIRST, create the components
 
-        # Toplevel hull
-        $hull configure \
-            -borderwidth 1 \
-            -relief raised
-
         # Title Bar
-        install bar using frame $win.bar \
-            -relief flat
+        install bar using ttk::frame $win.bar
 
         # Get the -parsecmd, -format, -tags and -showtitle values, specifying
         # the scrollinglog(n) default.
@@ -165,6 +149,8 @@ snit::widget ::marsgui::scrollinglog {
             -background     white                       \
             -height         24                          \
             -width          80                          \
+            -insertwidth    0                           \
+            -font           codefont                    \
             -msgcmd         [mymethod LogCmd]           \
             -autoupdate     1                           \
             -autoscroll     $scrollbackFlag             \
@@ -194,26 +180,23 @@ snit::widget ::marsgui::scrollinglog {
             # NOTE: Propagated options handled via configurelist below
         }
 
-        # Title bar contents
-        label $bar.title \
-            -textvariable [myvar options(-title)]
-
-        ComboBox    $bar.loglevel \
-            -modifycmd    [mymethod HandleLogLevel]      \
+        # Tool bar contents
+        ttk::combobox $bar.loglevel                      \
+            -style        Menubox.TCombobox              \
             -textvariable [myvar options(-loglevel)]     \
             -values       [lrange [logger levels] 1 end] \
-            -font         codefont  \
-            -width        7         \
-            -editable     0           
+            -width        7                              \
+            -state        readonly
+        bind $bar.loglevel <<ComboboxSelected>> [mymethod HandleLogLevel]
 
-        checkbutton $bar.scrollback \
-            -bitmap @$::marsgui::library/autoscroll_on.xbm \
-            -indicatoron 0 \
-            -offrelief flat \
-            -variable [myvar scrollbackFlag] \
-            -offvalue 1 \
-            -onvalue  0 \
-            -highlightthickness 0 \
+        ttk::checkbutton $bar.scrollback                  \
+            -style    Toolbutton                          \
+            -image    {
+                         ::marsgui::icon::autoscroll_on
+                selected ::marsgui::icon::autoscroll_off} \
+            -variable [myvar scrollbackFlag]              \
+            -offvalue 1                                   \
+            -onvalue  0                                   \
             -command [mymethod SetScrollback]
 
         finder $bar.finder              \
@@ -228,7 +211,6 @@ snit::widget ::marsgui::scrollinglog {
             -width     20
 
         # NEXT, pack the components
-        pack $bar.title      -side left  -padx 1
         pack $bar.loglevel   -side left  -padx 1
         pack $bar.scrollback -side right -padx 1
         pack $bar.finder     -side right -padx 1 -pady {0 2}
@@ -299,6 +281,7 @@ snit::widget ::marsgui::scrollinglog {
     # Adjusts the verbosities array according to -loglevel and calls redisplay.
 
     method HandleLogLevel {} {
+        $bar.loglevel selection clear
         set levels [logger levels]
         set lognum [lsearch $levels $options(-loglevel)]
         foreach level $levels {
@@ -317,15 +300,10 @@ snit::widget ::marsgui::scrollinglog {
     # the scrollback flag updating the icon as well.
 
     method SetScrollback {} {
-    
         $log configure -autoscroll $scrollbackFlag
         
         # Set the scrollback button's bitmap to match and set -autoupdate.
         if {$scrollbackFlag} {
-    
-            $bar.scrollback configure \
-                                -bitmap @$::marsgui::library/autoscroll_on.xbm
-            
             $log configure -autoupdate on
 
             if {$loglist ne ""} {
@@ -339,10 +317,6 @@ snit::widget ::marsgui::scrollinglog {
                 $log load $logfile
             }
         } else {
-    
-            $bar.scrollback configure \
-                                -bitmap @$::marsgui::library/autoscroll_off.xbm
-            
             $log configure -autoupdate off
 
             if {$loglist ne ""} {

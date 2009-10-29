@@ -127,10 +127,10 @@ snit::widget ::marsgui::commandentry {
         if {$options(-clearbtn)} {
             install clearbtn using ttk::button $bgframe.clear \
                 -image        {
-                    ::marsgui::icon::clear11
-                    disabled ::marsgui::icon::clear11d }    \
-                -command      [mymethod ClearEntry]         \
-                -style        Entrybutton.Toolbutton        \
+                    ::marsgui::icon::clear
+                    disabled ::marsgui::icon::cleard }        \
+                -command      [mymethod ClearEntry]           \
+                -style        Entrybutton.Toolbutton          \
                 -state        disabled
 
             pack $bgframe.clear -side right -padx 2

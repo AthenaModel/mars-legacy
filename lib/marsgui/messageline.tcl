@@ -29,6 +29,7 @@ namespace eval ::marsgui:: {
 # Widget Definition
 
 snit::widget ::marsgui::messageline {
+    hulltype ttk::frame
 
     #-------------------------------------------------------------------
     # Components
@@ -42,20 +43,20 @@ snit::widget ::marsgui::messageline {
     # Delegated options
     delegate option -font to display
     delegate option -blankinterval to blanker as -interval
+    
+    #-------------------------------------------------------------------
+    # Instance Variables
+    
+    variable message ""    ;# The displayed message text
 
     #-------------------------------------------------------------------
     # Constructor & Destructor
     
     constructor {args} {
         # FIRST, Create the text widget
-        install display using text $win.display                 \
-            -height             1                               \
-            -background         $::marsgui::defaultBackground   \
-            -wrap               none                            \
-            -font               messagefont                     \
-            -state              disabled                        \
-            -borderwidth        0                               \
-            -highlightthickness 0
+        install display using ttk::label $win.display \
+            -font         messagefont                 \
+            -textvariable [myvar message]
                             
         grid $display -sticky nsew
         grid columnconfigure $win 0 -weight  1
@@ -80,9 +81,7 @@ snit::widget ::marsgui::messageline {
     # Blanks the display
 
     method BlankDisplay {} {
-        $display configure -state normal
-        $display delete 1.0 end
-        $display configure -state disabled
+        set message ""
     }
 
     #-------------------------------------------------------------------
@@ -102,11 +101,7 @@ snit::widget ::marsgui::messageline {
         }
         
         # NEXT, display the message.
-        $display configure -state normal
-        $display delete 1.0 end
-        $display insert end [string trim $msg]
-        $display see 1.0
-        $display configure -state disabled
+        set message [normalize $msg]
 
         update idletasks
         
@@ -114,6 +109,8 @@ snit::widget ::marsgui::messageline {
         # schedule
         $blanker cancel
         $blanker schedule
+        
+        return
     }
 }
 

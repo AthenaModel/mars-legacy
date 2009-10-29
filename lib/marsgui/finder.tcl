@@ -42,7 +42,7 @@ snit::widgetadaptor ::marsgui::finder {
         # FIRST, create icons used just by this widget
         namespace eval ${type}::icon {}
 
-        mkiconPair ${type}::icon::first {
+        mkicon ${type}::icon::first {
             XX......X
             XX.....XX
             XX....XXX
@@ -55,9 +55,9 @@ snit::widgetadaptor ::marsgui::finder {
             XX....XXX
             XX.....XX
             XX......X
-        }
+        } { . trans X black } d { X gray }
 
-        mkiconPair ${type}::icon::prev {
+        mkicon ${type}::icon::prev {
             .....X
             ....XX
             ...XXX
@@ -70,9 +70,9 @@ snit::widgetadaptor ::marsgui::finder {
             ...XXX
             ....XX
             .....X
-        }
+        } { . trans X black } d { X gray }
 
-        mkiconPair ${type}::icon::next {
+        mkicon ${type}::icon::next {
             X.....
             XX....
             XXX...
@@ -85,9 +85,9 @@ snit::widgetadaptor ::marsgui::finder {
             XXX...
             XX....
             X.....
-        }
+        } { . trans X black } d { X gray }
 
-        mkiconPair ${type}::icon::last {
+        mkicon ${type}::icon::last {
             X......XX
             XX.....XX
             XXX....XX
@@ -100,9 +100,9 @@ snit::widgetadaptor ::marsgui::finder {
             XXX....XX
             XX.....XX
             X......XX
-        }
+        } { . trans X black } d { X gray }
 
-        mkiconPair ${type}::icon::prevlog {
+        mkicon ${type}::icon::prevlog {
             .....X.....
             ....XXX....
             ...XXXXX...
@@ -116,9 +116,9 @@ snit::widgetadaptor ::marsgui::finder {
             ..XXXXXXX..
             .XXXXXXXXX.
             XXXXXXXXXXX
-        }
+        } { . trans X black } d { X gray }
 
-        mkiconPair ${type}::icon::nextlog {
+        mkicon ${type}::icon::nextlog {
             XXXXXXXXXXX
             .XXXXXXXXX.
             ..XXXXXXX..
@@ -132,9 +132,9 @@ snit::widgetadaptor ::marsgui::finder {
             ...XXXXX...
             ....XXX....
             .....X.....
-        }
+        } { . trans X black } d { X gray }
 
-        mkiconPair ${type}::icon::stop {
+        mkicon ${type}::icon::stop {
             XXXXXXXX
             XXXXXXXX
             XXXXXXXX
@@ -143,19 +143,9 @@ snit::widgetadaptor ::marsgui::finder {
             XXXXXXXX
             XXXXXXXX
             XXXXXXXX
-        }
+        } { . trans X black } d { X gray }
     }
     
-    proc mkiconPair {name pixels} {
-        mkicon $name    $pixels [list . trans X black]
-        mkicon ${name}d $pixels [list . trans X gray]
-    }
-    
-    proc getIcon {name} {
-        list ::marsgui::finder::icon::$name \
-            disabled ::marsgui::finder::icon::${name}d
-    }
-
 
     #-------------------------------------------------------------------
     # Components
@@ -232,7 +222,7 @@ snit::widgetadaptor ::marsgui::finder {
         set menu $f.type.menu
         ttk::menubutton $f.type                \
             -style   Entrybutton.Toolbutton    \
-            -image   ::marsgui::icon::search16 \
+            -image   ::marsgui::icon::search   \
             -menu    $menu
         
         DynamicHelp::add $f.type \
@@ -276,30 +266,31 @@ snit::widgetadaptor ::marsgui::finder {
 
         ttk::button $f.first                    \
             -style    Entrybutton.Toolbutton    \
-            -image    [getIcon first]           \
+            -image    [GetIcon first]           \
             -state    disabled                  \
             -command  [mymethod GoToFirst]
 
         ttk::button $f.prev                     \
             -style    Entrybutton.Toolbutton    \
-            -image    [getIcon prev]            \
+            -image    [GetIcon prev]            \
             -state    disabled                  \
             -command  [mymethod GoToPrev]
 
         ttk::button $f.next                     \
             -style    Entrybutton.Toolbutton    \
-            -image    [getIcon next]            \
+            -image    [GetIcon next]            \
             -state    disabled                  \
             -command  [mymethod GoToNext]
 
         ttk::button $f.last                     \
             -style    Entrybutton.Toolbutton    \
-            -image    [getIcon last]            \
+            -image    [GetIcon last]            \
             -state    disabled                  \
             -command  [mymethod GoToLast]
 
-        label $f.status                         \
+        ttk::label $f.status                    \
             -background     white               \
+            -anchor         center              \
             -textvariable   [varname status]    \
             -relief         flat                \
             -width          15                  \
@@ -308,19 +299,19 @@ snit::widgetadaptor ::marsgui::finder {
         if {$options(-loglist) ne ""} {
             ttk::button $f.prevlog                      \
                 -style    Entrybutton.Toolbutton        \
-                -image    [getIcon prevlog]             \
+                -image    [GetIcon prevlog]             \
                 -state    disabled                      \
                 -command  [mymethod SearchLogs earlier]
 
             ttk::button $f.stop                         \
                 -style    Entrybutton.Toolbutton        \
-                -image    [getIcon stop]                \
+                -image    [GetIcon stop]                \
                 -state    disabled                      \
                 -command  [mymethod StopSearch]
             
             ttk::button $f.nextlog                      \
                 -style    Entrybutton.Toolbutton        \
-                -image    [getIcon nextlog]             \
+                -image    [GetIcon nextlog]             \
                 -state    disabled                      \
                 -command  [mymethod SearchLogs later]
         }     
@@ -347,6 +338,18 @@ snit::widgetadaptor ::marsgui::finder {
         
         return
     }
+
+    # GetIcon name
+    #
+    # name      root name of one of the icons defined above
+    #
+    # Returns a -image value for a ttk::button.
+    proc GetIcon {name} {
+        list ::marsgui::finder::icon::$name \
+            disabled ::marsgui::finder::icon::${name}d
+    }
+
+
 
     #-------------------------------------------------------------------
     # Private Methods

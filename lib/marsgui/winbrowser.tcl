@@ -22,11 +22,13 @@ namespace eval ::marsgui:: {
 # winbrowser
 
 snit::widget ::marsgui::winbrowser {
+    hulltype ttk::frame
+    
     #-------------------------------------------------------------------
     # Typeconstructor
 
     typeconstructor {
-        namespace import ::marsutil::* ::marsutil::* ::marsgui::*
+        namespace import ::marsutil::* 
     }
 
     #-------------------------------------------------------------------

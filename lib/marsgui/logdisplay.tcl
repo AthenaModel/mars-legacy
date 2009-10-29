@@ -27,6 +27,8 @@ namespace eval ::marsgui:: {
 # Widget Definition
 
 snit::widget ::marsgui::logdisplay {
+    hulltype ttk::frame
+    
     #-------------------------------------------------------------------
     # Components
 
@@ -136,11 +138,11 @@ snit::widget ::marsgui::logdisplay {
         
         # NEXT, Install the rotext widget.
         install rotext using ::marsgui::rotext $win.text \
-            -wrap               none                 \
-            -selectborderwidth  0                    \
-            -xscrollcommand     [list $win.xbar set] \
-            -yscrollcommand     [list $win.ybar set] \
-            -borderwidth        1                    \
+            -wrap               none                     \
+            -selectborderwidth  0                        \
+            -xscrollcommand     [list $win.xbar set]     \
+            -yscrollcommand     [list $win.ybar set]     \
+            -borderwidth        1                        \
             -relief             sunken          
 
         # NEXT, Save the constructor options.

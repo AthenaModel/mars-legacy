@@ -25,14 +25,8 @@ namespace eval ::marsgui:: {
 # The zuluspinbox Widget Type
 
 snit::widget ::marsgui::zuluspinbox {
+    hulltype    ttk::frame
     widgetclass ZuluSpinbox
-
-    #-------------------------------------------------------------------
-    # Type Constructor
-
-    typeconstructor {
-        # TBD
-    }
 
     #-------------------------------------------------------------------
     # Components

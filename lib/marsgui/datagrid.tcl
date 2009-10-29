@@ -95,7 +95,7 @@ snit::widget ::marsgui::datagrid {
     method label {r c args} {
         set w "$win.wid[incr counter]"
 
-        eval label $w $args
+        ttk::label $w {*}$args
 
         $self Position $w $r $c
     }
@@ -115,7 +115,7 @@ snit::widget ::marsgui::datagrid {
     method value {r c args} {
         set w "$win.wid[incr counter]"
 
-        eval label $w -font codefont -anchor w $args
+        ttk::label $w -font codefont -anchor w {*}$args
 
         $self Position $w $r $c
     }

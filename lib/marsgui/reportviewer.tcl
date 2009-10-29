@@ -24,6 +24,8 @@ namespace eval ::marsgui:: {
 # Widget Definition
 
 snit::widget ::marsgui::reportviewer {
+    hulltype ttk::frame
+    
     #-------------------------------------------------------------------
     # Options
 
@@ -66,22 +68,16 @@ snit::widget ::marsgui::reportviewer {
         # FIRST, save the options
         $self configurelist $args
 
-        # NEXT, set the hull frame's appearance.
-        $hull configure \
-            -borderwidth 0 \
-            -relief flat
-
         # NEXT, create the info bar across the top.
-        set bar [frame $win.bar \
-                    -borderwidth 0 \
-                    -relief flat]
-        label $bar.label \
+        set bar [ttk::frame $win.bar]
+        
+        ttk::label $bar.label \
             -text "Report Text"
 
-        install hotbtn using checkbutton $bar.hotbtn \
-            -text     "Hot List"                     \
-            -variable [myvar hot]                    \
-            -state    disabled                       \
+        install hotbtn using ttk::checkbutton $bar.hotbtn \
+            -text     "Hot List"                          \
+            -variable [myvar hot]                         \
+            -state    disabled                            \
             -command  [mymethod Toggle]
 
         pack $bar.label  -side left

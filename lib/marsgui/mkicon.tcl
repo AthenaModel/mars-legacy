@@ -21,7 +21,7 @@ namespace eval ::marsgui:: {
 # Public Commands
 
 
-# mkicon cmd charmap colors
+# mkicon cmd charmap colors ?suffix colors...?
 #
 # cmd       Name of icon command to create.  If "", a name is 
 #           generated automatically.
@@ -32,10 +32,13 @@ namespace eval ::marsgui:: {
 #           white.  The special color "trans" indicates that the pixel
 #           should be transparent.  Each character in the charmap needs
 #           to be represented in the dictionary.
+# suffix     A suffix to be added to name
+# mod        A partial dictionary of colors to use for suffix.
 #
-# Creates and returns a Tk photo image.
+# Creates and returns a family of Tk photo images based on the
+# charmap and colors.
 
-proc ::marsgui::mkicon {cmd charmap colors} {
+proc ::marsgui::mkicon {cmd charmap colors args} {
     # FIRST, make sure the name is fully qualified.
     if {$cmd ne "" && ![string match "::*" $cmd]} {
         set ns [uplevel 1 {namespace current}]
@@ -47,7 +50,20 @@ proc ::marsgui::mkicon {cmd charmap colors} {
         }
     }
 
-    # NEXT, get the number of rows and columns
+    set result [list]
+    
+    lappend result [mkicon_MakeIcon $cmd $charmap $colors] 
+    
+    foreach {suffix mod} $args {
+        lappend result \
+            [mkicon_MakeIcon ${cmd}$suffix $charmap [dict merge $colors $mod]]
+    }
+
+    return $result
+}
+
+proc ::marsgui::mkicon_MakeIcon {cmd charmap colors} {
+    # FIRST, get the number of rows and columns
     set rows [llength $charmap]
     set cols [string length [lindex $charmap 1]]
     
@@ -79,7 +95,7 @@ proc ::marsgui::mkicon {cmd charmap colors} {
     return $icon
 }
 
-# mkiconfile name fmt charmap colors
+# mkiconfile name fmt charmap colors ?suffix mod...?
 #
 # name      The file name
 # fmt       gif|png
@@ -90,18 +106,27 @@ proc ::marsgui::mkicon {cmd charmap colors} {
 #           white.  The special color "trans" indicates that the pixel
 #           should be transparent.  Each character in the charmap needs
 #           to be represented in the dictionary.
+# suffix     A suffix to be added to name
+# mod        A partial dictionary of colors to use for suffix.
 #
-# Creates a image file of the specified format.  By default, the file
-# will be created in the current working directory.  Returns the
-# absolute path to the icon file.
+# Creates one or more image files of the specified format.  By default,
+# the files will be created in the current working directory.  Returns a
+# list of the absolute paths to the icon files.
 
-proc ::marsgui::mkiconfile {name fmt charmap colors} {
-    # FIRST, make the icon
-    set icon [mkicon "" $charmap $colors]
+proc ::marsgui::mkiconfile {name fmt charmap colors args} {
+    set result [list]
+    set args [linsert $args 0 {} {}]
+    
+    foreach {suffix mod} $args {
+        # FIRST, make the icon
+        set icon [mkicon_MakeIcon "" $charmap [dict merge $colors $mod]]
 
-    # NEXT, save the image to disk, and delete the image object.
-    $icon write $name -format $fmt
-    image delete $icon
-
-    return [file normalize $name]
+        # NEXT, save the image to disk, and delete the image object.
+        set fname [file rootname $name]$suffix[file extension $name]
+        $icon write $fname -format $fmt
+        image delete $icon
+        lappend result [file normalize $name]
+    }
+    
+    return $result
 }

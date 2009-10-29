@@ -125,6 +125,12 @@ ttk::style theme use clam
 # Entrybutton.Toolbutton: A style for buttons used in entries.
 ttk::style configure Entrybutton.Toolbutton -background white
 ttk::style map Entrybutton.Toolbutton -background {disabled white}
+ttk::style configure Menubox.TCombobox \
+    -fieldbackground white -foreground black
+ttk::style map Menubox.TCombobox -fieldbackground {}
+# [list readonly white focus white] 
+ttk::style map Menubox.TCombobox -foreground {}
+# [list readonly black focus black] 
 
 #-----------------------------------------------------------------------
 # Option Database Settings

@@ -24,16 +24,8 @@ namespace eval ::marsgui:: {
 # Widget Definition
 
 snit::widget ::marsgui::reportbrowser {
-    #-------------------------------------------------------------------
-    # Type Constructor
-
-    typeconstructor {
-        # Add defaults to the option database
-        option add *Reportbrowser.borderWidth        1
-        option add *Reportbrowser.relief             flat
-        option add *Reportbrowser.background     $::marsgui::defaultBackground
-    }
-
+    hulltype ttk::frame
+    
     #-------------------------------------------------------------------
     # Options
 
@@ -135,31 +127,28 @@ snit::widget ::marsgui::reportbrowser {
         grid columnconfigure $win 0 -weight 1
 
         # ROW 0: Toolbar
-        frame $win.bar -relief flat
+        ttk::frame $win.bar
 
         set search [$self CreateSearchBox $win.bar.search]
 
-        label $win.bar.current \
+        ttk::label $win.bar.current \
             -textvariable [myvar currentBin]
 
-        checkbutton $win.bar.recent                   \
-            -offrelief   flat                         \
-            -overrelief  raised                       \
-            -indicatoron no                           \
-            -image       ::marsgui::clock_icon            \
+        ttk::checkbutton $win.bar.recent              \
+            -style       Toolbutton                   \
+            -image       ::marsgui::icon::clock       \
             -command     [mymethod LoadBin]           \
             -variable    [myvar options(-showrecent)] 
 
         DynamicHelp::add $win.bar.recent \
             -text "When set, show recent reports only."
 
-        checkbutton $win.bar.scrolllock                \
-            -offrelief   flat                          \
-            -overrelief  raised                        \
-            -indicatoron no                            \
-            -image       ::marsgui::autoscroll_on_icon     \
-            -selectimage ::marsgui::autoscroll_off_icon    \
-            -variable    [myvar options(-scrolllock)]  \
+        ttk::checkbutton $win.bar.scrolllock              \
+            -style       Toolbutton                       \
+            -image       {
+                         ::marsgui::icon::autoscroll_on
+                selected ::marsgui::icon::autoscroll_off} \
+            -variable    [myvar options(-scrolllock)]     \
             -command     [mymethod UpdateScrollLock]
 
         DynamicHelp::add $win.bar.scrolllock \
@@ -171,7 +160,7 @@ snit::widget ::marsgui::reportbrowser {
         pack $search             -side right -padx 2
         
         # ROW 1, add a separator
-        frame $win.sep1 -height 2 -relief sunken -borderwidth 2
+        ttk::separator $win.sep1 -orient horizontal
 
         # ROW 2, the left/right paner
         ttk::panedwindow $win.lr \
@@ -188,9 +177,7 @@ snit::widget ::marsgui::reportbrowser {
         $win.lr add $win.lr.tb
 
         # List pane
-        frame $win.lr.tb.top \
-            -borderwidth 0 \
-            -relief flat
+        ttk::frame $win.lr.tb.top
         $win.lr.tb add $win.lr.tb.top
 
         install replist using listbox $win.lr.tb.top.reports \
@@ -540,7 +527,7 @@ snit::widget ::marsgui::reportbrowser {
 
         ttk::menubutton $f.menubtn                \
             -style  Entrybutton.Toolbutton        \
-            -image  ::marsgui::icon::filter16     \
+            -image  ::marsgui::icon::filter       \
             -menu   $menu
         
         pack $f.menubtn \

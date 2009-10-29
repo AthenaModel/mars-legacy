@@ -17,6 +17,8 @@
 # Widget Definition
 
 snit::widget ::marsgui::rb_bintree {
+    hulltype ttk::frame
+    
     #-------------------------------------------------------------------
     # Options
 

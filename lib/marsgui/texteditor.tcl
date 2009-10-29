@@ -29,18 +29,6 @@ snit::widget ::marsgui::texteditor {
     widgetclass TextEditor
 
     #-------------------------------------------------------------------
-    # Type Constructor
-
-    typeconstructor {
-        # Add defaults to the option database
-        option add *TextEditor.background         white
-        option add *TextEditor.Foreground         black
-        option add *TextEditor.font               codefont
-        option add *TextEditor.width              80
-        option add *TextEditor.height             24
-    }
-
-    #-------------------------------------------------------------------
     # Components
 
     component text    ;# The Tk text widget
@@ -94,7 +82,7 @@ snit::widget ::marsgui::texteditor {
 
     constructor {args} {
         # FIRST, create the menu bar
-        set menubar [menu $win.menubar]
+        set menubar [menu $win.menubar -borderwidth 0]
         $win configure -menu $menubar
 
         # NEXT, create the File menu
@@ -158,12 +146,20 @@ snit::widget ::marsgui::texteditor {
             -underline 0 \
             -accelerator "Ctrl+V" \
             -command {event generate [focus] <<Paste>>}
+        
+        # NEXT, create a separator
+        ttk::separator $win.sep0 -orient horizontal
 
         # NEXT, create the text widget
-        install text using text $win.text \
-            -wrap           none \
-            -undo           1 \
-            -autoseparators 1 \
+        install text using text $win.text           \
+            -background     white                   \
+            -foreground     black                   \
+            -font           codefont                \
+            -width          80                      \
+            -height         24                      \
+            -wrap           none                    \
+            -undo           1                       \
+            -autoseparators 1                       \
             -yscrollcommand [list $win.yscroll set] \
             -xscrollcommand [list $win.xscroll set]
 
@@ -175,21 +171,19 @@ snit::widget ::marsgui::texteditor {
             -orient horizontal \
             -command [list $text xview]
 
-        label $win.msgline \
+        ttk::label $win.msgline \
             -textvariable [myvar message] \
-            -anchor w \
-            -justify left
+            -anchor       w               
 
         # NEXT, grid everything.
         grid columnconfigure $win 0 -weight 1
-        grid columnconfigure $win 1 -weight 0
 
-        grid rowconfigure $win 0 -weight 1
-        grid rowconfigure $win 1 -weight 0
+        grid rowconfigure $win 1 -weight 1
 
-        grid $win.text     $win.yscroll -sticky nsew
+        grid $win.sep0     -            -sticky ew
+        grid $win.text     $win.yscroll -sticky nsew -pady 1
         grid $win.xscroll               -sticky nsew
-        grid $win.msgline -columnspan 2 -sticky ew
+        grid $win.msgline -             -sticky ew
 
         # NEXT, set the hull's background to the default, so that
         # the lower-right corner is properly colored.
