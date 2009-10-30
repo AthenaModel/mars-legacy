@@ -106,7 +106,7 @@ snit::widget appwin {
                     -loglevel      debug                              \
                     -showloglist   yes                                \
                     -rootdir       [file normalize [file join . log]] \
-                    -defaultappdir app_gram                           \
+                    -defaultappdir mars_gram                          \
                     -format        {
                         {zulu  12 yes}
                         {v      7 yes}

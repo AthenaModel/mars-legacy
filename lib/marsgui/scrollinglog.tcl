@@ -103,6 +103,7 @@ snit::widget ::marsgui::scrollinglog {
     variable logfile        ""     ;# Name of the log file being displayed
     variable scrollbackFlag 1      ;# Var for $bar.scrollback
     variable verbosities -array {} ;# Controls which levels to display
+    variable colindex -array {}    ;# Column index by column name
 
     #-------------------------------------------------------------------
     # Constructor
@@ -128,6 +129,12 @@ snit::widget ::marsgui::scrollinglog {
             {warning -background yellow}
         }]
         set showTitle [from args -showtitle]
+        
+        # From the -format, determine which column is which
+        set i -1
+        foreach record $format {
+            set colindex([lindex $record 0]) [incr i]
+        }
 
         # NEXT, determine if a loglist should be included.
         set loglist ""
@@ -190,12 +197,15 @@ snit::widget ::marsgui::scrollinglog {
         ttk::checkbutton $bar.scrollback                  \
             -style    Toolbutton                          \
             -image    {
-                         ::marsgui::icon::autoscroll_on
-                selected ::marsgui::icon::autoscroll_off} \
+                         ::marsgui::icon::unlocked
+                selected ::marsgui::icon::locked}         \
             -variable [myvar scrollbackFlag]              \
             -offvalue 1                                   \
             -onvalue  0                                   \
             -command [mymethod SetScrollback]
+        
+        DynamicHelp::add $bar.scrollback \
+            -text "Scroll Lock/Unlock"
 
         finder $bar.finder              \
             -findcmd  [list $log find]  \
@@ -211,8 +221,8 @@ snit::widget ::marsgui::scrollinglog {
         # NEXT, pack the components
         pack $bar.loglevel   -side left  -padx 1
         pack $bar.scrollback -side right -padx 1
-        pack $bar.finder     -side right -padx 1 -pady {0 2}
-        pack $bar.filter     -side right -padx 1 -pady {0 2}
+        pack $bar.finder     -side right -padx 1 -pady 2 -padx {4 0}
+        pack $bar.filter     -side right -padx 1 -pady 2
 
         pack $bar -side top -fill x
 
@@ -338,7 +348,7 @@ snit::widget ::marsgui::scrollinglog {
 
     method LogFilter {entryStr} {
         #  Filter by verbosity.
-        set verb [lindex $entryStr 1]
+        set verb [lindex $entryStr $colindex(v)]
         
         if {![info exists verbosities($verb)] || !$verbosities($verb)} {
             return 0
@@ -416,7 +426,21 @@ snit::widget ::marsgui::scrollinglog {
             $log load $logfile
         }
     }
-
+    
+    # lock ?flag?
+    #
+    # flag   A boolean flag
+    #
+    # Queries/sets the scroll lock (called "scrollback" above).
+    
+    method lock {{flag ""}} {
+        if {$flag ne ""} {
+            set scrollbackFlag [expr {!$flag}]
+            $self SetScrollback
+        }
+        
+        return [expr {!$scrollbackFlag}]
+    }
 }
 
 

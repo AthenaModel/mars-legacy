@@ -107,13 +107,6 @@ same names.<p>
 <<defopt {-borderwidth <i>width</i>}>>
 <<defopt {-relief <i>relief</i>}>>
 
-These options apply to the widget's hull frame, and are all identical
-to the Tk frame widget options of the same name.<p>
-
-<<defopt {-hullbackground <i>color</i>}>>
-
-Sets the hull frame's background color.<p>
-
 <<defopt {-defaultappdir <i>appdir</i>}>>
 <<defopt {-formattext <i>val</i>}>>
 <<defopt {-logpattern <i>glob_pattern</i>}>>

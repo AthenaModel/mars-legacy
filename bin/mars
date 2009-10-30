@@ -107,6 +107,12 @@ set metadata {
         applib   app_link
         mode     cmdline
     }
+    
+    log {
+        text     "Log Browser"
+        applib   app_log
+        mode     gui
+    }
 
     man {
         text     "Man Page Processor"

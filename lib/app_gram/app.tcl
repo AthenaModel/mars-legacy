@@ -156,7 +156,7 @@ snit::type app {
     # Creates the logger, ::log, for this application
 
     typemethod CreateLogger {} {
-        set logdir [file normalize [file join . log app_gram]]
+        set logdir [file normalize [file join . log mars_gram]]
         
         file mkdir $logdir
         

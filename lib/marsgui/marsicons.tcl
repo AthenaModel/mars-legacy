@@ -129,6 +129,44 @@ namespace eval ::marsgui::icon:: {
         ..............
         ..............
     } { . trans X black } d { X gray }
+    
+    mkicon ::marsgui::icon::locked {
+        ..............
+        ...XXXXXXXX...
+        ..XXXXXXXXXX..
+        ..XX......XX..
+        ..XX......XX..
+        ..XX......XX..
+        ..XX......XX..
+        XXXXXXXXXXXXXX
+        X............X
+        X.XXXXXXXXXX.X
+        X............X
+        X.XXXXXXXXXX.X
+        X............X
+        X.XXXXXXXXXX.X
+        X............X
+        XXXXXXXXXXXXXX
+    } { . trans X black } d { X gray }
+
+    mkicon ::marsgui::icon::unlocked {
+        ...XXXXXXXX...
+        ..XXXXXXXXXX..
+        ..XX......XX..
+        ..XX......XX..
+        ..XX..........
+        ..XX..........
+        ..XX..........
+        XXXXXXXXXXXXXX
+        X............X
+        X.XXXXXXXXXX.X
+        X............X
+        X.XXXXXXXXXX.X
+        X............X
+        X.XXXXXXXXXX.X
+        X............X
+        XXXXXXXXXXXXXX
+    } { . trans X black } d { X gray }
 }
 
 
