@@ -181,13 +181,11 @@ snit::widget ::marsgui::scrollinglog {
         }
 
         # Tool bar contents
-        ttk::combobox $bar.loglevel                      \
-            -style        Menubox.TCombobox              \
+        menubox $bar.loglevel                            \
             -textvariable [myvar options(-loglevel)]     \
             -values       [lrange [logger levels] 1 end] \
             -width        7                              \
-            -state        readonly
-        bind $bar.loglevel <<ComboboxSelected>> [mymethod HandleLogLevel]
+            -command      [mymethod HandleLogLevel]
 
         ttk::checkbutton $bar.scrollback                  \
             -style    Toolbutton                          \
@@ -281,7 +279,6 @@ snit::widget ::marsgui::scrollinglog {
     # Adjusts the verbosities array according to -loglevel and calls redisplay.
 
     method HandleLogLevel {} {
-        $bar.loglevel selection clear
         set levels [logger levels]
         set lognum [lsearch $levels $options(-loglevel)]
         foreach level $levels {
