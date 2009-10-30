@@ -111,7 +111,7 @@ namespace eval ::marsgui::icon:: {
         X.XXXXXXXXXX.X
         X............X
         XXXXXXXXXXXXXX
-    } { . trans X black } d { X black }
+    } { . trans X black } d { X gray }
 
     mkicon ::marsgui::icon::autoscroll_off {
         ..XXXXXXXXXX..
@@ -128,7 +128,7 @@ namespace eval ::marsgui::icon:: {
         ..XXXXXXXXXX..
         ..............
         ..............
-    } { . trans X black } d { X black }
+    } { . trans X black } d { X gray }
 }
 
 

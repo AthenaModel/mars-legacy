@@ -125,12 +125,12 @@ ttk::style theme use clam
 # Entrybutton.Toolbutton: A style for buttons used in entries.
 ttk::style configure Entrybutton.Toolbutton -background white
 ttk::style map Entrybutton.Toolbutton -background {disabled white}
+
+# Menubox.TCombobox: A style for comboboxes used as pulldown menus.
 ttk::style configure Menubox.TCombobox \
     -fieldbackground white -foreground black
 ttk::style map Menubox.TCombobox -fieldbackground {}
-# [list readonly white focus white] 
 ttk::style map Menubox.TCombobox -foreground {}
-# [list readonly black focus black] 
 
 #-----------------------------------------------------------------------
 # Option Database Settings
@@ -144,6 +144,8 @@ ttk::style map Menubox.TCombobox -foreground {}
 
 set ::marsgui::defaultBackground [ttk::style configure . -background]
 set ::marsgui::activeBackground  [ttk::style lookup . -background active]
+
+. configure -background $::marsgui::defaultBackground
 
 option add *background                      $::marsgui::defaultBackground
 
@@ -181,40 +183,25 @@ option add *Listbox.foreground              black
 option add *Listbox.background              white
 
 # entry widget
-option add *Entry.foreground  black
-option add *Entry.background  white
+option add *Entry.foreground                black
+option add *Entry.background                white
 
 # spinbox widget
-option add *Spinbox.background white
-option add *Spinbox.foreground black
-option add *Spinbox.repeatInterval 15
+option add *Spinbox.background              white
+option add *Spinbox.foreground              black
+option add *Spinbox.repeatInterval          15
 
 # BWidget ComboBox widget
-option add *ComboBox*Entry.background  white
-option add *ComboBox*Entry.foreground  black
-option add *ComboBox.borderWidth       1
-option add *ComboBox*selectBackground  white
-option add *ComboBox*selectForeground  black
+option add *ComboBox*Entry.background       white
+option add *ComboBox*Entry.foreground       black
+option add *ComboBox.borderWidth            1
+option add *ComboBox*selectBackground       white
+option add *ComboBox*selectForeground       black
 
 #BWidget dynamic help (tool tip) defaults
 DynamicHelp::configure -background #FFFF99
 
-# WHD, 10/27/09: These settings are commented out.  They date
-# from the earliest JNEM GUI, and appear to no longer be needed.  If
-# you're reading this comment, you can probably just delete them.
 
-# All widgets
-# option add *selectBorderWidth 0
-
-# menu widget
-# option add *Menu.activeBackground  "royal blue"
-# option add *Menu.activeForeground  white
-# option add *Menu.borderWidth  1
-# option add *Menu.activeBorderWidth 0                
-
-# frame widget
-# option add *Frame.borderWidth  1
-# option add *Frame.relief       raised
 
 
 

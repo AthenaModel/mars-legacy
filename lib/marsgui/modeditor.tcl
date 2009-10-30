@@ -122,13 +122,10 @@ snit::widget ::marsgui::modeditor {
         ttk::separator $win.sep1 \
             -orient horizontal
         
-        install editor using text $win.editor \
-            -width              80            \
-            -height             24            \
-            -font               TkFixedFont   \
-            -borderwidth        1             \
-            -highlightthickness 0             \
-            -relief             sunken        \
+        install editor using texteditor $win.editor     \
+            -borderwidth        1                       \
+            -highlightthickness 0                       \
+            -relief             sunken                  \
             -yscrollcommand     [list $win.yscroll set]
         
         ttk::scrollbar $win.yscroll \
@@ -147,9 +144,6 @@ snit::widget ::marsgui::modeditor {
         # Get button is only enabled if there's something in the name field.
         bind $codename <KeyRelease> [mymethod SetButtonState]
         bind $codename <Return>     [mymethod GrabCode]
-        
-        # Tab in the editor shouldn't use tab characters.
-        bind $editor <Tab> [mymethod EditorTab]
     }
     
     # GrabCode

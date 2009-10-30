@@ -76,24 +76,24 @@ snit::widget ::marsgui::debugger {
         set filemenu [menu $menubar.file]
         $menubar add cascade -label "File" -underline 0 -menu $filemenu
 
-        $filemenu add command \
-            -label "New Debugger..." \
-            -underline 0 \
-            -accelerator "Ctrl+N" \
+        $filemenu add command         \
+            -label "New Debugger..."  \
+            -underline 0              \
+            -accelerator "Ctrl+N"     \
             -command [mymethod NewDebugger]
         bind $win <Control-n> [mymethod NewDebugger]
 
         if {$options(-app)} {
-            $filemenu add command \
-                -label "Exit" \
-                -underline 0 \
+            $filemenu add command     \
+                -label "Exit"         \
+                -underline 0          \
                 -accelerator "Ctrl+Q" \
                 -command [mymethod Exit]
             bind $win <Control-q> [mymethod Exit]
         } else {
-            $filemenu add command \
+            $filemenu add command     \
                 -label "Close Window" \
-                -underline 0 \
+                -underline 0          \
                 -accelerator "Ctrl+W" \
                 -command [mymethod Close]
             bind $win <Control-w> [mymethod Close]
@@ -103,23 +103,38 @@ snit::widget ::marsgui::debugger {
         set editmenu [menu $menubar.edit]
         $menubar add cascade -label "Edit" -underline 0 -menu $editmenu
     
-        $editmenu add command \
-            -label "Cut" \
-            -underline 2 \
+        $editmenu add command     \
+            -label "Undo"         \
+            -underline 0          \
+            -accelerator "Ctrl+Z" \
+            -command {event generate [focus] <<Undo>>}
+
+        $editmenu add separator
+
+        $editmenu add command     \
+            -label "Cut"          \
+            -underline 2          \
             -accelerator "Ctrl+X" \
             -command {event generate [focus] <<Cut>>}
 
-        $editmenu add command \
-            -label "Copy" \
-            -underline 0 \
+        $editmenu add command     \
+            -label "Copy"         \
+            -underline 0          \
             -accelerator "Ctrl+C" \
             -command {event generate [focus] <<Copy>>}
 
-        $editmenu add command \
-            -label "Paste" \
-            -underline 0 \
+        $editmenu add command     \
+            -label "Paste"        \
+            -underline 0          \
             -accelerator "Ctrl+V" \
             -command {event generate [focus] <<Paste>>}
+        
+        $editmenu add command           \
+            -label "Select All"         \
+            -underline 0                \
+            -accelerator "Ctrl+Shift+A" \
+            -command {event generate [focus] <<SelectAll>>}
+
 
         # NEXT, create the Browser menu
         set bmenu [menu $menubar.browser]

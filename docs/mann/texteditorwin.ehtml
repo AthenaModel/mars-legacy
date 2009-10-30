@@ -1,4 +1,4 @@
-<<manpage {marsgui(n) texteditor(n)} "Simple Text Editor">>
+<<manpage {marsgui(n) texteditorwin(n)} "Simple Text Editor Window">>
 
 <<section SYNOPSIS>>
 
@@ -13,7 +13,7 @@ namespace import ::marsgui::*
 
 <<xref marsgui(n)>> contains general-purpose (i.e.,
 non-application-specific) GUI code for use in Mars.
-This module defines the ::marsgui::texteditor, a simple text editor
+This module defines the ::marsgui::texteditorwin, a simple text editor
 window which can be popped up to edit files in any Tk application.<p>
 
 The text editor has the following features:<p>
@@ -24,17 +24,19 @@ The text editor has the following features:<p>
   <li> New Window, Open File, Save File, Save File As.
 </ul>
 
+texteditorwin(n) is based on the <<xref texteditor(n)>> editing widget.<p>
+
 <<section COMMANDS>>
 
 This module defines the following command:<p>
 
 <<deflist commands>>
 
-<<defitem texteditor {texteditor <i>pathName ?options...?</i>}>>
+<<defitem texteditorwin {texteditorwin <i>pathName ?options...?</i>}>>
 
-Creates a new toplevel texteditor window named <i>pathName</i>.<p>
+Creates a new toplevel texteditorwin window named <i>pathName</i>.<p>
 
-The <<iref texteditor>> widget has all the options of the
+The <<iref texteditorwin>> widget has all the options of the
 standard Tk "toplevel" widget; in addition, it has the following:<p>
 
 <<deflist options>>
@@ -84,15 +86,15 @@ the Tk manpages for the format.<p>
 
 <<deflist instance>>
 
-<<defitem configure {$texteditor configure <i>option value...</i>}>>
+<<defitem configure {<i>win</i> configure <i>option value...</i>}>>
 
 Sets the values of the specified <i>options</i>.<p>
 
-<<defitem cget {$texteditor cget <i>option</i>}>>
+<<defitem cget {<i>win</i> cget <i>option</i>}>>
 
 Returns the value of the specified <i>option</i>.<p>
 
-<<defitem load {$texteditor load <i>filename</i>}>>
+<<defitem load {<i>win</i> load <i>filename</i>}>>
 
 Loads the named file into the editor.  The file will not be
 loaded if the current file needs to be saved.<p>
@@ -101,7 +103,7 @@ The named file need not exist; if it does not, a blank document
 will be created, but the file name will be saved for when the
 file is saved.<p>
 
-<<defitem open {$texteditor open ?<i>filename</i>?}>>
+<<defitem open {<i>win</i> open ?<i>filename</i>?}>>
 
 Called with a file name, this subcommand is equivalent to
 <<iref load>>.  Called without a file name, prompts the user

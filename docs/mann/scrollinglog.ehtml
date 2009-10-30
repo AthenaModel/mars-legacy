@@ -72,8 +72,7 @@ levels.<p>
 
 <<defopt {-title <i>title</i>}>>
 
-Specifies a title string to display in the widget's control bar.
-Defaults to "Log".<p>
+<b>Obsolete.</b>  This option no longer has any effect.<p>
 
 <<defopt {-updateinterval <i>milliseconds</i>}>>
 

@@ -95,6 +95,12 @@ set metadata {
         applib   app_gram
         mode     gui
     }
+    
+    icons {
+        text     "Icon Browser"
+        applib   app_icons
+        mode     gui
+    }
 
     link {
         text     "Link Mars into client projects"

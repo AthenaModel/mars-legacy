@@ -12,78 +12,130 @@ namespace import ::marsgui::*
 <<section DESCRIPTION>>
 
 marsgui(n) is a package of non-application-specific graphical user
-interface code for use in Mars GUI applications.  In addition
-to including a number of useful widgets, it also sets a number
-of Tk settings to new default values.  See <<xref DETAILS>> for
+interface code for use in Mars GUI applications; see the man page
+<a href="./index.html">index</a> for the full list.  In addition
+to including a number of useful widgets, it also configures
+Tk for a better look and feel.  See <<xref DETAILS>> for
 more.
-
-<<section MODULES>>
-
-marsgui(n) includes the following submodules:<p>
-
-<ul>
-  <li> <<xref cli(n)>> -- Command-Line Interface Widget</li>
-  <li> <<xref commandentry(n)>> -- Command Entry Widget</li>
-  <li> <<xref datagrid(n)>> -- Grid-based Data Frame</li>
-  <li> <<xref debugger(n)>> -- Debugging Console</li>
-  <li> <<xref filter(n)>> -- Text Filter Control Widget</li>
-  <li> <<xref finder(n)>> -- Text Search Widget</li>
-  <li> <<xref gradient(n)>> -- Color Gradient Computer</li>
-  <li> <<xref logdisplay(n)>> -- Log Display Widget</li>
-  <li> <<xref loglist(n)>> -- Log List Widget</li>
-  <li> <<xref messagebox(n)>> -- Message Box Dialog</i>
-  <li> <<xref messageline(n)>> -- Message Line Widget</li>
-  <li> <<xref paner(n)>> -- Paned Window Widget</li>
-  <li> <<xref rotext(n)>> -- Read-only Text Widget</li>
-  <li> <<xref scrollinglog(n)>> -- File Logging Widget</li>
-  <li> <<xref subwin(n)>> -- Subordinate Window Widget</li>
-  <li> <<xref texteditor(n)>> -- Simple Text Editor</li>
-  <li> <<xref zuluspinbox(n)>> -- Zulu-Time Spinbox Widget</li>
-</ul>
-
-<<section IMAGES>>
-
-marsgui(n) includes the following images, all of which are loaded as
-Tk bitmaps and can be used by name.  Note that the image names are
-not exported from the <code>::marsgui::</code> namespace; the name should
-always be given as shown.<p>
-
-<b>TBD:</b> This needs to be updated.<p>
-
-<<deflist images>>
-
-<<defitem folder_icon {::marsgui::folder_icon}>>
-
-A 16x16 pixel bitmap of a folder.<p>
-
-<<defitem page_icon {::marsgui::page_icon}>>
-
-A 16x16 pixel bitmap of a page with one corner folded down.<p>
-
-<</deflist images>>
 
 <<section DETAILS>>
 
-In addition to the modules and commands listed above, marsgui(n) affects
-standard Tk as follows:<p>
+In addition to the modules and commands listed in the index,
+above, marsgui(n) modifies standard Tk as follows:<p>
 
 <ul>
-  <li> Sets the Tk scaling factor so that fonts display properly.<p>
-
-  <li> Defines the Control-x, Control-c, and Control-v as the
+  <li> Defines Ctrl+Z, Ctrl+C, and Ctrl+V as the
        standard cut, copy, and paste keys.<p>
+       
+  <li> Defines Ctrl+Z and Ctrl+Shift+Z as the standard Undo/Redo keys;
+       widgets must support the &lt;&lt;Undo&gt;&gt; and
+       &lt;&lt;Redo&gt;&gt; virtual events.<p>
 
-  <li> Defines Shift-Control-a as the standard "select all" key.
+  <li> Defines Ctrl+Shift+A as the standard "select all" key.
        Widgets must support the &lt;&lt;SelectAll&gt;&gt; virtual event.<p>
 
-  <li> Defines two standard monospace fonts, "codefont" and
-       "codefontbold".<p>
+  <li> Defines a number of standard <<xref FONTS>>.<p>
+  
+  <li> Modifies the standard <<xref tk:text(n)>> and <<xref tk:entry(n)>>
+       widget bindings so that pasting text deletes the current selection.<p>
+       
+  <li> Requests the <b>clam</b> ttk:: theme.<p>
+      
+  <li> Defines new ttk:: <<xref STYLES>>.<p>
 
-  <li> Adds a number of definitions to the option database to
-       improve the appearance of the Tk widgets.  See the code for
+  <li> Adds a number of definitions to the option database so that the
+       appearance and color of the standard Tk widgets matches the
+       current ttk::theme, or is otherwise improved.  See the code for
        specifics.<p>
 </ul>
 
+<<section FONTS>>
+
+marsgui(n) defines the following standard fonts.<p>
+
+<table border="1" cellspacing="0" cellpadding="2">
+
+<tr align="left"><th>Font Name</th> <th>Description</th></tr>
+
+<tr valign="baseline">
+<td><code><b>codefont</b></td>
+<td>
+Standard fixed pitch font.
+</td>
+</tr>
+
+<tr valign="baseline">
+<td><code><b>codefontitalic<b></code></td>
+<td>
+<code><b>codefont</b></code> + Italics
+</td>
+</tr>
+
+<tr valign="baseline">
+<td><code><b>codefontbold</b></code></td>
+<td>
+<code><b>codefont</b></code> + Bold face
+</td>
+</tr>
+
+<tr valign="baseline">
+<td><code><b>tinyfont</b></code></td>
+<td>
+Tiny sans-serif font, for small buttons.
+</td>
+</tr>
+
+<tr valign="baseline">
+<td><code><b>messagefont</b></code></td>
+<td>
+Sans-serif font for messages
+</td>
+</tr>
+
+<tr valign="baseline">
+<td><code><b>messagefontb</b></code></td>
+<td>
+<code><b>messagefont</b></code> + Bold Face
+</td>
+</tr>
+
+<tr valign="baseline">
+<td><code><b>reportfont</b></td>
+<td>
+Font for report headers.
+</td>
+</tr>
+
+</table>
+
+<<section STYLES>>
+
+marsgui(n) defines the follow styles for use with ttk:: widgets.<p>
+
+<table border="1" cellspacing="0" cellpadding="2">
+
+<tr align="left"><th>Style Name</th> <th>Description</th></tr>
+
+<tr valign="baseline">
+<td><code><b>Entrybutton.Toolbutton</b></td>
+<td>
+The standard <code><b>Toolbutton</b></code> style configures
+ttk::button widgets for use in toolbars.  This style extends this
+with a white background, for use in compound entry widgets like
+<<xref commandentry(n)>>.<p>
+</td>
+</tr>
+
+<tr valign="baseline">
+<td><code><b>Menubox.TCombobox<b></code></td>
+<td>
+This style extends the standard <code><b>TCombobox</b></code> style,
+used for the ttk::combobox widget, giving it a white background even
+when it is readonly.
+</td>
+</tr>
+
+</table>
 
 <<section ENVIRONMENT>>
 

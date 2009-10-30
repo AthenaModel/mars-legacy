@@ -17,9 +17,9 @@ pack .lab
 ::marsgui::debugger new
 
 if {[llength $argv] == 0} {
-    ::marsgui::texteditor .%AUTO% -title "Test Editor"
+    ::marsgui::texteditorwin .%AUTO% -title "Test Editor"
 } else {
-    set win [::marsgui::texteditor .%AUTO% -title "Test Editor"]
+    set win [::marsgui::texteditorwin .%AUTO% -title "Test Editor"]
 
     $win open [lindex $argv 0]
 }
