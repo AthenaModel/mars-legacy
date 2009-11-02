@@ -37,6 +37,14 @@ snit::type app {
     
     #-------------------------------------------------------------------
     # Type Variables
+
+    # Options
+    typevariable opts -array {
+        -appname       "mars log"
+        -defaultappdir ""
+        -manpage       "mars_log(1)"
+        -project       "Mars"
+    }
     
     # fieldFlag array: show/hide the named field.
     
@@ -63,12 +71,13 @@ snit::type app {
         if {[llength $argv] == 0} {
             set logdir log
         } elseif {[llength $argv] == 1} {
-            set logdir [lindex $argv 0]
+            set logdir [lshift argv]
         } else {
             app usage
-            app exit 1
+            exit 1
         }
-        
+
+
         # NEXT, is this a directory of log files, or a directory of
         # application log directories?  If the latter, set parentFlag
         # to true.
@@ -82,7 +91,7 @@ snit::type app {
         }
         
         # NEXT, set the default window title
-        wm title . "Mars Log: [file normalize $logdir]"
+        wm title . "$opts(-project) Log: [file normalize $logdir]"
 
         # NEXT, Exit the app when this window is closed, if it's a 
         # main window.
@@ -174,16 +183,17 @@ snit::type app {
         
         # ROW 1 -- Scrolling log
         set log .log
-        scrollinglog .log                          \
-            -relief       flat                     \
-            -height       24                       \
-            -logcmd       [mytypemethod puts]      \
-            -loglevel     normal                   \
-            -showloglist  yes                      \
-            -showapplist  $parentFlag              \
-            -rootdir      [file normalize $logdir] \
-            -parsecmd     [myproc LogParser]       \
-            -format       {
+        scrollinglog .log                           \
+            -relief        flat                     \
+            -height        24                       \
+            -logcmd        [mytypemethod puts]      \
+            -loglevel      normal                   \
+            -showloglist   yes                      \
+            -showapplist   $parentFlag              \
+            -defaultappdir $opts(-defaultappdir)    \
+            -rootdir       [file normalize $logdir] \
+            -parsecmd      [myproc LogParser]       \
+            -format        {
                 {t     20 no}
                 {zulu  12 yes}
                 {v      7 yes}
@@ -262,6 +272,40 @@ snit::type app {
         return $lineList
     }
     
+    #-------------------------------------------------------------------
+    # Application Framework Type Methods
+    
+    # configure option ?value? ?option value...?
+    #
+    # option    A configuration option
+    # value     A new value for the option
+    #
+    # Sets/gets application framework options.
+    
+    typemethod configure {args} {
+        if {[llength $args] == 1} {
+            return $opts([lindex $args 0])
+        }
+        
+        # NEXT, get the options
+        while {[llength $args] > 0} {
+            set opt [lshift args]
+            
+            switch -exact -- $opt {
+                -appname       -
+                -defaultappdir -
+                -manpage       -
+                -project       {
+                    set opts($opt) [lshift args]
+                }
+                
+                default {
+                    error "Unrecognized option: $opt"
+                }
+            }
+        }
+    }
+    
     
     #-------------------------------------------------------------------
     # Utility Type Methods
@@ -290,10 +334,11 @@ snit::type app {
     # Displays the application's command-line syntax
     
     typemethod usage {} {
-        puts "Usage: mars log \[logdir\]"
+        puts "Usage: $opts(-appname) \[logdir\]"
         puts ""
-        puts "See mars_log(1) for more information."
+        puts "See $opts(-manpage) information."
     }
 }
+
 
 
