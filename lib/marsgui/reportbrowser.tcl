@@ -146,13 +146,13 @@ snit::widget ::marsgui::reportbrowser {
         ttk::checkbutton $win.bar.scrolllock              \
             -style       Toolbutton                       \
             -image       {
-                         ::marsgui::icon::autoscroll_on
-                selected ::marsgui::icon::autoscroll_off} \
+                         ::marsgui::icon::unlocked
+                selected ::marsgui::icon::locked}         \
             -variable    [myvar options(-scrolllock)]     \
             -command     [mymethod UpdateScrollLock]
 
         DynamicHelp::add $win.bar.scrolllock \
-            -text "When set, do not jump to new reports."
+            -text "When locked, do not jump to new reports."
 
         pack $win.bar.current    -side left
         pack $win.bar.scrolllock -side right
@@ -205,7 +205,7 @@ snit::widget ::marsgui::reportbrowser {
         $win.lr.tb add $win.lr.tb.bottom
 
         # NEXT, manage all of the components.
-        grid $win.bar  -sticky ew
+        grid $win.bar  -sticky ew -pady 2
         grid $win.sep1 -sticky ew
         grid $win.lr   -stick nsew
 

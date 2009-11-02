@@ -47,6 +47,8 @@ snit::widget ::marsgui::rb_bintree {
 
         # NEXT, create the tree
         install tree using treectrl $win.tree       \
+            -background     white                   \
+            -linestyle      solid                   \
             -width          140                     \
             -borderwidth    0                       \
             -relief         flat                    \
