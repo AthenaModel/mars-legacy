@@ -19,6 +19,7 @@ package require marsutil
 package require Tk 8.5
 package require BWidget  1.8
 package require treectrl 2.2.6
+package require tablelist_tile 4.11.2
 
 #-----------------------------------------------------------------------
 # Package Definition
@@ -31,6 +32,9 @@ package provide marsgui 1.0
 
 namespace eval ::marsgui:: {
     variable library [file dirname [info script]]
+    
+    # Make marsutil calls visible in marsgui
+    namespace import ::marsutil::*
 }
 
 source [file join $::marsgui::library global.tcl         ]
@@ -62,5 +66,6 @@ source [file join $::marsgui::library reportbrowser.tcl  ]
 source [file join $::marsgui::library reportviewer.tcl   ]
 source [file join $::marsgui::library reportviewerwin.tcl]
 source [file join $::marsgui::library rb_bintree.tcl     ]
+source [file join $::marsgui::library sqlbrowser.tcl     ]
 
 
