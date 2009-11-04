@@ -15,7 +15,7 @@
 # Settings
 
 # Location of Tcl Libraries
-export MARS_TCL_HOME = /usr/local/ActiveTclEE-2009Q2
+export MARS_TCL_HOME = /usr/local/ActiveTclEE-2009Q3
 
 # TCLLIBPATH for code run during the build process (including tests!)
 export TCLLIBPATH = $(TOP_DIR)/lib
