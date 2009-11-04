@@ -19,7 +19,7 @@ package require marsutil
 package require Tk 8.5
 package require BWidget  1.8
 package require treectrl 2.2.6
-package require tablelist_tile 4.11.2
+package require tablelist 4.11.2
 
 #-----------------------------------------------------------------------
 # Package Definition
