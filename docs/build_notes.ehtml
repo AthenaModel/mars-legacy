@@ -10,6 +10,29 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.20, 4 November 2009</h3>
+This build contains a fair amount of GUI retooling. Included are the move
+of report browser functionality into Mars, and the change of look and feel for
+all Mars GUI widgets. sqldocument(n) has been changed to reguire the register
+of SQL sections with instances of it. There are also some changes to gram(n) and
+the introduction of the mars_gram(1) workbench tool and the mars_log(1) log
+browser. The list of packages is as follows:
+
+<ul>
+  <li> Bug 2282: sqldocument(n): register sections with instances
+  <li> Bug 2314: Move reporter(n), reportviewer(n), reportviewerwin(n), reportbrowser(n) into mars
+  <li> Bug 2319: gram(n): Delete "object" column from schema
+  <li> Bug 2323: gram(n): Delete ability to target inputs at all neighborhoods
+  <li> Bug 2325: gram(n): Here Multiplier
+  <li> Bug 2331: modeditor(n): Mod Editor Widget
+  <li> Bug 2332: getcode(n): Improved output
+  <li> Bug 2334: mars_gram(1): GRAM workbench
+  <li> Bug 2338: marsgui(n): GUI Scrub
+  <li> Bug 2339: mars_log(1): Mars Log Browser
+  <li> Bug 2343: sqlbrowser(n): SQL View Browser
+  <li> Bug 2337: statecontroller(n) -- Import from Athena 
+</ul><p>
+
 <h3>Build 1.19, 5 October 2009 -- Athena 1.1</h3>
 
 This build supports the Athena 1.1 release.  It contains two changes,
