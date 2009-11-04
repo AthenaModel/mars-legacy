@@ -132,6 +132,8 @@ snit::type sim {
         set info(dbfile)   ""
 
         rdb clear
+        rdb eval [readfile [file join $::app_gram::library gui_views.sql]]
+
         notifier send ::sim <Reset>
         notifier send ::sim <Unload>
     }

@@ -15,6 +15,8 @@
 #
 #-----------------------------------------------------------------------
 
+
+
 #-----------------------------------------------------------------------
 # appwin
 
@@ -27,9 +29,9 @@ snit::widget appwin {
     typeconstructor {
         mkicon ${type}::icon::step {
             ......................
-            ......................
-            .........XXX..........
-            .........XXX..........
+            ..........XX..........
+            .........XXXX.........
+            .........XXXX.........
             ..........XX..........
             ........XXX...........
             ......XXXXXX..........
@@ -48,10 +50,7 @@ snit::widget appwin {
             ......................
             ......................
             ......................
-        } {
-            .  trans
-            X  #000000
-        }
+        } { .  trans X  black } d { X gray }
     }
     
     #-------------------------------------------------------------------
@@ -78,7 +77,7 @@ snit::widget appwin {
         -readonly yes
 
     #-------------------------------------------------------------------
-    # Instance variables
+    # Tab Definitions
 
     # Dictionary of tabs to be created.
     #
@@ -115,8 +114,172 @@ snit::widget appwin {
                     }
             }
         }
+        
+        gram {
+            label  "gram(n)"
+            parent ""
+            script ""
+        }
+        
+        gram_driver {
+            label driver
+            parent gram
+            script {
+                gram_tab %W gram_driver 1 -layout {
+                    { driver     - -sortmode integer }
+                    { dtype      -                   }
+                    { name       -                   }
+                    { oneliner   -                   }
+                    { last_input - -sortmode integer }
+                }
+            }
+        }
+        
+        gram_sat {
+            label sat
+            parent gram
+            script {
+                gram_tab %W gv_gram_sat 6 -layout {
+                    { ngc_id   - -sortmode integer }
+                    { ng_id    - -sortmode integer }
+                    { n        -                   }
+                    { g        -                   }
+                    { c        -                   }
+                    { gtype    -                   }
+                    { saliency - -sortmode real    }
+                    { trend    - -sortmode real    }
+                    { curve_id - -sortmode integer }
+                    { sat0     - -sortmode real    }
+                    { sat      - -sortmode real    }
+                    { delta    - -sortmode real    }
+                    { slope    - -sortmode real    }
+                }
+            }
+        }
+
+        gram_coop {
+            label coop
+            parent gram
+            script {
+                gram_tab %W gv_gram_coop 5 -layout {
+                    { nfg_id   - -sortmode integer }
+                    { curve_id - -sortmode integer }
+                    { n        -                   }
+                    { f        -                   }
+                    { g        -                   }
+                    { coop0    - -sortmode real    }
+                    { coop     - -sortmode real    }
+                    { delta    - -sortmode real    }
+                    { slope    - -sortmode real    }
+                }
+            }
+        }
+
+        gramdb {
+            label  "gramdb(5)"
+            parent ""
+            script ""
+        }
+
+        gramdb_mn {
+            label mn
+            parent gramdb
+            script {
+                gramdb_tab %W gramdb_mn 2
+            }
+        }
+        
+        gramdb_g {
+            label  g
+            parent gramdb
+            script { gramdb_tab %W gramdb_g 1 }
+        }
+
+        gramdb_ng {
+            label  ng
+            parent gramdb
+            script { gramdb_tab %W gramdb_ng 2 }
+        }
+        
+        gramdb_gc {
+            label  gc
+            parent gramdb
+            script { gramdb_tab %W gramdb_gc 2 }
+        }
+        
+        gramdb_ngc {
+            label  ngc
+            parent gramdb
+            script { gramdb_tab %W gramdb_ngc 3 }
+        }
+
+        gramdb_fg {
+            label  fg
+            parent gramdb
+            script { gramdb_tab %W gramdb_fg 2 }
+        }
+        
+        gramdb_nfg {
+            label  nfg
+            parent gramdb
+            script { gramdb_tab %W gramdb_nfg 3 }
+        }
+        
+        query {
+            label  Query
+            parent ""
+            script {
+                querybrowser %W                 \
+                    -db       ::rdb             \
+                    -reloadon { ::sim <Reset> }
+            }
+        }
+    }
+    
+    #-----------------------------------------------------------------------
+    # Tab Helper Routines
+    
+    # gram_tab win name tc ?options...?
+    #
+    # win      The window name
+    # name     The name of a gram(n) table or view
+    # tc       Number of title columns
+    # options  sqlbrowser(n) options
+    #
+    # Creates an sqlbrowser(n) tab with default settings.
+    
+    proc gram_tab {win name tc args} {
+        sqlbrowser $win \
+            -db           ::rdb               \
+            -view         $name               \
+            -titlecolumns $tc                 \
+            -reloadon     {
+                ::sim <Reset>
+                ::sim <Time>
+            }                                 \
+            {*}$args
     }
 
+    # gramdb_tab win name tc ?options...?
+    #
+    # win      The window name
+    # name     The name of a gramdb(5) table or view
+    # tc       Number of title columns
+    # options  sqlbrowser(n) options
+    #
+    # Creates an sqlbrowser(n) tab.
+    
+    proc gramdb_tab {win name tc args} {
+        sqlbrowser $win \
+            -db           ::rdb               \
+            -view         $name               \
+            -titlecolumns $tc                 \
+            -reloadon     { ::sim <Reset> }   \
+            {*}$args
+    }
+
+    #-------------------------------------------------------------------
+    # Other Instance Variables
 
     # Status info
     #
@@ -455,9 +618,11 @@ snit::widget appwin {
         ttk::frame $win.toolbar
 
         if {$options(-main)} {
-            ttk::button $win.toolbar.step   \
-                -style Toolbutton           \
-                -image ${type}::icon::step  \
+            ttk::button $win.toolbar.step                \
+                -style Toolbutton                        \
+                -image [list                             \
+                                 ${type}::icon::step     \
+                        disabled ${type}::icon::stepd]   \
                 -command [list executive evalsafe step]
             cond::dbloaded control $win.toolbar.step
             
@@ -597,6 +762,7 @@ snit::widget appwin {
         }
     }
     
+   
     #-------------------------------------------------------------------
     # Components: Event Handlers
 

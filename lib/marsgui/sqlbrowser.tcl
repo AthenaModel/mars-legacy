@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    Prototype tablebrowser(n) replacement
+#    marsgui(n): SQLite3 table/view browser
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
@@ -87,6 +87,29 @@ snit::widget ::marsgui::sqlbrowser {
     option -layout                           \
         -default         {}                  \
         -configuremethod ConfigureThenLayout
+    
+    # -reloadon events
+    #
+    # events is a list of notifier(n) subjects and events.  The
+    # browser will reload its contents when the events are received.
+    
+    option -reloadon                       \
+        -default         {}                \
+        -configuremethod ConfigureReloadOn
+    
+    method ConfigureReloadOn {opt val} {
+        # FIRST, remove any existing bindings
+        foreach {subject event} $options(-reloadon) {
+            notifier bind $subject $event $win ""
+        }
+        
+        # NEXT, add the new bindings
+        set options($opt) $val
+        
+        foreach {subject event} $val {
+            notifier bind $subject $event $win [mymethod ReloadOnEvent]
+        }
+    }
     
     # -selectioncmd
     #
@@ -252,12 +275,13 @@ snit::widget ::marsgui::sqlbrowser {
             -foreground       black                         \
             -font             codefont                      \
             -width            80                            \
-            -height           24                            \
+            -height           14                            \
             -state            normal                        \
             -stripebackground #CCFFBB                       \
             -selectbackground black                         \
             -selectforeground white                         \
             -labelborderwidth 1                             \
+            -labelbackground  $::marsgui::defaultBackground \
             -selectmode       extended                      \
             -exportselection  false                         \
             -movablecolumns   no                            \
@@ -366,6 +390,10 @@ snit::widget ::marsgui::sqlbrowser {
         $self reload
     }
     
+    destructor {
+        notifier forget $win
+    }
+    
     #-------------------------------------------------------------------
     # Behaviour
     
@@ -391,6 +419,15 @@ snit::widget ::marsgui::sqlbrowser {
     
     method FocusIn {} {
         focus $tlist
+    }
+    
+    # ReloadOnEvent
+    #
+    # Reloads the widget when a -reloadon event is received.
+    # The "args" parameter is so that any event can be handled.
+    
+    method ReloadOnEvent {args} {
+        $self reload
     }
     
     # SetView
@@ -475,14 +512,19 @@ snit::widget ::marsgui::sqlbrowser {
             return
         }
         
-        puts "Reloading $options(-view)!"
-        
         # NEXT, clear the reload request counter.
         set info(reloadRequests) 0
 
         # NEXT, Layout the columns if need be.
         if {!$info(layoutFlag)} {
             $self LayoutColumns
+        }
+        
+        # NEXT, if there are no known columns, just clear the
+        # tablelist and return.
+        if {[llength $info(columns)] == 0} {
+            $self clear
+            return
         }
         
         # NEXT, Save the selection
@@ -550,6 +592,8 @@ snit::widget ::marsgui::sqlbrowser {
         } else {
             $self ParseLayoutSpec
         }
+        
+        set info(layoutFlag) 1
     }
     
     # InferLayoutSpec
@@ -576,10 +620,8 @@ snit::widget ::marsgui::sqlbrowser {
             }
             
             $tlist insertcolumns end 0 $row(name) $align
-        }
-        
-        if {[llength $info(columns)] == 0} {
-            error "view has no columns: \"$options(-view)\""
+            
+            $tlist columnconfigure $cindex -sortmode dictionary
         }
     }
     
@@ -612,6 +654,20 @@ snit::widget ::marsgui::sqlbrowser {
             lassign $cspec cname label
             set opts [lrange $cspec 2 end]
             
+            # Get the sortmode; use dictionary sorting by default.
+            set sortmode [from opts -sortmode dictionary]
+            
+            # If it's numeric, put -align right at the head of the
+            # options.  The user can always override it.
+            
+            if {$sortmode in {real integer}} {
+                set opts [linsert $opts 0 -align right]
+            }
+            
+            if {$label eq "-"} {
+                set label $cname
+            }
+            
             lappend info(columns) $cname
             
             set layout($cname) [dict create \
@@ -622,7 +678,9 @@ snit::widget ::marsgui::sqlbrowser {
             $tlist insertcolumns end 0 $label
             
             if {[llength $opts] > 0} {
-                $tlist columnconfigure $cindex {*}$opts
+                $tlist columnconfigure $cindex \
+                    -sortmode $sortmode        \
+                    {*}$opts
             }            
         }
     }
@@ -768,8 +826,14 @@ snit::widget ::marsgui::sqlbrowser {
     #
     # col        The name of the column to sort by
     # direction  -increasing/-decreasing/-none
+    #
+    # Tells the widget to sort by the specified column.
+    # TBD: Need a way to defer the operation of this until
+    # the widget is layed out.
 
     method sortby {col {direction "-increasing"}} {
+        require $info(layoutFlag) \
+            "Columns not yet layed out"
         # FIRST, save the info
         set info(sortcol) $col
         dict set layout($col) sortdir $direction

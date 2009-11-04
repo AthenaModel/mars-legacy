@@ -67,5 +67,6 @@ source [file join $::marsgui::library reportviewer.tcl   ]
 source [file join $::marsgui::library reportviewerwin.tcl]
 source [file join $::marsgui::library rb_bintree.tcl     ]
 source [file join $::marsgui::library sqlbrowser.tcl     ]
+source [file join $::marsgui::library querybrowser.tcl   ]
 
 

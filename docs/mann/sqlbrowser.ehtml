@@ -37,8 +37,11 @@ following syntax:<p>
 <i>cname label</i> ?<i>option value...</i>?<p>
 
 where <i>cname</i> is the column name in the <b>-view</b> and <i>label</i>
-is the column title.  The options are tablelist(n) <<iref columnconfigure>>
-options, and are passed through to the tablelist(n) unchanged.  In theory,
+is the column title.  If <i>label</i> is a single hyphen, "<code>-</code>",
+then the column name will be used as the label.<p>
+
+The options are tablelist(n) <<iref columnconfigure>>
+options, and are passed through to the tablelist(n).  In theory,
 any tablelist(n) column option can be used; be aware that many do not
 make sense in this context.  Of those that do, these are the most likely
 to be useful:<p>
@@ -49,6 +52,15 @@ to be useful:<p>
 <li> <b>-foreground <i>color</i></b>
 <li> <b>-maxwidth <i>width</i></b>
 <li> <b>-sortmode ascii|dictionary|integer|real</b>
+</ul><p>
+
+sqlbrowser(n) specifies the following options by default; they can
+be overridden by the user:<p>
+
+<ul>
+<li> The default <b>-sortmode</b> is <b>dictionary</b>.
+<li> If the caller specifies a numeric <b>-sortmode</b>, then the
+     default <b>-align</b> is <b>right</b>.
 </ul><p>
 
 
@@ -107,6 +119,24 @@ view or table being browsed, and treats all data as left-justified strings.
 The caller can override this behavior by defining an explicit layout
 specification.  See <<xref "Column Layout">> for the syntax for
 layout specifications.<p>
+
+<<defopt {-reloadon <i>eventList</i>}>>
+
+Causes the browser to subscribe to any number of <<xref notifier(n)>>
+events, and reload its contents when any of them are received.  The
+<i>eventList</i> must be a list of <<xref notifier(n)>> subjects and
+events.  For example, the following option causes the browser to
+reload whenever the <b>&lt;Reset&gt;</b> event is received from
+the <b>::sim</b> object.<p>
+
+<pre>
+    sqlbrowser .browser             \
+        ...                         \
+        -reloadon { ::sim &lt;Reset&gt; }
+</pre>
+
+If the value of <b>-reloadon</b> is changed, the previous bindings will be
+unbound; and all bindings will be unbound when the browser is destroyed.<p>
 
 <<defopt {-selectioncmd <i>cmd</i>}>>
 
@@ -202,6 +232,20 @@ Deletes all rows from the browser.<p>
 
 Returns a list of the row indices of the selected rows, or the empty list
 if no rows are selected.  See also <<iref uid curselection>>.<p>
+
+<<defitem get {<i>win</i> get <i>first last</i>}>>
+<<defitem get {<i>win</i> get <i>indexList</i>}>>
+
+Retrieves the data from one or more rows in the browser.<p>
+
+The first form of the command returns a list whose elements are all of the
+items (i.e., row contents) between <i>first</i> and <i>last</i>, inclusive.
+The value returned by the second form depends on the number of elements in
+the list <i>indexList</i>: if the latter contains exactly one index then the
+return value is the item indicated by that index (or an empty
+string if the index refers to a non-existent item); otherwise the command
+returns the list of all of the items corresponding to the indices
+specified by <i>indexList</i>.<p>
 
 <<defitem layout {<i>win</i> layout}>>
 
@@ -320,24 +364,6 @@ Sets the font of the row with the given <i>uid</i>.<p>
 <</deflist uid>>
 
 <</deflist instance>>
-
-<<section "BINDINGS">>
-
-The <<xref sqlbrowser(n)>> widget responds to the following keystrokes:<p>
-
-<dl>
-  <dt> <b>Up</b>
-  <dd> Scrolls up one row.<p>
-
-  <dt> <b>Down</b>
-  <dd> Scrolls down one row.<p>
-
-  <dt> <b>Home</b>
-  <dd> Scrolls so the first row is visible.<p>
-
-  <dt> <b>End</b>
-  <dd> Scrolls so the last row is visible.<p>
-</dl>
 
 <<section ENVIRONMENT>>
 
