@@ -115,15 +115,9 @@ snit::widget appwin {
             }
         }
         
-        gram {
-            label  "gram(n)"
-            parent ""
-            script ""
-        }
-        
         gram_driver {
-            label driver
-            parent gram
+            label Drivers
+            parent ""
             script {
                 gram_tab %W gram_driver 1 -layout {
                     { driver     - -sortmode integer }
@@ -135,9 +129,15 @@ snit::widget appwin {
             }
         }
         
+        sat {
+            label  "Satisfaction"
+            parent ""
+            script ""
+        }
+        
         gram_sat {
-            label sat
-            parent gram
+            label gram_sat
+            parent sat
             script {
                 gram_tab %W gv_gram_sat 6 -layout {
                     { ngc_id   - -sortmode integer }
@@ -156,10 +156,95 @@ snit::widget appwin {
                 }
             }
         }
+        
+        satinf {
+            label gram_sat_influence
+            parent sat
+            script {
+                gram_tab %W gv_gram_sat_influence 6 -layout {
+                    { direct_ng     - -sortmode integer }
+                    { d_n           -                   }
+                    { d_g           -                   }
+                    { influenced_ng - -sortmode integer }
+                    { i_n           -                   }
+                    { i_g           -                   }
+                    { prox          - -sortmode integer }
+                    { delay         - -sortmode real    }
+                    { factor        - -sortmode real    }
+                }
+            }
+        }
+        
+        satlevels {
+            label Levels
+            parent sat
+            script {
+                gram_tab %W gv_gram_sat_levels 10 -layout {
+                    { driver   - -sortmode integer }
+                    { input    - -sortmode integer }
+                    { id       - -sortmode integer }
+                    { ts       - -sortmode integer }
+                    { te       - -sortmode integer }
+                    { dn       -                   }
+                    { dg       -                   }
+                    { n        -                   }
+                    { g        -                   }
+                    { c        -                   }
+                    { cause    -                   }
+                    { active   -                   }
+                    { prox     - -sortmode real    }
+                    { sat      - -sortmode real    }
+                    { days     - -sortmode real    }
+                    { tau      - -sortmode real    }
+                    { llimit   - -sortmode real    }
+                    { tlast    - -sortmode integer }
+                    { ncontrib - -sortmode real    }
+                    { acontrib - -sortmode real    }
+                    { nominal  - -sortmode real    }
+                    { actual   - -sortmode real    }
+                }
+            }
+        }
+
+        satslopes {
+            label Slopes
+            parent sat
+            script {
+                gram_tab %W gv_gram_sat_slopes 10 -layout {
+                    { driver   - -sortmode integer }
+                    { input    - -sortmode integer }
+                    { id       - -sortmode integer }
+                    { ts       - -sortmode integer }
+                    { te       - -sortmode integer }
+                    { dn       -                   }
+                    { dg       -                   }
+                    { n        -                   }
+                    { g        -                   }
+                    { c        -                   }
+                    { cause    -                   }
+                    { active   -                   }
+                    { prox     - -sortmode real    }
+                    { sat      - -sortmode real    }
+                    { delay    - -sortmode real    }
+                    { slope    - -sortmode real    }
+                    { tlast    - -sortmode integer }
+                    { ncontrib - -sortmode real    }
+                    { acontrib - -sortmode real    }
+                    { nominal  - -sortmode real    }
+                    { actual   - -sortmode real    }
+                    { future   -                   }
+                }
+            }
+        }
+        coop {
+            label  "Cooperation"
+            parent ""
+            script ""
+        }
 
         gram_coop {
-            label coop
-            parent gram
+            label gram_coop
+            parent coop
             script {
                 gram_tab %W gv_gram_coop 5 -layout {
                     { nfg_id   - -sortmode integer }
@@ -171,6 +256,22 @@ snit::widget appwin {
                     { coop     - -sortmode real    }
                     { delta    - -sortmode real    }
                     { slope    - -sortmode real    }
+                }
+            }
+        }
+        
+        gram_coop_influence {
+            label  gram_coop_influence
+            parent coop
+            script {
+                gram_tab %W gv_gram_coop_influence 4 -layout {
+                    { dn     -                    }
+                    { dg     -                    }
+                    { m      -                    }
+                    { h      -                    }
+                    { prox   -  -sortmode integer }
+                    { delay  -  -sortmode real    }
+                    { factor -  -sortmode real    }
                 }
             }
         }
@@ -253,6 +354,7 @@ snit::widget appwin {
             -db           ::rdb               \
             -view         $name               \
             -titlecolumns $tc                 \
+            -reloadbtn    yes                 \
             -reloadon     {
                 ::sim <Reset>
                 ::sim <Time>
@@ -274,6 +376,7 @@ snit::widget appwin {
             -db           ::rdb               \
             -view         $name               \
             -titlecolumns $tc                 \
+            -reloadbtn    yes                 \
             -reloadon     { ::sim <Reset> }   \
             {*}$args
     }

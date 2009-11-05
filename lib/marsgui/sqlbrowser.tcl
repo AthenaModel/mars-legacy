@@ -28,6 +28,29 @@ snit::widget ::marsgui::sqlbrowser {
     
     typeconstructor {
         namespace import ::marsutil::*
+        
+        mkicon ${type}::icon::reload {
+            .........X......X......
+            .........XX......XX....
+            .........XXX......XX...
+            .......XXXXXX......XX..
+            .....XXXXXXXXX......XX.
+            ....XXXXXXXXXXX.....XX.
+            ..XXXXXXXXXXXX.......XX
+            .XXXXXXXXXXXX........XX
+            .XXXX....XXX.........XX
+            XXXX.....XX...X.....XXX
+            XXX......X...XX....XXXX
+            XX..........XXX...XXXX.
+            XX.........XXXXXXXXXXX.
+            XX........XXXXXXXXXXX..
+            .XX......XXXXXXXXXXX...
+            .XX.......XXXXXXXXX....
+            ..XX.......XXXXXX......
+            ...XX.......XXX........
+            ....XX.......XX........
+            ......X.......X........
+        } { . trans X black }
     }
     
     #-------------------------------------------------------------------
@@ -87,6 +110,16 @@ snit::widget ::marsgui::sqlbrowser {
     option -layout                           \
         -default         {}                  \
         -configuremethod ConfigureThenLayout
+    
+    # -reloadbtn flag
+    #
+    # If true, a reload button is put on the right-hand end of the
+    # toolbar.
+    
+    option -reloadbtn \
+        -type     snit::boolean \
+        -default  0             \
+        -readonly yes
     
     # -reloadon events
     #
@@ -315,6 +348,19 @@ snit::widget ::marsgui::sqlbrowser {
         
         # Browser Toolbar
         install toolbar using ttk::frame $win.toolbar
+        
+        # Reload Button
+        if {$options(-reloadbtn)} {
+            ttk::button $toolbar.reload        \
+                -style   Toolbutton            \
+                -image   ${type}::icon::reload \
+                -command [mymethod reload]
+            
+            pack $toolbar.reload -side right -fill y -padx {2 0}
+            
+            DynamicHelp::add $toolbar.reload \
+                -text "Reload contents of browser"
+        }
         
         # Filter box
         install filter using filter $toolbar.filter \

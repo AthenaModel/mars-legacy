@@ -29,6 +29,75 @@ SELECT ngc_id,
        format('%.3f',slope) AS slope
 FROM gram_sat;
 
+-- gv_gram_sat_influence
+CREATE TEMPORARY VIEW gv_gram_sat_influence AS
+SELECT main.direct_ng             AS direct_ng,
+       D.n                        AS d_n,
+       D.g                        AS d_g,
+       main.influenced_ng         AS influenced_ng,
+       I.n                        AS i_n,
+       I.g                        AS i_g,
+       main.prox                  AS prox,
+       main.delay                 AS delay,
+       format('%.3f',main.factor) AS factor
+FROM gram_sat_influence   AS main
+JOIN gram_ng AS D ON (main.direct_ng = D.ng_id)
+JOIN gram_ng AS I ON (main.influenced_ng = I.ng_id);
+
+-- gv_gram_sat_levels
+CREATE TEMPORARY VIEW gv_gram_sat_levels AS
+SELECT driver,
+       input,
+       id,
+       ts,
+       te,
+       dn,
+       dg,
+       n,
+       g,
+       c,
+       cause,
+       active,
+       prox,
+       format('%.3f',sat)     AS sat,
+       format('%.3f',days)    AS days,
+       format('%.5f',tau)      AS tau,
+       format('%.2f',llimit)   AS llimit,
+       tlast,
+       format('%.5f',ncontrib) AS ncontrib,
+       format('%.5f',acontrib) AS acontrib,
+       format('%.5f',nominal)  AS nominal, 
+       format('%.5f',actual)   AS actual 
+FROM gram_sat_effects
+WHERE etype='L';
+
+-- gv_gram_sat_slopes
+CREATE TEMPORARY VIEW gv_gram_sat_slopes AS
+SELECT driver,
+       input,
+       id,
+       ts,
+       te,
+       dn,
+       dg,
+       n,
+       g,
+       c,
+       cause,
+       active,
+       prox,
+       format('%.3f',sat)      AS sat, 
+       delay,
+       format('%.2f',slope)    AS slope, 
+       future,
+       tlast,
+       format('%.5f',ncontrib) AS ncontrib,
+       format('%.5f',acontrib) AS acontrib,
+       format('%.5f',nominal)  AS nominal, 
+       format('%.5f',actual)   AS actual 
+FROM gram_sat_effects
+WHERE etype='S';
+
 -- gv_gram_coop
 CREATE TEMPORARY VIEW gv_gram_coop AS
 SELECT nfg_id,
@@ -41,3 +110,15 @@ SELECT nfg_id,
        format('%.3f', delta) AS delta,
        format('%.3f', slope) AS slope
 FROM gram_coop;
+
+-- gv_gram_coop_influence
+CREATE TEMPORARY VIEW gv_gram_coop_influence AS
+SELECT dn,
+       dg,
+       m,
+       h,
+       prox,
+       delay,
+       format('%.3f',factor) AS factor
+FROM gram_coop_influence;
+

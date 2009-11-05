@@ -120,6 +120,11 @@ The caller can override this behavior by defining an explicit layout
 specification.  See <<xref "Column Layout">> for the syntax for
 layout specifications.<p>
 
+<<defopt {-reloadbtn <i>flag</i>}>>
+
+If <i>flag</i> is true, then a "reload" button will appear in the toolbar,
+to the right of the filter box.  Defaults to false.<p>
+
 <<defopt {-reloadon <i>eventList</i>}>>
 
 Causes the browser to subscribe to any number of <<xref notifier(n)>>
