@@ -10,6 +10,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.21, 5 November 2009</h3>
+Shortly after build 1.20 it was discovered that a new Tk widget used in Mars
+was not being packaged properly by the tclapp program that bundles Tcl/Tk
+code into a binary executable. This build fixes that by reverting back to the
+previous widget. There is no new functionality.
+
+<ul>
+  <li> Bug 2345 marsgui(n): tablelist_tile causes tclapp to fail
+</ul><p>
+
 <h3>Build 1.20, 4 November 2009</h3>
 This build contains a fair amount of GUI retooling. Included are the move
 of report browser functionality into Mars, and the change of look and feel for
