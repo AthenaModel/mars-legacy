@@ -71,8 +71,8 @@ SELECT driver,
 FROM gram_sat_effects
 WHERE etype='L';
 
--- gv_gram_sat_slopes
-CREATE TEMPORARY VIEW gv_gram_sat_slopes AS
+-- gv_gram_sat_slopes_trend
+CREATE TEMPORARY VIEW gv_gram_sat_slopes_trend AS
 SELECT driver,
        input,
        id,
@@ -98,6 +98,11 @@ SELECT driver,
 FROM gram_sat_effects
 WHERE etype='S';
 
+-- gv_gram_sat_slopes
+CREATE TEMPORARY VIEW gv_gram_sat_slopes AS
+SELECT * FROM gv_gram_sat_slopes_trend
+WHERE cause != 'TREND';
+
 -- gv_gram_coop
 CREATE TEMPORARY VIEW gv_gram_coop AS
 SELECT nfg_id,
@@ -122,3 +127,58 @@ SELECT dn,
        format('%.3f',factor) AS factor
 FROM gram_coop_influence;
 
+-- gv_gram_coop_levels
+CREATE TEMPORARY VIEW gv_gram_coop_levels AS
+SELECT driver,
+       input,
+       id,
+       ts,
+       te,
+       dn,
+       df,
+       dg,
+       n,
+       f,
+       g,
+       cause,
+       active,
+       prox,
+       format('%.3f',coop)     AS coop,
+       format('%.3f',days)     AS days,
+       format('%.5f',tau)      AS tau,
+       format('%.2f',llimit)   AS llimit,
+       tlast,
+       format('%.5f',ncontrib) AS ncontrib,
+       format('%.5f',acontrib) AS acontrib,
+       format('%.5f',nominal)  AS nominal, 
+       format('%.5f',actual)   AS actual 
+FROM gram_coop_effects
+WHERE etype='L';
+
+-- gv_gram_coop_slopes
+CREATE TEMPORARY VIEW gv_gram_coop_slopes AS
+SELECT driver,
+       input,
+       id,
+       ts,
+       te,
+       dn,
+       df,
+       dg,
+       n,
+       f,
+       g,
+       cause,
+       active,
+       prox,
+       format('%.3f',coop)     AS coop,
+       delay,
+       format('%.2f',slope)    AS slope, 
+       future,
+       tlast,
+       format('%.5f',ncontrib) AS ncontrib,
+       format('%.5f',acontrib) AS acontrib,
+       format('%.5f',nominal)  AS nominal, 
+       format('%.5f',actual)   AS actual 
+FROM gram_coop_effects
+WHERE etype='S';

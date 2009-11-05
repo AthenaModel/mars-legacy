@@ -179,17 +179,17 @@ snit::widget appwin {
             label Levels
             parent sat
             script {
-                gram_tab %W gv_gram_sat_levels 10 -layout {
+                gram_tab %W gv_gram_sat_levels 6 -layout {
                     { driver   - -sortmode integer }
                     { input    - -sortmode integer }
                     { id       - -sortmode integer }
+                    { n        -                   }
+                    { g        -                   }
+                    { c        -                   }
                     { ts       - -sortmode integer }
                     { te       - -sortmode integer }
                     { dn       -                   }
                     { dg       -                   }
-                    { n        -                   }
-                    { g        -                   }
-                    { c        -                   }
                     { cause    -                   }
                     { active   -                   }
                     { prox     - -sortmode real    }
@@ -210,17 +210,17 @@ snit::widget appwin {
             label Slopes
             parent sat
             script {
-                gram_tab %W gv_gram_sat_slopes 10 -layout {
+                gram_tab %W gv_gram_sat_slopes 6 -layout {
                     { driver   - -sortmode integer }
                     { input    - -sortmode integer }
                     { id       - -sortmode integer }
+                    { n        -                   }
+                    { g        -                   }
+                    { c        -                   }
                     { ts       - -sortmode integer }
                     { te       - -sortmode integer }
                     { dn       -                   }
                     { dg       -                   }
-                    { n        -                   }
-                    { g        -                   }
-                    { c        -                   }
                     { cause    -                   }
                     { active   -                   }
                     { prox     - -sortmode real    }
@@ -233,9 +233,13 @@ snit::widget appwin {
                     { nominal  - -sortmode real    }
                     { actual   - -sortmode real    }
                     { future   -                   }
+                } -views {
+                    gv_gram_sat_slopes       "Exclude Trends"
+                    gv_gram_sat_slopes_trend "Include Trends"
                 }
             }
         }
+
         coop {
             label  "Cooperation"
             parent ""
@@ -272,6 +276,70 @@ snit::widget appwin {
                     { prox   -  -sortmode integer }
                     { delay  -  -sortmode real    }
                     { factor -  -sortmode real    }
+                }
+            }
+        }
+
+        cooplevels {
+            label Levels
+            parent coop
+            script {
+                gram_tab %W gv_gram_coop_levels 6 -layout {
+                    { driver   - -sortmode integer }
+                    { input    - -sortmode integer }
+                    { id       - -sortmode integer }
+                    { n        -                   }
+                    { f        -                   }
+                    { g        -                   }
+                    { ts       - -sortmode integer }
+                    { te       - -sortmode integer }
+                    { dn       -                   }
+                    { df       -                   }
+                    { dg       -                   }
+                    { cause    -                   }
+                    { active   -                   }
+                    { prox     - -sortmode real    }
+                    { coop     - -sortmode real    }
+                    { days     - -sortmode real    }
+                    { tau      - -sortmode real    }
+                    { llimit   - -sortmode real    }
+                    { tlast    - -sortmode integer }
+                    { ncontrib - -sortmode real    }
+                    { acontrib - -sortmode real    }
+                    { nominal  - -sortmode real    }
+                    { actual   - -sortmode real    }
+                }
+            }
+        }
+
+        coopslopes {
+            label Slopes
+            parent coop
+            script {
+                gram_tab %W gv_gram_coop_slopes 6 -layout {
+                    { driver   - -sortmode integer }
+                    { input    - -sortmode integer }
+                    { id       - -sortmode integer }
+                    { n        -                   }
+                    { f        -                   }
+                    { g        -                   }
+                    { ts       - -sortmode integer }
+                    { te       - -sortmode integer }
+                    { dn       -                   }
+                    { df       -                   }
+                    { dg       -                   }
+                    { cause    -                   }
+                    { active   -                   }
+                    { prox     - -sortmode real    }
+                    { coop     - -sortmode real    }
+                    { delay    - -sortmode real    }
+                    { slope    - -sortmode real    }
+                    { tlast    - -sortmode integer }
+                    { ncontrib - -sortmode real    }
+                    { acontrib - -sortmode real    }
+                    { nominal  - -sortmode real    }
+                    { actual   - -sortmode real    }
+                    { future   -                   }
                 }
             }
         }
