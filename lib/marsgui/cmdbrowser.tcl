@@ -190,12 +190,15 @@ snit::widget ::marsgui::cmdbrowser {
         $win.paner add $tnb
 
         $self AddPage code
+        
+        messageline $win.msgline
 
         grid rowconfigure    $win 1 -weight 1
         grid columnconfigure $win 0 -weight 1
 
-        grid $win.bar   -row 0 -column 0 -sticky ew
-        grid $win.paner -row 1 -column 0 -sticky nsew
+        grid $win.bar     -row 0 -column 0 -sticky ew
+        grid $win.paner   -row 1 -column 0 -sticky nsew
+        grid $win.msgline -row 2 -column 0 -sticky ew
 
         # NEXT, get the options
         $self configurelist $args
@@ -237,12 +240,16 @@ snit::widget ::marsgui::cmdbrowser {
 
         set pages($name) \
             [rotext $sw.text \
+                -insertwidth        1                 \
                 -width              50                \
                 -height             15                \
                 -font               codefont          \
                 -highlightthickness 1                 \
                 -yscrollcommand     [list $sw.y set]  \
                 -xscrollcommand     [list $sw.x set]]
+        
+        isearch enable $sw.text
+        isearch logger $sw.text [list $win.msgline puts]
 
         ttk::scrollbar $sw.y \
             -command [list $sw.text yview]

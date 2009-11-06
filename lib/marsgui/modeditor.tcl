@@ -131,10 +131,14 @@ snit::widget ::marsgui::modeditor {
         ttk::scrollbar $win.yscroll \
             -command [list $editor yview]
         
+        messageline $win.msgline
+        
         grid $bar         -row 0 -column 0 -columnspan 2 -sticky ew
         grid $win.sep1    -row 1 -column 0 -columnspan 2 -sticky ew -pady 2
         grid $editor      -row 2 -column 0 -sticky nsew
         grid $win.yscroll -row 2 -column 1 -sticky ns
+        grid $win.msgline -row 3 -column 0 -columnspan 2 -sticky ew
+        
 
         grid columnconfigure $win 0 -weight 1
         grid rowconfigure    $win 2 -weight 1
@@ -144,6 +148,14 @@ snit::widget ::marsgui::modeditor {
         # Get button is only enabled if there's something in the name field.
         bind $codename <KeyRelease> [mymethod SetButtonState]
         bind $codename <Return>     [mymethod GrabCode]
+        
+        # Active incremental searching
+        isearch enable $editor
+        isearch logger $editor [list $win.msgline puts]
+    }
+    
+    destructor {
+        isearch disable $editor
     }
     
     # GrabCode
