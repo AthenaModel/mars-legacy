@@ -71,7 +71,7 @@ snit::widget ::marsgui::messageline {
         $self configurelist $args
     }
 
-    # Destructor: not needed yet.
+    # Destructor - not needed yet.
 
     #-------------------------------------------------------------------
     # Private Methods

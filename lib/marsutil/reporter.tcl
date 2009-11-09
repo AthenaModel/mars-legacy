@@ -95,7 +95,7 @@ snit::type ::marsutil::reporter {
     typevariable deletecmd {}
 
 
-    # Array: Bin Definitions
+    # Array - Bin Definitions
     #
     #    bins        List of names of all bins
     #    kids-$bin:  List of names of child bins.  Top-level bins

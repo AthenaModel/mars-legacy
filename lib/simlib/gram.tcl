@@ -139,7 +139,7 @@ snit::type ::simlib::gram {
         far    3
     }
     
-    # array: gram instance by RDB
+    # array - gram instance by RDB
     # This array tracks which RDBs are in use by gram instances; thus,
     # if we create a new instance on an RDB that's already in use by
     # a GRAM instance, we can throw an error.

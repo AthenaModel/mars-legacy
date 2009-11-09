@@ -1,25 +1,29 @@
 #-----------------------------------------------------------------------
-# TITLE:
-#    app.tcl
+# FILE: app.tcl
+#
+# Main Application Module
+#
+# PACKAGE:
+#   app_gram(n) -- mars_gram(1) implementation library
+#
+# PROJECT:
+#   Mars Simulation Infrastructure Library
 #
 # AUTHOR:
-#    Will Duquette
-#
-# DESCRIPTION:
-#    mars_gram(1) Main Application Window
-#
-#    This module defines app, the application ensemble.  app encapsulates 
-#    all of the functionality of the mars_gram(1)  main window, 
-#    including the application's start-up behavior.  To invoke the 
-#    application,
-#
-#        package require app_gram
-#        app init $argv
+#   Will Duquette
 #
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
-# app ensemble
+# Module: app
+#
+# This module defines app, the application ensemble.  app encapsulates 
+# all of the functionality of the mars_gram(1)  main window, 
+# including the application's start-up behavior.  To invoke the 
+# application,
+#
+# > package require app_gram
+# > app init $argv
 
 snit::type app {
     pragma -hastypedestroy 0 -hasinstances 0
@@ -35,10 +39,12 @@ snit::type app {
     #-------------------------------------------------------------------
     # Type Variables
     
-    # info array
+    # Typevariable: info
     #
-    #    ticks      Time now, in ticks
-    #    zulu       Time now, in zulu time
+    # Information array; the keys are as follows.
+    #
+    #   ticks - Time now, in ticks
+    #   zulu  - Time now, in zulu time
     
     typevariable info -array {
         ticks 0000
@@ -46,13 +52,14 @@ snit::type app {
     }
 
     #===================================================================
-    # Application Initialization
+    # Group: Application Initialization
 
-    # init argv
-    #
-    # argv         Command line arguments
+    # Typemethod: init
     #
     # Initializes the application.
+    #
+    # Parameters:
+    # argv - Command line arguments
 
     typemethod init {argv} {
         # FIRST, handle the command line.
@@ -128,30 +135,8 @@ snit::type app {
 
         app puts "Welcome to GRAM Workbench!"
     }
-    
-    # NotifierTrace subject event eargs objects
-    #
-    # A notifier(n) trace command
 
-    proc NotifierTrace {subject event eargs objects} {
-        set objects [join $objects ", "]
-        log detail notify "send $subject $event [list $eargs] to $objects"
-    }
-    
-    # usage
-    #
-    # Display command line syntax.
-
-    typemethod usage {} {
-        puts {Usage: mars gram [options...] [file.gramdb]}
-        puts ""
-        puts "    -script script.tcl     Execute the named script file."
-        puts "    -help                  Display this text."
-        puts ""
-        puts "See mars_gram(1) for more information."
-    }
-
-    # CreateLogger
+    # Typemethod: CreateLogger
     #
     # Creates the logger, ::log, for this application
 
@@ -168,7 +153,7 @@ snit::type app {
         log normal app "mars_gram(1)"
     }
 
-    # CreateRdb
+    # Typemethod: CreateRdb
     #
     # Creates and initializes the rdb as an in-memory database.
 
@@ -181,13 +166,39 @@ snit::type app {
     }
 
     #-------------------------------------------------------------------
-    # Public Typemethods
-
-    # puts text
+    # Group: Event Handlers
+    
+    # Proc: NotifierTrace
     #
-    # text     A text string
+    # A notifier(n) trace command; it simply logs all notifier events.
+
+    proc NotifierTrace {subject event eargs objects} {
+        set objects [join $objects ", "]
+        log detail notify "send $subject $event [list $eargs] to $objects"
+    }
+    
+    #-------------------------------------------------------------------
+    # Group: Public Type Methods
+    
+    # Typemethod: usage
+    #
+    # Display command line syntax.
+
+    typemethod usage {} {
+        puts {Usage: mars gram [options...] [file.gramdb]}
+        puts ""
+        puts "    -script script.tcl     Execute the named script file."
+        puts "    -help                  Display this text."
+        puts ""
+        puts "See mars_gram(1) for more information."
+    }
+
+    # Typemethod: puts
     #
     # Writes the text to the message line of the topmost appwin.
+    #
+    # Parameters:
+    #   text - A text string
 
     typemethod puts {text} {
         set topwin [app topwin]
@@ -197,11 +208,12 @@ snit::type app {
         }
     }
 
-    # error text
-    #
-    # text       A tsubst'd text string
+    # Typemethod: error
     #
     # Displays the error in a message box
+    #
+    # Parameters:
+    #   text - A tsubst'd text string
 
     typemethod error {text} {
         set topwin [app topwin]
@@ -213,11 +225,12 @@ snit::type app {
         }
     }
 
-    # exit ?text?
-    #
-    # Optional error message, tsubst'd
+    # Typemethod: exit 
     #
     # Exits the program
+    #
+    # Parameters:
+    #   ?text? - Optional error message, tsubst'd
 
     typemethod exit {{text ""}} {
         # FIRST, output the text.
@@ -233,13 +246,17 @@ snit::type app {
         exit
     }
 
-    # topwin ?subcommand...?
+    # Typemethod: topwin
     #
-    # subcommand    A subcommand of the topwin, as one argument or many
+    # Provides access to the topmost <appwin>.
     #
     # If there's no subcommand, returns the name of the topmost appwin.
     # Otherwise, delegates the subcommand to the top win.  If there is
     # no top win, this is a noop.
+    #
+    # Parameters:
+    #   ?subcommand...? - A subcommand of the topwin, as one argument
+    #                     or many
 
     typemethod topwin {args} {
         # FIRST, determine the topwin
@@ -260,99 +277,17 @@ snit::type app {
 
         return [$topwin {*}$args]
     }
-    
-    #---------------------------------------------------------------
-    # Obsolete code
-    #
-    # These routines are obsolete, but are left here as a memory
-    # jog until I decide what to do with these capabilities.
-    
-    # CreateMenuBar
-    #
-    # Creates the application menu bar and its menus.
-
-    typemethod CreateMenuBar {} {
-        # Menu Bar
-        set menu [menu .menubar -relief flat]
-        . configure -menu $menu
-        
-        # File Menu
-        set filemenu [menu $menu.file]
-        $menu add cascade -label "File" -underline 0 -menu $filemenu
-
-        $filemenu add command \
-            -label "New Script..." \
-            -underline 5 \
-            -accelerator "Ctrl+N" \
-            -command [mytypemethod NewScript]
-        bind . <Control-N> [mytypemethod NewScript]
-
-        $filemenu add command \
-            -label "Open gramdb(5) File..." \
-            -underline 0 \
-            -accelerator "Ctrl+O" \
-            -command [mytypemethod OpenDatabase]
-        bind . <Control-o> [mytypemethod OpenDatabase]
-
-        $filemenu add command \
-            -label "Open Script..." \
-            -underline 5 \
-            -accelerator "Ctrl+Shift+O" \
-            -command [mytypemethod OpenScript]
-        bind . <Control-O> [mytypemethod OpenScript]
-
-    }
-
-    # NewScript
-    #
-    # Opens a text editor on a new script; returns the text editor's
-    # window.
-
-    typemethod NewScript {} {
-        texteditor .%AUTO% \
-            -title "GRAM Workbench Script Editor" \
-            -initialdir [pwd] \
-            -filetypes {
-                {{GRAM Script} {.tcl}}
-                {{All Files} {*}}
-            }
-    }
-
-    # OpenDatabase
-    #
-    # Opens a text editor on a gramdb file.
-    # window.
-    
-    typemethod OpenDatabase {} {
-        set win [texteditor .%AUTO% \
-                     -title "GRAM Workbench gramdb(5) Editor" \
-                     -initialdir [pwd] \
-                     -filetypes {
-                         {gramdb(5) {.gramdb}}
-                         {{All Files} {*}}
-                     }]
-
-        $win open
-    }
-
-    # OpenScript
-    #
-    # Opens a text editor and prompts the user to select a script.
-    
-    typemethod OpenScript {} {
-        [app NewScript] open
-    }
-
 }
 
 #-------------------------------------------------------------------
-# Handle bgerrors
+# Section: Miscellaneous Commands
 
-# bgerror message
+# proc: bgerror 
 #
-# message         An error message
+# Customized bgerror handler; Logs background error messages.
 #
-# Logs background error messages
+# Parameters:
+# message - An error message
 
 proc bgerror {message} {
     global errorInfo

@@ -172,7 +172,7 @@ snit::widgetadaptor ::marsgui::filter {
         $self configurelist $args
     }
     
-    # Destructor: default destructor is adequate
+    # Destructor - default destructor is adequate
 
 
     #-------------------------------------------------------------------

@@ -150,7 +150,7 @@ snit::widget ::marsgui::commandentry {
         bind $entry <<SelectAll>>       [mymethod SelectAll]
     }
 
-    # Destructor: Not needed
+    # Destructor - Not needed
     
     #-------------------------------------------------------------------
     # Private Methods

@@ -23,6 +23,7 @@
 #                    documentation from scratch, using the version
 #                    number.  Should only be used after checking out
 #                    the tagged code.
+#       nd           Experimental: Build naturaldocs documentation
 #
 #---------------------------------------------------------------------
 
@@ -130,7 +131,6 @@ check_ver:
 	    echo "Makefile variable MARS_VERSION is not set." ; exit 1 ; fi
 	@ if test "$(MARS_VERSION)" = "$(MARS_VERSION_DEFAULT)" ; then \
 	    echo "Makefile variable MARS_VERSION is not set." ; exit 1 ; fi
-
 
 #---------------------------------------------------------------------
 # Shared Rules

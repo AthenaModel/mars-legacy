@@ -30,8 +30,7 @@ SUBS       = dev man1 man5 mann mani
 
 # Documents to build
 EHTML_DOCS = $(wildcard *.ehtml)
-HTML_DOCS  = $(EHTML_DOCS:%.ehtml=%.html)
-
+HTML_DOCS  = $(EHTML_DOCS:%.ehtml=%.html)\
 
 #---------------------------------------------------------------------
 # Target: all
@@ -47,17 +46,29 @@ $(HTML_DOCS): $(EHTML_DOCS)
 #---------------------------------------------------------------------
 # Target: <subdir> -- Rebuilds individual subdirectories
 
-.PHONY: $(SUBS)
+.PHONY: $(SUBS) nddocs
 
 $(SUBS):
 	cd $@ ; make clean ; make
-
 
 #---------------------------------------------------------------------
 # Target: clean -- Removes build products
 
 clean: cleansubs
 	rm -f $(HTML_DOCS)
+        
+#---------------------------------------------------------------------
+# nddocs
+#
+# NaturalDocs documentation for Mars applications.  These are built
+# only on demands.
+
+nddocs:
+	NaturalDocs -r -s Default MyCss \
+		-i $(TOP_DIR)/lib/app_gram \
+		-o HTML $(TOP_DIR)/docs/nddocs \
+		-p $(TOP_DIR)/docs/ndproj
+
 
 #---------------------------------------------------------------------
 # Standard Rules

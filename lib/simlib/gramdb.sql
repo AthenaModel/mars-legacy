@@ -10,13 +10,13 @@
 --
 ------------------------------------------------------------------------
 
--- gramdb(5) Table: concern definitions
+-- gramdb(5) Table -  concern definitions
 CREATE TABLE gramdb_c (
     c      TEXT PRIMARY KEY,                 -- Symbolic concern name
     gtype  TEXT                              -- CIV, ORG, FRC
 );
 
--- gramdb(5) Table: group definitions
+-- gramdb(5) Table -  group definitions
 CREATE TABLE gramdb_g (
     g              TEXT PRIMARY KEY,         -- Symbolic group name
     gtype          TEXT,                     -- CIV, ORG, FRC
@@ -24,12 +24,12 @@ CREATE TABLE gramdb_g (
     effects_factor DOUBLE DEFAULT 1.0        -- CIV, ORG only
 );
 
--- gramdb(5) Table: Neighborhood definitions
+-- gramdb(5) Table -  Neighborhood definitions
 CREATE TABLE gramdb_n (
     n              TEXT PRIMARY KEY          -- Symbolic name
 );
 
--- gramdb(5) Table: Pairs of neighborhoods (m,n)
+-- gramdb(5) Table -  Pairs of neighborhoods (m,n)
 CREATE TABLE gramdb_mn (
     m              TEXT,                     -- Symbolic nbhood name
     n              TEXT,                     -- Symbolic nbhood name
@@ -41,7 +41,7 @@ CREATE TABLE gramdb_mn (
     PRIMARY KEY (m, n)
 );
 
--- gramdb(5) Table: Neighborhood/group pairs (n,g)
+-- gramdb(5) Table -  Neighborhood/group pairs (n,g)
 CREATE TABLE gramdb_ng (
     n              TEXT,                     -- Symbolic nbhood name
     g              TEXT,                     -- Symbolic group name
@@ -56,7 +56,7 @@ CREATE TABLE gramdb_ng (
     PRIMARY KEY (n, g)
 );
 
--- gramdb(5) Table: group/concern pairs (g,c)
+-- gramdb(5) Table -  group/concern pairs (g,c)
 CREATE TABLE gramdb_gc (
     g              TEXT,                     -- Symbolic group name
     c              TEXT,                     -- Symbolic concern name
@@ -68,7 +68,7 @@ CREATE TABLE gramdb_gc (
     PRIMARY KEY (g, c)
 );
 
--- gramdb(5) Table: group/group pairs (f,g)
+-- gramdb(5) Table -  group/group pairs (f,g)
 CREATE TABLE gramdb_fg (
     f              TEXT,                     -- Symbolic group name
     g              TEXT,                     -- Symbolic group name
@@ -79,7 +79,7 @@ CREATE TABLE gramdb_fg (
     PRIMARY KEY (f, g)
 );
     
--- gramdb(5) Table: Neighborhood/pgroup/concern triples (n,g,c)
+-- gramdb(5) Table -  Neighborhood/pgroup/concern triples (n,g,c)
 -- Values default from gramdb_gc.
 CREATE TABLE gramdb_ngc (
     n              TEXT,                     -- Symbolic nbhood name
@@ -93,7 +93,7 @@ CREATE TABLE gramdb_ngc (
     PRIMARY KEY (n, g, c)
 );
 
--- gramdb(5) Table: Neighborhood/pgroup/pgroup triples (n,f,g)
+-- gramdb(5) Table -  Neighborhood/pgroup/pgroup triples (n,f,g)
 -- Values default from gramdb_fg.
 CREATE TABLE gramdb_nfg (
     n              TEXT,                     -- Symbolic nbhood name
