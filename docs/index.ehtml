@@ -23,12 +23,13 @@
 <ul>
   <li> Mars Analyst's Guide (<<link dev/mag.odt odt>>)</li>
   <li> CM Plan (<<link dev/cm.html html>>)</li>
+  <li> Tcl Coding Standard (<<link dev/tcl_standard.html html>>)
 </ul><p>
 
 
 <h2>Copyright</h2>
 
-(C) 2008. California Institute of Technology.  ALL RIGHTS RESERVED.
+(C) 2009. California Institute of Technology.  ALL RIGHTS RESERVED.
 U.S. Government sponsorship acknowledged. Any commercial use must be
 negotiated with the Office of Technology Transfer at the California
 Institute of Technology.<p>
