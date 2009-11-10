@@ -1,33 +1,71 @@
 #-----------------------------------------------------------------------
-# TITLE:
-#    sim.tcl
+# FILE: sim.tcl
+#
+# Simulation Manager
+#
+# PACKAGE:
+#   app_gram(n) -- mars_gram(1) implementation package
+#
+# PROJECT:
+#   Mars Simulation Infrastructure Library
 #
 # AUTHOR:
-#    Will Duquette
-#
-# DESCRIPTION:
-#    mars_gram(1) Simulation Manager object
-#
-#    The Simulation object loads the data from the gramdb(5) file, and
-#    owns and manages the NSAT objects.
+#   Will Duquette
 #
 #-----------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+# Module: sim
+#
+# The sim module manages the simulation proper: the gramdb(5)
+# database input, the initialization of the GRAM module, the passage
+# of simulation time, and so forth.  Most of the <executive> commands
+# relating to the simulation are defined here as well.
 
 snit::type sim {
     pragma -hasinstances no
     
     #-------------------------------------------------------------------
-    # Type Components
-
-    typecomponent ram               ;# gram(n) 
+    # Group: Notifier Events
+    
+    # Notifier Event: Load
+    #
+    # A new gramdb(5) database has been loaded.  A <Reset> is also sent.
+    
+    # Notifier Event: Reset
+    #
+    # The simulation has changed in some basic way; all dependent modules
+    # should reset themselves.
+    
+    # Notifier Event: Unload
+    #
+    # The gramdb(5) data has been deleted and the simulation uninitialized.
+    # A <Reset> is also sent.
+    
+    # Notifier Event: Time
+    #
+    # Simulation time has changed.
 
     #-------------------------------------------------------------------
-    # Type Variables
-    
-    # Info Array
+    # Group: Type Components
+
+    # Type Component: ram
     #
-    #    dbloaded      1 if a gramdb(5) has been loaded, and 0 otherwise
-    #    dbfile        Name of the loaded gramdb(5), or ""
+    # The current gram(n) instance, or <NullGram> if no gram(n)
+    # instance currently exists.
+    
+    typecomponent ram
+
+    #-------------------------------------------------------------------
+    # Group: Type Variables
+    
+    # Type variable: info
+    #
+    # An array of information about the state of the simulation.  The
+    # keys are as follows.
+    #
+    #   dbloaded - 1 if a gramdb(5) is loaded, and 0 otherwise
+    #   dbfile   - Name of the loaded gramdb(5) file, or "" if none.
     
     typevariable info -array {
         dbloaded   0
@@ -35,8 +73,16 @@ snit::type sim {
     }
 
     #-------------------------------------------------------------------
-    # Initialization
+    # Group: Initialization
 
+    # Type method: init
+    #
+    # Initializes the module.  This is a simple task, as most things
+    # can't be done until the user specifies a gramdb(5) file, and
+    # we don't have it yet.  It _does_ set the ram component to
+    # <NullGram>, so that <executive> commands delegated to GRAM
+    # will be rejected with a user-friendly error message.
+    
     typemethod init {} {
         log normal sim "Initializing..."
         
@@ -48,11 +94,16 @@ snit::type sim {
     }
 
     #-------------------------------------------------------------------
-    # Scenario Management
+    # Group: Scenario Management
 
-    # load dbfile
+    # Type method: load 
     #
-    # Loads the gramdb(5) file and initializes the simulation.
+    # Loads the _dbfile_ and initializes GRAM.  Sends <Load> and <Reset>.
+    #
+    # Syntax:
+    #   sim load _dbfile_
+    #
+    #   dbfile - The name of a gramdb(5) database file.
 
     typemethod load {dbfile} {
         # FIRST, clean up the old simulation data.
@@ -73,7 +124,7 @@ snit::type sim {
             -tick [parmdb get sim.tickSize]
 
         # NEXT, create and initialize the GRAM.
-        if {[catch {sim InitGram} result]} {
+        if {[catch {sim CreateGram} result]} {
             # Save the stack trace while we clean up
             set errInfo $::errorInfo
             sim unload
@@ -89,9 +140,25 @@ snit::type sim {
         return
     }
 
-    # reset
+    # Type method: CreateGram
     #
-    # Reinitializes the simulation
+    # Creates the gram(n) object, and initializes it using the currently
+    # loaded gramdb(5) data.
+    
+    typemethod CreateGram {} {
+        set ram [gram ::ram \
+                     -clock        ::simclock                       \
+                     -rdb          ::rdb                            \
+                     -logger       ::log                            \
+                     -logcomponent gram                             \
+                     -loadcmd      {::simlib::gramdb loader ::rdb}]
+        $ram init
+    }
+    
+    # Type method: reset
+    #
+    # Reinitializes the simulation, setting the simulation time back to
+    # 0.  Sends <Reset>.
     
     typemethod reset {} {
         simclock reset
@@ -106,23 +173,11 @@ snit::type sim {
         return 
     }
 
-    # InitGram
+    # Type method: unload
     #
-    # Initializes the gram(n) objects.
+    # Deletes the simulation objects, leaving the simulation
+    # uninitialized.  Sends <Reset> and <Unload>
     
-    typemethod InitGram {} {
-        set ram [gram ::ram \
-                     -clock        ::simclock                       \
-                     -rdb          ::rdb                            \
-                     -logger       ::log                            \
-                     -logcomponent gram                             \
-                     -loadcmd      {::simlib::gramdb loader ::rdb}]
-        $ram init
-    }
-    
-    # unload
-    #
-    # Deletes the simulation objects to make way for new ones.
     typemethod unload {} {
         catch {$ram destroy}
 
@@ -139,11 +194,17 @@ snit::type sim {
     }
     
     #-------------------------------------------------------------------
-    # Simulation Control
+    # Group: Simulation Control
 
-    # step ?ticks?
+    # Type method: step
     #
-    # Runs the simulation forward one timestep
+    # Runs the simulation forward one timestep.  Sends <Time>.
+    #
+    # Syntax:
+    #   sim step _?ticks?_
+    #
+    #   ticks - Some positive number of simulation ticks, defaulting
+    #           to sim.stepsize.
 
     typemethod step {{ticks ""}} {
         if {$ticks eq ""} {
@@ -157,19 +218,26 @@ snit::type sim {
         return
     }
 
-    # run zulutime
+    # Type method: run
     #
-    # Lets the simulation run until the specified zulu-time
+    # Lets the simulation run until the specified zulu-time, one
+    # <step> at a time.  Sends <Time> after each step.
+    #
+    # Syntax:
+    #   sim run _zulutime_
+    #
+    #   zulutime - A simulation time expressed as a Zulu-time string.
     
     typemethod run {zulutime} {
         set endTime [simclock fromZulu $zulutime]
+        set ticks [parmdb get sim.stepsize]
     
         if {$endTime <= [simclock now]} {
             error "Not in future: '$zulutime'"
         }
 
         while {[simclock now] <= $endTime} {
-            simclock step $stepsize
+            simclock step $ticks
 
             $ram advance
             notifier send ::sim <Time>
@@ -179,11 +247,12 @@ snit::type sim {
     }
     
     #-------------------------------------------------------------------
-    # Queries
+    # Group: Queries
     
-    # dbfile 
+    # Type method: dbfile 
     #
-    # Returns the name of the loaded gramdb(5) file, if any.
+    # Returns the name of the loaded gramdb(5) file, or "" if not
+    # <dbloaded>.
 
     typemethod dbfile {} {
         if {$info(dbloaded)} {
@@ -193,7 +262,7 @@ snit::type sim {
         }
     }
 
-    # dbloaded
+    # Type method: dbloaded
     #
     # Returns 1 if GRAM is initialized with a database, and
     # 0 otherwise.
@@ -202,16 +271,15 @@ snit::type sim {
         return $info(dbloaded)
     }
 
-    #-------------------------------------------------------------------
-    # Time Conversion typemethods
-
-    # now ?offset?
+    # Type method: now
     #
-    # offset    An offset in integer ticks; defaults to 0.
+    # Returns the current simulation time (plus the _offset_) 
+    # as a Zulu-time string.  If not <dbloaded>, returns "".
     #
-    # Returns the current simulation time (plus the offset) 
-    # as a Zulu-time string.  If the
-    # simulation hasn't been initialized, returns "".
+    # Syntax:
+    #   sim now _?offset?_
+    #
+    # offset - An offset in integer ticks; defaults to 0.
 
     typemethod now {{offset 0}} {
         # Do we have a scenario?
@@ -224,17 +292,28 @@ snit::type sim {
     }
 
     #-------------------------------------------------------------------
-    # GRAM Type Methods
+    # Group: GRAM Executive Commands
     #
-    # These are in this module, rather than executive, because they
-    # depend on the "ram" component.
+    # These routines are the implementations for GRAM-related
+    # <executive> commands.  They are declared here, rather
+    # than in <executive>, because they depend on the <ram> component.
     
-    # Delegated typemethods
+    # Delegated type method: dump *
+    #
+    # The "dump" family of subcommands is delegated to <ram> as is.
+    
     delegate typemethod {dump *} to ram  using {%c dump %m}
 
-    # cancel driver
+    # Type method: cancel
     #
-    # Cancels the effects of a driver given its ID.
+    # Cancels the effects of a gram(n) _driver_ given its ID.
+    # If -delete is specified, deletes the driver completely;
+    # otherwise, it is retained but is marked deleted.
+    #
+    # Syntax:
+    #   sim cancel _driver_ ?-delete?
+    #
+    #   driver - The gram(n) driver ID
 
     typemethod cancel {driver {option ""}} {
         if {![$ram driver exists $driver]} {
@@ -249,18 +328,25 @@ snit::type sim {
     }
 
     
-    # coop adjust n f g mag ?options?
+    # Type method: coop adjust
     #
-    # n             The targeted neighborhood, or "*"
-    # f             The targeted civ group, or "*"
-    # g             The targeted frc group, or "*"
-    # mag           magnitude (qmag)
+    # Adjusts the specified cooperation level by the specified
+    # amount.  If -driver is specified, the adjustment is associated
+    # with the specified driver; otherwise, a new driver ID is assigned
+    # automatically.
     #
-    # -driver       Driver ID.  Defaults to next ID.
+    # Syntax:
+    #   sim coop adjust _n f g mag ?options...?_
     #
-    # Adjusts the specified cooperation by the specified amount.
+    #   n   - The targeted neighborhood, or "*"
+    #   f   - The targeted civ group, or "*"
+    #   g   - The targeted frc group, or "*"
+    #   mag - magnitude (qmag)
+    #
+    # Options:
+    # -driver driver - A gram(n) driver ID
 
-    typemethod {coop adjust} {n f g mag args} {
+    typemethod "coop adjust" {n f g mag args} {
         set driver [sim GetDriver args]
 
         if {[llength $args] > 0} {
@@ -270,26 +356,30 @@ snit::type sim {
         $ram coop adjust $driver $n $f $g $mag
     }
 
-    # coop level n f g limit days ?options?
+    # Type method: coop level
     #
-    # n             The targeted neighborhood, or "*"
-    # f             The targeted civilian group
-    # g             The targeted force group
-    # limit         Nominal magnitude (qmag)
-    # days          Realization time in days (qduration)
+    # Schedule a cooperation level input at the specified time,
+    # which defaults to now.
+    #
+    # Syntax:
+    #   sim coop level _n f g limit days ?options?_
+    #
+    #   n     - The targeted neighborhood, or "*"
+    #   f     - The targeted civilian group
+    #   g     - The targeted force group
+    #   limit - Nominal magnitude (qmag)
+    #   days  - Realization time in days (qduration)
     #
     # Options: 
-    #     -driver driver  Driver ID; defaults to next ID
-    #     -cause cause    Sets the cause for this input.
-    #     -s factor       "here" multiplier, defaults to 1
-    #     -p factor       "near" indirect effects multiplier, defaults to 0
-    #     -q factor       "far" indirect effects multiplier, defaults to 0
-    #     -zulu zulu      Start time, as a zulu-time
-    #     -tick ticks     Start time, in ticks
-    #
-    # Schedule a level input at the specified time, which defaults to now.
+    #   -driver driver  - Driver ID; defaults to next ID
+    #   -cause cause    - Sets the cause for this input.
+    #   -s factor       - "here" multiplier, defaults to 1
+    #   -p factor       - "near" indirect effects multiplier, defaults to 0
+    #   -q factor       - "far" indirect effects multiplier, defaults to 0
+    #   -zulu zulu      - Start time, as a zulu-time
+    #   -tick ticks     - Start time, in ticks
 
-    typemethod {coop level} {n f g limit days args} {
+    typemethod "coop level" {n f g limit days args} {
         set driver [sim GetDriver args]
         set ts     [sim GetStartTime args]
 
@@ -298,24 +388,28 @@ snit::type sim {
         return
     }
 
-    # coop slope n f g slope limit ?options...?
+    # Type method: coop slope
     #
-    # n             The targeted neighborhood, or "*"
-    # f             The targeted civilian group
-    # g             The targeted force group
-    # slope         change/day (qmag)
+    # Schedule a cooperation slope input at the specified time, which
+    # defaults to now.
+    #
+    # Syntax:
+    #   sim coop slope _n f g slope limit ?options...?_
+    #
+    #   n     - The targeted neighborhood, or "*"
+    #   f     - The targeted civilian group
+    #   g     - The targeted force group
+    #   slope - change/day (qmag)
     #
     # Options: 
-    #     -driver driver  Driver ID; defaults to next ID
-    #     -s factor       "here" multiplier, defaults to 1
-    #     -p factor       "near" indirect effects multiplier, defaults to 0
-    #     -q factor       "far" indirect effects multiplier, defaults to 1
-    #     -zulu zulu      Start time, as a zulu-time
-    #     -tick ticks     Start time, in ticks
-    #
-    # Schedule a slope input at the specified time.
+    #   -driver driver  - Driver ID; defaults to next ID
+    #   -s factor       - "here" multiplier, defaults to 1
+    #   -p factor       - "near" indirect effects multiplier, defaults to 0
+    #   -q factor       - "far" indirect effects multiplier, defaults to 1
+    #   -zulu zulu      - Start time, as a zulu-time
+    #   -tick ticks     - Start time, in ticks
 
-    typemethod {coop slope} {n f g slope args} {
+    typemethod "coop slope" {n f g slope args} {
         set driver [sim GetDriver args]
         set ts     [sim GetStartTime args]
 
@@ -324,18 +418,25 @@ snit::type sim {
         return
     }
 
-    # sat adjust n g c mag ?options?
+    # Type method: sat adjust
     #
-    # n        The targeted neighborhood, or "*"
-    # g        The targeted group, or "*"
-    # c        The affected concern, or "*"
-    # mag      magnitude (qmag)
+    # Adjusts the specified satisfaction level by the specified amount.
+    # If -driver is specified, the adjustment is associated
+    # with the specified driver; otherwise, a new driver ID is assigned
+    # automatically.
     #
-    # -driver       Driver ID.  Defaults to next.
+    # Syntax:
+    #   sim sat adjust _n g c mag ?options?_
     #
-    # Adjusts the specified satisfaction by the specified amount.
+    #   n   - The targeted neighborhood, or "*"
+    #   g   - The targeted group, or "*"
+    #   c   - The affected concern, or "*"
+    #   mag - magnitude (qmag)
+    #
+    # Options:
+    #   -driver driver  - Driver ID.  Defaults to next ID.
 
-    typemethod {sat adjust} {n g c mag args} {
+    typemethod "sat adjust" {n g c mag args} {
         # FIRST, get the Driver ID
         set driver [sim GetDriver args]
 
@@ -346,24 +447,29 @@ snit::type sim {
         $ram sat adjust $driver $n $g $c $mag
     }
 
-    # sat level n g c limit days ?options?
+    # Type method: sat level 
     #
-    # g         The targeted group
-    # c         The affected concern
-    # limit     Nominal magnitude (qmag)
-    # days      Realization time in days (qduration)
+    # Schedule a satisfaction level input at the specified time,
+    # which defaults to now.
+    #
+    # Syntax:
+    #   sim sat level _n g c limit days ?options?_
+    #
+    #   n     -  The targeted neighborhood
+    #   g     -  The targeted group
+    #   c     -  The affected concern
+    #   limit -  Nominal magnitude (qmag)
+    #   days  -  Realization time in days (qduration)
     #
     # Options: 
-    #     -driver driver  Driver ID; defaults to next ID
-    #     -s factor       "here" multiplier, defaults to 1
-    #     -p factor       "near" indirect effects multiplier, defaults to 0
-    #     -q factor       "far" indirect effects multiplier, defaults to 0
-    #     -zulu zulu      Start time, as a zulu-time
-    #     -tick ticks     Start time, in ticks
-    #
-    # Schedule a level input the specified time.
+    #   -driver driver  - Driver ID; defaults to next ID
+    #   -s factor       - "here" multiplier, defaults to 1
+    #   -p factor       - "near" indirect effects multiplier, defaults to 0
+    #   -q factor       - "far" indirect effects multiplier, defaults to 0
+    #   -zulu zulu      - Start time, as a zulu-time
+    #   -tick ticks     - Start time, in ticks
 
-    typemethod {sat level} {n g c limit days args} {
+    typemethod "sat level" {n g c limit days args} {
         set driver [sim GetDriver args]
         set ts     [sim GetStartTime args]
 
@@ -372,24 +478,28 @@ snit::type sim {
         return
     }
 
-    # sat slope n g c slope ?options...?
+    # Type method: sat slope
     #
-    # n         The targeted neighborhood, or "*"
-    # g         The targeted group
-    # c         The affected concern
-    # slope     change/day (qmag)
+    # Schedule a satisfaction slope input at the specified time,
+    # which defaults to now.
+    #
+    # Syntax:
+    #   sim sat slope _n g c slope ?options...?_
+    #
+    #   n     - The targeted neighborhood
+    #   g     - The targeted group
+    #   c     - The affected concern
+    #   slope - change/day (qmag)
     #
     # Options: 
-    #     -driver driver  Driver ID; defaults to next ID
-    #     -s factor       "here" multiplier, defaults to 1
-    #     -p factor       "near" indirect effects multiplier, defaults to 0
-    #     -q factor       "far" indirect effects multiplier, defaults to 0
-    #     -zulu zulu      Start time, as a zulu-time
-    #     -tick ticks     Start time, in ticks
-    #
-    # Schedule a slope input at the specified time.
+    #   -driver driver  - Driver ID; defaults to next ID
+    #   -s factor       - "here" multiplier, defaults to 1
+    #   -p factor       - "near" indirect effects multiplier, defaults to 0
+    #   -q factor       - "far" indirect effects multiplier, defaults to 0
+    #   -zulu zulu      - Start time, as a zulu-time
+    #   -tick ticks     - Start time, in ticks
 
-    typemethod {sat slope} {n g c slope args} {
+    typemethod "sat slope" {n g c slope args} {
         set driver [sim GetDriver args]
         set ts     [sim GetStartTime args]
 
@@ -397,12 +507,23 @@ snit::type sim {
 
         return
     }
+    
+    #-------------------------------------------------------------------
+    # Group: Utility Routines
 
-    # GetDriver argvar
+    # Type method: GetDriver
     #
     # Plucks -driver from an option/value list (if present).
     # If set, validates it; otherwise, generates a new Driver ID.
     # Returns the Driver ID.
+    #
+    # Syntax:
+    #   sim GetDriver _argvar_
+    #
+    #   argvar - Name of a variable containing an option/value list.
+    #
+    # Options:
+    #   -driver driver    - A GRAM driver ID
 
     typemethod GetDriver {argvar} {
         upvar $argvar arglist
@@ -418,18 +539,22 @@ snit::type sim {
         return $driver
     }
     
-    # GetStartTime argvar
+    # Type method: GetStartTime
     #
-    # argvar     Name of a variable containing an argument list
-    #
-    # Plucks the named options and their values from
+    # Plucks the start time options and their values from
     # the argument variable and validates them.
     #
-    #   -zulu     A valid zulu-time
-    #   -tick     A time in ticks
+    # Syntax:
+    #   sim GetStartType _argvar_
+    #
+    #   argvar - Name of a variable containing an option/value list.
+    #
+    # Options:
+    #   -zulu zulutime - A valid zulu-time
+    #   -tick ticks    - A simulation time in ticks
     #
     # If either option is given, returns the number of ticks.
-    # Otherwise, returns [simclock now].
+    # Otherwise, returns <now>.
 
     typemethod GetStartTime {argvar} {
         upvar $argvar arglist
@@ -446,19 +571,14 @@ snit::type sim {
     }
 
 
-    # NullGram args....
+    # Proc: NullGram
     #
-    # Handles typemethods delegated to a gram(n) object when there isn't one.
+    # Handles typemethods delegated to <ram> when not <dbloaded> by
+    # throwing a user-readable error.  Any arguments are ignored.
     
     proc NullGram {args} {
         error "simulation uninitialized"
     }
-
-
-    #-------------------------------------------------------------------
-    # Utility Methods and Procs
-
-    # TBD
 }
 
 

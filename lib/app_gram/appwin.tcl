@@ -4,7 +4,7 @@
 # Main application window.
 #
 # PACKAGE:
-#   app_gram(n) -- mars_gram(1) implementation library
+#   app_gram(n) -- mars_gram(1) implementation package
 #
 # PROJECT:
 #   Mars Simulation Infrastructure Library
@@ -18,10 +18,10 @@
 #-----------------------------------------------------------------------
 # Widget: appwin
 #
-# This window is implemented as a snit::widget; however, it's set up
-# to be the application's main window, and will exit the program when
-# it's closed, just like ".".  It's expected that "." will be
-# withdrawn at start-up.
+# Main application window widget; also used for secondary browser
+# windows.  Note that an instance of this widget replaces the default
+# main window, "."; closing the <-main> appwin will terminate
+# the program.  It is expected that "." will be withdrawn at start-up.
 
 snit::widget appwin {
     hulltype toplevel
@@ -30,6 +30,13 @@ snit::widget appwin {
     # Type Constructor
     
     typeconstructor {
+        #-------------------------------------------------------------------
+        # Group: Icons
+        
+        # Icon: icon::step
+        #
+        # Represents a figure of a man stepping forward.
+        
         mkicon ${type}::icon::step {
             ......................
             ..........XX..........
@@ -77,7 +84,7 @@ snit::widget appwin {
     #
     # Whether or not this appwin is the main window (true) or just a
     # secondary browser window (false).  This affects the components, 
-    # the menus, and so forth.
+    # the menus, and so forth.  The value can be any boolean flag.
     
     option -main      \
         -default  no  \
@@ -85,6 +92,12 @@ snit::widget appwin {
 
     #-------------------------------------------------------------------
     # Group: Tab Definitions
+    #
+    # The body of the <appwin> consists of a tabbed notebook containing
+    # variety of tabs, each containing some particular view of the
+    # application data.  Some tabs have subtabs.  This section contains
+    # the definitions of the tabs (in the <tabs> variable) along with
+    # some helper routines used to create them.
 
     # Variable: tabs
     #
@@ -426,12 +439,13 @@ snit::widget appwin {
     # Creates an sqlbrowser(n) tab with default settings for a
     # gram(n) table.
     #
-    # Syntax: gram_tab _win name tc ?option value...?_
+    # Syntax:
+    #   gram_tab _win name tc ?option value...?_
     #
-    #   win        - The window name
-    #   name       - The name of a gram(n) table or view
-    #   tc         - Number of title columns
-    #   ?options?  - sqlbrowser(n) options
+    #   win          - The window name
+    #   name         - The name of a gram(n) table or view
+    #   tc           - Number of title columns
+    #   option value - sqlbrowser(n) options and their values.
     
     proc gram_tab {win name tc args} {
         sqlbrowser $win \
@@ -452,11 +466,13 @@ snit::widget appwin {
     # Creates an sqlbrowser(n) tab with default settings
     # for a gramdb(5) table.
     #
-    # Parameters:
-    #   win        - The window name
-    #   name       - The name of a gramdb(5) table or view
-    #   tc         - Number of title columns
-    #   ?options?  - sqlbrowser(n) options
+    # Syntax:
+    #   gram_tab _win name tc ?option value...?_
+    #
+    #   win          - The window name
+    #   name         - The name of a gramdb(5) table or view
+    #   tc           - Number of title columns
+    #   option value - sqlbrowser(n) options and their values.
 
     proc gramdb_tab {win name tc args} {
         sqlbrowser $win \
@@ -475,9 +491,10 @@ snit::widget appwin {
     #
     # Status info array.  The keys are as follows.
     #
-    #   ticks - Current sim time as a four-digit tick
-    # 
-    #   zulu  - Current sim time as a zulu time string
+    #   ticks - Current sim time as a four-digit tick, for display
+    #           in the toolbar.
+    #   zulu  - Current sim time as a zulu time string, for display
+    #           in the toolbar.
 
     variable info -array {
         ticks  "0000"
@@ -527,19 +544,26 @@ snit::widget appwin {
         $self Reconfigure
     }
 
+    # Destructor: destructor
+    #
+    # Unsubscribes the <appwin> from all of its notifier(n) events.
+    
     destructor {
         notifier forget $self
     }
     
     #===================================================================
     # Group: Menu Bar
+    #
+    # This section contains the routines that create the menu bar and
+    # implement the individual menu items.
     
     #-------------------------------------------------------------------
     # Menu Bar: Creation
 
     # method: CreateMenuBar
     #
-    # Creates the main menu bar
+    # Creates the main menu bar.
 
     method CreateMenuBar {} {
         # Menu Bar
@@ -638,8 +662,13 @@ snit::widget appwin {
     #
     # Adds menu items to the View menu to pop up each of the <tabs>.
     #
-    # Parameters:
+    # Syntax:
+    #   AddTabMenuItems _mnu_
+    #
     #   mnu - The View menu
+    #
+    # TBD: It isn't clear whether these View menu items are really all
+    # that useful.
 
     method AddTabMenuItems {mnu} {
         # FIRST, save the parent menu for toplevel tabs
@@ -671,7 +700,9 @@ snit::widget appwin {
 
     # method: FileLoadGramdb
     #
-    # Allows the user to select a gramdb(5) file via an OpenFile dialog;
+    # File/Load gramdb(5) File... menu item.
+    #
+    # Allows the user to select a gramdb(5) file via an Open File dialog;
     # the file is then loaded.
     
     method FileLoadGramdb {} {
@@ -687,6 +718,8 @@ snit::widget appwin {
     }
 
     # method: FileSaveRDB
+    #
+    # File/Save RDB... menu item.
     #
     # Allows the user to save a snapshot of the RDB to a file.
 
@@ -728,6 +761,8 @@ snit::widget appwin {
 
 
     # method: FileSaveCLI
+    #
+    # File/Save CLI Scrollback Buffer... menu item.
     #
     # Prompts the user to save the CLI scrollback buffer to disk
     # as a text file.
@@ -785,10 +820,14 @@ snit::widget appwin {
     
     #===================================================================
     # Group: Components
+    #
+    # This section contains routines that build the <appwin>'s
+    # major components.
 
     # method: CreateComponents
     #
-    # Creates the main window's components
+    # Creates and lays out the <appwin>'s components (other than the
+    # menus).
 
     method CreateComponents {} {
         # FIRST, prepare the grid.  The scrolling log/shell panedwindow
@@ -922,7 +961,8 @@ snit::widget appwin {
 
     # method: AddTabs
     #
-    # Adds all of the content <tabs> and subtabs to the window.
+    # Adds all of the content tabs and subtabs to the window,
+    # reading the <Tab Definitions> from the <tabs> variable.
 
     method AddTabs {} {
         # FIRST, add each tab
@@ -961,10 +1001,14 @@ snit::widget appwin {
    
     #-------------------------------------------------------------------
     # Group: Event Handlers
+    #
+    # This section contains a variety of event handlers bound to
+    # widgets and notifier events during creation of the window.
 
     # method: Reconfigure
     #
-    # Reconfigure the window given the new scenario
+    # Reconfigure the window to reflect the current scenario, in
+    # response to a variety of notifier events.
 
     method Reconfigure {} {
         if {[sim dbfile] ne ""} {
@@ -977,8 +1021,8 @@ snit::widget appwin {
 
     # method: SimTime
     #
-    # This routine is called when the simulation time display has changed,
-    # either because the start date has changed, or the time has advanced.
+    # Update the displayed simulation time, because either the start date
+    # has changed or the simulation time has advanced.
 
     method SimTime {} {
         # Display current sim time.
@@ -988,31 +1032,26 @@ snit::widget appwin {
 
     # method: CliPrompt
     #
-    # Returns a prompt string for the CLI
+    # Return a prompt string for the CLI.
 
     method CliPrompt {} {
         return ">"
-    
-        # TBD: Need to update executive first
-        if {[executive usermode] eq "super"} {
-            return "super>"
-        } else {
-            return ">"
-        }
     }
     
     #===================================================================
-    # Group: Public Methods
-
-    #-------------------------------------------------------------------
-    # Tab Management
+    # Group: Public Methods - Tab management
+    #
+    # These methods manipulate the window's <tabs>.
 
     # Method: tab win
     #
-    # Returns the window name of the specified tab
+    # Returns the window name of the content window on the
+    # specified tab.
     #
-    # Parameters:
-    #   tab -  A tab ID
+    # Syntax:
+    #   tab win _tab_
+    #
+    #   tab -  A tab ID, as defined in <tabs>
     
     method "tab win" {tab} {
         dict get $tabs $tab tabwin
@@ -1020,10 +1059,13 @@ snit::widget appwin {
 
     # Method: tab view
     #
-    # Makes the window display the specified tab
+    # Brings the named tab to the front of the window.  If the tab is
+    # a subtab, the parent tab is also brought to the front.
     #
-    # Parameters:
-    #   tab -  A tab ID
+    # Syntax:
+    #   tab view _tab_
+    #
+    #   tab -  A tab ID, as defined in <tabs>.
 
     method "tab view" {tab} {
         dict with tabs $tab {
@@ -1039,12 +1081,14 @@ snit::widget appwin {
     }
    
     #-------------------------------------------------------------------
-    # CLI history
+    # Group: CLI History
 
     # method: savehistory
     #
     # If there's a CLI, saves its command history to 
     # ~/.mars_gram/history.cli.
+    #
+    # TBD: This should probably be "cli savehistory".
 
     method savehistory {} {
         assert {$cli ne ""}
@@ -1058,9 +1102,11 @@ snit::widget appwin {
         close $f
     }
 
-    # LoadCliHistory
+    # method: LoadCliHistory
     #
-    # If there's a CLI, and a history file, read its command history.
+    # Load the CLI history file, if any, into the CLI.
+    #
+    # TBD: This should probably be "cli loadhistory".
 
     method LoadCliHistory {} {
         if {[file exists ~/.mars_gram/history.cli]} {
@@ -1077,14 +1123,19 @@ snit::widget appwin {
 
         $cli clear
     }
+    
+    #-------------------------------------------------------------------
+    # Group: Other Public Methods
 
     # method: new
     #
     # Creates a new application window with the specified options
     # and an automatically generated name.
     #
-    # Parameters:
-    #   ?option value...? - The creation <options>.
+    # Syntax:
+    #   new _?option value...?_
+    #
+    #   option value - The creation <options>.
 
     typemethod new {args} {
         $type create .%AUTO% {*}$args
@@ -1092,9 +1143,11 @@ snit::widget appwin {
     
     # method: error
     #
-    # Displays the error in a message box
+    # Displays the error text in a messagebox(n) dialog.
     #
-    # Parameters:
+    # Syntax:
+    #   error _text_
+    #
     #   text - A tsubst'd text string
 
     method error {text} {
@@ -1108,9 +1161,11 @@ snit::widget appwin {
 
     # method: puts
     #
-    # Writes the text to the message line
+    # Writes the text to the window's message line.
     #
-    # Parameters:
+    # Syntax:
+    #   puts _text_
+    #
     #   text - A text string
 
     method puts {text} {

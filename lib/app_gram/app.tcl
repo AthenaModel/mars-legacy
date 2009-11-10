@@ -4,7 +4,7 @@
 # Main Application Module
 #
 # PACKAGE:
-#   app_gram(n) -- mars_gram(1) implementation library
+#   app_gram(n) -- mars_gram(1) implementation package
 #
 # PROJECT:
 #   Mars Simulation Infrastructure Library
@@ -17,13 +17,15 @@
 #-----------------------------------------------------------------------
 # Module: app
 #
-# This module defines app, the application ensemble.  app encapsulates 
-# all of the functionality of the mars_gram(1)  main window, 
-# including the application's start-up behavior.  To invoke the 
+# This module defines app, the application ensemble.  app contains
+# the application start-up code, as well a variety of subcommands
+# available to the application as a whole.  To invoke the 
 # application,
 #
 # > package require app_gram
 # > app init $argv
+#
+# Note that app_gram is usually invoked by mars(1).
 
 snit::type app {
     pragma -hastypedestroy 0 -hasinstances 0
@@ -35,31 +37,17 @@ snit::type app {
     typecomponent msgline           ;# The application message line.
     typecomponent rdb               ;# The runtime database, for nsat(n)
                                      # inputs.
-                                     
-    #-------------------------------------------------------------------
-    # Type Variables
-    
-    # Typevariable: info
-    #
-    # Information array; the keys are as follows.
-    #
-    #   ticks - Time now, in ticks
-    #   zulu  - Time now, in zulu time
-    
-    typevariable info -array {
-        ticks 0000
-        zulu  ""
-    }
-
     #===================================================================
     # Group: Application Initialization
 
-    # Typemethod: init
+    # Type method: init
     #
     # Initializes the application.
     #
-    # Parameters:
-    # argv - Command line arguments
+    # Syntax:
+    #   app init _argv_
+    #
+    #   argv - Command line arguments
 
     typemethod init {argv} {
         # FIRST, handle the command line.
@@ -136,9 +124,9 @@ snit::type app {
         app puts "Welcome to GRAM Workbench!"
     }
 
-    # Typemethod: CreateLogger
+    # Type method: CreateLogger
     #
-    # Creates the logger, ::log, for this application
+    # Creates and configures the logger, ::log, for this application.
 
     typemethod CreateLogger {} {
         set logdir [file normalize [file join . log mars_gram]]
@@ -153,9 +141,11 @@ snit::type app {
         log normal app "mars_gram(1)"
     }
 
-    # Typemethod: CreateRdb
+    # Type method: CreateRdb
     #
-    # Creates and initializes the rdb as an in-memory database.
+    # Creates and initializes an in-memory database to be the
+    # Run-Time Database (RDB); it includes the schemas for
+    # gramdb(5) and gram(n).
 
     typemethod CreateRdb {} {
         set rdb [sqldocument ::rdb -clock ::simclock]
@@ -180,9 +170,9 @@ snit::type app {
     #-------------------------------------------------------------------
     # Group: Public Type Methods
     
-    # Typemethod: usage
+    # Type method: usage
     #
-    # Display command line syntax.
+    # Outputs the application's command line syntax to stdout.
 
     typemethod usage {} {
         puts {Usage: mars gram [options...] [file.gramdb]}
@@ -193,11 +183,13 @@ snit::type app {
         puts "See mars_gram(1) for more information."
     }
 
-    # Typemethod: puts
+    # Type method: puts
     #
-    # Writes the text to the message line of the topmost appwin.
+    # Writes the text to the message line of the topmost <appwin>.
     #
-    # Parameters:
+    # Syntax:
+    #   app puts _text_
+    #
     #   text - A text string
 
     typemethod puts {text} {
@@ -208,11 +200,13 @@ snit::type app {
         }
     }
 
-    # Typemethod: error
+    # Type method: error
     #
-    # Displays the error in a message box
+    # Displays an error message in a messagebox(n) message box.
     #
-    # Parameters:
+    # Syntax:
+    #   app error _text_
+    #
     #   text - A tsubst'd text string
 
     typemethod error {text} {
@@ -225,12 +219,15 @@ snit::type app {
         }
     }
 
-    # Typemethod: exit 
+    # Type method: exit 
     #
-    # Exits the program
+    # Exits the program, writing an optional message to stdout.
+    # Saves the CLI history and the parmdb settings to ~/.mars_gram/.
     #
-    # Parameters:
-    #   ?text? - Optional error message, tsubst'd
+    # Syntax:
+    #   app exit _?text?_
+    #
+    #   text - Optional error message, tsubst'd
 
     typemethod exit {{text ""}} {
         # FIRST, output the text.
@@ -246,17 +243,19 @@ snit::type app {
         exit
     }
 
-    # Typemethod: topwin
+    # Type method: topwin
     #
     # Provides access to the topmost <appwin>.
     #
-    # If there's no subcommand, returns the name of the topmost appwin.
-    # Otherwise, delegates the subcommand to the top win.  If there is
-    # no top win, this is a noop.
+    # If there's no subcommand, returns the name of the topmost <appwin>
+    # window. Otherwise, delegates the subcommand to the topmost window.
+    # If there is no topmost window, this is a no-op.
     #
-    # Parameters:
-    #   ?subcommand...? - A subcommand of the topwin, as one argument
-    #                     or many
+    # Syntax:
+    #   app topwin _?subcommand...?_
+    #
+    #   subcommand... - A subcommand of the topwin, expanded or
+    #                   unexpanded.
 
     typemethod topwin {args} {
         # FIRST, determine the topwin
@@ -286,8 +285,10 @@ snit::type app {
 #
 # Customized bgerror handler; Logs background error messages.
 #
-# Parameters:
-# message - An error message
+# Syntax:
+#   bgerror _message_
+#
+#   message - An error message
 
 proc bgerror {message} {
     global errorInfo

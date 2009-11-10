@@ -47,17 +47,24 @@ Format: 1.4
 
 
 File: app.tcl  (app.tcl)
+File: app_gram.tcl  (app_gram.tcl)
 File: appwin.tcl  (appwin.tcl)
+File: executive.tcl  (executive.tcl)
+File: parmdb.tcl  (parmdb.tcl)
+File: sim.tcl  (sim.tcl)
 
 Group: Index  {
 
    Index: Everything
+   Event Index: Events
    File Index: Files
    Method Index: Methods
    Module Index: Modules
    Option Index: Options
    Proc Index: Procs
+   Type Index: Types
    Variable Index: Variables
    Widget Index: Widgets
+   Icon Index: Icons
    }  # Group: Index
 

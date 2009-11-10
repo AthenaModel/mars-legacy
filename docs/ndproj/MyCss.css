@@ -3,6 +3,7 @@
 /* WHD: Use block paragraphs instead of indented paragraphs. */
 p {
    text-indent: 0;
+   margin-left: 1em;
    margin-bottom: 1em;
    }
 

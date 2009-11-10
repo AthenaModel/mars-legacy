@@ -1,21 +1,36 @@
 #-----------------------------------------------------------------------
-# TITLE:
-#    executive.tcl
+# FILE: executive.tcl
+#
+# Executive Command Processor
+#
+# PACKAGE:
+#   app_gram(n) -- mars_gram(1) implementation package
+#
+# PROJECT:
+#   Mars Simulation Infrastructure Library
 #
 # AUTHOR:
-#    Will Duquette
-#
-# DESCRIPTION:
-#    mars_gram(1): Executive Command Processor
-#
-#    The Executive is the program's command processor.  It's a singleton, 
-#    implemented as an instance of the executiveType so that it can have
-#    options if need be.
+#   Will Duquette
 #
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
-# executive
+# Module: executive
+#
+# The executive is the program's command processor.  It defines the
+# set of commands available at the application's CLI in the
+# main <appwin>.
+#
+# The executive is a wrapper around a smartinterpreter(n).  Unsafe
+# Tcl commands are excluded.  Executive commands are of four types:
+#
+# * Standard Tcl commands defined in the executive interpreter.
+# * Tcl procs defined in the executive interpreter by the executive
+#   itself.
+# * Smart aliases to commands defined elsewhere in the program.
+# * Smart aliases to commands defined with the executive.
+#
+# The commands themselves are documented in the mars_gram(1) man page.
 
 snit::type executive {
     pragma -hasinstances no
@@ -26,12 +41,23 @@ snit::type executive {
     typecomponent interp    ;# Interpreter used for processing commands.
 
     #-------------------------------------------------------------------
-    # Type Variables
+    # Group: Type Variables
 
-    typevariable stackTrace {}   ;# Traceback for last error.
+    # Type variable: stackTrace
+    #
+    # Tcl ::errorInfo for the most recent command error (if any).
+    # This information is stored to support debugging of unexpected
+    # errors (as opposed to errors due to invalid input).
+    typevariable stackTrace {}
 
     #-------------------------------------------------------------------
-    # Initialization
+    # Group: Initialization
+    
+    # Type method: init
+    #
+    # Initializes the executive at application start-up.  In particular,
+    # this type method defines all of the commands available to the
+    # executive.
     
     typemethod init {} {
         log normal exec "Initializing..."
@@ -269,11 +295,22 @@ snit::type executive {
     }
 
     #-------------------------------------------------------------------
-    # Public type methods
-
-    # help ?-info? command...
+    # Group: Public type methods
     #
-    # Outputs the help for the command 
+    # These subcommands are available for use throughout the program.
+
+    # Type method: help
+    #
+    # Outputs the calling syntax for a command.  Only smartalias'd
+    # commands are supported.
+    #
+    # Syntax:
+    #   executive help ?-info? _command..._
+    #
+    # -info      - If this option is included, the output will include
+    #              the full command to which this _command_ is an alias.
+    # command... - The name of the command; for ensemble commands, the
+    #              command and its subcommand(s).
 
     typemethod help {args} {
         set getInfo 0
@@ -292,10 +329,16 @@ snit::type executive {
         return $out
     }
 
-    # eval script
+    # Type method: eval
     #
-    # Evaluate the script; throw an error or return the script's value.
-    # Either way, log what happens. Ignore empty scripts.
+    # Evaluates a _script_ in the context of the executive, throwing
+    # an error or returning the script's result.  Either way, the
+    # evaluation is logged.  Emptry scripts are ignored.
+    #
+    # Syntax:
+    #   executive eval _script_
+    #
+    #   script - A script of executive commands.
 
     typemethod eval {script} {
         if {[string trim $script] eq ""} {
@@ -317,16 +360,22 @@ snit::type executive {
         return $result
     }
 
-    # evalsafe script
+    # Type method: evalsafe
     #
-    # Like eval, but swallows the return value or error (since
-    # it's logged anyway).
+    # Evaluates a _script_ of executive commands, just as <eval> does,
+    # but swallows the return value or error (since it will be logged
+    # anyway).
+    #
+    # Syntax:
+    #   executive evalsafe _script_
+    #
+    #   script - A script of executive commands.
 
     typemethod evalsafe {script} {
         catch {$type eval $script}
     }
 
-    # commands
+    # Type method: commands
     #
     # Returns a list of the commands defined in the Executive's 
     # interpreter
@@ -335,9 +384,9 @@ snit::type executive {
         $interp eval {info commands}
     }
 
-    # errtrace
+    # Type method: errtrace
     #
-    # returns the stack trace from the most recent evaluation error.
+    # Returns the <stackTrace> from the most recent evaluation error.
 
     typemethod errtrace {} {
         log warning exec "errtrace: $stackTrace"
@@ -345,14 +394,16 @@ snit::type executive {
     }
     
     #-------------------------------------------------------------------
-    # Executive Command Implementations
+    # Group: Executive Command Implementations
     #
-    # The following typemethods exist only to implement executive
-    # commands.
+    # These type methods and procs
+    # implement all executive commands that aren't implemented
+    # elsewhere.
 
-    # bgerrtrace
+    # Type method: bgerrtrace
     #
-    # Returns the stack trace from the most recent bgerror
+    # Implements the *bgerrtrace* command.
+    # Returns the stack trace from the most recent <bgerror>.
 
     typemethod bgerrtrace {} {
         global bgErrorInfo
@@ -365,11 +416,15 @@ snit::type executive {
         }
     }
     
-    # parm_help parm
+    # Type method: parm_help
     #
-    # parm     The name of a parameter
+    # Implements the *parm help* command.  Returns help information
+    # for the named <parm>.
     #
-    # Returns help information for the parameter.
+    # Syntax:
+    #   parm_help _parm_
+    #
+    #   parm - The name of a parameter
     
     typemethod parm_help {parm} {
         # FIRST, get the docstring
@@ -385,12 +440,18 @@ snit::type executive {
         return $doc
     }
     
-    #---------------------------------------------------------------
-    # Procs
-
-    # super args
+    # Proc: super
     #
-    # Executes args as a command in the global namespace
+    # Executes the _command_ in the global namespace.  This gives
+    # the developer access to the application internals from the CLI,
+    # while minimizing the risk of corrupting the application during
+    # normal use.
+    #
+    # Syntax:
+    #   super command _?args...?_
+    #
+    #   command - The command to execute.
+    #   args... - The command's arguments.
 
     proc super {args} {
         namespace eval :: $args

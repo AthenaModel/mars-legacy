@@ -110,7 +110,8 @@ Topic Type: Object Type
    Class Hierarchy: Yes
 
    Keywords:
-      otype
+      otype, otypes,
+      object type, object types
 
 
 Topic Type: Widget
@@ -166,14 +167,27 @@ Topic Type: Method
 
    Keywords:
       method, methods
-      delegate method, delegate methods
-      typemethod, typemethods
-      delegate typemethod, delegate typemethods
+      delegated method, delegated methods
+      type method, type methods
+      delegated type method, delegated type methods
 
 
 Alter Topic Type: Variable
 
    Add Keywords:
-      typevariable, typevariables
+      type variable, type variables
       component, components
-      typecomponent, typecomponents
+      type component, type components
+
+
+Alter Topic Type: Event
+
+   Add Keywords:
+      notifier event, notifier events
+
+
+Topic Type: Icon
+
+   Plural: Icons
+   Keywords:
+      icon, icons

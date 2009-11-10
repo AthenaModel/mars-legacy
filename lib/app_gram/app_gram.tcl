@@ -1,12 +1,18 @@
 #-----------------------------------------------------------------------
-# TITLE:
-#	app_gram.tcl
+# FILE: app_gram.tcl
+#
+#   Package loader.  This file provides the package, requires all
+#   other packages upon which this package depends, and sources in
+#   all of the package's modules.
+#
+# PACKAGE:
+#   app_gram(n) -- mars_gram(1) implementation package
+#
+# PROJECT:
+#   Mars Simulation Infrastructure Library
 #
 # AUTHOR:
-#	Will Duquette
-#
-# DESCRIPTION:
-#       Mars: app_gram(n) loader
+#    Will Duquette
 #
 #-----------------------------------------------------------------------
 

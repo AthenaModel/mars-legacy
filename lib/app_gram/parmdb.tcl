@@ -1,21 +1,34 @@
 #-----------------------------------------------------------------------
-# TITLE:
-#    parmdb.tcl
+# FILE: parmdb.tcl
+#
+#   Preference parameter definitions
+#
+# PACKAGE:
+#   app_gram(n): mars_gram(1) implementation package
+#
+# PROJECT:
+#   Mars Simulation Infrastructure Library
 #
 # AUTHOR:
 #    Will Duquette
 #
-# DESCRIPTION:
-#    mars_gram(1) model parameter database
-#
-#    The module delegates most of its function to parmset(n).
-#
 #-----------------------------------------------------------------------
 
-snit::integer ticks -min 1
+#-----------------------------------------------------------------------
+# Exported Commands
+
+namespace eval ::lib:: {
+    namespace export parmdb
+}
 
 #-----------------------------------------------------------------------
-# parmdb
+# Module: parmdb
+#
+# This module is a wrapper around a parmset(n) object containing
+# preference and model parameters for the application.  In addition
+# to defining the application-specific parameters and pulling in
+# library parameters, it provides for saving the parameters as
+# ~/.mars_gram/defaults.parmdb.
 
 snit::type parmdb {
     # Make it a singleton
@@ -27,19 +40,28 @@ snit::type parmdb {
     typecomponent ps ;# The parmset(n) object
 
     #-------------------------------------------------------------------
-    # Type Variables
+    # Group: Type Variables
 
-    # Name of the defaults file; set by init
+    # Type Variable: defaultsFile
+    #
+    # The name of the user's default parameter settings file; set
+    # by <init>.
     typevariable defaultsFile
 
     #-------------------------------------------------------------------
-    # Public typemethods
+    # Group: Public Type Methods
 
+    # Delegated Type Method: *
+    #
+    # All parmset(n) methods are available as subcommands of <parmdb>.
+    
     delegate typemethod * to ps
 
-    # init
+
+    # Type method: init
     #
-    # Initializes the module
+    # Initializes the module, defining the parameters and loading
+    # the user's default settings (if any).
 
     typemethod init {} {
         # Don't initialize twice.
@@ -87,10 +109,10 @@ snit::type parmdb {
         $type load
     }
 
-    # save
+    # Type method: save
     #
-    # Saves the current parameters as the default for future
-    # scenarios, by saving ~/.mars_gram/defaults.parmdb.
+    # Saves the current parameter settings to the user <defaultsFile>
+    # as the default for future runs.
 
     typemethod save {} {
         file mkdir [file join ~ .mars_gram]
@@ -98,9 +120,10 @@ snit::type parmdb {
         return
     }
 
-    # reset
+    # Type method: reset
     #
-    # Clears the saved defaults by deleting ~/.mars_gram/defaults.parmdb.
+    # Resets all parameter settings to their default values, and
+    # deletes the user <defaultsFile>.
 
     typemethod reset {} {
         if {[file exists $defaultsFile]} {
@@ -111,10 +134,11 @@ snit::type parmdb {
         return "Parameters reset to default values."
     }
 
-    # load
+    # Type method: load
     #
-    # Loads the parameters from the defaults file, if any.  Otherwise,
-    # the parameters are reset to the normal defaults.
+    # Loads the user's parameter settings from the user <defaultsFile>,
+    # if there is one.  Otherwise, the parameters are reset to the normal
+    # defaults.
 
     typemethod load {} {
         if {[file exists $defaultsFile]} {
@@ -127,5 +151,13 @@ snit::type parmdb {
     }
 }
 
+#-------------------------------------------------------------------
+# Section: Validation Types
 
+# Type: ticks
+#
+# An integer number of simulation ticks, no less than 1.
+# TBD: This should probably be in a different module.
+
+snit::integer ticks -min 1
 
