@@ -1,44 +1,63 @@
 #-----------------------------------------------------------------------
-# TITLE:
-#    app.tcl
+# FILE: app.tcl
+#
+# Main Application Module
+#
+# PACKAGE:
+#   app_log(n) -- mars_log(1) implementation package
+#
+# PROJECT:
+#   Mars Simulation Infrastructure Library
 #
 # AUTHOR:
-#    Will Duquette
-#
-# DESCRIPTION:
-#    mars_log(1) Main Application Window
-#
-#    This module defines app, the application ensemble.  app encapsulates 
-#    all of the functionality of the mars_log(1) main window, 
-#    including the application's start-up behavior.  To invoke the 
-#    application,
-#
-#        package require app_log
-#        app init $argv
+#   Will Duquette
 #
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
-# Required Packages
-
-# All needed packages are required in app_log.tcl.
-
-#-----------------------------------------------------------------------
-# app ensemble
+# Module: app
+#
+# This module defines app, the application ensemble.  app contains
+# the application start-up code, as well a variety of subcommands
+# available to the application as a whole.  To invoke the 
+# application,
+#
+# > package require app_log
+# > app init $argv
+#
+# Note that app_log is usually invoked by mars(1).
 
 snit::type app {
     pragma -hasinstances 0
     
     #-------------------------------------------------------------------
-    # Type Components
+    # Group: Type Components
     
-    typecomponent log      ;# The scrollinglog(n)
-    typecomponent msgline  ;# The messageline(n)
+    # Type component: log
+    #
+    # The scrollinglog(n) widget.
+    typecomponent log
+    
+    # Type component: msgline
+    #
+    # The messageline(n) widget.
+    typecomponent msgline
     
     #-------------------------------------------------------------------
-    # Type Variables
+    # Group: Type Variables
 
-    # Options
+    # Type variable: opts
+    #
+    # The application's configuration options:
+    #
+    # -appname name       - The application name, as entered at the
+    #                       command prompt.
+    # -defaultappdir dir  - The default application directory in log/.
+    # -manpage name       - The application's man page name, for use
+    #                       in error messages.
+    # -project            - The application's project name, for use in
+    #                       the GUI.
+    
     typevariable opts -array {
         -appname       "mars log"
         -defaultappdir ""
@@ -46,7 +65,9 @@ snit::type app {
         -project       "Mars"
     }
     
-    # fieldFlag array: show/hide the named field.
+    # Type variable: fieldFlags
+    #
+    # An array of flags, indicating whether to show or hide the named field.
     
     typevariable fieldFlags -array {
         t      0
@@ -55,17 +76,26 @@ snit::type app {
         c      1
     }
 
-    # scrollLockFlag -- do we auto-update and scroll, or not.
+    # Type variable: scrollLockFlag
+    #
+    # Do we auto-update and scroll, or not?
     typevariable scrollLockFlag 0
     
     #-------------------------------------------------------------------
-    # Application Initializer
+    # Group: Application Initializer
 
-    # init argv
+    # Type method: init
     #
-    # argv  Command line arguments (if any)
+    # Initializes the application, and processes the command line.
     #
-    # Initializes the application.
+    # Syntax:
+    #   init _argv_
+    #
+    #   argv - Command line arguments (if any)
+    #
+    # The application expects a single argument, the root of the log
+    # directory tree; if absent, it defaults to "./log".
+
     typemethod init {argv} {
         # FIRST, get the log directory.
         if {[llength $argv] == 0} {
@@ -221,19 +251,24 @@ snit::type app {
     }
     
     #-------------------------------------------------------------------
-    # Event Handlers
+    # Group: Event Handlers
     
-    # SetScrollLock
+    # Type method: SetScrollLock
     #
-    # Locks/Unlocks the scrolling log's scroll lock
+    # Locks/Unlocks the scrolling log's scroll lock.
     
     typemethod SetScrollLock {} {
         $log lock $scrollLockFlag
     }
 
-    # ShowHideField name
+    # Type method: ShowHideField
     #
     # Shows/Hides the named field
+    #
+    # Syntax:
+    #   ShowHideField _name_
+    #
+    #   name - The name of a log field.
     
     typemethod ShowHideField {name} {
         if {$fieldFlags($name)} {
@@ -243,14 +278,14 @@ snit::type app {
         }
     }
     
-    #-------------------------------------------------------------------
-    # Utility Procs
-
-    # LogParser text
+    # Proc: LogParser
     #
-    # text    A block of log lines
+    # Parses the log lines for the <log> and returns a list of lists.
     #
-    # Parses the lines and returns a list of lists.
+    # Syntax:
+    #   LogParser _text_
+    #
+    #   text - A block of log lines
     
     proc LogParser {text} {
         set lines [split [string trimright $text] "\n"]
@@ -271,16 +306,19 @@ snit::type app {
         
         return $lineList
     }
-    
     #-------------------------------------------------------------------
-    # Application Framework Type Methods
+    # Group: Application Framework
     
-    # configure option ?value? ?option value...?
+    # Type method: configure
     #
-    # option    A configuration option
-    # value     A new value for the option
+    # Sets/gets application framework options, which are stored in the
+    # <opts> variable.
     #
-    # Sets/gets application framework options.
+    # Syntax:
+    #   configure _option ?value? ?option value...?_
+    #
+    #   option - A configuration option
+    #   value  - A new value for the option
     
     typemethod configure {args} {
         if {[llength $args] == 1} {
@@ -308,28 +346,36 @@ snit::type app {
     
     
     #-------------------------------------------------------------------
-    # Utility Type Methods
+    # Group: Utility Type Methods
     
-    # exit ?code?
+    # Type method: exit
     #
-    # Exits the program.
+    # Exits the program, with the specified exit code.
+    #
+    # Syntax:
+    #   exit _?code?_
+    #
+    #   code - The exit code.  Defaults to 0.
     
     typemethod exit {{code 0}} {
         # TBD: Put any special exit handling here.
         exit $code
     }
     
-    # puts msg
+    # Type method: puts
     #
-    # msg     A text string
+    # Display the _msg_ in the message line
     #
-    # Display the text string in the message line
+    # Syntax:
+    #   puts _msg_
+    #
+    #   msg - A text string
     
     typemethod puts {msg} {
         $msgline puts $msg        
     }
 
-    # usage
+    # Type method: usage
     #
     # Displays the application's command-line syntax
     
@@ -338,6 +384,7 @@ snit::type app {
         puts ""
         puts "See $opts(-manpage) information."
     }
+
 }
 
 

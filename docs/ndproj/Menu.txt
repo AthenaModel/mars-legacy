@@ -43,15 +43,28 @@ Format: 1.4
 # time it is run.  When working with groups, just deal with the braces and
 # forget about the indentation and comments.
 # 
+# You can use this file on other computers even if they use different
+# directories.  As long as the command line points to the same source files,
+# Natural Docs will be able to correct the locations automatically.
+# 
 # --------------------------------------------------------------------------
 
 
-File: app.tcl  (app.tcl)
-File: app_gram.tcl  (app_gram.tcl)
-File: appwin.tcl  (appwin.tcl)
-File: executive.tcl  (executive.tcl)
-File: parmdb.tcl  (parmdb.tcl)
-File: sim.tcl  (sim.tcl)
+Group: App_gram  {
+
+   File: app.tcl  (/home/will/mars/lib/app_gram/app.tcl)
+   File: app_gram.tcl  (/home/will/mars/lib/app_gram/app_gram.tcl)
+   File: appwin.tcl  (/home/will/mars/lib/app_gram/appwin.tcl)
+   File: executive.tcl  (/home/will/mars/lib/app_gram/executive.tcl)
+   File: parmdb.tcl  (/home/will/mars/lib/app_gram/parmdb.tcl)
+   File: sim.tcl  (/home/will/mars/lib/app_gram/sim.tcl)
+   }  # Group: App_gram
+
+Group: App_log  {
+
+   File: app.tcl  (/home/will/mars/lib/app_log/app.tcl)
+   File: app_log.tcl  (/home/will/mars/lib/app_log/app_log.tcl)
+   }  # Group: App_log
 
 Group: Index  {
 
@@ -68,3 +81,8 @@ Group: Index  {
    Icon Index: Icons
    }  # Group: Index
 
+
+
+##### Do not change or remove these lines. #####
+Data: 1(D3333RuEG378oo3EpH63o8Y3pIIV`HpE)
+Data: 1(h3333RuEG378oo3EpH63o8Y3pIIVou`)

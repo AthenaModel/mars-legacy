@@ -37,7 +37,8 @@ snit::type app {
     typecomponent msgline           ;# The application message line.
     typecomponent rdb               ;# The runtime database, for nsat(n)
                                      # inputs.
-    #===================================================================
+                                     
+    #-------------------------------------------------------------------
     # Group: Application Initialization
 
     # Type method: init

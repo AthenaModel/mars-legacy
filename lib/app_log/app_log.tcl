@@ -1,12 +1,18 @@
 #-----------------------------------------------------------------------
-# TITLE:
-#	app_log.tcl
+# FILE: app_log.tcl
+#
+#   Package loader.  This file provides the package, requires all
+#   other packages upon which this package depends, and sources in
+#   all of the package's modules.
+#
+# PACKAGE:
+#   app_log(n) -- mars_log(1) implementation package
+#
+# PROJECT:
+#   Mars Simulation Infrastructure Library
 #
 # AUTHOR:
-#	Will Duquette
-#
-# DESCRIPTION:
-#       Mars: app_log(n) loader
+#    Will Duquette
 #
 #-----------------------------------------------------------------------
 

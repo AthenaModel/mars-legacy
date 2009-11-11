@@ -110,7 +110,7 @@ Topic Type: Object Type
    Class Hierarchy: Yes
 
    Keywords:
-      otype, otypes,
+      otype, otypes
       object type, object types
 
 

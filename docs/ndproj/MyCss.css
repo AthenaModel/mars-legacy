@@ -20,3 +20,7 @@ u {
     font: 10pt "Courier New", Courier, monospace;
     padding-bottom: .25em;
     white-space: nowrap }
+
+/* Indent preformatted blocks relative to the surrounding text. */
+.CBody pre {
+    margin-left: 2em; }
