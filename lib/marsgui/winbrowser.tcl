@@ -30,6 +30,8 @@ snit::widget ::marsgui::winbrowser {
     typeconstructor {
         namespace import ::marsutil::* 
     }
+    
+    
 
     #-------------------------------------------------------------------
     # Components
@@ -38,9 +40,17 @@ snit::widget ::marsgui::winbrowser {
     component tnb        ;# Tabbed notebook for window data
 
     #-------------------------------------------------------------------
-    # Options
+    # Group: Options
 
     delegate option * to hull
+    
+    # Option: -logcmd
+    #
+    # A command that takes one additional argument, a status message
+    # to be displayed to the user.
+    
+    option -logcmd \
+        -default ""
 
     #-------------------------------------------------------------------
     # Instance Variables
@@ -90,13 +100,10 @@ snit::widget ::marsgui::winbrowser {
         $self AddPage options
         $self AddPage bindings
         
-        messageline $win.msgline
-
         grid rowconfigure    $win 0 -weight 1
         grid columnconfigure $win 0 -weight 1
 
         grid $win.paner -row 0 -column 0 -sticky nsew
-        grid $win.msgline -row 1 -column 0 -sticky ew
 
         # NEXT, get the options
         $self configurelist $args
@@ -106,6 +113,19 @@ snit::widget ::marsgui::winbrowser {
 
         # NEXT, activate the first item.
         $tree selection set .
+    }
+    
+    # Method: Log
+    #
+    # Logs a status message by calling the <-logcmd>.
+    #
+    # Syntax:
+    #   Log _msg_
+    #
+    #   msg     A short text message
+    
+    method Log {msg} {
+        callwith $options(-logcmd) $msg
     }
 
     # AddPage name label
@@ -135,7 +155,7 @@ snit::widget ::marsgui::winbrowser {
                 -xscrollcommand     [list $sw.x set]]
         
         isearch enable $sw.text
-        isearch logger $sw.text [list $win.msgline puts]
+        isearch logger $sw.text [mymethod Log]
 
         ttk::scrollbar $sw.y \
             -command [list $sw.text yview]

@@ -38,11 +38,12 @@ snit::widget ::marsgui::debugger {
     #-------------------------------------------------------------------
     # Components
 
-    component tnb    ;# The tabbed notebook
-    component wb     ;# The winbrowser
-    component cb     ;# The cmdbrowser
-    component me     ;# The modeditor
-    component cli    ;# The CLI shell
+    component tnb     ;# The tabbed notebook
+    component wb      ;# The winbrowser
+    component cb      ;# The cmdbrowser
+    component me      ;# The modeditor
+    component cli     ;# The CLI shell
+    component msgline ;# The messageline
 
     #-------------------------------------------------------------------
     # Options
@@ -162,7 +163,8 @@ snit::widget ::marsgui::debugger {
         $win.paner add $tnb
 
         # NEXT, create the winbrowser
-        install wb using ::marsgui::winbrowser $tnb.wb
+        install wb using ::marsgui::winbrowser $tnb.wb \
+            -logcmd [list $win.msgline puts]
 
         $tnb add $wb \
             -sticky  nsew      \
@@ -171,7 +173,8 @@ snit::widget ::marsgui::debugger {
         
         # NEXT, create the cmdbrowser
         install cb using ::marsgui::cmdbrowser $tnb.cb \
-            -editcmd [mymethod edit]
+            -editcmd [mymethod edit]                   \
+            -logcmd  [list $win.msgline puts]
 
         $tnb add $cb \
             -sticky  nsew       \
@@ -179,7 +182,8 @@ snit::widget ::marsgui::debugger {
             -text    "Commands"
 
         # NEXT, create the mod editor
-        install me using ::marsgui::modeditor $tnb.me
+        install me using ::marsgui::modeditor $tnb.me \
+            -logcmd [list $win.msgline puts]
         
         $tnb add $me \
             -sticky  nsew     \
@@ -193,12 +197,17 @@ snit::widget ::marsgui::debugger {
             -commandlist [info commands]
 
         $win.paner add $cli
+        
+        # NEXT, the message line.
+        
+        install msgline using messageline $win.msgline
 
         # NEXT, grid everything.
         grid rowconfigure    $win 0 -weight 1
         grid columnconfigure $win 0 -weight 1
 
-        grid $win.paner -sticky nsew
+        grid $win.paner -row 0 -column 0 -sticky nsew
+        grid $msgline   -row 1 -column 0 -sticky ew
 
         # NEXT, set the window title.
         if {$options(-app)} {

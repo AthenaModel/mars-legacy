@@ -18,7 +18,7 @@ implemented in Tcl, and source it back into the application on demand.<p>
 
 <<section OPTIONS>>
 
-The widget the same options as the
+The widget has the same options as the
 standard ttk::frame; in addition, it provides the
 following:<p>
 
@@ -35,6 +35,13 @@ Specifies the name of a command used to format an edited mod before saving
 it.  The command takes two additional arguments, the file name and
 the code to format.  It should return the formatted text.  The
 application can use this to add boilerplate to the saved file.<p>
+
+<<defopt {-logcmd <i>command</i>}>>
+
+Allows the widget to display <<xref isearch(n)>> status messages to the
+user.  The <i>command</i> is a Tcl command expecting one additional
+argument, a text string.  The client will usually arrange for this
+string to be written to a <<xref messageline(n)>>.<p>
 
 <</deflist>>
 

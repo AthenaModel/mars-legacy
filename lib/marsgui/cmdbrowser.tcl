@@ -1,21 +1,16 @@
 #-----------------------------------------------------------------------
-# TITLE:
-#    cmdbrowser.tcl
+# FILE: cmdbrowser.tcl
+#
+# Browser for Tcl commands and Snit objects.
+#
+# PACKAGE:
+#   marsgui(n) -- Mars GUI Infrastructure Package
+#
+# PROJECT:
+#   Mars Simulation Infrastructure Library
 #
 # AUTHOR:
-#    Will Duquette
-#
-# DESCRIPTION:
-#    cmdbrowser(n) is an experimental widget for browsing Tcl commands
-#    and Snit objects.
-#
-# FUTURE:
-#    * Should preserve location on Populate, if possible
-#    * Might want to use a tktreeview instead of Tree, so that we can 
-#      have multiple columns.
-#    * It would be nice to be able to edit code on the fly.
-#    * Would like better support for Snit types and instances.
-#    * Would like searching.
+#   Will Duquette
 #
 #-----------------------------------------------------------------------
 
@@ -27,7 +22,17 @@ namespace eval ::marsgui:: {
 }
 
 #-----------------------------------------------------------------------
-# cmdbrowser
+# Widget: cmdbrowser
+#
+# cmdbrowser(n) is an experimental widget for browsing Tcl commands
+# and Snit objects.
+#
+# FUTURE:
+#    * Should preserve location on Populate, if possible
+#    * Might want to use a treectrl instead of Tree, so that we can 
+#      have multiple columns.
+#    * Would like better support for Snit types and instances.
+#
 
 snit::widget ::marsgui::cmdbrowser {
     #-------------------------------------------------------------------
@@ -65,17 +70,25 @@ snit::widget ::marsgui::cmdbrowser {
     component tnb        ;# Tabbed notebook for window data
 
     #-------------------------------------------------------------------
-    # Options
+    # Group: Options
 
     delegate option * to hull
     
-    # -editcmd
+    # Option: -editcmd
     #
     # A command that takes one argument, the name of the command to
     # edit.  Called when the "Edit" button is pressed; the command
     # is the name of the currently selected command.
     
     option -editcmd \
+        -default ""
+    
+    # Option: -logcmd
+    #
+    # A command that takes one additional argument, a status message
+    # to be displayed to the user.
+    
+    option -logcmd \
         -default ""
 
     #-------------------------------------------------------------------
@@ -191,14 +204,11 @@ snit::widget ::marsgui::cmdbrowser {
 
         $self AddPage code
         
-        messageline $win.msgline
-
         grid rowconfigure    $win 1 -weight 1
         grid columnconfigure $win 0 -weight 1
 
         grid $win.bar     -row 0 -column 0 -sticky ew
         grid $win.paner   -row 1 -column 0 -sticky nsew
-        grid $win.msgline -row 2 -column 0 -sticky ew
 
         # NEXT, get the options
         $self configurelist $args
@@ -220,6 +230,19 @@ snit::widget ::marsgui::cmdbrowser {
         set name [dict get $cmd name]
 
         callwith $options(-editcmd) $name
+    }
+
+    # Method: Log
+    #
+    # Logs a status message by calling the <-logcmd>.
+    #
+    # Syntax:
+    #   Log _msg_
+    #
+    #   msg     A short text message
+    
+    method Log {msg} {
+        callwith $options(-logcmd) $msg
     }
 
     # AddPage name label
@@ -249,7 +272,7 @@ snit::widget ::marsgui::cmdbrowser {
                 -xscrollcommand     [list $sw.x set]]
         
         isearch enable $sw.text
-        isearch logger $sw.text [list $win.msgline puts]
+        isearch logger $sw.text [mymethod Log]
 
         ttk::scrollbar $sw.y \
             -command [list $sw.text yview]

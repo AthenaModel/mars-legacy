@@ -22,18 +22,11 @@ commands and a data pane which displays information
 about the currently selected command.  The contents of the data
 pane depends on the kind of command selected.<p>
 
-<<section COMMANDS>>
+<<section OPTIONS>>
 
-This module defines the following command:<p>
-
-<<deflist commands>>
-
-<<defitem cmdbrowser {cmdbrowser <i>pathName ?options...?</i>}>>
-
-Creates a new <<iref cmdbrowser>> widget named <i>pathName</i>.<p>
-
-The <<iref cmdbrowser>> widget may be created with the same options as
-the Tk <b>frame</b> widget, along with the following:<p>
+The widget has the same options as the
+standard ttk::frame; in addition, it provides the
+following:<p>
 
 <<deflist options>>
 
@@ -45,7 +38,26 @@ callback is defined.  The <i>command</i> is a Tcl command expecting one
 additional argument, the name of the command.  It is up to the client
 to allow the user to edit the command in some way.<p>
 
-<</deflist>>
+<<defopt {-logcmd <i>command</i>}>>
+
+Allows the widget to display <<xref isearch(n)>> status messages to the
+user.  The <i>command</i> is a Tcl command expecting one additional
+argument, a text string.  The client will usually arrange for this
+string to be written to a <<xref messageline(n)>>.<p>
+
+<</deflist options>>
+
+<<section COMMANDS>>
+
+This module defines the following command:<p>
+
+<<deflist commands>>
+
+<<defitem cmdbrowser {cmdbrowser <i>pathName ?options...?</i>}>>
+
+Creates a new <<iref cmdbrowser>> widget named <i>pathName</i>.<p>
+
+<</deflist commands>>
 
 <<section "INSTANCE COMMAND">>
 

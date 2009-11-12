@@ -42,11 +42,11 @@ snit::widget ::marsgui::modeditor {
     component editor     ;# Text widget for editing the code.
 
     #-------------------------------------------------------------------
-    # Options
+    # Group: Options
     
     delegate option * to hull
     
-    # -defaultdir
+    # Option: -defaultdir
     #
     # The default directory in which to save mods.  If not set,
     # you get the current working directory.
@@ -54,7 +54,7 @@ snit::widget ::marsgui::modeditor {
     option -defaultdir \
         -default ""
     
-    # -formatcmd
+    # Option: -formatcmd
     #
     # If set, this command is called on save, and is passed one
     # additional argument, the code to save.  The command can format
@@ -63,6 +63,13 @@ snit::widget ::marsgui::modeditor {
     option -formatcmd \
         -default ""
     
+    # Option: -logcmd
+    #
+    # A command that takes one additional argument, a status message
+    # to be displayed to the user.
+    
+    option -logcmd \
+        -default ""
     
     #-------------------------------------------------------------------
     # Instance Variables
@@ -131,14 +138,10 @@ snit::widget ::marsgui::modeditor {
         ttk::scrollbar $win.yscroll \
             -command [list $editor yview]
         
-        messageline $win.msgline
-        
         grid $bar         -row 0 -column 0 -columnspan 2 -sticky ew
         grid $win.sep1    -row 1 -column 0 -columnspan 2 -sticky ew -pady 2
         grid $editor      -row 2 -column 0 -sticky nsew
         grid $win.yscroll -row 2 -column 1 -sticky ns
-        grid $win.msgline -row 3 -column 0 -columnspan 2 -sticky ew
-        
 
         grid columnconfigure $win 0 -weight 1
         grid rowconfigure    $win 2 -weight 1
@@ -151,13 +154,26 @@ snit::widget ::marsgui::modeditor {
         
         # Active incremental searching
         isearch enable $editor
-        isearch logger $editor [list $win.msgline puts]
+        isearch logger $editor [mymethod Log]
     }
     
     destructor {
         isearch disable $editor
     }
     
+    # Method: Log
+    #
+    # Logs a status message by calling the <-logcmd>.
+    #
+    # Syntax:
+    #   Log _msg_
+    #
+    #   msg     A short text message
+    
+    method Log {msg} {
+        callwith $options(-logcmd) $msg
+    }
+
     # GrabCode
     #
     # Gets the code, and inserts it in the editor
@@ -348,6 +364,4 @@ snit::widget ::marsgui::modeditor {
         $editor insert end "\n\n# BEGIN $name\n$text\n# END $name\n"
         $editor yview moveto 1.0
     }
-    
-
 }
