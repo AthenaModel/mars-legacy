@@ -106,7 +106,10 @@ ticker schedule
 
 debugger new
 
-pack [reportbrowser .rb -db ::db] -fill both -expand yes
+reportbrowser .rb \
+    -db ::db      \
+    -logcmd puts
+pack .rb -fill both -expand yes
 
 .rb refresh
 

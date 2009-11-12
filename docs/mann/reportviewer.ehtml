@@ -42,6 +42,13 @@ following to its hull frame widget:<p>
 Specifies the name of the <<xref sqldocument(n)>> object for the
 database containing the reports to display.<p>
 
+<<defopt {-logcmd <i>command</i>}>>
+
+Allows the widget to display <<xref isearch(n)>> status messages to the
+user.  The <i>command</i> is a Tcl command expecting one additional
+argument, a text string.  The client will usually arrange for this
+string to be written to a <<xref messageline(n)>>.<p>
+
 <</deflist reportviewer options>>
 
 <</deflist commands>>

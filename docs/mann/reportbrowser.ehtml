@@ -58,7 +58,7 @@ widget.<p>
 <<defopt {-shownewest <i>boolean</i>}>>
 
 Specifies whether or not the browser should scroll to the most recent reports
-in the bin when a new bin is selected.  Defaults to false.
+in the bin when a new bin is selected.  Defaults to false.<p>
 
 <<defopt {-showrecent <i>boolean</i>}>>
 
@@ -81,6 +81,14 @@ Defaults to false.<p>
 
 When <code>-scrolllock</code> is disabled, the browser will
 immediately jump to the last report in the bin.<p>
+
+<<defopt {-logcmd <i>command</i>}>>
+
+Allows the widget's <<xref reportviewer(n)>> pane
+to display <<xref isearch(n)>> status messages to the
+user.  The <i>command</i> is a Tcl command expecting one additional
+argument, a text string.  The client will usually arrange for this
+string to be written to a <<xref messageline(n)>>.<p>
 
 <</deflist reportbrowser options>>
 

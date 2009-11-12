@@ -46,7 +46,14 @@ snit::widget ::marsgui::reportviewer {
             $self clear
         }
     }
-
+    
+    # Option: -logcmd
+    #
+    # A command that takes one additional argument, a status message
+    # to be displayed to the user.
+    
+    option -logcmd \
+        -default ""
 
     #-------------------------------------------------------------------
     # Components
@@ -87,6 +94,9 @@ snit::widget ::marsgui::reportviewer {
         install reptext using ::marsgui::rotext $win.text \
             -yscrollcommand [list $win.yscroll set] \
             -xscrollcommand [list $win.xscroll set]
+        
+        isearch enable $reptext
+        isearch logger $reptext [mymethod Log]
 
         # NEXT, create the scrollbasrs.
         ttk::scrollbar $win.yscroll \
@@ -123,6 +133,20 @@ snit::widget ::marsgui::reportviewer {
     method Toggle {} {
         reporter hotlist set $currentReport $hot
     }
+    
+    # Method: Log
+    #
+    # Logs a status message by calling the <-logcmd>.
+    #
+    # Syntax:
+    #   Log _msg_
+    #
+    #   msg     A short text message
+    
+    method Log {msg} {
+        callwith $options(-logcmd) $msg
+    }
+
 
     #-------------------------------------------------------------------
     # Public methods

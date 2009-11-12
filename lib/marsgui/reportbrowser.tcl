@@ -81,6 +81,14 @@ snit::widget ::marsgui::reportbrowser {
 
         $viewer configure -db $db
     }
+    
+    # Option: -logcmd
+    #
+    # A command that takes one additional argument, a status message
+    # to be displayed to the user.
+    
+    option -logcmd \
+        -default ""
 
     #-------------------------------------------------------------------
     # Components
@@ -201,7 +209,8 @@ snit::widget ::marsgui::reportbrowser {
 
         # Report Text pane
         install viewer using ::marsgui::reportviewer $win.lr.tb.bottom \
-            -height 10
+            -height 10                                                 \
+            -logcmd [mymethod Log]
         $win.lr.tb add $win.lr.tb.bottom
 
         # NEXT, manage all of the components.
@@ -232,6 +241,20 @@ snit::widget ::marsgui::reportbrowser {
 
     #-------------------------------------------------------------------
     # Event Handlers
+    
+    # Method: Log
+    #
+    # Logs a status message by calling the <-logcmd>.
+    #
+    # Syntax:
+    #   Log _msg_
+    #
+    #   msg     A short text message
+    
+    method Log {msg} {
+        callwith $options(-logcmd) $msg
+    }
+
 
     # UpdateScrollLock
     #

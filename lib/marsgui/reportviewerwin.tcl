@@ -55,6 +55,7 @@ snit::widget ::marsgui::reportviewerwin {
     # Components
 
     component viewer    ;# The reportviewer widget
+    component msgline   ;# The messageline(n) widget
 
     delegate option * to hull
     delegate method * to hull
@@ -64,11 +65,14 @@ snit::widget ::marsgui::reportviewerwin {
 
     constructor {args} {
         # Create the reportviewer
-        install viewer using ::marsgui::reportviewer $win.text
+        install viewer using ::marsgui::reportviewer $win.text \
+            -logcmd [list $win.msgline puts]
+        install msgline using messageline $win.msgline
 
         $self configurelist $args
 
-        pack $viewer -side top -fill both -expand 1
+        pack $msgline -side bottom -fill x    -expand 1
+        pack $viewer  -side top    -fill both -expand 1
     }
 
     #-------------------------------------------------------------------
