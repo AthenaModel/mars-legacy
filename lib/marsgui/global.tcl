@@ -126,6 +126,10 @@ ttk::style theme use clam
 ttk::style configure Entrybutton.Toolbutton -background white
 ttk::style map Entrybutton.Toolbutton -background {disabled white}
 
+# Text.Toolbutton: A style for tool buttons that have text instead
+# of icons. 
+ttk::style configure Text.Toolbutton -font tinyfont
+
 # Menubox.TCombobox: A style for comboboxes used as pulldown menus.
 ttk::style configure Menubox.TCombobox \
     -fieldbackground white -foreground black
