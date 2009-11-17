@@ -1,19 +1,13 @@
 Format: 1.4
 
 
-# You can add a title and sub-title to your menu like this:
-# Title: [project name]
-# SubTitle: [subtitle]
+Title: Mars
+SubTitle: Internals
 
 # You can add a footer to your documentation like this:
 # Footer: [text]
 # If you want to add a copyright notice, this would be the place to do it.
-
-# You can add a timestamp to your documentation like one of these:
-# Timestamp: Generated on month day, year
-# Timestamp: Updated mm/dd/yyyy
-# Timestamp: Last updated mon day
-#
+Timestamp: Internals Documentation Generated d month year
 #   m     - One or two digit month.  January is "1"
 #   mm    - Always two digit month.  January is "01"
 #   mon   - Short month word.  January is "Jan"
@@ -43,28 +37,41 @@ Format: 1.4
 # time it is run.  When working with groups, just deal with the braces and
 # forget about the indentation and comments.
 # 
-# You can use this file on other computers even if they use different
-# directories.  As long as the command line points to the same source files,
-# Natural Docs will be able to correct the locations automatically.
-# 
 # --------------------------------------------------------------------------
 
 
 Group: App_gram  {
 
-   File: app.tcl  (/home/will/mars/lib/app_gram/app.tcl)
-   File: app_gram.tcl  (/home/will/mars/lib/app_gram/app_gram.tcl)
-   File: appwin.tcl  (/home/will/mars/lib/app_gram/appwin.tcl)
-   File: executive.tcl  (/home/will/mars/lib/app_gram/executive.tcl)
-   File: parmdb.tcl  (/home/will/mars/lib/app_gram/parmdb.tcl)
-   File: sim.tcl  (/home/will/mars/lib/app_gram/sim.tcl)
+   File: app.tcl  (app_gram/app.tcl)
+   File: app_gram.tcl  (app_gram/app_gram.tcl)
+   File: appwin.tcl  (app_gram/appwin.tcl)
+   File: executive.tcl  (app_gram/executive.tcl)
+   File: parmdb.tcl  (app_gram/parmdb.tcl)
+   File: sim.tcl  (app_gram/sim.tcl)
    }  # Group: App_gram
 
 Group: App_log  {
 
-   File: app.tcl  (/home/will/mars/lib/app_log/app.tcl)
-   File: app_log.tcl  (/home/will/mars/lib/app_log/app_log.tcl)
+   File: app.tcl  (app_log/app.tcl)
+   File: app_log.tcl  (app_log/app_log.tcl)
    }  # Group: App_log
+
+Group: Simlib  {
+
+   File: gram.tcl  (simlib/gram.tcl)
+   File: gram.sql  (simlib/gram.sql)
+   File: gramdb.tcl  (simlib/gramdb.tcl)
+   File: gramdb.sql  (simlib/gramdb.sql)
+   }  # Group: Simlib
+
+Group: Marsgui  {
+
+   File: cmdbrowser.tcl  (marsgui/cmdbrowser.tcl)
+   File: modeditor.tcl  (marsgui/modeditor.tcl)
+   File: reportbrowser.tcl  (marsgui/reportbrowser.tcl)
+   File: reportviewer.tcl  (marsgui/reportviewer.tcl)
+   File: winbrowser.tcl  (marsgui/winbrowser.tcl)
+   }  # Group: Marsgui
 
 Group: Index  {
 
@@ -79,10 +86,6 @@ Group: Index  {
    Variable Index: Variables
    Widget Index: Widgets
    Icon Index: Icons
+   Object Type Index: Object Types
    }  # Group: Index
 
-
-
-##### Do not change or remove these lines. #####
-Data: 1(D3333RuEG378oo3EpH63o8Y3pIIV`HpE)
-Data: 1(h3333RuEG378oo3EpH63o8Y3pIIVou`)

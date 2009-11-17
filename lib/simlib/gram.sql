@@ -1,12 +1,16 @@
 ------------------------------------------------------------------------
--- TITLE:
---    gram.sql
+-- FILE: gram.sql
+--
+-- SQL Schema for the gram(n) module.
+--
+-- PACKAGE:
+--    simlib(n) -- Simulation Infrastructure Package
+--
+-- PROJECT:
+--    Mars Simulation Infrastructure Library
 --
 -- AUTHOR:
 --    Will Duquette
---
--- DESCRIPTION:
---    SQL Schema for the GRAM computational engine.
 --
 ------------------------------------------------------------------------
 

@@ -1,23 +1,17 @@
 #-----------------------------------------------------------------------
-# TITLE:
-#    gram.tcl
+# FILE: gram.tcl
+#
+#   GRAM: Generalized Regional Analysis Module
+#
+# PACKAGE:
+#   simlib(n) -- Simulation Infrastructure Package
+#
+# PROJECT:
+#   Mars Simulation Infrastructure Library
 #
 # AUTHOR:
 #    Will Duquette
 #
-# DESCRIPTION:
-#    GRAM: Generalized Regional Analysis Model
-#
-#    * Bookkeeps GRAM inputs.
-#    * Recomputes GRAM outputs as simulation time is advanced per
-#      simulation clock.
-#    * Allows owner to schedule GRAM level and slope inputs.
-#    * Allows introspection of all inputs and outputs.
-#
-#    Note that the engine cannot "run" on its own; it expects to be
-#    embedded in a larger simulation which will control the advancement
-#    of simulation time and schedule GRAM level and slope inputs as needed.
-##
 #-----------------------------------------------------------------------
 
 namespace eval ::simlib:: {
@@ -25,37 +19,71 @@ namespace eval ::simlib:: {
 }
 
 #-----------------------------------------------------------------------
-# Data Types
+# Section: Data Types
 
+# Type: satgrouptypes
+#
 # Group types for which satisfaction is tracked
 snit::enum ::simlib::satgrouptypes -values {CIV ORG}
 
-# Proximity Limits
-snit::enum ::simlib::proxlimit     -values {none here near far}
+# Type: proxlimit
+#
+# Proximity limit enumeration.
+snit::enum ::simlib::proxlimit -values {none here near far}
+
+#-----------------------------------------------------------------------
+# Section: Object Types
+
+#-----------------------------------------------------------------------
+# Object Type: gram
+#
+# GRAM -- Generalized Regional Analysis Model
+#
+# Instances of the gram object type do the following.
+#
+#  * Bookkeep GRAM inputs.
+#  * Recompute GRAM outputs as simulation time is advanced per
+#    the <-simclock>.
+#  * Allow the owner to schedule GRAM level and slope inputs.
+#  * Allow introspection of all inputs and outputs.
+#
+# Note that the instance of gram cannot "run" on its own; it expects to be
+# embedded in a larger simulation which will control the advancement
+# of simulation time and schedule GRAM level and slope inputs as needed.
+#
+# TBD:
+#  * We need a "coop drivers" command.
+#  * Need to optimize <cancel>; see the TBD in that routine.
+#  * The <adjust> method is not public, and should be renamed.
+#  * Is there any reason not to delete inactive effects?
 
 #-----------------------------------------------------------------------
 # GRAM engine
 
 snit::type ::simlib::gram {
     #-------------------------------------------------------------------
-    # Type Components
+    # Group: Type Components
 
-    # gram(n)'s configuration parameter set
+    # Type component: parm
+    #
+    # gram(n) supports the parm(i) interface.  This component is
+    # gram(n)'s configuration <parmset>.  Because it is -public,
+    # it is automatically available as a type method.
+    
     typecomponent parm -public parm
 
 
     #-------------------------------------------------------------------
-    # Type Constructor
+    # Group: Type Constructor
+    #
+    # The type constructor is responsible for creating the <parm>
+    # component and adding the GRAM configuration parameters.
 
     typeconstructor {
         # FIRST, Import needed commands from other packages.
-        namespace import ::marsutil::* 
         namespace import ::marsutil::*
-        namespace import ::simlib::*
 
         # NEXT, define the module's configuration parameters.
-        # TBD: The types will need to be dealt with when gram(n)
-        # is moved to Paxsim.
         set parm ${type}::parm
         parmset $parm
 
@@ -84,38 +112,42 @@ snit::type ::simlib::gram {
     }
 
     #-------------------------------------------------------------------
-    # sqlsection(i) implementation
+    # Group: sqlsection(i) implementation
     #
     # The following routines implement the module's 
     # sqlsection(i) interface.
 
-    # sqlsection title
+    # Type method: sqlsection title
     #
-    # Returns a human-readable title for the section
+    # Returns a human-readable title for the section.
 
     typemethod {sqlsection title} {} {
         return "gram(n)"
     }
 
-    # sqlsection schema
+    # Type method: sqlsection schema
     #
-    # Returns the section's persistent schema definitions.
+    # Returns the section's persistent schema definitions, which are
+    # read from <gram.sql>.
 
     typemethod {sqlsection schema} {} {
         return [readfile [file join $::simlib::library gram.sql]]
     }
 
-    # sqlsection tempschema
+    # Type method: sqlsection tempschema
     #
-    # Returns the section's temporary schema definitions, if any.
+    # Returns the section's temporary schema definitions, which are
+    # read from <gram_temp.sql>.
 
     typemethod {sqlsection tempschema} {} {
         return [readfile [file join $::simlib::library gram_temp.sql]]
     }
 
-    # sqlsection functions
+    # Type method: sqlsection functions
     #
-    # Returns a dictionary of function names and command prefixes
+    # Returns a dictionary of function names and command prefixes.
+    #
+    #   clamp - <ClampCurve>
 
     typemethod {sqlsection functions} {} {
         return [list \
@@ -123,14 +155,20 @@ snit::type ::simlib::gram {
     }
 
     #-------------------------------------------------------------------
-    # Type Variables
+    # Group: Type Variables
 
+    # Type Variable: maxEndTime
+    #
     # This value is used as a sentinel, to indicate that a slope effect
-    # has no end time.
+    # has no end time.  The call to [expr] ensures that the value is
+    # seen as an integer by SQLite3.
     typevariable maxEndTime [expr {int(99999999)}]
 
-    # This value indicates the numeric proximity limit for each
-    # value of gram.*.proxlimit.
+    # Type Variable: proxlimit
+    #
+    # The array translates from <proxlimit> enumeration to numeric
+    # proximity limits.  Thus, it gives the numeric value
+    # for each value of the gram.*.proxlimit <parm>.
 
     typevariable proxlimit -array {
         none   0
@@ -139,24 +177,25 @@ snit::type ::simlib::gram {
         far    3
     }
     
-    # array - gram instance by RDB
-    # This array tracks which RDBs are in use by gram instances; thus,
-    # if we create a new instance on an RDB that's already in use by
-    # a GRAM instance, we can throw an error.
+    # Type Variable: rdbTracker
+    #
+    # Array, gram(n) instance by RDB. This array tracks which RDBs are in use by
+    # gram instances; thus, if we create a new instance on an RDB that's already
+    # in use by a GRAM instance, we can throw an error.
     
     typevariable rdbTracker -array { }
 
     #-------------------------------------------------------------------
-    # Options
+    # Group: Options
 
-    # -rdb rdb
+    # Option: -rdb
     #
-    # The name of an sqldocument(n) instance in which
-    # gram(n) will store its working data.
+    # The name of the sqldocument(n) instance in which
+    # gram(n) will store its working data.  After creation, the
+    # value will be stored in the <rdb> component.
     option -rdb -readonly 1
-    component rdb
 
-    # -loadcmd cmd
+    # Option: -loadcmd
     #
     # The name of a command that will populate the GRAM tables in the
     # RDB.  It must take one additional argument, $self.
@@ -164,66 +203,102 @@ snit::type ::simlib::gram {
 
     option -loadcmd -readonly 1
 
-    # -clock simclock
+    # Option: -clock
     #
-    # The input is the name of a simclock(n) instance which is controlling
-    # simulation time.
+    # The name of a simclock(n) instance which is controlling
+    # simulation time.  After creation, the value will be stored in the
+    # <clock> component.
 
     option -clock -readonly 1
-    component clock
 
-    # -logger
+    # Option: -logger
     #
-    # Sets name of application's logger(n) object.
+    # The name of application's logger(n) object.
 
     option -logger
 
-    # -logcomponent
+    # Option: -logcomponent
     #
-    # Sets this object's "log component" name, to be used in log messages.
+    # This object's "log component" name, to be used in log messages.
 
     option -logcomponent -default gram -readonly 1
 
     #-------------------------------------------------------------------
-    # Components
+    # Group: Components
+    #
+    # Each instance of gram(n) uses the following components.
+    
+    # Component: rdb
+    #
+    # The run-time database (RDB), an instance of sqldocument(n) in which
+    # gram(n) stores its data.  The RDB is passed in at creation time via
+    # the <-rdb> option.
+    component rdb
+    
+    # Component: clock
+    #
+    # The simclock(n) simulation clock that drives the advance of simulation
+    # time for this instance of gram(n). The clock is passed in at creation time
+    # via the <-clock> option.
+    component clock
 
-    # nbhoods: Neighborhoods snit::enum
+    # Component: nbhoods
+    #
+    # A snit::enum used to validate neighborhood IDs.
     component nbhoods
 
-    # cgroups: CIV Groups snit::enum
+    # Component: cgroups
+    #
+    # A snit::enum used to validate CIV group IDs.
     component cgroups
 
-    # cogroups: CIV and ORG Groups snit::enum
+    # Component: cogroups
+    #
+    # A snit::enum used to validate CIV and ORG group IDs.
     component cogroups
 
-    # fgroups: FRC Groups snit::enum
+    # Component: fgroups
+    #
+    # A snit::enum used to validate FRC group IDs.
     component fgroups
 
-    # concerns: Concerns snit::enum
+    # Component: concerns
+    #
+    # A snit::enum used to validate concern IDs.
     component concerns
 
     #-------------------------------------------------------------------
-    # GRAM Model Data
+    # Group: Checkpointed Variables
     #
-    # Some GRAM model data is stored as elements in the "db" array.  The 
-    # elements are as listed below.
+    # Most model data is stored in the <rdb>; however, there are a few
+    # values that are stored in variables.
+    
+    
+    # Variable: db
     #
-    # initialized        0 if -loadcmd has never been called, and 1 if 
-    #                    it has.
+    # Array of model scalars; the elements are as listed below.
     #
-    # loadstate          Indicates the progress of the -loadcmd.
+    #   initialized - 0 if <-loadcmd> has never been called, and 1 if 
+    #                 it has.
     #
-    # time               Simulation Time: integer ticks, starting at 0
+    #   loadstate   - Transient; indicates the progress of the <-loadcmd>.
     #
-    # timelast           Time of previous advance: integer ticks, 
-    #                    starting at 0.  time - timelast gives us the 
-    #                    most recent time step.
+    #   time        - Simulation Time: integer ticks, starting at 0
+    #
+    #   timelast    - Time of previous advance: integer ticks, 
+    #                 starting at 0. The expression (time minus timelast) gives
+    #                 us the length of the most recent time step.
     #
     #-----------------------------------------------------------------------
     
     variable db -array { }
 
-    # Initial db values
+    #-------------------------------------------------------------------
+    # Group: Non-checkpointed Variables
+
+    # Variable: initdb
+    #
+    # Array, initial values for <db>.
     variable initdb {
         initialized      0
         loadstate        ""
@@ -231,22 +306,23 @@ snit::type ::simlib::gram {
         timelast         {}
     }
 
-
-    #-------------------------------------------------------------------
-    # Other Variables
-
-    # Non-checkpointed scalar data
+    # Variable: info
     #
-    # changed    1 if db() has changed, and 0 otherwise.
-
+    # Array, non-checkpointed scalar data.  The keys are as follows.
+    #
+    #   changed - 1 if the contents of <db> has changed, and 0 otherwise.
     
     variable info -array {
         changed          0
     }
 
     #-------------------------------------------------------------------
-    # Constructor
+    # Group: Constructor
 
+    # Constructor: constructor
+    #
+    # Creates a new instance of gram(n), given the creation <Options>.
+    
     constructor {args} {
         # FIRST, get the creation arguments.
         $self configurelist $args
@@ -279,6 +355,11 @@ snit::type ::simlib::gram {
 
         $self Log normal "Created"
     }
+    
+    # Constructor: destructor
+    #
+    # Removes the instance's <rdb> from the <rdbTracker>, and deletes
+    # the instance's content from the relevant <rdb> tables.
 
     destructor {
         catch {
@@ -288,13 +369,17 @@ snit::type ::simlib::gram {
     }
 
     #-------------------------------------------------------------------
-    # Object Management Methods
+    # Group: Checkpoint/Restore
 
-    # checkpoint ?-saved?
+    # Method: checkpoint
     #
-    # Return a copy of the engine's state for later restoration.
+    # Returns a copy of the object's state for later restoration.
     # This includes only the data stored in the db array; data stored
-    # in the RDB is checkpointed automatically.
+    # in the RDB is checkpointed with the RDB.  If the -saved flag
+    # is included, the object is marked as unchanged.
+    #
+    # Syntax:
+    #   checkpoint ?-saved?
     
     method checkpoint {{option ""}} {
         if {$option eq "-saved"} {
@@ -305,12 +390,16 @@ snit::type ::simlib::gram {
     }
 
 
-    # restore state ?-saved?
-    #
-    # state     Checkpointed state returned by the checkpoint method.
+    # Method: restore
     #
     # Restores the checkpointed state; this is just the reverse of
-    # "checkpoint".
+    # <checkpoint>. If the -saved flag is included, the object is marked as
+    # unchanged.
+    #
+    # Syntax:
+    #   restore _state_ ?-saved?
+    #
+    #   state - Checkpointed state returned by the <checkpoint> method.
 
     method restore {state {option ""}} {
         # FIRST, restore the state.
@@ -331,24 +420,29 @@ snit::type ::simlib::gram {
     }
 
 
-    # changed
+    # Method: changed
     #
-    # Returns the changed flag.
+    # Returns the changed flag, 1 if the state has changed and 0 otherwise.
+    # The changed flag is set by TBD, and is cleared by <checkpoint> and
+    # <restore> when called with the -saved flag.
 
     method changed {} {
         return $info(changed)
     }
 
     #-------------------------------------------------------------------
-    # Simulation Execution Methods
+    # Group: Scenario Management
 
-    # init ?-reload?
+    # Method: init
     #
-    # -reload    If present, calls the -loadcmd to reload the 
-    #            initial data into the RDB.
-    #
-    # Initializes the simulation to 0.  Reloads initial data on
+    # Initializes the simulation to time 0.  Reloads initial data on
     # demand.
+    #
+    # Syntax:
+    #   init ?-reload?
+    #
+    #   -reload - If present, calls the <-loadcmd> to reload the 
+    #             initial data into the <rdb>.
 
     method init {{opt ""}} {
         # FIRST, get inputs from the RDB
@@ -394,10 +488,48 @@ snit::type ::simlib::gram {
         return
     }
 
-    # clear
+    # Method: CreateLongTermTrends
     #
-    # Uninitializes gram, returning it to its initial state on 
-    # creation and deleting all of the instance's data from the RDB.
+    # The long-term trends are entered as a single driver with 
+    # driver ID 0; a single slope effect is created for each ngc.
+
+    method CreateLongTermTrends {} {
+        # FIRST, create the Driver
+        $rdb eval {
+            INSERT INTO gram_driver(driver,name,dtype,oneliner)
+            VALUES(0,"Trend","Trend","Satisfaction Long-Term Trend")
+        }
+
+        set input(driver)  0
+        set input(input)  [$self DriverGetInput $input(driver)]
+        set input(cause)   "TREND"
+        set input(ts)      $db(time)
+        set input(p)       0.0
+        set input(q)       0.0
+        set input(s)       1.0
+
+        set chain(prox)    -1
+        set chain(factor)  1.0
+        set chain(delay)   0
+
+        # NEXT, enter a slope effect for each ngc with a non-zero trend.
+        $rdb eval {
+            SELECT * FROM gram_ngc
+            WHERE trend != 0.0
+        } row {
+            set input(slope)     $row(trend)
+
+            set chain(curve_id)  $row(curve_id)
+            set chain(direct_id) $row(ngc_id)
+
+            $self ScheduleSlope input chain 0.0
+        }
+    }
+
+    # Method: clear
+    #
+    # Uninitializes <gram>, returning it to its initial state on 
+    # creation and deleting all of the instance's data from the <rdb>.
 
     method clear {} {
         # FIRST, reset the in-memory data
@@ -410,27 +542,218 @@ snit::type ::simlib::gram {
         # NEXT, Clear the RDB
         $self ClearTables
     }
-
-    # initialized
+    
+    # Method: DestroyValidators
     #
-    # Returns 1 if the -loadcmd has ever been successfully called, and 0
+    # Destroys the snit::enums (e.g., <nbhoods>) for the valid nbhoods,
+    # concerns, etc.
+
+    method DestroyValidators {} {
+        if {$nbhoods ne ""} {
+            rename $nbhoods   "" ; set nbhoods  ""
+            rename $cgroups   "" ; set cgroups  ""
+            rename $cogroups  "" ; set cogroups ""
+            rename $fgroups   "" ; set fgroups  ""
+            rename $concerns  "" ; set concerns ""
+        }
+    }
+
+    # Method: ClearTables
+    #
+    # Deletes all data from the <gram.sql> tables for this instance
+
+    method ClearTables {} {
+        $rdb eval {
+            DELETE FROM gram_curves;
+            DELETE FROM gram_effects;
+            DELETE FROM gram_contribs;
+            DELETE FROM gram_values;
+            DELETE FROM gram_n;
+            DELETE FROM gram_g;
+            DELETE FROM gram_c;
+            DELETE FROM gram_mn;
+            DELETE FROM gram_nfg;
+            DELETE FROM gram_ng;
+            DELETE FROM gram_frc_ng;
+            DELETE FROM gram_nc;
+            DELETE FROM gram_gc;
+            DELETE FROM gram_ngc;
+            DELETE FROM gram_sat_influence;
+            DELETE FROM gram_coop_influence;
+        }
+    }
+
+    # Method: initialized
+    #
+    # Returns 1 if the <-loadcmd> has ever been successfully called, and 0
     # otherwise.
 
     method initialized {} {
         return $db(initialized)
     }
+    
+    # Method: ComputeSatInfluence
+    #
+    # Computes all satisfaction influence entries and places them
+    # in <gram_sat_influence>.  This is done at
+    # initialization time; hence, it is assumed that none of the
+    # influence inputs can vary after time 0.
+
+    method ComputeSatInfluence {} {
+        # FIRST, get the conversion from days to ticks
+        set daysToTicks [$clock fromDays 1.0]
+
+        # NEXT, clear the previous influence
+        $rdb eval {
+            DELETE FROM gram_sat_influence 
+        }
+
+        # NEXT, accumulate the combinations and save.  For every
+        # neighborhood group that can be the target of a direct effect
+        # (which is all of them) we want to acquire the set of 
+        # neighborhood groups which can receive the indirect effect.
+        # That is, all neighborhood groups that:
+        #
+        # * Are here, near, or far, but not remote
+        # * Do not have a multiplicative factor or 0
+        #
+        # For each combination we want to compute that multiplicative
+        # factor, and also the proximity and delay (in ticks).
+
+        $rdb eval {
+            INSERT INTO gram_sat_influence(
+                   direct_ng, influenced_ng, prox, delay, factor)
+            SELECT dir_ng.ng_id                            AS direct_ng,
+                   inf_ng.ng_id                            AS influenced_ng,
+                   CASE WHEN dir_ng.ng_id = inf_ng.ng_id 
+                        THEN -1
+                        ELSE gram_mn.proximity END         AS prox,
+                   CAST (gram_mn.effects_delay*$daysToTicks 
+                         AS INTEGER)                       AS delay,
+                   CASE WHEN gram_mn.proximity = 0  -- "Here"
+                        THEN gram_nfg.rel
+                        ELSE gram_nfg.rel * dir_ng.effects_factor 
+                        END                                AS factor
+
+            FROM  gram_ng AS dir_ng   -- Direct effect nbhood-group
+            JOIN  gram_ng AS inf_ng   -- Influenced nbhood-group
+            JOIN  gram_g  AS dir_g    -- Direct group
+            JOIN  gram_g  AS inf_g    -- Influenced group
+            JOIN  gram_mn             -- proximity, delay
+            JOIN  gram_nfg            -- Relationships
+
+            WHERE inf_ng.sat_tracked =  1
+            AND   dir_g.g            =  dir_ng.g
+            AND   inf_g.g            =  inf_ng.g
+            AND   dir_g.gtype        =  inf_g.gtype
+            AND   gram_mn.m          =  inf_ng.n
+            AND   gram_mn.n          =  dir_ng.n
+            AND   prox               <  3   -- Not remote!
+            AND   gram_nfg.n         =  inf_ng.n
+            AND   gram_nfg.f         =  inf_ng.g
+            AND   gram_nfg.g         =  dir_ng.g
+            AND   factor             != 0.0
+        }
+    }
+
+    # Method: ComputeCoopInfluence
+    #
+    # Computes all cooperation influence entries and places them
+    # in <gram_coop_influence>.  This is done at
+    # initialization time; hence, it is assumed that none of the
+    # influence inputs can vary after time 0.
+
+    method ComputeCoopInfluence {} {
+        # FIRST, get the conversion from days to ticks
+        set daysToTicks [$clock fromDays 1.0]
+
+        # NEXT, clear the previous influence
+        $rdb eval {
+            DELETE FROM gram_coop_influence 
+        }
+
+        # NEXT, accumulate the combinations and save.  For every
+        # neighborhood dn and FRC group dg that can be the target of a 
+        # direct cooperation effect (along with a CIV group f)
+        # we want to acquire the set of nbhoods m and FRC groups h
+        # which can receive the indirect effect.  That is, all m,h that:
+        #
+        # * Are here, near, or far, but not remote, from dn
+        # * Do not have a multiplicative factor of 0
+        #
+        # For each combination we want to compute that multiplicative
+        # factor, and also the proximity and delay (in ticks).
+
+        $rdb eval {
+            SELECT 
+            G.g                AS dg,
+            H.g                AS h,
+            MN.m               AS m,
+            MN.n               AS dn,
+            MN.proximity       AS prox,
+            MN.effects_delay   AS delay,
+            MHG.rel            AS rel_mhg
+            FROM gram_g   AS G
+            JOIN gram_g   AS H
+            JOIN gram_mn  AS MN
+            JOIN gram_nfg AS MHG
+            WHERE G.gtype            =  'FRC'
+            AND   H.gtype            =  'FRC'
+            AND   MN.proximity       <  3  -- Not remote!
+            AND   MHG.n              =  m
+            AND   MHG.f              =  h
+            AND   MHG.g              =  dg
+            AND   rel_mhg            != 0
+        } {
+            # FIRST, fix up prox to be -1 for direct effects
+            if {$m eq $dn &&
+                $h eq $dg
+            } {
+                set prox -1
+            }
+
+            # NEXT, convert delay to ticks
+            set delay [expr {$delay * $daysToTicks}]
+
+            # NEXT, insert into gram_coop_influence
+            $rdb eval {
+                INSERT INTO 
+                gram_coop_influence(dn,dg,m,h,prox,delay,factor)
+                VALUES($dn, $dg, $m, $h, $prox, $delay, $rel_mhg)
+            }
+        }
+    }
 
     #-------------------------------------------------------------------
-    # load API
+    # Group: Load API
     #
-    # This API is used by the load command to load new data into 
-    # GRAM.  The commands must be used in a strict order, as indicated
-    # by db(loadstate).
+    # GRAM is usually initialized from the <rdb>, but different
+    # applications have different database schemas; thus, GRAM cannot
+    # assume that the data will be in the form that it wants.
+    # Consequently, this API is used by the load command to load new
+    # data into GRAM. The commands must be used in a strict order, as
+    # indicated by db(loadstate).  The order of states is:
+    #
+    #  * nbhoods
+    #  * groups
+    #  * concerns
+    #  * nbrel
+    #  * nbgroups
+    #  * sat
+    #  * rel
+    #  * coop
+    #
+    # The state indicates that the relevant "load *" method has
+    # successfully been called, e.g., db(loadstate) is *nbhoods*
+    # after <load nbhoods> has been called.
 
-    # LoadData
+    # Method: LoadData
     #
-    # This is called by "init" when it's necessary to reload input
-    # data from the client.
+    # This is called by <init> when it's necessary to reload input
+    # data from the client.  It clears the current data, initializes
+    # the db(loadstate) state machine, calls the <-loadcmd>, verifies
+    # that the state machine has terminated, and does a <SanityCheck>
+    # and calls <CreateValidators>.
 
     method LoadData {} {
         # FIRST, clear all of the tables, so that they can be
@@ -456,39 +779,83 @@ snit::type ::simlib::gram {
         $self SanityCheck
         $self CreateValidators
     }
-
-    # ClearTables
+    
+    # Method: SanityCheck
     #
-    # Clears all gram(n) tables for this instance
+    # Verifies that <LoadData> has loaded everything we need to run.
+    #
+    # TBD:
+    #
+    #  * This method is currently a no-op.
 
-    method ClearTables {} {
-        $rdb eval {
-            DELETE FROM gram_curves;
-            DELETE FROM gram_effects;
-            DELETE FROM gram_contribs;
-            DELETE FROM gram_values;
-            DELETE FROM gram_n;
-            DELETE FROM gram_g;
-            DELETE FROM gram_c;
-            DELETE FROM gram_mn;
-            DELETE FROM gram_nfg;
-            DELETE FROM gram_ng;
-            DELETE FROM gram_frc_ng;
-            DELETE FROM gram_nc;
-            DELETE FROM gram_gc;
-            DELETE FROM gram_ngc;
-            DELETE FROM gram_sat_influence;
-            DELETE FROM gram_coop_influence;
-        }
+    method SanityCheck {} {
+        # TBD: Not yet implemented.
     }
 
-    # load nbhoods name ?name...?
+    # Method: CreateValidators
     #
-    # name         A neighborhood name.
-    #
-    # Loads the neighborhoods.  Typically, the names should be pre-sorted.
+    # Creates snit::enums (e.g., <nbhoods>) for the valid nbhood, concern,
+    # and group names.
 
-    method {load nbhoods} {args} {
+    method CreateValidators {} {
+        # FIRST, if they already exist get rid of them.
+        $self DestroyValidators
+
+        # Nbhoods
+        set values [$rdb eval {
+            SELECT n FROM gram_n 
+            ORDER BY n_id
+        }]
+
+        set nbhoods [snit::enum ${selfns}::nbhoods -values $values]
+
+        # CIV Groups
+        set values [$rdb eval {
+            SELECT g FROM gram_g 
+            WHERE  gtype = 'CIV'
+            ORDER BY g_id
+        }]
+
+        set cgroups [snit::enum ${selfns}::cgroups -values $values]
+
+        # CIV/ORG Groups
+        set values [$rdb eval {
+            SELECT g FROM gram_g 
+            WHERE  gtype IN ('CIV','ORG')
+            ORDER BY g_id
+        }]
+
+        set cogroups [snit::enum ${selfns}::cogroups -values $values]
+
+        # FRC Groups
+        set values [$rdb eval {
+            SELECT g FROM gram_g 
+            WHERE  gtype = 'FRC'
+            ORDER BY g_id
+        }]
+
+        set fgroups [snit::enum ${selfns}::fgroups -values $values]
+
+        # Concerns
+        set values [$rdb eval {
+            SELECT c FROM gram_c
+            ORDER BY c_id
+        }]
+
+        set concerns [snit::enum ${selfns}::concerns -values $values]
+    }
+
+    # Method: load nbhoods
+    #
+    # Loads the neighborhood names into <gram_n>. Typically, the names
+    # should be pre-sorted.
+    #
+    # Syntax:
+    #   load nbhoods _name ?name...?_
+    #
+    #   name - A neighborhood name.
+
+    method "load nbhoods" {args} {
         assert {$db(loadstate) eq "begin"}
 
         foreach n $args {
@@ -501,15 +868,18 @@ snit::type ::simlib::gram {
         set db(loadstate) "nbhoods"
     }
 
-    # load groups name gtype ?name gtype...?
-    # 
-    # name       Group name
-    # gtype      Group type (CIV, FRC, ORG)
+    # Method: load groups
     #
-    # Loads the group names.  Typically, the groups are ordered
-    # first by group type, and then by name.
+    # Loads the group names into <gram_g>. Typically, the groups are
+    # ordered first by group type, and then by name.
+    #
+    # Syntax:
+    #   load groups _name gtype ?name gtype...?_
+    #
+    #   name  - Group name
+    #   gtype - Group type (CIV, FRC, ORG)
 
-    method {load groups} {args} {
+    method "load groups" {args} {
         assert {$db(loadstate) eq "nbhoods"}
 
         foreach {g gtype} $args {
@@ -522,15 +892,18 @@ snit::type ::simlib::gram {
         set db(loadstate) "groups"
     }
 
-    # load concerns name gtype ?name gtype...?
-    # 
-    # name       Concern name
-    # gtype      Concern type (CIV, ORG)
+    # Method: load concerns
     #
-    # Loads the concern names.  Typically, the concerns are ordered
-    # first by concern type, and then by name.
+    # Loads the concern names into <gram_c>. Typically, the concerns are
+    # ordered first by group type, and then by name.
+    #
+    # Syntax:
+    #   load concerns _name gtype ?name gtype...?_
+    #
+    #   name  - Concern name
+    #   gtype - Concern type (CIV, ORG)
 
-    method {load concerns} {args} {
+    method "load concerns" {args} {
         assert {$db(loadstate) eq "groups"}
 
         foreach {c gtype} $args {
@@ -545,11 +918,12 @@ snit::type ::simlib::gram {
         set db(loadstate) "concerns"
     }
 
-    # PopulateDefaultsAfterConcerns
+    # Method: PopulateDefaultsAfterConcerns
     #
     # Once all of the relevant neighborhoods, groups, and concerns
-    # known, this routine populates dependent tables with default
-    # values.  The -loadcmd can subsequently fill in details as
+    # are known, this routine populates <gram_nc>, <gram_gc>,
+    # <gram_mn>, <gram_ng>, and <gram_frc_ng> with default
+    # values.  The <-loadcmd> can subsequently fill in details as
     # desired.
 
     method PopulateDefaultsAfterConcerns {} {
@@ -631,14 +1005,19 @@ snit::type ::simlib::gram {
         }
     }
 
-    # load nbrel m n proximity effects_delay ?...?
+    # Method: load nbrel
     #
-    # m               Neighborhood name
-    # n               Neighborhood name
-    # proximity       eproximity(n); must be 0 if m=n.
-    # effects_delay   Effects delay in decimal days.
+    # Loads non-default neighborhood relationships into <gram_mn>.
+    #
+    # Syntax:
+    #   load nbrel _m n proximity effects_delay ?...?_
+    #
+    #   m             - Neighborhood name
+    #   n             - Neighborhood name
+    #   proximity     - eproximity(n); must be 0 if m=n.
+    #   effects_delay - Effects delay in decimal days.
 
-    method {load nbrel} {args} {
+    method "load nbrel" {args} {
         assert {$db(loadstate) eq "concerns"}
 
         foreach {m n proximity effects_delay} $args {
@@ -667,15 +1046,21 @@ snit::type ::simlib::gram {
         set db(loadstate) "nbrel"
     }
 
-    # load nbgroups n g population rollup_weight effects_factor ?...?
+    # Method: load nbgroups
     #
-    # n               Neighborhood name
-    # g               Group name
-    # population      Population; 0 for ORG groups
-    # rollup_weight   Rollup Weight
-    # effects_factor  Effects Factor
+    # Loads specifics of the neighborhood CIV and ORG groups into
+    # <gram_ng>.
+    #
+    # Syntax:
+    #   load nbgroups _n g population rollup_weight effects_factor ?...?_
+    #
+    #   n              - Neighborhood name
+    #   g              - Group name
+    #   population     - Population; 0 for ORG groups
+    #   rollup_weight  - Rollup Weight
+    #   effects_factor - Effects Factor
 
-    method {load nbgroups} {args} {
+    method "load nbgroups" {args} {
         assert {$db(loadstate) eq "nbrel"}
 
         foreach {n g population rollup_weight effects_factor} $args {
@@ -714,12 +1099,12 @@ snit::type ::simlib::gram {
         set db(loadstate) "nbgroups"
     }
 
-    # PopulateDefaultsAfterNbgroups
+    # Method: PopulateDefaultsAfterNbgroups
     #
     # Once all of the relevant neighborhood groups are
-    # known, this routine populates dependent tables with default
-    # values.  The -loadcmd can subsequently fill in details as
-    # desired.
+    # known, this routine populates <gram_curves>, <gram_ngc>, and
+    # <gram_nfg> with default values. The <-loadcmd> can subsequently fill
+    # in details as desired.
 
     method PopulateDefaultsAfterNbgroups {} {
         # FIRST, populate gram_ngc. Saliency is 1.0 if sat_tracked,
@@ -807,14 +1192,20 @@ snit::type ::simlib::gram {
         }
     }
 
-    # load sat n g c sat0 saliency trend 
+    # Method: load sat
     #
-    # n               Neighborhood name
-    # g               Group name
-    # c               Concern name
-    # sat0            Initial satisfaction level
-    # saliency        Saliency
-    # trend           Long-term trend
+    # Loads the non-default satisfaction curve data into <gram_curves> and
+    # <gram_ngc>.
+    #
+    # Syntax:
+    #   load sat _n g c sat0 saliency trend ?...?_
+    #
+    #   n        - Neighborhood name
+    #   g        - Group name
+    #   c        - Concern name
+    #   sat0     - Initial satisfaction level
+    #   saliency - Saliency
+    #   trend    - Long-term trend
 
     method {load sat} {args} {
         assert {$db(loadstate) eq "nbgroups"}
@@ -846,9 +1237,10 @@ snit::type ::simlib::gram {
         set db(loadstate) "sat"
     }
 
-    # PopulateTablesAfterSat
+    # Method: PopulateTablesAfterSat
     #
-    # Computes the total saliency for each n,g,c.
+    # Computes the total saliency for each n,g,c and saves it in
+    # <gram_ng>
 
     method PopulateTablesAfterSat {} {
         # FIRST, get the total_saliency for each neighborhood group
@@ -867,14 +1259,22 @@ snit::type ::simlib::gram {
         }
     }
 
-    # load rel n f g rel ?....? 
+    # Method: load rel
     #
-    # n               Neighborhood name
-    # f               Group name
-    # g               Group name
-    # rel             Group relationship
+    # Loads non-default group relationships into <gram_nfg>. All groups
+    # have relationships in all neighborhoods; however, it's expected that
+    # relationships between non-CIV groups will be constant across
+    # neighborhoods.
+    #
+    # Syntax:
+    #   load rel _n f g rel ?...?_
+    #
+    #   n   - Neighborhood name
+    #   f   - Group name
+    #   g   - Group name
+    #   rel - Group relationship
 
-    method {load rel} {args} {
+    method "load rel" {args} {
         assert {$db(loadstate) eq "sat"}
 
         foreach {n f g rel} $args {
@@ -895,12 +1295,17 @@ snit::type ::simlib::gram {
         set db(loadstate) "rel"
     }
 
-    # load coop n f g coop0 
+    # Method: load coop
     #
-    # n               Neighborhood name
-    # f               Force group name
-    # g               Civ group name
-    # coop0           Initial cooperation level
+    # Loads non-default cooperation levels into <gram_curves>.
+    #
+    # Syntax:
+    #   load coop _n f g coop0 ?...?_
+    #
+    #   n     - Neighborhood name
+    #   f     - Force group name
+    #   g     - Civ group name
+    #   coop0 - Initial cooperation level
 
     method {load coop} {args} {
         assert {$db(loadstate) eq "rel"}
@@ -925,140 +1330,31 @@ snit::type ::simlib::gram {
         set db(loadstate) "coop"
     }
 
-    # SanityCheck
-    #
-    # Verifies that we have everything we need to run.
-
-    method SanityCheck {} {
-        # TBD: Not yet implemented.
-    }
-
-    # CreateValidators
-    #
-    # Creates snit::enums for the valid nbhood, concern, and pgroup
-    # names.
-
-    method CreateValidators {} {
-        # FIRST, if they already exist get rid of them.
-        $self DestroyValidators
-
-        # Nbhoods
-        set values [$rdb eval {
-            SELECT n FROM gram_n 
-            ORDER BY n_id
-        }]
-
-        set nbhoods [snit::enum ${selfns}::nbhoods -values $values]
-
-        # CIV Groups
-        set values [$rdb eval {
-            SELECT g FROM gram_g 
-            WHERE  gtype = 'CIV'
-            ORDER BY g_id
-        }]
-
-        set cgroups [snit::enum ${selfns}::cgroups -values $values]
-
-        # CIV/ORG Groups
-        set values [$rdb eval {
-            SELECT g FROM gram_g 
-            WHERE  gtype IN ('CIV','ORG')
-            ORDER BY g_id
-        }]
-
-        set cogroups [snit::enum ${selfns}::cogroups -values $values]
-
-        # FRC Groups
-        set values [$rdb eval {
-            SELECT g FROM gram_g 
-            WHERE  gtype = 'FRC'
-            ORDER BY g_id
-        }]
-
-        set fgroups [snit::enum ${selfns}::fgroups -values $values]
-
-        # Concerns
-        set values [$rdb eval {
-            SELECT c FROM gram_c
-            ORDER BY c_id
-        }]
-
-        set concerns [snit::enum ${selfns}::concerns -values $values]
-    }
-
-    # DestroyValidators
-    #
-    # Destroys the snit::enums for the valid nbhoods, concerns,
-    # etc.
-
-    method DestroyValidators {} {
-        if {$nbhoods ne ""} {
-            rename $nbhoods   "" ; set nbhoods  ""
-            rename $cgroups   "" ; set cgroups  ""
-            rename $cogroups  "" ; set cogroups ""
-            rename $fgroups   "" ; set fgroups  ""
-            rename $concerns  "" ; set concerns ""
-        }
-    }
-
-    # CreateLongTermTrends
-    #
-    # The long-term trends are entered as a single driver with 
-    # driver ID 0; a single slope effect is created for each ngc.
-
-    method CreateLongTermTrends {} {
-        # FIRST, create the Driver
-        $rdb eval {
-            INSERT INTO gram_driver(driver,name,dtype,oneliner)
-            VALUES(0,"Trend","Trend","Satisfaction Long-Term Trend")
-        }
-
-        set input(driver)  0
-        set input(input)  [$self DriverGetInput $input(driver)]
-        set input(cause)   "TREND"
-        set input(ts)      $db(time)
-        set input(p)       0.0
-        set input(q)       0.0
-        set input(s)       1.0
-
-        set chain(prox)    -1
-        set chain(factor)  1.0
-        set chain(delay)   0
-
-        # NEXT, enter a slope effect for each ngc with a non-zero trend.
-        $rdb eval {
-            SELECT * FROM gram_ngc
-            WHERE trend != 0.0
-        } row {
-            set input(slope)     $row(trend)
-
-            set chain(curve_id)  $row(curve_id)
-            set chain(direct_id) $row(ngc_id)
-
-            $self ScheduleSlope input chain 0.0
-        }
-    }
 
     #-------------------------------------------------------------------
-    # Update API
+    # Group: Update API
     #
     # This API is used to update scenario data after the initial load.
-    # Not everything can be modified.
+    # Not everything can be modified.  (In fact, very little can
+    # be modified.)
 
-    # update population n g population ...
+    # Method: update population
     #
-    # n           A neighborhood
-    # g           A group in the neighborhood
-    # population  The group ng's new population
-    #
-    # Updates the population for the specified groups.  Note that
+    # Updates <gram_ng.population> for the specified groups.  Note that
     # it's an error to assign a non-zero population to a group with
     # zero population, or a zero population to a group with non-zero
     # population.
     #
-    # The change takes affect on the next time advance.
+    # The change takes affect on the next time <advance>.
+    #
+    # Syntax:
+    #   update population _n g population ?...?_
+    #
+    #   n          - A neighborhood
+    #   g          - A group in the neighborhood
+    #   population - The group ng's new population
 
-    method {update population} {args} {
+    method "update population" {args} {
         foreach {n g population} $args {
             # TBD: Could verify that g is CIV, and that
             # existing population matches.
@@ -1070,36 +1366,36 @@ snit::type ::simlib::gram {
         }
     }
 
-
-
     #-------------------------------------------------------------------
-    # Driver IDs
+    # Group: Drivers
     #
     # Every input to GRAM is associated with a satisfaction or
     # cooperation driver, i.e., an event or situation.
     # Prior to entering the input, the application must allocate
-    # a numeric Driver ID by calling "driver add".
-    #
-    # OPTIONS
-    #
-    # Driver IDs have the following options:
-    #
-    # -name     text    Short name for the driver.  Defaults
-    #                   to the driver ID.
-    # -dtype    text    Driver type.  Defaults to "unknown".
-    # -oneliner text    One-line description of the driver.
-    #                   Defaults to "unknown".
+    # a numeric Driver ID by calling <driver add>.  Driver data
+    # is stored in the <gram_driver> table.
 
-    # driver add ?options?
+    # Method: driver add
     #
-    # Assigns and returns a new Driver ID.  Saves the options if given.
+    # Creates a new driver and returns its driver ID.  Saves the options
+    # if given. 
+    #
+    # Syntax:
+    #   driver add _?option value...?_
+    #
+    # Options:
+    #   -name     text  - Short name for the driver.  Defaults
+    #                     to the driver ID.
+    #   -dtype    text  - Driver type.  Defaults to "unknown".
+    #   -oneliner text  - One-line description of the driver.
+    #                     Defaults to "unknown".
     #
     # NOTE: This code has the important property that if the most recently
-    # added driver is deleted (cancel -delete), the driver ID will be 
+    # added driver is deleted (<cancel> -delete), the driver ID will be 
     # reused the next time.  This allows allocation of driver IDs to
     # be undone.  Don't break it!
 
-    method {driver add} {args} {
+    method "driver add" {args} {
         # FIRST, process the options
         set opts [$self ParseDriverOptions $args]
 
@@ -1126,13 +1422,18 @@ snit::type ::simlib::gram {
         return $nextDriver
     }
 
-    # driver configure driver ?options?
+    # Method: driver configure
     #
-    # driver    An existing Driver ID
+    # Sets new driver option values.
     #
-    # Sets new option values
+    # Syntax:
+    #   driver configure _driver option value ?option value...?_
+    #
+    #   driver - An existing Driver ID.
+    #
+    # The options are as for <driver add>.
 
-    method {driver configure} {driver args} {
+    method "driver configure" {driver args} {
         # FIRST, validate the driver ID
         $self driver validate $driver "Cannot configure"
 
@@ -1142,49 +1443,20 @@ snit::type ::simlib::gram {
         return
     }
 
-    # driver exists driver
-    #
-    # driver    A Driver ID
-    #
-    # Returns 1 if the Driver ID exists, and 0 otherwise.
-
-    method {driver exists} {driver} {
-        # FIRST, validate the driver
-        if {[$rdb exists {
-            SELECT driver FROM gram_driver
-            WHERE driver=$driver
-        }]} {
-            return 1
-        } else {
-            return 0
-        }
-    }
-
-    # driver validate driver ?prefix?
-    #
-    # driver   A Driver ID
-    # prefix   Optional error message prefix
-    #
-    # Throws an error if the Driver ID is not valid.
-
-    method {driver validate} {driver {prefix ""}} {
-        if {![$self driver exists $driver]} {
-            if {$prefix ne ""} {
-                append prefix ", "
-            }
-            error "${prefix}unknown Driver ID: \"$driver\""
-        }
-    }
-
-    # driver cget driver option
-    #
-    # driver  An existing Driver ID
-    # option  An option
+    # Method: driver cget
     #
     # Returns the current value of the option, which can also simply
     # be read from the RDB.
+    #
+    # Syntax:
+    #   driver cget _driver option_
+    #
+    #   driver - An existing Driver ID
+    #   option - An option
+    #
+    # The options are as for <driver add>.
 
-    method {driver cget} {driver option} {
+    method "driver cget" {driver option} {
         # FIRST, Validate the option
         switch -exact -- $option {
             -dtype {
@@ -1216,12 +1488,58 @@ snit::type ::simlib::gram {
         error "Cannot cget, unknown Driver ID: \"$driver\""
     }
 
-    # ParseDriverOptions optlist
+    # Method: driver exists
     #
-    # optlist     List of zero or more options and their values
+    # Returns 1 if the driver exists, and 0 otherwise.
     #
-    # Parses and validates the options, and returns a dict of them.
-    # The option values match the column names.
+    # Syntax:
+    #   driver exists _driver_
+    #
+    #   driver - A Driver ID
+
+    method "driver exists" {driver} {
+        # FIRST, validate the driver
+        if {[$rdb exists {
+            SELECT driver FROM gram_driver
+            WHERE driver=$driver
+        }]} {
+            return 1
+        } else {
+            return 0
+        }
+    }
+
+    # Method: driver validate
+    #
+    # Throws an error if the Driver ID is not valid.  If the
+    # _prefix_ is given, it begins the error message.
+    #
+    # Syntax:
+    #   driver validate _driver ?prefix?_
+    #
+    # driver - A Driver ID
+    # prefix - Optional error message prefix
+
+    method "driver validate" {driver {prefix ""}} {
+        if {![$self driver exists $driver]} {
+            if {$prefix ne ""} {
+                append prefix ", "
+            }
+            error "${prefix}unknown Driver ID: \"$driver\""
+        }
+    }
+
+
+    # Method: ParseDriverOptions
+    #
+    # Parses and validates the options, and returns a dict of
+    # equivalent <gram_driver> column names and option values.
+    #
+    # Syntax:
+    #   ParseDriverOptions _optlist_
+    #
+    #   optlist - List of zero or more <driver add> options and their
+    #             values.
 
     method ParseDriverOptions {optlist} {
         set opts [dict create]
@@ -1251,12 +1569,17 @@ snit::type ::simlib::gram {
         return $opts
     }
 
-    # SetDriverOptions driver opts
+    # Method: SetDriverOptions
     #
-    # driver  Existing driver ID
-    # opts    Dictionary of valid options and values
+    # Sets all option values, given a dictionary as produced by
+    # <ParseDriverOptions>.
     #
-    # Sets all option values.
+    # Syntax:
+    #   SetDriverOptions _driver opts_
+    #
+    #   driver - Existing driver ID
+    #   opts   - Dictionary of valid <gram_driver> column names
+    #            and values
     
     method SetDriverOptions {driver opts} {
         dict for {opt val} $opts {
@@ -1268,9 +1591,14 @@ snit::type ::simlib::gram {
         } 
     }
 
-    # DriverGetInput driver
+    # Method: DriverGetInput
     #
     # Returns the next input counter for a given driver.
+    #
+    # Syntax:
+    #   DriverGetInput _driver_
+    #
+    #   driver - An existing driver ID
     
     method DriverGetInput {driver} {
         $rdb onecolumn {
@@ -1283,12 +1611,17 @@ snit::type ::simlib::gram {
         }
     }
 
-    # DriverDecrementInput driver
+    # Method: DriverDecrementInput
     #
     # Decrements the input counter for a given driver.
     #
-    # NOTE: This is provided for "sat set -undo" and 
-    # "coop set -undo", pending a real undo mechanism.
+    # Syntax:
+    #   DriverDecrementInput _driver_
+    #
+    #   driver - An existing driver ID
+    #
+    # NOTE: This is provided for "<sat set> -undo" and 
+    # "<coop set> -undo", pending a real undo mechanism.
     
     method DriverDecrementInput {driver} {
         $rdb eval {
@@ -1301,141 +1634,13 @@ snit::type ::simlib::gram {
     }
 
     #-------------------------------------------------------------------
-    # Influence
+    # Group: Time Advance
 
-    # ComputeSatInfluence
+    # Method: advance
     #
-    # Computes all satisfaction influence entries
-
-    method ComputeSatInfluence {} {
-        # FIRST, get the conversion from days to ticks
-        set daysToTicks [$clock fromDays 1.0]
-
-        # NEXT, clear the previous influence
-        $rdb eval {
-            DELETE FROM gram_sat_influence 
-        }
-
-        # NEXT, accumulate the combinations and save.  For every
-        # neighborhood group that can be the target of a direct effect
-        # (which is all of them) we want to acquire the set of 
-        # neighborhood groups which can receive the indirect effect.
-        # That is, all neighborhood groups that:
-        #
-        # * Are here, near, or far, but not remote
-        # * Do not have a multiplicative factor or 0
-        #
-        # For each combination we want to compute that multiplicative
-        # factor, and also the proximity and delay (in ticks).
-
-        $rdb eval {
-            INSERT INTO gram_sat_influence(
-                   direct_ng, influenced_ng, prox, delay, factor)
-            SELECT dir_ng.ng_id                            AS direct_ng,
-                   inf_ng.ng_id                            AS influenced_ng,
-                   CASE WHEN dir_ng.ng_id = inf_ng.ng_id 
-                        THEN -1
-                        ELSE gram_mn.proximity END         AS prox,
-                   CAST (gram_mn.effects_delay*$daysToTicks 
-                         AS INTEGER)                       AS delay,
-                   CASE WHEN gram_mn.proximity = 0  -- "Here"
-                        THEN gram_nfg.rel
-                        ELSE gram_nfg.rel * dir_ng.effects_factor 
-                        END                                AS factor
-
-            FROM  gram_ng AS dir_ng   -- Direct effect nbhood-group
-            JOIN  gram_ng AS inf_ng   -- Influenced nbhood-group
-            JOIN  gram_g  AS dir_g    -- Direct group
-            JOIN  gram_g  AS inf_g    -- Influenced group
-            JOIN  gram_mn             -- proximity, delay
-            JOIN  gram_nfg            -- Relationships
-
-            WHERE inf_ng.sat_tracked =  1
-            AND   dir_g.g            =  dir_ng.g
-            AND   inf_g.g            =  inf_ng.g
-            AND   dir_g.gtype        =  inf_g.gtype
-            AND   gram_mn.m          =  inf_ng.n
-            AND   gram_mn.n          =  dir_ng.n
-            AND   prox               <  3   -- Not remote!
-            AND   gram_nfg.n         =  inf_ng.n
-            AND   gram_nfg.f         =  inf_ng.g
-            AND   gram_nfg.g         =  dir_ng.g
-            AND   factor             != 0.0
-        }
-    }
-
-    # ComputeCoopInfluence
-    #
-    # Computes all cooperation influence entries
-
-    method ComputeCoopInfluence {} {
-        # FIRST, get the conversion from days to ticks
-        set daysToTicks [$clock fromDays 1.0]
-
-        # NEXT, clear the previous influence
-        $rdb eval {
-            DELETE FROM gram_coop_influence 
-        }
-
-        # NEXT, accumulate the combinations and save.  For every
-        # neighborhood dn and FRC group dg that can be the target of a 
-        # direct cooperation effect (along with a CIV group f)
-        # we want to acquire the set of nbhoods m and FRC groups h
-        # which can receive the indirect effect.  That is, all m,h that:
-        #
-        # * Are here, near, or far, but not remote, from dn
-        # * Do not have a multiplicative factor of 0
-        #
-        # For each combination we want to compute that multiplicative
-        # factor, and also the proximity and delay (in ticks).
-
-        $rdb eval {
-            SELECT 
-            G.g                AS dg,
-            H.g                AS h,
-            MN.m               AS m,
-            MN.n               AS dn,
-            MN.proximity       AS prox,
-            MN.effects_delay   AS delay,
-            MHG.rel            AS rel_mhg
-            FROM gram_g   AS G
-            JOIN gram_g   AS H
-            JOIN gram_mn  AS MN
-            JOIN gram_nfg AS MHG
-            WHERE G.gtype            =  'FRC'
-            AND   H.gtype            =  'FRC'
-            AND   MN.proximity       <  3  -- Not remote!
-            AND   MHG.n              =  m
-            AND   MHG.f              =  h
-            AND   MHG.g              =  dg
-            AND   rel_mhg            != 0
-        } {
-            # FIRST, fix up prox to be -1 for direct effects
-            if {$m eq $dn &&
-                $h eq $dg
-            } {
-                set prox -1
-            }
-
-            # NEXT, convert delay to ticks
-            set delay [expr {$delay * $daysToTicks}]
-
-            # NEXT, insert into gram_coop_influence
-            $rdb eval {
-                INSERT INTO 
-                gram_coop_influence(dn,dg,m,h,prox,delay,factor)
-                VALUES($dn, $dg, $m, $h, $prox, $delay, $rel_mhg)
-            }
-        }
-    }
-
-    #-------------------------------------------------------------------
-    # Time Advance
-
-    # advance
-    #
-    # Advances the time to match the -clock.  Recomputes satisfaction
-    # and other outputs.
+    # Advances the time to match the <-clock>.  Computes current
+    # satisfaction and cooperation levels, saves contributions of
+    # drivers to the levels, and computes roll-ups.
 
     method advance {} {
         # FIRST, update the time.
@@ -1457,20 +1662,20 @@ snit::type ::simlib::gram {
 
 
     #-------------------------------------------------------------------
-    # Satisfaction Roll-ups
+    # Group: Satisfaction Roll-ups
     #
-    # All roll-ups -- sat.ng, sat.nc, sat.gc, sat.g, sat.c -- all have
-    # the same nature.  The computation is a weighted average over
-    # a set of satisfaction levels; all that changes is the definition
+    # All satisfaction roll-ups -- sat.ng, sat.nc, sat.gc, sat.g, sat.c
+    # -- all have the same nature.  The computation is a weighted average
+    # over a set of satisfaction levels; all that changes is the definition
     # of the set.  The equation for a roll-up over set A is as follows:
     #
-    #            Sum            w   * L    * S
-    #               n,g,c in A   ng    ngc    ngc
-    #  S  =      --------------------------------
-    #   A        Sum            w   * L   
-    #               n,g,c in A   ng    ngc
+    # >        Sum            w   * L    * S
+    # >           n,g,c in A   ng    ngc    ngc
+    # >  S  =  --------------------------------
+    # >   A    Sum            w   * L   
+    # >           n,g,c in A   ng    ngc
 
-    # ComputeSatRollups
+    # Method: ComputeSatRollups
     #
     # Computes all satisfaction roll-ups.
 
@@ -1483,10 +1688,10 @@ snit::type ::simlib::gram {
         $self ComputeSatC
     }
 
-    # ComputeSatGC
+    # Method: ComputeSatGC
     #
     # Computes sat.gc, slope.gc by rolling up sat.ngc, slope.ngc.  Note 
-    # that inactive pgroups are skipped.
+    # that inactive groups are skipped.
 
     method ComputeSatGC {} {
         $rdb eval {
@@ -1511,9 +1716,9 @@ snit::type ::simlib::gram {
         }
     }
     
-    # ComputeSatNG
+    # Method: ComputeSatNG
     #
-    # Computes the composite satisfaction for each pgroup at time t
+    # Computes the composite satisfaction for each group at time t
     # weighted by the saliency of each concern, within each neighborhood.
     #
     # NOTE: This is the standard roll-up algorithm; however, the 
@@ -1547,7 +1752,7 @@ snit::type ::simlib::gram {
         }
     }
     
-    # ComputeSatNC
+    # Method: ComputeSatNC
     #
     # Computes the composite neighborhood satisfaction by concern.
     #
@@ -1573,7 +1778,7 @@ snit::type ::simlib::gram {
         }
     }
 
-    # ComputeSatN
+    # Method: ComputeSatN
     #
     # Computes the overall civilian mood for each nbhood at time t.
     
@@ -1597,9 +1802,9 @@ snit::type ::simlib::gram {
         }
     }
     
-    # ComputeSatG
+    # Method: ComputeSatG
     #
-    # Computes the toplevel mood for  each pgroup at time t.
+    # Computes the playbox mood for each group at time t.
     
     method ComputeSatG {} {
         $rdb eval {
@@ -1620,9 +1825,9 @@ snit::type ::simlib::gram {
         }
     }
     
-    # ComputeSatC
+    # Method: ComputeSatC
     #
-    # Computes the composite satisfaction by concern.
+    # Computes the playbox composite satisfaction by concern at time t.
     #
     # Updates sat.c in place.
     
@@ -1646,32 +1851,26 @@ snit::type ::simlib::gram {
     }
 
     #-------------------------------------------------------------------
-    # Cooperation Roll-ups
+    # Group: Cooperation Roll-ups
     #
     # We only compute one cooperation roll-up, coop.ng: the cooperation
-    # of a neighborhood as a whole with a force group.
+    # of a neighborhood as a whole with a force group.  This is based
+    # on the population of the neighborhood groups, rather than
+    # effects_factor and saliency; cooperation is the likelihood that
+    # random member of the population will share information if asked.
+    #
+    # The equation is as follows:
+    #
+    # >           Sum  population   * coop
+    # >              f           nf       nfg
+    # >  coop   = ---------------------------
+    # >      ng        Sum  population  
+    # >                   f           nf
 
 
-    # All roll-ups -- sat.ng, sat.nc, sat.gc, sat.g, sat.c -- all have
-    # the same nature.  The computation is a weighted average over
-    # a set of satisfaction levels; all that changes is the definition
-    # of the set.  The equation for a roll-up over set A is as follows:
+    # Method: ComputeCoopRollups
     #
-    #            Sum            w   * L    * S
-    #               n,g,c in A   ng    ngc    ngc
-    #  S  =      --------------------------------
-    #   A        Sum            w   * L   
-    #               n,g,c in A   ng    ngc
-
-    # ComputeCoopRollups
-    #
-    # Computes coop.ng.  The equation is as follows:
-    #
-    #           Sum  population   * coop
-    #              f           nf       nfg
-    #  coop   = ---------------------------
-    #      ng        Sum  population  
-    #                   f           nf
+    # Computes coop.ng.  
 
     method ComputeCoopRollups {} {
         # FIRST, compute coop.ng
@@ -1695,214 +1894,37 @@ snit::type ::simlib::gram {
     }
     
     #-------------------------------------------------------------------
-    # Satisfaction Queries
-
-    # sat.ngc
+    # Group: Satisfaction Adjustments and Inputs
     #
-    # n     A neighborhood name
-    # g     A CIV or ORG group name
-    # c     A CIV or ORG concern name
+    # An adjustment is an administrative change to a particular
+    # satisfaction level.  An input is a level or slope change to a
+    # particular satisfaction level that has indirect effects across
+    # the playbox as determined by GRAM.
     #
-    # Returns the requested satisfaction level.  g and c must have
-    # the same type.
-
-    method sat.ngc {n g c} {
-        $nbhoods validate $n
-        $cogroups validate $g
-        $concerns validate $c
-
-        set result [$rdb onecolumn {
-            SELECT sat FROM gram_sat 
-            WHERE n=$n AND g=$g AND c=$c
-        }]
-
-        if {$result eq ""} {
-            # If the types of g and c don't match, this is
-            # an error; otherwise, sat_tracked is 0, so return 0.0
-
-            require {[$rdb exists {
-                SELECT gc_id FROM gram_gc 
-                WHERE g=$g AND c=$c
-            }]} "g and c must have the same group type, CIV or ORG"
-            
-            set result 0.0
-        }
-
-        return $result
-    }
-
-
-    # sat.ng
-    #
-    # n     A neighborhood name
-    # g     A CIV or ORG group name
-    #
-    # Returns the requested satisfaction roll-up.
-
-    method sat.ng {n g} {
-        $nbhoods  validate $n
-        $cogroups validate $g
-
-        return [$rdb onecolumn {
-            SELECT sat FROM gram_ng 
-            WHERE n=$n AND g=$g
-        }]
-    }
-
-    # sat.nc
-    #
-    # n     A neighborhood name
-    # c     A CIV or ORG concern name
-    #
-    # Returns the requested satisfaction roll-up.
-
-    method sat.nc {n c} {
-        $nbhoods  validate $n
-        $concerns validate $c
-
-        return [$rdb onecolumn {
-            SELECT sat FROM gram_nc 
-            WHERE n=$n AND c=$c
-        }]
-    }
-
-    # sat.gc
-    #
-    # g     A CIV or ORG group name
-    # c     A CIV or ORG concern name
-    #
-    # Returns the requested satisfaction roll-up.  g and c must have
-    # the same type.
-
-    method sat.gc {g c} {
-        $cogroups validate $g
-        $concerns validate $c
-
-        set result [$rdb onecolumn {
-            SELECT sat FROM gram_gc 
-            WHERE g=$g AND c=$c
-        }]
-
-        # Only empty if g and c don't match
-        if {$result eq ""} {
-            error "g and c must have the same group type, CIV or ORG"
-        }
-
-        return $result
-    }
-
-    # sat.n
-    #
-    # n     A neighborhood name
-    #
-    # Returns the requested satisfaction roll-up.
-
-    method sat.n {n} {
-        $nbhoods  validate $n
-
-        return [$rdb onecolumn {
-            SELECT sat FROM gram_n 
-            WHERE n=$n
-        }]
-    }
-
-
-    # sat.g
-    #
-    # g     A CIV or ORG group name
-    #
-    # Returns the requested satisfaction roll-up.
-
-    method sat.g {g} {
-        $cogroups validate $g
-
-        return [$rdb onecolumn {
-            SELECT sat FROM gram_g 
-            WHERE g=$g
-        }]
-    }
-
-    # sat.c
-    #
-    # c     A CIV or ORG concern name
-    #
-    # Returns the requested satisfaction roll-up.
-
-    method sat.c {c} {
-        $concerns validate $c
-
-        return [$rdb onecolumn {
-            SELECT sat FROM gram_c 
-            WHERE c=$c
-        }]
-    }
-
-    #-------------------------------------------------------------------
-    # Cooperation Queries
-
-    # coop.nfg
-    #
-    # n     A neighborhood name
-    # f     A CIV group name
-    # g     A FRC group name
-    #
-    # Returns the requested cooperation level.  Group f must reside
-    # in n.
-
-    method coop.nfg {n f g} {
-        $nbhoods validate $n
-        $cgroups validate $f
-        $fgroups validate $g
-
-        set result [$rdb onecolumn {
-            SELECT coop FROM gram_coop 
-            WHERE n=$n AND f=$f AND g=$g
-        }]
-
-        if {$result eq ""} {
-            error "Group $f does not reside in nbhood $n"
-        }
-
-        return $result
-    }
-
-
-    # coop.ng
-    #
-    # n     A neighborhood name
-    # g     A FRC group name
-    #
-    # Returns the requested cooperation roll-up.
-
-    method coop.ng {n g} {
-        $nbhoods validate $n
-        $fgroups validate $g
-
-        return [$rdb onecolumn {
-            SELECT coop FROM gram_frc_ng 
-            WHERE n=$n AND g=$g
-        }]
-    }
-
-    #-------------------------------------------------------------------
-    # Satisfaction Adjustments, Level Inputs, and Slope Inputs
-
-    # sat adjust driver n g c mag
-    #
-    # driver       The driver ID
-    # n            Neighborhood name, or "*" for all.
-    # g            Group name, or "*" for all.
-    # c            Concern name, or "*" for all.
-    # mag          Magnitude (a qmag value)
+    # Both adjustments and inputs are made relative to some _driver_, as
+    # created using <driver add>. Each has an input ID, a driver-specific
+    # serial number. Thus, any adjustment or input can be identified as
+    # "_driver.input_".
+    
+    # Method: sat adjust
     #
     # Adjusts sat.ngc by the required amount, clamping it within bounds.
     #
     # * The group and concern must have the same group type, CIV or ORG.
     # * The group and concern cannot both be wildcarded.
     #
-    # Returns the input ID for this driver.  
+    # Returns the input ID for this _driver_.  
+    #
+    # Syntax:
+    #   sat adjust _driver n g c mag_
+    #
+    #   driver - The driver ID
+    #   n      - Neighborhood name, or "*" for all.
+    #   g      - Group name, or "*" for all.
+    #   c      - Concern name, or "*" for all.
+    #   mag    - Magnitude (a qmag value)
 
-    method {sat adjust} {driver n g c mag} {
+    method "sat adjust" {driver n g c mag} {
         $self Log detail "sat adjust driver=$driver n=$n g=$g c=$c M=$mag"
 
         # FIRST, check the inputs, and accumulate query terms
@@ -1984,14 +2006,7 @@ snit::type ::simlib::gram {
         return [$self DriverGetInput $driver]
     }
 
-    # sat set driver n g c mag ?-undo?
-    #
-    # driver       The driver ID
-    # n            Neighborhood name, or "*" for all.
-    # g            Group name, or "*" for all.
-    # c            Concern name, or "*" for all.
-    # sat          Quantity (a qsat value)
-    # -undo        Flag; decrements last_input instead of incrementing.
+    # Method: sat set
     #
     # Sets sat.ngc to the required value.
     #
@@ -2000,11 +2015,24 @@ snit::type ::simlib::gram {
     #
     # Returns the input ID for this driver.  
     #
+    #
+    # Syntax:
+    #   sat set _driver n g c sat_ ?-undo?
+    #
+    #   driver - The driver ID
+    #   n      - Neighborhood name, or "*" for all.
+    #   g      - Group name, or "*" for all.
+    #   c      - Concern name, or "*" for all.
+    #   sat    - Quantity (a qsat value)
+    #
+    # Options:
+    #   -undo  - Flag; decrements last_input instead of incrementing.
+    #
     # NOTE: If -undo is given, decrements the last_input counter for this
     # driver, and returns nothing.  This is a stopgap measure to allow
-    # sat adjust and sat set to be undone.
+    # <sat adjust> and <sat set> to be undone.
 
-    method {sat set} {driver n g c sat {flag ""}} {
+    method "sat set" {driver n g c sat {flag ""}} {
         $self Log detail "sat set driver=$driver n=$n g=$g c=$c S=$sat $flag"
 
         # FIRST, check the inputs, and accumulate query terms
@@ -2086,31 +2114,37 @@ snit::type ::simlib::gram {
         }
     }
 
-    # sat level driver ts n g c limit days ?options?
+    # Method: sat level
     #
-    # driver       driver ID
-    # ts           Start time, integer ticks
-    # n            Neighborhood name
-    # g            Group name
-    # c            Concern name
-    # limit        Magnitude of the effect (qmag)
-    # days         Realization time of the effect, in days (qduration)
-    #
-    # Options: 
-    #     -cause cause   Name of the cause of this input
-    #     -s factor      "here" indirect effects multiplier, defaults to 1.0
-    #     -p factor      "near" indirect effects multiplier, defaults to 0
-    #     -q factor      "far" indirect effects multiplier, defaults to 0
-    #
-    # Schedules a new satisfaction level input with the specified parameters.
+    # Schedules a new satisfaction level input with the specified
+    # parameters.  This will result in a direct effect on the specified
+    # curve, and indirect effects across the playbox, as determined by
+    # the influence and the values of -s, -p, and -q.
     #
     # * The group and concern must have the same type, CIV or ORG.
     #
     # Returns the driver input number for this input.  This is
     # a number that starts at 1 and is incremented for each level or slope
     # input received for the driver.
+    #
+    # Syntax:
+    #   sat level _driver ts n g c limit days ?options?_
+    #
+    #   driver - driver ID
+    #   ts     - Start time, integer ticks
+    #   n      - Neighborhood name
+    #   g      - Group name
+    #   c      - Concern name
+    #   limit  - Magnitude of the effect (qmag)
+    #   days   - Realization time of the effect, in days (qduration)
+    #
+    # Options: 
+    #   -cause cause - Name of the cause of this input
+    #   -s factor    - "here" indirect effects multiplier, defaults to 1.0
+    #   -p factor    - "near" indirect effects multiplier, defaults to 0
+    #   -q factor    - "far" indirect effects multiplier, defaults to 0
 
-    method {sat level} {driver ts n g c limit days args} {
+    method "sat level" {driver ts n g c limit days args} {
         $self Log detail "sat level driver=$driver ts=$ts n=$n g=$g c=$c lim=$limit days=$days $args"
 
         # FIRST, check the regular inputs
@@ -2183,32 +2217,37 @@ snit::type ::simlib::gram {
     }
 
 
-    # sat slope driver ts n g c slope ?options...?
-    #
-    # driver       Driver ID
-    # ts           Input start time, integer ticks
-    # n            Neighborhood name
-    # g            Group name
-    # c            Concern name
-    # slope        Slope (change/day) of the effect (qmag)
-    #
-    # Options: 
-    #     -cause cause   Name of the cause of this input
-    #     -s factor      "here" indirect effects multiplier, defaults to 1.0
-    #     -p factor      "near" indirect effects multiplier, defaults to 0
-    #     -q factor      "far" indirect effects multiplier, defaults to 0
+    # Method: sat slope
     #
     # Schedules a new GRAM slope input with the specified parameters.
     #
     # * The g and c must have the same group type
-    #
     # * A subsequent input for the same driver, n, g, c, and cause will update
     #   all direct and indirect effects accordingly.
-    #
     # * Such subsequent inputs must have a start time, ts,
     #   no earlier than the ts of the previous input.
+    #
+    # Returns the driver input number for this input.  This is
+    # a number that starts at 1 and is incremented for each level or slope
+    # input received for the driver.
+    #
+    # Syntax:
+    #   sat slope _driver ts n g c slope ?options...?_
+    #
+    #   driver - Driver ID
+    #   ts     - Input start time, integer ticks
+    #   n      - Neighborhood name
+    #   g      - Group name
+    #   c      - Concern name
+    #   slope  - Slope (change/day) of the effect (qmag)
+    #
+    # Options: 
+    #   -cause cause - Name of the cause of this input
+    #   -s factor    - "here" indirect effects multiplier, defaults to 1.0
+    #   -p factor    - "near" indirect effects multiplier, defaults to 0
+    #   -q factor    - "far" indirect effects multiplier, defaults to 0
 
-    method {sat slope} {driver ts n g c slope args} {
+    method "sat slope" {driver ts n g c slope args} {
         $self Log detail \
             "sat slope driver=$driver ts=$ts n=$n g=$g c=$c s=$slope $args"
 
@@ -2322,14 +2361,18 @@ snit::type ::simlib::gram {
         return $input(input)
     }
 
-    # ParseInputOptions optsArray optsList
+    # Method: ParseInputOptions
     #
-    # optsArray      An array to receive the options
-    # optsList       List of options and their values
-    #
-    # Sets defaults, processes the optsList, validating each
-    # entry, and puts the parsed values in the optsVar.  If
+    # Option parser for <sat level> and company.
+    # Sets defaults, processes the _optsList_, validating each
+    # entry, and puts the parsed values in the _optsVar_.  If
     # any values are invalid, an error is thrown.
+    #
+    # Syntax:
+    #   ParseInputOptions _optsArray optsList_
+    #
+    #   optsArray - An array to receive the options
+    #   optsList  - List of options and their values
 
     method ParseInputOptions {optsArray optsList} {
         upvar $optsArray opts
@@ -2361,17 +2404,24 @@ snit::type ::simlib::gram {
         }
     }
 
-    # sat drivers ?options...?
+    # Method: sat drivers
     #
-    # -nbhood      Neighborhood name, or "*" for all (default).
-    # -group       Group name, or "*" for all (default).
-    # -concern     Concern name, or "*" for all (default), or "mood" for mood
-    # -start       Start time; defaults to time 0
-    # -end         End time; defaults to latest time
+    # This call queries the <gram_sat_contribs> view, accumulating 
+    # contributions by specific drivers over time for a selected set of
+    # neighborhoods, groups, and concerns.
     #
-    # This call queries the gram_sat_contribs view, accumulating 
-    # contributions over time for a selected set of neighborhoods,
-    # groups, and concerns.  If -concern is "mood", then the contribution
+    # Syntax:
+    #   sat drivers _?options...?_
+    #
+    # Options:
+    #   -nbhood  - Neighborhood name, or "*" for all (default).
+    #   -group   - Group name, or "*" for all (default).
+    #   -concern - Concern name, or "*" for all (default), or "mood" for
+    #              mood
+    #   -start   - Start time; defaults to time 0
+    #   -end     - End time; defaults to latest time
+    #
+    # If -concern is "mood", then the contribution
     # to mood will be computed for each driver, neighborhood, and group,
     # and added to the output.
     #
@@ -2379,11 +2429,11 @@ snit::type ::simlib::gram {
     # all neighborhoods, groups, and concerns across the entire run
     # of the simulation.
     #
-    # The results are stored in the temporary table gram_sat_drivers.
+    # The results are stored in the temporary table <gram_sat_drivers>.
     # The data will persist until the next query, or until the 
     # database is closed.
 
-    method {sat drivers} {args} {
+    method "sat drivers" {args} {
         # FIRST, get the option values.
         array set opts {
             -nbhood  "*"
@@ -2506,21 +2556,34 @@ snit::type ::simlib::gram {
     }
 
     #-------------------------------------------------------------------
-    # Cooperation Adjustments, Level Inputs, and Slope Inputs
-
-    # coop adjust driver n f g mag
+    # Group: Cooperation Adjustments and Inputs
     #
-    # driver       The driver ID
-    # n            Neighborhood name, or "*" for all.
-    # f            Civilian group name, or "*" for all.
-    # g            Force group name, or "*" for all.
-    # mag          Magnitude (a qmag value)
+    # An adjustment is an administrative change to a particular
+    # cooperation level.  An input is a level or slope change to a
+    # particular cooperation level that has indirect effects across
+    # the playbox as determined by GRAM.
+    #
+    # Both adjustments and inputs are made relative to some _driver_, as
+    # created using <driver add>. Each has an input ID, a driver-specific
+    # serial number. Thus, any adjustment or input can be identified as
+    # "_driver.input_".
+
+    # Method: coop adjust
     #
     # Adjusts coop.nfg by the required amount, clamping it within bounds.
     #
     # Returns the input ID for this driver.  
+    #
+    # Syntax:
+    #   coop adjust _driver n f g mag_
+    #
+    #   driver - The driver ID
+    #   n      - Neighborhood name, or "*" for all.
+    #   f      - Civilian group name, or "*" for all.
+    #   g      - Force group name, or "*" for all.
+    #   mag    - Magnitude (a qmag value)
 
-    method {coop adjust} {driver n f g mag} {
+    method "coop adjust" {driver n f g mag} {
         $self Log detail "coop adjust driver=$driver n=$n f=$f g=$g M=$mag"
 
         # FIRST, check the inputs, and accumulate query terms
@@ -2591,24 +2654,28 @@ snit::type ::simlib::gram {
         return [$self DriverGetInput $driver]
     }
 
-    # coop set driver n f g coop ?-undo?
+    # Method: coop set
     #
-    # driver       The driver ID
-    # n            Neighborhood name, or "*" for all.
-    # f            Civilian group name, or "*" for all.
-    # g            Force group name, or "*" for all.
-    # mag          Magnitude (a qmag value)
-    # -undo        Flag; decrements last_input instead of incrementing.
+    # Sets coop.nfg to the required amount. Returns the input ID for this
+    # driver. 
     #
-    # Sets coop.nfg to the required amount.
+    # Syntax:
+    #   coop set _driver n f g coop_ ?-undo?
     #
-    # Returns the input ID for this driver.  
+    #   driver - The driver ID
+    #   n      - Neighborhood name, or "*" for all.
+    #   f      - Civilian group name, or "*" for all.
+    #   g      - Force group name, or "*" for all.
+    #   mag    - Magnitude (a qmag value)
+    #
+    # Options:
+    #   -undo  - Flag; decrements last_input instead of incrementing.
     #
     # NOTE: If -undo is given, decrements the last_input counter for this
     # driver, and returns nothing.  This is a stopgap measure to allow
-    # coop adjust and coop set to be undone.
+    # <coop adjust> and <coop set> to be undone.
 
-    method {coop set} {driver n f g coop {flag ""}} {
+    method "coop set" {driver n f g coop {flag ""}} {
         $self Log detail "coop adjust driver=$driver n=$n f=$f g=$g C=$coop $flag"
 
         # FIRST, check the inputs, and accumulate query terms
@@ -2677,29 +2744,32 @@ snit::type ::simlib::gram {
         }
     }
 
-    # coop level driver ts n f g limit days ?options?
-    #
-    # driver       Driver ID
-    # ts           Start time, integer ticks
-    # n            Neighborhood name
-    # f            Civilian group name
-    # g            Force group name
-    # limit        Magnitude of the effect (qmag)
-    # days         Realization time of the effect, in days (qduration)
-    #
-    # Options: 
-    #     -cause cause   Name of the cause of this input
-    #     -s factor      "here" indirect effects multiplier, defaults to 1.0
-    #     -p factor      "near" indirect effects multiplier, defaults to 0
-    #     -q factor      "far" indirect effects multiplier, defaults to 0
+    # Method:
     #
     # Schedules a new cooperation level input with the specified parameters.
     #
     # Returns the driver input number for this input.  This is
     # a number that starts at 1 and is incremented for each level or slope
     # input received for the driver.
+    #
+    # Syntax:
+    #   coop level _driver ts n f g limit days ?options?_
+    #
+    #   driver - Driver ID
+    #   ts     - Start time, integer ticks
+    #   n      - Neighborhood name
+    #   f      - Civilian group name
+    #   g      - Force group name
+    #   limit  - Magnitude of the effect (qmag)
+    #   days   - Realization time of the effect, in days (qduration)
+    #
+    # Options: 
+    #   -cause cause - Name of the cause of this input
+    #   -s factor    - "here" indirect effects multiplier, defaults to 1.0
+    #   -p factor    - "near" indirect effects multiplier, defaults to 0
+    #   -q factor    - "far" indirect effects multiplier, defaults to 0
 
-    method {coop level} {driver ts n f g limit days args} {
+    method "coop level" {driver ts n f g limit days args} {
         $self Log detail "coop level driver=$driver ts=$ts n=$n f=$f g=$g lim=$limit days=$days $args"
 
         # FIRST, check the regular inputs
@@ -2780,20 +2850,7 @@ snit::type ::simlib::gram {
         return $input(input)
     }
 
-    # coop slope driver ts n f g slope ?options...?
-    #
-    # driver       Driver ID
-    # ts           Start time, integer ticks
-    # n            Neighborhood name
-    # f            Civilian group name
-    # g            Force group name
-    # slope        Slope (change/day) of the effect (qmag)
-    #
-    # Options: 
-    #     -cause cause   Name of the cause of this input
-    #     -s factor      "here" indirect effects multiplier, defaults to 1.0
-    #     -p factor      "near" indirect effects multiplier, defaults to 0
-    #     -q factor      "far" indirect effects multiplier, defaults to 0
+    # Method: coop slope
     #
     # Schedules a new GRAM slope input with the specified parameters.
     #
@@ -2802,8 +2859,28 @@ snit::type ::simlib::gram {
     #
     # * Such subsequent inputs must have a start time, ts,
     #   no earlier than the ts of the previous input.
+    #
+    # Returns the driver input number for this input.  This is
+    # a number that starts at 1 and is incremented for each level or slope
+    # input received for the driver.
+    #
+    # Syntax:
+    #   coop slope "driver ts n f g slope ?options...?"
+    #
+    #   driver - Driver ID
+    #   ts     - Start time, integer ticks
+    #   n      - Neighborhood name
+    #   f      - Civilian group name
+    #   g      - Force group name
+    #   slope  - Slope (change/day) of the effect (qmag)
+    #
+    # Options: 
+    #   -cause cause - Name of the cause of this input
+    #   -s factor    - "here" indirect effects multiplier, defaults to 1.0
+    #   -p factor    - "near" indirect effects multiplier, defaults to 0
+    #   -q factor    - "far" indirect effects multiplier, defaults to 0
 
-    method {coop slope} {driver ts n f g slope args} {
+    method "coop slope" {driver ts n f g slope args} {
         $self Log detail \
             "coop slope driver=$driver ts=$ts n=$n f=$f g=$g s=$slope $args"
 
@@ -2930,18 +3007,24 @@ snit::type ::simlib::gram {
 
 
     #-------------------------------------------------------------------
-    # Cancellation/Termination of Drivers
+    # Group: Cancellation/Termination of Drivers
 
-    # cancel driver ?-delete?
-    #
-    # driver        A Driver ID
-    #   -delete     If the option is given, the driver ID itself will be
-    #               deleted entirely; otherwise, it will remain with a
-    #               type of "unknown" and a name of "CANCELLED".
+    # Method: cancel
     #
     # Cancels all actual contributions made to any curve by the specified 
     # driver.  Contributions are cancelled by subtracting the
-    # "actual' value from the relevant curves and deleting them from the RDB.
+    # "actual: value from the relevant curves and deleting them from the
+    # <rdb>.
+    #
+    # Syntax:
+    #   cancel _driver_ ?-delete?
+    #
+    #   driver - A Driver ID
+    #
+    # Options:
+    #   -delete - If the option is given, the driver ID itself will be
+    #             deleted entirely; otherwise, it will remain with a
+    #             type of "unknown" and a name of "CANCELLED".
 
     method cancel {driver {option ""}} {
         # FIRST, Update the curves.
@@ -3014,14 +3097,17 @@ snit::type ::simlib::gram {
         return
     }
 
-    # terminate driver ts
-    #
-    # driver    A driver ID
-    # ts        A start time.
+    # Method: terminate
     #
     # Terminates all slope effects for the given driver, just as though
     # they were assigned a zero slope.  Termination of delayed effects 
     # is delayed accordingly.
+    #
+    # Syntax:
+    #   terminate _driver ts_
+    #
+    #   driver - A driver ID
+    #   ts     - A start time.
 
     method terminate {driver ts} {
         $self Log detail "terminate driver=$driver ts=$ts"
@@ -3051,12 +3137,29 @@ snit::type ::simlib::gram {
     }
 
     #-------------------------------------------------------------------
-    # Curve Infrastructure
-
-    # CurvesInit
+    # Group: Effect Curves
     #
-    # Initializes the curves submodule.  The gram_curves table is already
-    # populated; but this resets variable data and clears the history.
+    # An effect curve is a variable whose value can vary over time,
+    # subject to level and slope effects, e.g., a satisfaction or 
+    # cooperation curve.  This section of the module contains the 
+    # generic effect curve code.
+    #
+    # The following tables are used:
+    #
+    #   gram_curves   - One record per curve, including current value.
+    #   gram_effects  - One record per level/slope effect
+    #   gram_contribs - History of contributions to curves.
+    #   gram_values   - History of curve values.
+    #
+    # Other sections of this module will provide identities to specific
+    # curves.  The satisfaction section, for example, maps n,g,c
+    # combinations to particular curves.
+
+    # Method: CurvesInit
+    #
+    # Initializes the curves submodule.  The <gram_curves> table is
+    # populated at GRAM <init>; but this routine resets variable data and
+    # clears the history.
 
     method CurvesInit {} {
         $rdb eval {
@@ -3075,13 +3178,16 @@ snit::type ::simlib::gram {
         $self SaveValues
     }
 
-    # adjust driver curve_id mag
-    #
-    # driver         Driver ID
-    # curve_id       ID of the curve to adjust
-    # mag            Magnitude to adjust by
+    # Method: adjust
     #
     # Adjusts the curve by the selected amount, clamping appropriately.
+    #
+    # Syntax:
+    #   adjust _driver curve_id mag_
+    #
+    #   driver   - Driver ID
+    #   curve_id - ID of the curve to adjust
+    #   mag      - Magnitude to adjust by
 
     method adjust {driver curve_id mag} {
         $rdb eval {
@@ -3131,14 +3237,21 @@ snit::type ::simlib::gram {
         }
     }
 
-    # GetProxLimit s p q
+    # Method: GetProxLimit
     #
-    # s     Here effects multiplier
-    # p     Near effects multiplier
-    # q     Far effects multiplier
+    # An input to a curve cannot have any indirect effect beyond the
+    # proximity limit.  There is a global proximity limit, as defined
+    # by the gram.proxlimit parameter; but for each input, there is
+    # also a _de facto_ proximity limit, given the global
+    # proximity limit and the here, near, and far multipliers.  This
+    # routine computed this _de facto_ proximity limit for an input.
     #
-    # Returns the de factor proximity limit given the global
-    # proximity limit and the multipliers.
+    # Syntax:
+    #   GetProxLimit _s p q_
+    #
+    #  s - Here effects multiplier
+    #  p - Near effects multiplier
+    #  q - Far effects multiplier
 
     method GetProxLimit {s p q} {
         set plimit $proxlimit([$parm get gram.proxlimit])
@@ -3158,28 +3271,41 @@ snit::type ::simlib::gram {
         return $plimit
     }
 
-    # ScheduleLevel inputArray effectArray epsilon
+    # Method: ScheduleLevel
     #
-    # inputArray   Array of data about the current input
-    #     driver     Driver ID
-    #     input      Input number, for this driver
-    #     cause      "Cause" of this input
-    #     ts         Start time, in ticks
-    #     days       Realization time, in days (TBD: Should be ticks?)
-    #     llimit     "level limit", the direct effect magnitude
-    #     s          Here effects multiplier
-    #     p          Near effects multiplier
-    #     q          Far effects multiplier
-    # effectArray  Array of data about the current effect
-    #     curve_id   ID of affected curve in gram_curves.
-    #     direct_id  ID of entity receiving the direct effect (depends on
-    #                curve type).
-    #     prox       Proximity, -1 (direct), 0 (here), 1 (near), or 2 (far)
-    #     factor     Influence multiplier
-    #     delay      Effects delay, in ticks
-    # epsilon      The current epsilon
+    # Schedules a single level effect, given a dizzying set of input
+    # values.
     #
-    # Schedules a single level effect
+    # Syntax:
+    #   ScheduleLevel _inputArray effectArray epsilon_
+    #
+    #   inputArray  - Name of a variable containing an array of data about
+    #                 the current input
+    #   effectArray - Name of a variable containing an array of data about
+    #                 the current effect for the input.
+    #   epsilon     - The current epsilon.  Level effects smaller than
+    #                 epsilon take effect immediately.
+    #
+    # The _inputArray_ should contain the following values.
+    #
+    #   driver - Driver ID
+    #   input  - Input number, for this driver
+    #   cause  - "Cause" of this input
+    #   ts     - Start time, in ticks
+    #   days   - Realization time, in days
+    #   llimit - "level limit", the direct effect magnitude
+    #   s      - Here effects multiplier
+    #   p      - Near effects multiplier
+    #   q      - Far effects multiplier
+    #
+    # The _effectArray_ should contain the following values.
+    #
+    #   curve_id  - ID of affected curve in <gram_curves>.
+    #   direct_id - ID of entity receiving the direct effect (the table
+    #               depends on the curve type, satisfaction or cooperation).
+    #   prox      - Proximity, -1 (direct), 0 (here), 1 (near), or 2 (far)
+    #   factor    - Influence multiplier
+    #   delay     - Effects delay, in ticks
 
     method ScheduleLevel {inputArray effectArray epsilon} {
         upvar 1 $inputArray input
@@ -3261,27 +3387,40 @@ snit::type ::simlib::gram {
         return
     }
 
-    # ScheduleSlope input effect epsilon
+    # Method: ScheduleSlope
     #
-    # inputArray   Array of data about the current input
-    #     driver     Driver ID
-    #     input      Input number, for this driver
-    #     cause      "Cause" of this input
-    #     ts         Start time, in ticks
-    #     slope      Slope, in nominal points/day
-    #     s          Here effects multiplier
-    #     p          Near effects multiplier
-    #	  q          Far effects multiplier
-    # effectArray  Array of data about the current effect
-    #     curve_id   ID of affected curve in gram_curves.
-    #     direct_id  ID of entity receiving the direct effect (depends on
-    #                curve type).
-    #     prox       Proximity, -1 (direct), 0 (here), 1 (near), or 2 (far)
-    #     factor     Influence multiplier
-    #     delay      Effects delay, in ticks
-    # epsilon      The current epsilon
+    # Schedules or updates a single slope effect, given a dizzying set
+    # of input values.
     #
-    # Schedules or updates a single effect
+    # Syntax:
+    #   ScheduleSlope _inputArray effectArray epsilon_
+    #
+    #   inputArray  - Name of a variable containing an array of data about
+    #                 the current input
+    #   effectArray - Name of a variable containing an array of data about
+    #                 the current effect for the input.
+    #   epsilon     - The current epsilon.  Slope effects smaller than
+    #                 epsilon are ignored.
+    #
+    # The _inputArray_ should contain the following values.
+    #
+    #   driver - Driver ID
+    #   input  - Input number, for this driver
+    #   cause  - "Cause" of this input
+    #   ts     - Start time, in ticks
+    #   slope  - Slope, in nominal points/day
+    #   s      - Here effects multiplier
+    #   p      - Near effects multiplier
+    #   q      - Far effects multiplier
+    #
+    # The _effectArray_ should contain the following values.
+    #
+    #   curve_id  - ID of affected curve in gram_curves.
+    #   direct_id - ID of entity receiving the direct effect (depends on
+    #               curve type).
+    #   prox      - Proximity, -1 (direct), 0 (here), 1 (near), or 2 (far)
+    #   factor    - Influence multiplier
+    #   delay     - Effects delay, in ticks
 
     method ScheduleSlope {inputArray effectArray epsilon} {
         upvar 1 $inputArray input
@@ -3410,23 +3549,34 @@ snit::type ::simlib::gram {
         return
     }
 
-    # TerminateSlope inputArray effectArray
-    #
-    # inputArray   Array of data about the current input
-    #     ts         Termination time, in ticks
-    #     input      Input number for driver
-    # effectArray  Array of data about the current effect in gram_effects
-    #     id         ID of gram_effects record
-    #     ts         Start time of current slope, in ticks
-    #     te         End time of current slope, in ticks
-    #     delay      Delay of this effect, in ticks
-    #     future     Future slopes
+    # Method: TerminateSlope
     #
     # Terminates a slope effect by scheduling a slope of 0
     # after the appropriate time delay.
     #
-    # Constraints: The relevant effect already exists in gram_effects 
-    # and is active.
+    # Constraints: The relevant effect must already exist in <gram_effects> 
+    # and be active.
+    #
+    # Syntax:
+    #   TerminateSlope _inputArray effectArray_
+    #
+    #   inputArray  - Name of a variable containing an array of data about
+    #                 the current input
+    #   effectArray - Name of a variable containing an array of data about
+    #                 the current effect for the input.
+    #
+    # The _inputArray_ should contain the following values.
+    #
+    #   ts    - Termination time, in ticks
+    #   input - Input number for driver
+    #
+    # The _effectArray_ should contain the following values.
+    #
+    #   id     - ID of gram_effects record
+    #   ts     - Start time of current slope, in ticks
+    #   te     - End time of current slope, in ticks
+    #   delay  - Delay of this effect, in ticks
+    #   future - Future slopes
 
     method TerminateSlope {inputArray effectArray} {
         upvar 1 $inputArray  input
@@ -3465,60 +3615,12 @@ snit::type ::simlib::gram {
         return
     }
 
-    #-------------------------------------------------------------------
-    # Misc. Output Methods
 
-    # nbhood    A neighborhood name or index
-    #
-    # Returns a list of the CIV groups that reside in nbhood.
-
-    method nbhoodGroups {nbhood} {
-        $nbhoods validate $nbhood
-
-        $rdb eval {
-            SELECT g
-            FROM gram_ng JOIN gram_g USING (g)
-            WHERE n            = $nbhood
-            AND   sat_tracked  = 1
-            AND   gram_g.gtype = 'CIV'
-            ORDER BY g
-        }
-    }
-
-    #-------------------------------------------------------------------
-    # Time-Dependent Variable (outputs) Access Methods
-
-    # time
-    #
-    # Current gram(n) simulation time.
-    method time {} { 
-        return $db(time) 
-    }
-
-    #-------------------------------------------------------------------
-    # Effect Curves
-    #
-    # An effect curve is a variable whose value can vary over time,
-    # subject to level and slope effects, e.g., a satisfaction or 
-    # cooperation curve.  This section of the module contains the 
-    # generic effect curve code.
-    #
-    # The following tables are used:
-    #
-    #   gram_curves          One record per curve, including current value.
-    #   gram_effects         One record per level/slope effect
-    #   gram_contribs        History of contributions to curves.
-    #   gram_values          History of curve values.
-    #
-    # Other sections of this module will provide identities to specific
-    # curves.  The satisfaction section, for example, maps n,g,c
-    # combinations to particular curves.
-
-    # UpdateCurves
+    # Method: UpdateCurves
     #
     # Applies level and slope effects to curves for the time interval
     # from timelast to time.  Computes the current value for each
-    # curve and the slope for the current time advance.
+    # curve and the slope for the current time <advance>.
 
     method UpdateCurves {} {
         # FIRST, initialize the delta for this time step to 0.
@@ -3549,7 +3651,7 @@ snit::type ::simlib::gram {
         $self SaveValues
     }
 
-    # ComputeNominalContributionsForLevelEffects
+    # Method: ComputeNominalContributionsForLevelEffects
     #
     # Computes the nominal contribution of each active level effect to each
     # curve for this time step.
@@ -3604,7 +3706,7 @@ snit::type ::simlib::gram {
         }
     }
 
-    # ComputeNominalContributionsForSlopeEffects
+    # Method: ComputeNominalContributionsForSlopeEffects
     #
     # Computes the nominal contribution of each active slope effect to each
     # curve for this time advance.
@@ -3692,7 +3794,7 @@ snit::type ::simlib::gram {
         }
     }
 
-    # ComputeActualContributionsByCause
+    # Method: ComputeActualContributionsByCause
     #
     # Determine the maximum positive and negative contributions
     # for each curve and cause, scale them, and apply them.
@@ -3775,7 +3877,7 @@ snit::type ::simlib::gram {
         }
     }
 
-    # ExpireEffects
+    # Method: ExpireEffects
     #
     # Mark expired effects inactive.
 
@@ -3810,7 +3912,7 @@ snit::type ::simlib::gram {
         }
     }
 
-    # SaveContribs
+    # Method: SaveContribs
     #
     # Saves the total actual contributions for level and slope effects
     # by driver and curve.
@@ -3834,12 +3936,15 @@ snit::type ::simlib::gram {
         }
     }
 
-    # SaveValues ?curve_id?
-    #
-    # curve_id     A curve ID; defaults to all curves
+    # Method: SaveValues
     #
     # Saves the current value of the specified curve, or of all
-    # curves, to gram_values.
+    # curves, to <gram_values>.
+    #
+    # Syntax:
+    #   SaveValues _?curve_id?_
+    #
+    #   curve_id - A curve ID; defaults to all curves
 
     method SaveValues {{curve_id ""}} {
         # FIRST, save the history data, if that's what we want to do
@@ -3867,24 +3972,272 @@ snit::type ::simlib::gram {
         $rdb eval $query
     }
 
+    #-------------------------------------------------------------------
+    # Group: Miscellaneous Queries
+
+    # Method: sat.ngc
+    #
+    # Returns the requested satisfaction level.  Note that
+    # _g_ and _c_ must have the same group type, CIV or ORG.
+    #
+    # Syntax:
+    #    sat.ngc _n g c_
+    #
+    #   n - A neighborhood name
+    #   g - A CIV or ORG group name
+    #   c - A CIV or ORG concern name
+
+    method sat.ngc {n g c} {
+        $nbhoods validate $n
+        $cogroups validate $g
+        $concerns validate $c
+
+        set result [$rdb onecolumn {
+            SELECT sat FROM gram_sat 
+            WHERE n=$n AND g=$g AND c=$c
+        }]
+
+        if {$result eq ""} {
+            # If the types of g and c don't match, this is
+            # an error; otherwise, sat_tracked is 0, so return 0.0
+
+            require {[$rdb exists {
+                SELECT gc_id FROM gram_gc 
+                WHERE g=$g AND c=$c
+            }]} "g and c must have the same group type, CIV or ORG"
+            
+            set result 0.0
+        }
+
+        return $result
+    }
+
+
+    # Method: sat.ng
+    #
+    # Returns the requested satisfaction roll-up.
+    #
+    # Syntax:
+    #   sat.ng _n g_
+    #
+    #   n - A neighborhood name
+    #   g - A CIV or ORG group name
+
+    method sat.ng {n g} {
+        $nbhoods  validate $n
+        $cogroups validate $g
+
+        return [$rdb onecolumn {
+            SELECT sat FROM gram_ng 
+            WHERE n=$n AND g=$g
+        }]
+    }
+
+    # Method: sat.nc
+    #
+    # Returns the requested satisfaction roll-up.
+    #
+    # Syntax:
+    #   sat.nc _n c_
+    #
+    #   n - A neighborhood name
+    #   c - A CIV or ORG concern name
+
+    method sat.nc {n c} {
+        $nbhoods  validate $n
+        $concerns validate $c
+
+        return [$rdb onecolumn {
+            SELECT sat FROM gram_nc 
+            WHERE n=$n AND c=$c
+        }]
+    }
+
+    # Method: sat.gc
+    #
+    # Returns the requested satisfaction roll-up.  Note that
+    # _g_ and _c_ must have the same group type.
+    #
+    # Syntax:
+    #   sat.gc _g c_
+    #
+    #   g - A CIV or ORG group name
+    #   c - A CIV or ORG concern name
+
+    method sat.gc {g c} {
+        $cogroups validate $g
+        $concerns validate $c
+
+        set result [$rdb onecolumn {
+            SELECT sat FROM gram_gc 
+            WHERE g=$g AND c=$c
+        }]
+
+        # Only empty if g and c don't match
+        if {$result eq ""} {
+            error "g and c must have the same group type, CIV or ORG"
+        }
+
+        return $result
+    }
+
+    # Method: sat.n
+    #
+    # Returns the requested satisfaction roll-up.
+    #
+    # Syntax:
+    #   sat.n _n_
+    #
+    #   n - A neighborhood name
+
+    method sat.n {n} {
+        $nbhoods  validate $n
+
+        return [$rdb onecolumn {
+            SELECT sat FROM gram_n 
+            WHERE n=$n
+        }]
+    }
+
+
+    # Method: sat.g
+    #
+    # Returns the requested satisfaction roll-up.
+    #
+    # Syntax:
+    #   sat.g _g_
+    #
+    #   g - A CIV or ORG group name
+
+    method sat.g {g} {
+        $cogroups validate $g
+
+        return [$rdb onecolumn {
+            SELECT sat FROM gram_g 
+            WHERE g=$g
+        }]
+    }
+
+    # Method: sat.c
+    #
+    # Returns the requested satisfaction roll-up.
+    #
+    # Syntax:
+    #   sat.c _c_
+    #
+    #   c - A CIV or ORG concern name
+
+    method sat.c {c} {
+        $concerns validate $c
+
+        return [$rdb onecolumn {
+            SELECT sat FROM gram_c 
+            WHERE c=$c
+        }]
+    }
+    
+    # Method: coop.nfg
+    #
+    # Returns the requested cooperation level.  Group _f_ must reside
+    # in _n_.
+    #
+    # Syntax:
+    #   coop.nfg _n f g_
+    #
+    #   n - A neighborhood name
+    #   f - A CIV group name
+    #   g - A FRC group name
+
+    method coop.nfg {n f g} {
+        $nbhoods validate $n
+        $cgroups validate $f
+        $fgroups validate $g
+
+        set result [$rdb onecolumn {
+            SELECT coop FROM gram_coop 
+            WHERE n=$n AND f=$f AND g=$g
+        }]
+
+        if {$result eq ""} {
+            error "Group $f does not reside in nbhood $n"
+        }
+
+        return $result
+    }
+
+
+    # Method: coop.ng
+    #
+    # Returns the requested cooperation roll-up.
+    #
+    # Syntax:
+    #   coop.ng _n g_
+    #
+    #   n - A neighborhood name
+    #   g - A FRC group name
+
+    method coop.ng {n g} {
+        $nbhoods validate $n
+        $fgroups validate $g
+
+        return [$rdb onecolumn {
+            SELECT coop FROM gram_frc_ng 
+            WHERE n=$n AND g=$g
+        }]
+    }
+
+
+    # Method: nbhoodGroups
+    #
+    # Returns a list of the CIV groups that reside in the _nbhood_.
+    #
+    # Syntax:
+    #   nbhoodGroups _nbhood_
+    #
+    #   nbhood - A neighborhood name
+
+    method nbhoodGroups {nbhood} {
+        $nbhoods validate $nbhood
+
+        $rdb eval {
+            SELECT g
+            FROM gram_ng JOIN gram_g USING (g)
+            WHERE n            = $nbhood
+            AND   sat_tracked  = 1
+            AND   gram_g.gtype = 'CIV'
+            ORDER BY g
+        }
+    }
+
+    # Method: time
+    #
+    # Current gram(n) simulation time, in ticks.
+    method time {} { 
+        return $db(time) 
+    }
+
 
     #-------------------------------------------------------------------
-    # Data dumping methods
+    # Group: Data dumping methods
 
-    # dump sat.ngc ?options?
+    # Method: dump sat.ngc
     #
-    # -civ              Include CIV groups
-    # -org              Include ORG groups
-    # -nbhood n         Neighborhood name or *
-    # -group  g         Group name or *
-    #
-    # Dumps a pretty-printed gram_sat table.
+    # Dumps a pretty-printed <gram_sat> table.
     #
     # By default, both CIV and ORG groups are included.
     # If a specific group is specified, then -civ and -org are 
     # ignored.
+    #
+    # Syntax:
+    #   dump sat.ngc _?options?_
+    #
+    # Options:
+    #   -civ       - Include CIV groups
+    #   -org       - Include ORG groups
+    #   -nbhood n  - Neighborhood name or *
+    #   -group  g  - Group name or *
 
-    method {dump sat.ngc} {args} {
+    method "dump sat.ngc" {args} {
         # FIRST, set the defaults
         set conditions [list]
         set civFlag 0
@@ -3969,12 +4322,18 @@ snit::type ::simlib::gram {
         return $result
     }
 
-    # dump sat levels ?driver?
+    # Method: dump sat levels
     #
-    # Returns a pretty-printed list of active level effects, one per line.
-    # If driver is given, only those effects that match are included.  
+    # Returns a pretty-printed list of active satisfaction level effects,
+    # one per line. If _driver_ is given, only those effects that match are
+    # included. 
+    #
+    # Syntax:
+    #   dump sat levels _?driver?_
+    #
+    #   driver - A driver ID
 
-    method {dump sat levels} {{driver "*"}} {
+    method "dump sat levels" {{driver "*"}} {
         return [$rdb query "
             SELECT driver || '.' || input,
                    dn,
@@ -4005,16 +4364,20 @@ snit::type ::simlib::gram {
         } -headercols 4]
     }
 
-    # dump coop.nfg ?options?
+    # Method: dump coop.nfg
     #
-    # -nbhood n         Neighborhood name or *
-    # -civ    f         Civilian Group name or *
-    # -frc    g         Force Group name, or *
-    # -ids              Includes curve IDs
+    # Dumps a pretty-printed <gram_coop> table.
     #
-    # Dumps a pretty-printed gram_coop table.
+    # Syntax:
+    #   dump coop.nfg _?options?_
+    #
+    # Options:
+    #   -nbhood n  - Neighborhood name or *
+    #   -civ    f  - Civilian Group name or *
+    #   -frc    g  - Force Group name, or *
+    #   -ids       - Includes curve IDs
 
-    method {dump coop.nfg} {args} {
+    method "dump coop.nfg" {args} {
         # FIRST, set the defaults
         set conditions [list]
         set n       "*"
@@ -4095,12 +4458,16 @@ snit::type ::simlib::gram {
         return $result
     }
 
-    # dump coop levels ?driver?
+    # Method: dump coop levels
     #
-    # Returns a pretty-printed list of active level effects, one per line.
-    # If driver is given, only those effects that match are included.  
+    # Returns a pretty-printed list of active cooperation level effects,
+    # one per line. If _driver_ is given, only those effects that match are
+    # included. 
+    #
+    # Syntax:
+    #   dump coop levels _?driver?_
 
-    method {dump coop levels} {{driver "*"}} {
+    method "dump coop levels" {{driver "*"}} {
         return [$rdb query "
             SELECT driver || '.' || input,
                    dn,
@@ -4132,17 +4499,20 @@ snit::type ::simlib::gram {
         } -headercols 5]
     }
 
-    # dump sat level n g c
-    #
-    # n       A neighborhood name
-    # g       A group name
-    # c       A concern name
+    # Method: dump sat level
     #
     # Returns a pretty-printed list of the active level effects acting
     # on the specific satisfaction level, one per line, sorted by
     # cause.
+    #
+    # Syntax:
+    #   dump sat level _n g c_
+    #
+    #   n - A neighborhood name
+    #   g - A group name
+    #   c - A concern name
 
-    method {dump sat level} {n g c} {
+    method "dump sat level" {n g c} {
         # FIRST, validate the inputs
         $nbhoods  validate $n
 
@@ -4173,17 +4543,20 @@ snit::type ::simlib::gram {
         } -headercols 3]
     }
 
-    # dump coop level n f g
-    #
-    # n       A neighborhood name
-    # f       A CIV group name
-    # g       A FRC group name
+    # Method: dump coop level
     #
     # Returns a pretty-printed list of the active level effects acting
     # on the specific cooperation level, one per line, sorted by
     # cause.
+    #
+    # Syntax:
+    #   dump coop level _n f g_
+    #
+    #   n - A neighborhood name
+    #   f - A CIV group name
+    #   g - A FRC group name
 
-    method {dump coop level} {n f g} {
+    method "dump coop level" {n f g} {
         # FIRST, validate the inputs
         $nbhoods validate $n
         $cgroups validate $f
@@ -4215,15 +4588,20 @@ snit::type ::simlib::gram {
         } -headercols 3]
     }
 
-    # dump sat slopes ?driver?
+    # Method: dump sat slopes
     #
     # Returns a pretty-printed list of slope effects, one per line.
-    # If driver is given, only those effects that match are included.
+    # If _driver_ is given, only those effects that match are included.
     #
     # TBD: The disaggregation of the "future" column can be done in
-    # one routine shared with [dump coop slopes].
+    # one routine shared with <dump coop slopes>.
+    #
+    # Syntax:
+    #   dump sat slopes _?driver?_
+    #
+    #   driver  - A driver ID
 
-    method {dump sat slopes} {{driver ""}} {
+    method "dump sat slopes" {{driver ""}} {
         # FIRST, build a temporary table, then query it, then destroy
         # it.
         $rdb eval {
@@ -4345,12 +4723,17 @@ snit::type ::simlib::gram {
         return $out
     }
 
-    # dump coop slopes ?driver?
+    # Method: dump coop slopes
     #
     # Returns a pretty-printed list of slope effects, one per line.
-    # If driver is given, only those effects that match are included.  
+    # If _driver_ is given, only those effects that match are included.  
+    #
+    # Syntax:
+    #   dump coop slopes _?driver?_
+    #
+    #   driver - A driver ID
 
-    method {dump coop slopes} {{driver "*"}} {
+    method "dump coop slopes" {{driver "*"}} {
         # FIRST, build a temporary table, then query it, then destroy
         # it.
         $rdb eval {
@@ -4474,17 +4857,20 @@ snit::type ::simlib::gram {
     }
 
 
-    # dump sat slope n g c
-    #
-    # n       A neighborhood name
-    # g       A group name
-    # c       A concern name
+    # Method: dump sat slope
     #
     # Returns a pretty-printed list of the active slope effects acting
     # on the specific satisfaction level, one per line, sorted by
     # cause.
+    #
+    # Syntax:
+    #   dump sat slope _n g c_
+    #
+    #   n - A neighborhood name
+    #   g - A group name
+    #   c - A concern name
 
-    method {dump sat slope} {n g c} {
+    method "dump sat slope" {n g c} {
         # FIRST, validate the inputs
         $nbhoods  validate $n
 
@@ -4516,17 +4902,20 @@ snit::type ::simlib::gram {
         } -headercols 3]
     }
 
-    # dump coop slope n f g
-    #
-    # n       A neighborhood name
-    # f       A civ group name
-    # g       A frc group name
+    # Method: dump coop slope
     #
     # Returns a pretty-printed list of the active slope effects acting
     # on the specific cooperation level, one per line, sorted by
     # cause.
+    #
+    # Syntax:
+    #   dump coop slope _n f g_
+    #
+    #   n - A neighborhood name
+    #   f - A civ group name
+    #   g - A frc group name
 
-    method {dump coop slope} {n f g} {
+    method "dump coop slope" {n f g} {
         # FIRST, validate the inputs
         $nbhoods validate $n
         $cgroups validate $f
@@ -4560,21 +4949,24 @@ snit::type ::simlib::gram {
     }
 
     #-------------------------------------------------------------------
-    # Utility Methods and Procs
+    # Group: Utility Methods and Procs
 
-    # ValidateGC g c ?parmtext?
-    #
-    # g         A group name
-    # c         A concern name
-    # parmtext  Alternate errmsg text for "g and c"
+    # Method: ValidateGC
     #
     # Verifies that:
     #
-    #    g is a valid CIV or ORG group
-    #    c is a valid CIV or ORG concern
-    #    g and c are both CIV or both ORG
+    #   * g is a valid CIV or ORG group
+    #   * c is a valid CIV or ORG concern
+    #   * g and c are both CIV or both ORG
     #
     # Throws an appropriate error if not.
+    #
+    # Syntax:
+    #   ValidateGC _g c ?parmtext?_
+    #
+    #   g        - A group name
+    #   c        - A concern name
+    #   parmtext - Alternate errmsg text for "g and c"
 
     method ValidateGC {g c {parmtext "g and c"}} {
         $cogroups validate $g
@@ -4586,12 +4978,7 @@ snit::type ::simlib::gram {
         }]} "$parmtext must have the same group type, CIV or ORG"
     }
 
-    # ScaleFactor curve_type value sign
-    #
-    # curve_type     SAT or COOP
-    # value          The current value of the curve in question
-    # sign           -1 if net contribution is negative, 
-    #                +1 if net contribution is positive
+    # Proc: ScaleFactor
     #
     # Returns a positive scale factor that will scale net positive
     # contributions toward the upper limit and net negative
@@ -4600,6 +4987,14 @@ snit::type ::simlib::gram {
     #
     # See memo WHD-06-009, "Preventing Satisfaction Overflow" for
     # details.
+    #
+    # Syntax:
+    #   ScaleFactor _curve_type value sign_
+    #
+    #   curve_type - SAT or COOP
+    #   value      - The current value of the curve in question
+    #   sign       - -1 if net contribution is negative, 
+    #                +1 if net contribution is positive
 
     proc ScaleFactor {curve_type value sign} {
         if {$curve_type eq "SAT"} {
@@ -4618,12 +5013,15 @@ snit::type ::simlib::gram {
         }
     }
 
-    # ClampCurve curve_type value
-    #
-    # curve_type     SAT or COOP
-    # value          The current value of the curve in question
+    # Proc: ClampCurve
     #
     # Clamps the value based on the curve type.
+    #
+    # Syntax:
+    #   ClampCurve _curve_type value_
+    #
+    #   curve_type - SAT or COOP
+    #   value      - The current value of the curve in question
 
     proc ClampCurve {curve_type value} {
         if {$curve_type eq "SAT"} {
@@ -4634,23 +5032,30 @@ snit::type ::simlib::gram {
         }
     }
 
-    # profile command....
+    # Method: profile
     #
-    # command     A command to execute
-    #
-    # Executes the command using Tcl's "time" command, and logs the
+    # Executes the _command_ using Tcl's "time" command, and logs the
     # run time.
+    #
+    # Syntax:
+    #   profile _command...._
+    #
+    #   command - A command to execute
 
     method profile {args} {
         set profile [time $args 1]
         $self Log detail "profile: $args $profile"
     }
 
-
-    # Log severity message
+    # Method: Log
     #
-    # severity         A logger(n) severity level
-    # message          The message text.
+    # Logs the message to the -logger.
+    #
+    # Syntax:
+    #   Log _severity message_
+    #
+    #   severity - A logger(n) severity level
+    #   message  - The message text.
 
     method Log {severity message} {
         if {$options(-logger) ne ""} {

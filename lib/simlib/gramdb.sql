@@ -1,12 +1,16 @@
 ------------------------------------------------------------------------
--- TITLE:
---    gramdb.sql
+-- FILE: gramdb.sql
+--
+-- SQL Schema for the gramdb(n) module.
+--
+-- PACKAGE:
+--    simlib(n) -- Simulation Infrastructure Package
+--
+-- PROJECT:
+--    Mars Simulation Infrastructure Library
 --
 -- AUTHOR:
 --    Will Duquette
---
--- DESCRIPTION:
---    SQL Schema for the gramdb(n) module.
 --
 ------------------------------------------------------------------------
 
@@ -46,10 +50,10 @@ CREATE TABLE gramdb_ng (
     n              TEXT,                     -- Symbolic nbhood name
     g              TEXT,                     -- Symbolic group name
 
-    -- Inputs: CIV only
+    -- Inputs, CIV only
     population     INTEGER DEFAULT 0,
 
-    -- Inputs: CIV and ORG only
+    -- Inputs, CIV and ORG only
     rollup_weight  DOUBLE DEFAULT 1.0,       -- Default group weight
     effects_factor DOUBLE DEFAULT 1.0,       -- Indirect effects mult
 

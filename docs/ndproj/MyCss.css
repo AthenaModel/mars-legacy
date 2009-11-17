@@ -21,6 +21,13 @@ u {
     padding-bottom: .25em;
     white-space: nowrap }
 
+/* Have a little less space before description lists, and a little
+ * more space after. */
+.CDescriptionList {
+   margin-top: .3em;
+   margin-bottom: .3em;
+}
+
 /* Indent preformatted blocks relative to the surrounding text. */
 .CBody pre {
     margin-left: 2em; }

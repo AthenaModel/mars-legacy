@@ -64,10 +64,10 @@ clean: cleansubs
 # only on demands.
 
 nddocs:
-	NaturalDocs -r -s Default MyCss \
-		-i $(TOP_DIR)/lib/app_gram \
-                -i $(TOP_DIR)/lib/app_log  \
-		-o HTML $(TOP_DIR)/docs/nddocs \
+	NaturalDocs -r \
+        	-s Default MyCss \
+		-i $(TOP_DIR)/lib \
+		-o FramedHTML $(TOP_DIR)/docs/nddocs \
 		-p $(TOP_DIR)/docs/ndproj
 
 

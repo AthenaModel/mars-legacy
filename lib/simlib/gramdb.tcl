@@ -1,15 +1,16 @@
 #-----------------------------------------------------------------------
-# TITLE:
-#    gramdb.tcl
+# FILE: gramdb.tcl
+#
+#   Parser for the gramdb(5) database format.
+#
+# PACKAGE:
+#   simlib(n) -- Simulation Infrastructure Package
+#
+# PROJECT:
+#   Mars Simulation Infrastructure Library
 #
 # AUTHOR:
-#    Will Duquette
-#
-# DESCRIPTION:
-#    Parser for the gramdb(5) database format.
-#
-#    This parser is based on tabletext(n) which provides a generic
-#    mechanism for loading data from text files into SQLite3 tables.
+#   Will Duquette
 #
 #-----------------------------------------------------------------------
 
@@ -18,7 +19,10 @@ namespace eval ::simlib:: {
 }
 
 #-----------------------------------------------------------------------
-# gramdb
+# Module: gramdb
+#
+# This parser is based on tabletext(n) which provides a generic
+# mechanism for loading data from text files into SQLite3 tables.
 
 snit::type ::simlib::gramdb {
     # Make it a singleton
@@ -141,7 +145,7 @@ snit::type ::simlib::gramdb {
         set tt [tabletext ${type}::tt]
 
         #---------------------------------------------------------------
-        # Table: gramdb_c
+        # Table -- gramdb_c
 
         $tt table gramdb_c                                  \
             -tablevalidator [mytypemethod Val_gramdb_c]
@@ -153,7 +157,7 @@ snit::type ::simlib::gramdb {
             -validator [list $tt validate vtype egrouptype]
 
         #---------------------------------------------------------------
-        # Table: gramdb_g
+        # Table -- gramdb_g
 
          $tt table gramdb_g                                     \
            -tablevalidator  [mytypemethod Val_gramdb_g]         \
@@ -173,7 +177,7 @@ snit::type ::simlib::gramdb {
             -validator [list $tt validate vtype rmagnitude]
 
         #---------------------------------------------------------------
-        # Table: gramdb_n
+        # Table -- gramdb_n
 
         $tt table  gramdb_n                                 \
             -tablevalidator  [mytypemethod Val_gramdb_n]
@@ -182,7 +186,7 @@ snit::type ::simlib::gramdb {
             -validator [mytypemethod ValidateSymbolicName]
 
         #---------------------------------------------------------------
-        # Table: gramdb_mn
+        # Table -- gramdb_mn
 
         $tt table gramdb_mn -dependson gramdb_n                  \
             -tablevalidator  [mytypemethod Val_gramdb_mn]        \
@@ -200,7 +204,7 @@ snit::type ::simlib::gramdb {
 
 
         #---------------------------------------------------------------
-        # Table: gramdb_ng
+        # Table -- gramdb_ng
 
         $tt table gramdb_ng -dependson {gramdb_n gramdb_g}       \
             -tablevalidator  [mytypemethod Val_gramdb_ng]
@@ -217,7 +221,7 @@ snit::type ::simlib::gramdb {
             -validator [mytypemethod ValidateIntMagnitude]
 
         #---------------------------------------------------------------
-        # Table: gramdb_gc
+        # Table -- gramdb_gc
         
         $tt table gramdb_gc -dependson {gramdb_g gramdb_c} \
             -tablevalidator [mytypemethod Val_gramdb_gc] \
@@ -236,7 +240,7 @@ snit::type ::simlib::gramdb {
             -validator [mytypemethod ValidateQuality qsaliency]
         
         #---------------------------------------------------------------
-        # Table: gramdb_fg
+        # Table -- gramdb_fg
         
         $tt table gramdb_fg -dependson gramdb_g \
             -tablevalidator [mytypemethod Val_gramdb_fg]
@@ -252,7 +256,7 @@ snit::type ::simlib::gramdb {
             -validator [mytypemethod ValidateQuality qcooperation]
 
         #---------------------------------------------------------------
-        # Table: gramdb_ngc
+        # Table -- gramdb_ngc
         
         $tt table gramdb_ngc -dependson {gramdb_n gramdb_g gramdb_c} \
             -tablevalidator  [mytypemethod Val_gramdb_ngc]           \
@@ -273,7 +277,7 @@ snit::type ::simlib::gramdb {
             -validator [mytypemethod ValidateQuality qsaliency]
 
         #---------------------------------------------------------------
-        # Table: gramdb_nfg
+        # Table -- gramdb_nfg
         
         $tt table gramdb_nfg -dependson {gramdb_n gramdb_g}       \
             -tablevalidator  [mytypemethod Val_gramdb_nfg]        \
@@ -361,7 +365,7 @@ snit::type ::simlib::gramdb {
     }
 
     #-------------------------------------------------------------------
-    # Table: gramdb_c
+    # Table -- gramdb_c
 
     typemethod Val_gramdb_c {db table} {
         # Must have at least one concern of each type
@@ -373,7 +377,7 @@ snit::type ::simlib::gramdb {
     }
 
     #-------------------------------------------------------------------
-    # Table: gramdb_g
+    # Table -- gramdb_g
 
     typemethod Val_gramdb_g {db table} {
         # Must have at least one of each type
@@ -423,7 +427,7 @@ snit::type ::simlib::gramdb {
     }
 
     #-------------------------------------------------------------------
-    # Table: gramdb_n
+    # Table -- gramdb_n
 
     typemethod Val_gramdb_n {db table} {
         # FIRST, We must have at least one neighborhood
@@ -433,7 +437,7 @@ snit::type ::simlib::gramdb {
     }
 
     #-------------------------------------------------------------------
-    # Table: gramdb_mn
+    # Table -- gramdb_mn
 
     typemethod Val_gramdb_mn {db table} {
         # Fill out table with default values: HERE when m==n, FAR otherwise.
@@ -490,7 +494,7 @@ snit::type ::simlib::gramdb {
     
 
     #-------------------------------------------------------------------
-    # Table: gramdb_ng
+    # Table -- gramdb_ng
     
     typemethod Val_gramdb_ng {db table} {
         # Fill in missing records.  
@@ -545,7 +549,7 @@ snit::type ::simlib::gramdb {
 
 
     #-------------------------------------------------------------------
-    # Table: gramdb_gc
+    # Table -- gramdb_gc
     
     typemethod Val_gramdb_gc {db table} {
         # Insert rows for all missing combinations of g and c
@@ -584,7 +588,7 @@ snit::type ::simlib::gramdb {
     }
 
     #-------------------------------------------------------------------
-    # Table: gramdb_fg
+    # Table -- gramdb_fg
 
     typemethod Val_gramdb_fg {db table} {
         # Fill out table with default values: 1.0 when f==g, 0.0 otherwise.
@@ -635,7 +639,7 @@ snit::type ::simlib::gramdb {
     }
 
     #-------------------------------------------------------------------
-    # Table: gramdb_ngc
+    # Table -- gramdb_ngc
     
     typemethod Val_gramdb_ngc {db table} {
         # Copy data from gramdb_gc for all missing combinations of n, g and c
@@ -680,7 +684,7 @@ snit::type ::simlib::gramdb {
     }
 
     #-------------------------------------------------------------------
-    # Table: gramdb_nfg
+    # Table -- gramdb_nfg
     
     typemethod Val_gramdb_nfg {db table} {
         # Copy data from gramdb_fg for all missing combinations of n, f and g

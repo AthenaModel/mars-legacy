@@ -169,7 +169,7 @@ proc ::marsutil::swallow {body} {
 #-------------------------------------------------------------------
 # snit::macros
 
-# Macro: template name arglist ?initbody? template
+# Macro -- template name arglist ?initbody? template
 #
 # proctype    proc, method, typemethod
 # name        The template command's name
