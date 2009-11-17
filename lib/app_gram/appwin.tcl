@@ -217,8 +217,10 @@ snit::widget appwin {
                     { dg       -                   }
                     { cause    -                   }
                     { active   -                   }
-                    { prox     - -sortmode real    }
+                    { prox     - -sortmode integer }
                     { sat      - -sortmode real    }
+                    { athresh  - -sortmode real    }
+                    { dthresh  - -sortmode real    }
                     { days     - -sortmode real    }
                     { tau      - -sortmode real    }
                     { llimit   - -sortmode real    }
@@ -248,8 +250,10 @@ snit::widget appwin {
                     { dg       -                   }
                     { cause    -                   }
                     { active   -                   }
-                    { prox     - -sortmode real    }
+                    { prox     - -sortmode integer }
                     { sat      - -sortmode real    }
+                    { athresh  - -sortmode real    }
+                    { dthresh  - -sortmode real    }
                     { delay    - -sortmode real    }
                     { slope    - -sortmode real    }
                     { tlast    - -sortmode integer }
@@ -323,8 +327,10 @@ snit::widget appwin {
                     { dg       -                   }
                     { cause    -                   }
                     { active   -                   }
-                    { prox     - -sortmode real    }
+                    { prox     - -sortmode integer }
                     { coop     - -sortmode real    }
+                    { athresh  - -sortmode real    }
+                    { dthresh  - -sortmode real    }
                     { days     - -sortmode real    }
                     { tau      - -sortmode real    }
                     { llimit   - -sortmode real    }
@@ -355,8 +361,10 @@ snit::widget appwin {
                     { dg       -                   }
                     { cause    -                   }
                     { active   -                   }
-                    { prox     - -sortmode real    }
+                    { prox     - -sortmode integer }
                     { coop     - -sortmode real    }
+                    { athresh  - -sortmode real    }
+                    { dthresh  - -sortmode real    }
                     { delay    - -sortmode real    }
                     { slope    - -sortmode real    }
                     { tlast    - -sortmode integer }

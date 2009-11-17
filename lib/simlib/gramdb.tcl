@@ -608,12 +608,12 @@ snit::type ::simlib::gramdb {
         $db eval {
             UPDATE gramdb_fg
             SET rel   = COALESCE(rel, 1.0),
-                coop0 = COALESCE(rel, 100.0)
+                coop0 = COALESCE(coop0, 100.0)
             WHERE f = g;
             
             UPDATE gramdb_fg
             SET rel   = COALESCE(rel, 0.0),
-                coop0 = COALESCE(rel, 50.0)
+                coop0 = COALESCE(coop0, 50.0)
             WHERE f != g;
         }
     }

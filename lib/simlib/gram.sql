@@ -77,6 +77,8 @@ CREATE TABLE gram_curves (
     slope       DOUBLE
 );
 
+-- Table: gram_effects
+--
 -- gram(n) Level and Slope Effects table
 CREATE TABLE gram_effects (
     --------------------------------------------------------------------
@@ -124,7 +126,12 @@ CREATE TABLE gram_effects (
     -- there are no future links, a sentinel value is used 
     -- (99999999).
     te         INTEGER,
-
+    
+    -- Ascending Threshold
+    athresh    DOUBLE,
+    
+    -- Descending Threshold
+    dthresh    DOUBLE,
     
     --------------------------------------------------------------------
     -- General Variables
@@ -694,6 +701,8 @@ SELECT -- Effect Identification
        gram_effects.prox      AS prox,
        gram_effects.ts        AS ts,
        gram_effects.te        AS te,
+       gram_effects.athresh   AS athresh,
+       gram_effects.dthresh   AS dthresh,
 
        -- Contribution Details
        gram_effects.tlast     AS tlast,
@@ -807,6 +816,8 @@ SELECT -- Effect Identification
        gram_effects.prox      AS prox,
        gram_effects.ts        AS ts,
        gram_effects.te        AS te,
+       gram_effects.athresh   AS athresh,
+       gram_effects.dthresh   AS dthresh,
 
        -- Contribution Details
        gram_effects.tlast     AS tlast,

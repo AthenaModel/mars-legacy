@@ -504,9 +504,11 @@ snit::type ::simlib::gram {
         set input(input)  [$self DriverGetInput $input(driver)]
         set input(cause)   "TREND"
         set input(ts)      $db(time)
-        set input(p)       0.0
-        set input(q)       0.0
-        set input(s)       1.0
+        set input(p)          0.0
+        set input(q)          0.0
+        set input(s)          1.0
+        set input(athresh)  100.0
+        set input(dthresh) -100.0
 
         set chain(prox)    -1
         set chain(factor)  1.0
@@ -2139,10 +2141,15 @@ snit::type ::simlib::gram {
     #   days   - Realization time of the effect, in days (qduration)
     #
     # Options: 
-    #   -cause cause - Name of the cause of this input
-    #   -s factor    - "here" indirect effects multiplier, defaults to 1.0
-    #   -p factor    - "near" indirect effects multiplier, defaults to 0
-    #   -q factor    - "far" indirect effects multiplier, defaults to 0
+    #   -cause cause        - Name of the cause of this input
+    #   -s factor           - "here" indirect effects multiplier, defaults
+    #                         to 1.0
+    #   -p factor           - "near" indirect effects multiplier, defaults
+    #                         to 0
+    #   -q factor           - "far" indirect effects multiplier, defaults
+    #                         to 0
+    #   -athresh threshold  - Ascending threshold, defaults to 100.0.
+    #   -dthresh threshold  - Descending threshold, defaults to -100.0
 
     method "sat level" {driver ts n g c limit days args} {
         $self Log detail "sat level driver=$driver ts=$ts n=$n g=$g c=$c lim=$limit days=$days $args"
@@ -2166,7 +2173,7 @@ snit::type ::simlib::gram {
         qduration validate $days
 
         # NEXT, validate the options
-        $self ParseInputOptions opts $args
+        $self ParseInputOptions sat opts $args
 
         # NEXT, normalize the input data.
 
@@ -2181,6 +2188,8 @@ snit::type ::simlib::gram {
         set input(s)        $opts(-s)
         set input(p)        $opts(-p)
         set input(q)        $opts(-q)
+        set input(athresh)  $opts(-athresh)
+        set input(dthresh)  $opts(-dthresh)
 
         # If no cause is given, use the driver.
         # this ensures that truly independent effects are treated as such.
@@ -2242,10 +2251,15 @@ snit::type ::simlib::gram {
     #   slope  - Slope (change/day) of the effect (qmag)
     #
     # Options: 
-    #   -cause cause - Name of the cause of this input
-    #   -s factor    - "here" indirect effects multiplier, defaults to 1.0
-    #   -p factor    - "near" indirect effects multiplier, defaults to 0
-    #   -q factor    - "far" indirect effects multiplier, defaults to 0
+    #   -cause cause        - Name of the cause of this input
+    #   -s factor           - "here" indirect effects multiplier, defaults
+    #                         to 1.0
+    #   -p factor           - "near" indirect effects multiplier, defaults
+    #                         to 0
+    #   -q factor           - "far" indirect effects multiplier, defaults
+    #                         to 0
+    #   -athresh threshold  - Ascending threshold, defaults to 100.0.
+    #   -dthresh threshold  - Descending threshold, defaults to -100.0
 
     method "sat slope" {driver ts n g c slope args} {
         $self Log detail \
@@ -2269,7 +2283,7 @@ snit::type ::simlib::gram {
         qmag validate $slope
 
         # NEXT, validate the options
-        $self ParseInputOptions opts $args
+        $self ParseInputOptions sat opts $args
 
         # NEXT, normalize the input data
         set input(driver)   $driver
@@ -2282,6 +2296,8 @@ snit::type ::simlib::gram {
         set input(s)        $opts(-s)
         set input(p)        $opts(-p)
         set input(q)        $opts(-q)
+        set input(athresh)  $opts(-athresh)
+        set input(dthresh)  $opts(-dthresh)
 
         # NEXT, if the slope is less than epsilon, make it
         # zero.
@@ -2369,21 +2385,30 @@ snit::type ::simlib::gram {
     # any values are invalid, an error is thrown.
     #
     # Syntax:
-    #   ParseInputOptions _optsArray optsList_
+    #   ParseInputOptions _ctype optsArray optsList_
     #
+    #   ctype     - sat or coop
     #   optsArray - An array to receive the options
     #   optsList  - List of options and their values
 
-    method ParseInputOptions {optsArray optsList} {
+    method ParseInputOptions {ctype optsArray optsList} {
         upvar $optsArray opts
 
-        array set opts {
-            -cause ""
-            -s     1.0
-            -p     0.0
-            -q     0.0
+        # FIRST, set up the defaults.
+        array set opts { 
+            -cause   ""
+            -s          1.0
+            -p          0.0
+            -q          0.0
+            -athresh  100.0
+            -dthresh -100.0
         }
         
+        if {$ctype eq "coop"} {
+            set opts(-dthresh) 0.0
+        }
+
+        # NEXT, get the values.
         foreach {opt val} $optsList {
             switch -exact -- $opt {
                 -cause {
@@ -2395,6 +2420,15 @@ snit::type ::simlib::gram {
                     rfraction validate $val
                         
                     set opts($opt) $val
+                }
+                
+                -athresh -
+                -dthresh {
+                    if {$ctype eq "sat"} {
+                        set opts($opt) [qsat validate $val]
+                    } else {
+                        set opts($opt) [qcooperation validate $val]
+                    }
                 }
 
                 default {
@@ -2744,7 +2778,7 @@ snit::type ::simlib::gram {
         }
     }
 
-    # Method:
+    # Method: coop level
     #
     # Schedules a new cooperation level input with the specified parameters.
     #
@@ -2764,10 +2798,15 @@ snit::type ::simlib::gram {
     #   days   - Realization time of the effect, in days (qduration)
     #
     # Options: 
-    #   -cause cause - Name of the cause of this input
-    #   -s factor    - "here" indirect effects multiplier, defaults to 1.0
-    #   -p factor    - "near" indirect effects multiplier, defaults to 0
-    #   -q factor    - "far" indirect effects multiplier, defaults to 0
+    #   -cause cause        - Name of the cause of this input
+    #   -s factor           - "here" indirect effects multiplier, defaults
+    #                         to 1.0
+    #   -p factor           - "near" indirect effects multiplier, defaults
+    #                         to 0
+    #   -q factor           - "far" indirect effects multiplier, defaults
+    #                         to 0
+    #   -athresh threshold  - Ascending threshold, defaults to 100.0.
+    #   -dthresh threshold  - Descending threshold, defaults to 0.0
 
     method "coop level" {driver ts n f g limit days args} {
         $self Log detail "coop level driver=$driver ts=$ts n=$n f=$f g=$g lim=$limit days=$days $args"
@@ -2791,7 +2830,7 @@ snit::type ::simlib::gram {
         qduration validate $days
 
         # NEXT, validate the options
-        $self ParseInputOptions opts $args
+        $self ParseInputOptions coop opts $args
 
         # NEXT, normalize the input data.
 
@@ -2804,6 +2843,8 @@ snit::type ::simlib::gram {
         set input(days)     [qduration value $days]
         set input(llimit)   [qmag      value $limit]
         set input(s)        $opts(-s)
+        set input(athresh)  $opts(-athresh)
+        set input(dthresh)  $opts(-dthresh)
 
         # NEXT, Apply the effects_factor.nf to p and q.
         $rdb eval {
@@ -2875,10 +2916,15 @@ snit::type ::simlib::gram {
     #   slope  - Slope (change/day) of the effect (qmag)
     #
     # Options: 
-    #   -cause cause - Name of the cause of this input
-    #   -s factor    - "here" indirect effects multiplier, defaults to 1.0
-    #   -p factor    - "near" indirect effects multiplier, defaults to 0
-    #   -q factor    - "far" indirect effects multiplier, defaults to 0
+    #   -cause cause        - Name of the cause of this input
+    #   -s factor           - "here" indirect effects multiplier, defaults
+    #                         to 1.0
+    #   -p factor           - "near" indirect effects multiplier, defaults
+    #                         to 0
+    #   -q factor           - "far" indirect effects multiplier, defaults
+    #                         to 0
+    #   -athresh threshold  - Ascending threshold, defaults to 100.0.
+    #   -dthresh threshold  - Descending threshold, defaults to 0.0
 
     method "coop slope" {driver ts n f g slope args} {
         $self Log detail \
@@ -2902,7 +2948,7 @@ snit::type ::simlib::gram {
         qmag validate $slope
 
         # NEXT, validate the options
-        $self ParseInputOptions opts $args
+        $self ParseInputOptions coop opts $args
 
         # NEXT, normalize the input data
 
@@ -2916,6 +2962,8 @@ snit::type ::simlib::gram {
         set input(s)        $opts(-s)
         set input(p)        $opts(-p)
         set input(q)        $opts(-q)
+        set input(athresh)  $opts(-athresh)
+        set input(dthresh)  $opts(-dthresh)
 
         # NEXT, Apply the effects_factor.nf to p and q.
         $rdb eval {
@@ -3288,15 +3336,17 @@ snit::type ::simlib::gram {
     #
     # The _inputArray_ should contain the following values.
     #
-    #   driver - Driver ID
-    #   input  - Input number, for this driver
-    #   cause  - "Cause" of this input
-    #   ts     - Start time, in ticks
-    #   days   - Realization time, in days
-    #   llimit - "level limit", the direct effect magnitude
-    #   s      - Here effects multiplier
-    #   p      - Near effects multiplier
-    #   q      - Far effects multiplier
+    #   driver  - Driver ID
+    #   input   - Input number, for this driver
+    #   cause   - "Cause" of this input
+    #   ts      - Start time, in ticks
+    #   days    - Realization time, in days
+    #   llimit  - "level limit", the direct effect magnitude
+    #   s       - Here effects multiplier
+    #   p       - Near effects multiplier
+    #   q       - Far effects multiplier
+    #   athresh - Ascending threshold
+    #   dthresh - Descending threshold
     #
     # The _effectArray_ should contain the following values.
     #
@@ -3364,6 +3414,8 @@ snit::type ::simlib::gram {
                 prox,
                 ts,
                 te,
+                athresh,
+                dthresh,
                 days, 
                 tau,
                 llimit
@@ -3377,7 +3429,9 @@ snit::type ::simlib::gram {
                 $input(cause),
                 $effect(prox),
                 $ts, 
-                $te, 
+                $te,
+                $input(athresh),
+                $input(dthresh),
                 $input(days), 
                 $tau,
                 $llimit
@@ -3404,14 +3458,16 @@ snit::type ::simlib::gram {
     #
     # The _inputArray_ should contain the following values.
     #
-    #   driver - Driver ID
-    #   input  - Input number, for this driver
-    #   cause  - "Cause" of this input
-    #   ts     - Start time, in ticks
-    #   slope  - Slope, in nominal points/day
-    #   s      - Here effects multiplier
-    #   p      - Near effects multiplier
-    #   q      - Far effects multiplier
+    #   driver  - Driver ID
+    #   input   - Input number, for this driver
+    #   cause   - "Cause" of this input
+    #   ts      - Start time, in ticks
+    #   slope   - Slope, in nominal points/day
+    #   s       - Here effects multiplier
+    #   p       - Near effects multiplier
+    #   q       - Far effects multiplier
+    #   athresh - Ascending threshold
+    #   dthresh - Descending threshold
     #
     # The _effectArray_ should contain the following values.
     #
@@ -3496,10 +3552,12 @@ snit::type ::simlib::gram {
             # NEXT, update the record, and mark it active.
             $rdb eval {
                 UPDATE gram_effects
-                SET input = $input(input),
-                te = $te,
-                future = $old(future),
-                active = 1  
+                SET input   = $input(input),
+                    te      = $te,
+                    future  = $old(future),
+                    athresh = $input(athresh),
+                    dthresh = $input(dthresh),
+                    active  = 1  
                 WHERE id=$old(id)
             }
 
@@ -3525,6 +3583,8 @@ snit::type ::simlib::gram {
                 driver,
                 input,
                 prox,
+                athresh,
+                dthresh,
                 delay,
                 cause,
                 slope,
@@ -3538,6 +3598,8 @@ snit::type ::simlib::gram {
                 $input(driver),
                 $input(input),
                 $effect(prox),
+                $input(athresh),
+                $input(dthresh),
                 $effect(delay),
                 $input(cause),
                 $slope,
