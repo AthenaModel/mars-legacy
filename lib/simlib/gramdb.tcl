@@ -154,7 +154,7 @@ snit::type ::simlib::gramdb {
             -validator [mytypemethod ValidateSymbolicName]
 
         $tt field gramdb_c gtype -required                  \
-            -validator [list $tt validate vtype egrouptype]
+            -validator [list $tt validate vtype ::simlib::egrouptype]
 
         #---------------------------------------------------------------
         # Table -- gramdb_g
@@ -167,14 +167,14 @@ snit::type ::simlib::gramdb {
             -validator [mytypemethod ValidateSymbolicName]
 
         $tt field gramdb_g gtype                                 \
-            -validator [list $tt validate vtype egrouptype]
+            -validator [list $tt validate vtype ::simlib::egrouptype]
 
         # CIVs and ORGs only
         $tt field gramdb_g rollup_weight                        \
-            -validator [list $tt validate vtype rmagnitude]
+            -validator [list $tt validate vtype ::simlib::rmagnitude]
         
         $tt field gramdb_g effects_factor                       \
-            -validator [list $tt validate vtype rmagnitude]
+            -validator [list $tt validate vtype ::simlib::rmagnitude]
 
         #---------------------------------------------------------------
         # Table -- gramdb_n
@@ -199,7 +199,7 @@ snit::type ::simlib::gramdb {
         $tt field gramdb_mn proximity                            \
             -validator [list $tt validate vtype eproximity]
         $tt field gramdb_mn effects_delay                        \
-            -validator [list $tt validate vtype rmagnitude]
+            -validator [list $tt validate vtype ::simlib::rmagnitude]
 
 
 
@@ -214,9 +214,9 @@ snit::type ::simlib::gramdb {
         $tt field gramdb_ng g -key                               \
             -validator [mytypemethod ValidateCivOrgPgroup] 
         $tt field gramdb_ng rollup_weight                        \
-            -validator [list $tt validate vtype rmagnitude]
+            -validator [list $tt validate vtype ::simlib::rmagnitude]
         $tt field gramdb_ng effects_factor                       \
-            -validator [list $tt validate vtype rmagnitude]
+            -validator [list $tt validate vtype ::simlib::rmagnitude]
         $tt field gramdb_ng population -required                 \
             -validator [mytypemethod ValidateIntMagnitude]
 

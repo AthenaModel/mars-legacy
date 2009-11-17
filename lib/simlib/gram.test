@@ -63,8 +63,12 @@ namespace eval ::simlib::test {
     # Create a run-time database in memory
     sqldocument rdb -clock [namespace current]::myclock
     rdb register ::simlib::gram
+    rdb register ::simlib::gramdb
     rdb open :memory:
     rdb clear
+    
+    gramdb loadfile ./test.gramdb [namespace current]::rdb
+    
 
     # tableSave table
     #
@@ -248,18 +252,18 @@ namespace eval ::simlib::test {
     proc create {args} {
         # FIRST, set up the RDB
         rdb clear
+        set rdb [namespace current]::rdb
+        gramdb loadfile ./test.gramdb $rdb
 
         # NEXT, get create options
         set drivers [optval args -drivers 4]
         set trend [optval args -trend yes]
-
-        set cmd [list \
-                     gram jr \
-                     -clock   [namespace current]::myclock   \
-                     -rdb     [namespace current]::rdb       \
-                     -loadcmd [namespace current]::LoadGram]
-
-        eval $cmd $args
+        
+        gram jr \
+            -clock   [namespace current]::myclock        \
+            -rdb     $rdb                                \
+            -loadcmd [list ::simlib::gramdb loader $rdb] \
+            {*}$args
 
         jr init
 
@@ -275,113 +279,6 @@ namespace eval ::simlib::test {
 
         return
     }
-
-    # LoadGram gram
-    #
-    # Loads data into the gram's RDB tables.
-
-    proc LoadGram {gram} {
-        $gram load nbhoods N1 N2
-
-        $gram load groups \
-            KURD  CIV     \
-            SHIA  CIV     \
-            SUNN  CIV     \
-            BLUE  FRC     \
-            BRIT  FRC     \
-            OPFOR FRC     \
-            ORGA  ORG     \
-            ORGB  ORG
-
-        $gram load concerns \
-            AUT CIV         \
-            CUL CIV         \
-            QOL CIV         \
-            SFT CIV         \
-            CAS ORG         \
-            SVC ORG
-
-        $gram load nbrel
-
-        $gram load nbgroups \
-            N1 KURD 10000 1.0 1.0 \
-            N1 SHIA 10000 1.0 1.0 \
-            N1 SUNN 10000 1.0 1.0 \
-            N2 KURD 10000 1.0 1.0 \
-            N2 SHIA 10000 1.0 1.0 \
-            N2 SUNN 10000 1.0 1.0
-
-        $gram load sat \
-            N1 KURD AUT   0.0 1.0 -1.0 \
-            N1 KURD CUL   0.0 1.0 -1.0 \
-            N1 KURD QOL   0.0 1.0 -4.0 \
-            N1 KURD SFT -80.0 1.0 -4.0 \
-            N1 SHIA AUT  40.0 1.0  4.0 \
-            N1 SHIA CUL -40.0 1.0 -1.0 \
-            N1 SHIA QOL -40.0 1.0 -4.0 \
-            N1 SHIA SFT  40.0 1.0  4.0 \
-            N1 SUNN AUT -80.0 1.0 -8.0 \
-            N1 SUNN CUL -80.0 1.0 -4.0 \
-            N1 SUNN QOL -40.0 1.0 -8.0 \
-            N1 SUNN SFT -80.0 1.0 -8.0 \
-            N2 KURD AUT   0.0 1.0 -1.0 \
-            N2 KURD CUL   0.0 1.0 -1.0 \
-            N2 KURD QOL   0.0 1.0 -4.0 \
-            N2 KURD SFT -80.0 1.0 -4.0 \
-            N2 SHIA AUT  40.0 1.0  4.0 \
-            N2 SHIA CUL -40.0 1.0 -1.0 \
-            N2 SHIA QOL -40.0 1.0 -4.0 \
-            N2 SHIA SFT  40.0 1.0  4.0 \
-            N2 SUNN AUT -80.0 1.0 -8.0 \
-            N2 SUNN CUL -80.0 1.0 -4.0 \
-            N2 SUNN QOL -40.0 1.0 -8.0 \
-            N2 SUNN SFT -80.0 1.0 -8.0
-
-        $gram load rel \
-            N1 BLUE  BRIT   0.8 \
-            N1 BLUE  OPFOR -0.8 \
-            N1 BRIT  BLUE   0.8 \
-            N1 BRIT  OPFOR -0.8 \
-            N1 KURD  BLUE   0.6 \
-            N1 KURD  BRIT   0.6 \
-            N1 KURD  OPFOR -0.6 \
-            N1 KURD  SHIA   0.6 \
-            N1 KURD  SUNN  -0.6 \
-            N1 OPFOR BLUE  -0.8 \
-            N1 OPFOR BRIT  -0.8 \
-            N1 SHIA  BLUE   0.3 \
-            N1 SHIA  BRIT   0.3 \
-            N1 SHIA  KURD   0.6 \
-            N1 SHIA  OPFOR -0.3 \
-            N1 SUNN  BLUE  -0.6 \
-            N1 SUNN  BRIT  -0.6 \
-            N1 SUNN  KURD  -0.6 \
-            N1 SUNN  OPFOR  0.6 \
-            N1 SUNN  SHIA  -0.3 \
-            N2 BLUE  BRIT   0.8 \
-            N2 BLUE  OPFOR -0.8 \
-            N2 BRIT  BLUE   0.8 \
-            N2 BRIT  OPFOR -0.8 \
-            N2 KURD  BLUE   0.6 \
-            N2 KURD  BRIT   0.6 \
-            N2 KURD  OPFOR -0.6 \
-            N2 KURD  SHIA   0.6 \
-            N2 KURD  SUNN  -0.6 \
-            N2 OPFOR BLUE  -0.8 \
-            N2 OPFOR BRIT  -0.8 \
-            N2 SHIA  BLUE   0.3 \
-            N2 SHIA  BRIT   0.3 \
-            N2 SHIA  KURD   0.6 \
-            N2 SHIA  OPFOR -0.3 \
-            N2 SUNN  BLUE  -0.6 \
-            N2 SUNN  BRIT  -0.6 \
-            N2 SUNN  KURD  -0.6 \
-            N2 SUNN  OPFOR  0.6 \
-            N2 SUNN  SHIA  -0.3
-            
-        $gram load coop
-    }
-
 
     # init ?options?
     #
@@ -484,7 +381,7 @@ namespace eval ::simlib::test {
             -logcomponent temp                          \
             -clock        [namespace current]::myclock  \
             -rdb          [namespace current]::rdb      \
-            -loadcmd      [namespace current]::LoadGram
+            -loadcmd      [list ::simlib::gramdb loader [namespace current]::rdb]
         
     } -returnCodes {
         error
@@ -4122,6 +4019,127 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         cleanup
     } -result {1 2 {1 2}}
 
+    # sat_level-9.*: Thresholds
+    
+    test sat_level-9.1 {Positive, sat0 >= athresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr sat.ngc N1 SHIA AUT]
+        
+        # Note: $a == 40.0, so it's greater than -athresh
+        jr sat level 1 0 N1 SHIA AUT 10 0.1 -athresh 30.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr sat.ngc N1 SHIA AUT]
+        
+        expr {$a == $b}
+    } -cleanup {
+        cleanup
+    } -result {1}
+
+    test sat_level-9.2 {Positive, sat0+delta < athresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr sat.ngc N1 SHIA CUL]
+        
+        # Note: $a == -40.0, so it's well less than -athresh
+        jr sat level 1 0 N1 SHIA CUL 10 0.1 -athresh 30.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr sat.ngc N1 SHIA CUL]
+        
+        list $a $b
+    } -cleanup {
+        cleanup
+    } -result {-40.0 -26.0}
+    
+    test sat_level-9.3 {Positive, sat0+delta > athresh} -setup {
+        create -trend no
+    } -body {
+        set a [format %.1f [jr sat.ngc N1 SHIA SFT]]
+        
+        # Note: $a == 40.0, so it's justless than -athresh.
+        jr sat level 1 0 N1 SHIA SFT 10 0.9 -athresh 41.0
+
+        # Step twice; we should get an increase on the first, but
+        # not on the second.
+        myclock advance 720
+        jr advance
+        set b [format %.1f [jr sat.ngc N1 SHIA SFT]]
+
+        myclock advance 1440
+        jr advance
+        
+        set c [format %.1f [jr sat.ngc N1 SHIA SFT]]
+        
+        list $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {40.0 45.5 45.5}
+
+    test sat_level-9.4 {Negative, sat0 <= dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr sat.ngc N1 SHIA CUL]
+        
+        # Note: $a == -40.0, so it's less than -dthresh
+        jr sat level 1 0 N1 SHIA CUL -10 0.1 -dthresh -30.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr sat.ngc N1 SHIA CUL]
+        
+        expr {$a == $b}
+    } -cleanup {
+        cleanup
+    } -result {1}
+    
+    test sat_level-9.5 {Negative, sat0+delta > dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr sat.ngc N1 SHIA SFT]
+        
+        # Note: $a == 40.0, so it's well greater than -dthresh
+        jr sat level 1 0 N1 SHIA SFT -10 0.1 -dthresh -30.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr sat.ngc N1 SHIA SFT]
+        
+        list $a $b
+    } -cleanup {
+        cleanup
+    } -result {40.0 26.0}
+    
+    test sat_level-9.6 {Negative, sat0+delta < dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [format %.1f [jr sat.ngc N1 SHIA CUL]]
+        
+        # Note: $a == -40.0, so it's just greater than -dthresh.
+        jr sat level 1 0 N1 SHIA CUL -10 0.9 -dthresh -41.0
+
+        # Step twice; we should get a decrease on the first, but
+        # not on the second.
+        myclock advance 720
+        jr advance
+        set b [format %.1f [jr sat.ngc N1 SHIA CUL]]
+
+        myclock advance 1440
+        jr advance
+        
+        set c [format %.1f [jr sat.ngc N1 SHIA CUL]]
+        
+        list $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {-40.0 -45.5 -45.5}
 
     #-------------------------------------------------------------------
     # sat slope
@@ -4311,7 +4329,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         create
     } -body {
         jr sat slope 1 0 N1 SHIA SFT 10.0 -cause DUMMY
-    } -cleanup {
+    } -cleanup {sat_level-9
         cleanup 
     } -returnCodes {
         error
@@ -5048,6 +5066,129 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     } -cleanup {
         cleanup
     } -result {1 2 {1 2}}
+
+    # sat_slope-8.*: Thresholds
+    
+    test sat_slope-8.1 {Positive, sat0 >= athresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr sat.ngc N1 SHIA AUT]
+        
+        # Note: $a == 40.0, so it's greater than -athresh
+        jr sat slope 1 0 N1 SHIA AUT 10 -athresh 30.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr sat.ngc N1 SHIA AUT]
+        
+        expr {$a == $b}
+    } -cleanup {
+        cleanup
+    } -result {1}
+
+    test sat_slope-8.2 {Positive, sat0+delta < athresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr sat.ngc N1 SHIA CUL]
+        
+        # Note: $a == -40.0, so it's well less than -athresh
+        jr sat slope 1 0 N1 SHIA CUL 10 -athresh 30.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr sat.ngc N1 SHIA CUL]
+        
+        list $a $b
+    } -cleanup {
+        cleanup
+    } -result {-40.0 -33.0}
+    
+    test sat_slope-8.3 {Positive, sat0+delta > athresh} -setup {
+        create -trend no
+    } -body {
+        set a [format %.1f [jr sat.ngc N1 SHIA SFT]]
+        
+        # Note: $a == 40.0, so it's just less than -athresh.
+        jr sat slope 1 0 N1 SHIA SFT 10 -athresh 41.0
+
+        # Step twice; we should get an increase on the first, but
+        # not on the second.
+        myclock advance 720
+        jr advance
+        set b [format %.1f [jr sat.ngc N1 SHIA SFT]]
+
+        myclock advance 1440
+        jr advance
+        
+        set c [format %.1f [jr sat.ngc N1 SHIA SFT]]
+        
+        list $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {40.0 43.0 43.0}
+
+    test sat_slope-8.4 {Negative, sat0 <= dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr sat.ngc N1 SHIA CUL]
+        
+        # Note: $a == -40.0, so it's less than -dthresh
+        jr sat slope 1 0 N1 SHIA CUL -10 -dthresh -30.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr sat.ngc N1 SHIA CUL]
+        
+        expr {$a == $b}
+    } -cleanup {
+        cleanup
+    } -result {1}
+    
+    test sat_slope-8.5 {Negative, sat0+delta > dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr sat.ngc N1 SHIA SFT]
+        
+        # Note: $a == 40.0, so it's well greater than -dthresh
+        jr sat slope 1 0 N1 SHIA SFT -10 -dthresh -30.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr sat.ngc N1 SHIA SFT]
+        
+        list $a $b
+    } -cleanup {
+        cleanup
+    } -result {40.0 33.0}
+    
+    test sat_slope-8.6 {Negative, sat0+delta < dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [format %.1f [jr sat.ngc N1 SHIA CUL]]
+        
+        # Note: $a == -40.0, so it's just greater than -dthresh.
+        jr sat slope 1 0 N1 SHIA CUL -10 -dthresh -41.0
+
+        # Step twice; we should get a decrease on the first, but
+        # not on the second.
+        myclock advance 720
+        jr advance
+        set b [format %.1f [jr sat.ngc N1 SHIA CUL]]
+
+        myclock advance 1440
+        jr advance
+        
+        set c [format %.1f [jr sat.ngc N1 SHIA CUL]]
+        
+        list $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {-40.0 -43.0 -43.0}
+
 
     #-------------------------------------------------------------------
     # sat drivers
@@ -6629,6 +6770,128 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
         cleanup
     } -result {1 2 {1 2}}
 
+    # coop_level-9.*: Thresholds
+    
+    test coop_level-9.1 {Positive, coop0 >= athresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr coop.nfg N1 SHIA BLUE]
+        
+        # Note: $a == 50.0, so it's greater than -athresh
+        jr coop level 1 0 N1 SHIA BLUE 10 0.1 -athresh 30.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr coop.nfg N1 SHIA BLUE]
+        
+        expr {$a == $b}
+    } -cleanup {
+        cleanup
+    } -result {1}
+
+    test coop_level-9.2 {Positive, coop0+delta < athresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr coop.nfg N1 SHIA BLUE]
+        
+        # Note: $a == 50.0, so it's well less than -athresh
+        jr coop level 1 0 N1 SHIA BLUE 10 0.1 -athresh 90.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr coop.nfg N1 SHIA BLUE]
+        
+        list $a $b
+    } -cleanup {
+        cleanup
+    } -result {50.0 55.0}
+    
+    test coop_level-9.3 {Positive, coop0+delta > athresh} -setup {
+        create -trend no
+    } -body {
+        set a [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+        
+        # Note: $a == 50.0, so it's justless than -athresh.
+        jr coop level 1 0 N1 SHIA BLUE 10 0.9 -athresh 51.0
+
+        # Step twice; we should get an increase on the first, but
+        # not on the second.
+        myclock advance 720
+        jr advance
+        set b [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+
+        myclock advance 1440
+        jr advance
+        
+        set c [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+        
+        list $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {50.0 54.6 54.6}
+
+    test coop_level-9.4 {Negative, coop0 <= dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr coop.nfg N1 SHIA BLUE]
+        
+        # Note: $a == 50.0, so it's less than -dthresh
+        jr coop level 1 0 N1 SHIA BLUE -10 0.1 -dthresh 60.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr coop.nfg N1 SHIA BLUE]
+        
+        expr {$a == $b}
+    } -cleanup {
+        cleanup
+    } -result {1}
+    
+    test coop_level-9.5 {Negative, coop0+delta > dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr coop.nfg N1 SHIA BLUE]
+        
+        # Note: $a == 50.0, so it's well greater than -dthresh
+        jr coop level 1 0 N1 SHIA BLUE -10 0.1 -dthresh 10.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr coop.nfg N1 SHIA BLUE]
+        
+        list $a $b
+    } -cleanup {
+        cleanup
+    } -result {50.0 45.0}
+    
+    test coop_level-9.6 {Negative, coop0+delta < dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+        
+        # Note: $a == 50.0, so it's just greater than -dthresh.
+        jr coop level 1 0 N1 SHIA BLUE -10 0.9 -dthresh 49.0
+
+        # Step twice; we should get a decrease on the first, but
+        # not on the second.
+        myclock advance 720
+        jr advance
+        set b [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+
+        myclock advance 1440
+        jr advance
+        
+        set c [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+        
+        list $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {50.0 45.4 45.4}
+
 
     #-------------------------------------------------------------------
     # coop slope
@@ -7518,6 +7781,128 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
         cleanup
     } -result {1 2 {1 2}}
 
+
+    # coop_slope-8.*: Thresholds
+    
+    test coop_slope-8.1 {Positive, coop0 >= athresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr coop.nfg N1 SHIA BLUE]
+        
+        # Note: $a == 50.0, so it's greater than -athresh
+        jr coop slope 1 0 N1 SHIA BLUE 10 -athresh 30.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr coop.nfg N1 SHIA BLUE]
+        
+        expr {$a == $b}
+    } -cleanup {
+        cleanup
+    } -result {1}
+
+    test coop_slope-8.2 {Positive, coop0+delta < athresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr coop.nfg N1 SHIA BLUE]
+        
+        # Note: $a == 50.0, so it's well less than -athresh
+        jr coop slope 1 0 N1 SHIA BLUE 10 -athresh 90.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr coop.nfg N1 SHIA BLUE]
+        
+        list $a $b
+    } -cleanup {
+        cleanup
+    } -result {50.0 52.5}
+    
+    test coop_slope-8.3 {Positive, coop0+delta > athresh} -setup {
+        create -trend no
+    } -body {
+        set a [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+        
+        # Note: $a == 50.0, so it's justless than -athresh.
+        jr coop slope 1 0 N1 SHIA BLUE 10 -athresh 51.0
+
+        # Step twice; we should get an increase on the first, but
+        # not on the second.
+        myclock advance 720
+        jr advance
+        set b [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+
+        myclock advance 1440
+        jr advance
+        
+        set c [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+        
+        list $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {50.0 52.5 52.5}
+
+    test coop_slope-8.4 {Negative, coop0 <= dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr coop.nfg N1 SHIA BLUE]
+        
+        # Note: $a == 50.0, so it's less than -dthresh
+        jr coop slope 1 0 N1 SHIA BLUE -10 -dthresh 60.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr coop.nfg N1 SHIA BLUE]
+        
+        expr {$a == $b}
+    } -cleanup {
+        cleanup
+    } -result {1}
+    
+    test coop_slope-8.5 {Negative, coop0+delta > dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [jr coop.nfg N1 SHIA BLUE]
+        
+        # Note: $a == 50.0, so it's well greater than -dthresh
+        jr coop slope 1 0 N1 SHIA BLUE -10 -dthresh 10.0
+        
+        myclock advance 720
+        jr advance
+        
+        set b [jr coop.nfg N1 SHIA BLUE]
+        
+        list $a $b
+    } -cleanup {
+        cleanup
+    } -result {50.0 47.5}
+    
+    test coop_slope-8.6 {Negative, coop0+delta < dthresh} -setup {
+        create -trend no
+    } -body {
+        set a [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+        
+        # Note: $a == 50.0, so it's just greater than -dthresh.
+        jr coop slope 1 0 N1 SHIA BLUE -10 -dthresh 49.0
+
+        # Step twice; we should get a decrease on the first, but
+        # not on the second.
+        myclock advance 720
+        jr advance
+        set b [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+
+        myclock advance 1440
+        jr advance
+        
+        set c [format %.1f [jr coop.nfg N1 SHIA BLUE]]
+        
+        list $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {50.0 47.5 47.5}
 
     #-------------------------------------------------------------------
     # cancel

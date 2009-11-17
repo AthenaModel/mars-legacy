@@ -672,6 +672,20 @@ A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
 <b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
+<<defopt {-athresh <i>threshold</i>}>>
+
+The ascending threshold, a real number between -100.0 and 100.0.
+Defaults to 100.0.  Positive direct and indirect
+effects of this input will be ignored if the current value of the affected
+curve is greater than or equal to <i>threshold</i>.<p>
+
+<<defopt {-dthresh <i>threshold</i>}>>
+
+The descending threshold, a real number between -100.0 and 100.0.
+Defaults to -100.0.  Negative direct and indirect
+effects of this input will be ignored if the current value of the affected
+curve is less than or equal to <i>threshold</i>.<p>
+
 <</deflist sat level options>>
 
 <<defitem {sat set} {$obj sat set <i>driver n g c sat</i> ?-undo?}>>
@@ -766,6 +780,20 @@ the strength of indirect effects in neighborhoods which are
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
 <b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
+
+<<defopt {-athresh <i>threshold</i>}>>
+
+The ascending threshold, a real number between -100.0 and 100.0.
+Defaults to 100.0.  Positive direct and indirect
+effects of this input will be ignored if the current value of the affected
+curve is greater than or equal to <i>threshold</i>.<p>
+
+<<defopt {-dthresh <i>threshold</i>}>>
+
+The descending threshold, a real number between -100.0 and 100.0.
+Defaults to -100.0.  Negative direct and indirect
+effects of this input will be ignored if the current value of the affected
+curve is less than or equal to <i>threshold</i>.<p>
 
 <</deflist sat slope options>>
 
@@ -905,6 +933,20 @@ A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
 <b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
 
+<<defopt {-athresh <i>threshold</i>}>>
+
+The ascending threshold, a real number between 0.0 and 100.0.
+Defaults to 100.0.  Positive direct and indirect
+effects of this input will be ignored if the current value of the affected
+curve is greater than or equal to <i>threshold</i>.<p>
+
+<<defopt {-dthresh <i>threshold</i>}>>
+
+The descending threshold, a real number between 0.0 and 100.0.
+Defaults to 0.0.  Negative direct and indirect
+effects of this input will be ignored if the current value of the affected
+curve is less than or equal to <i>threshold</i>.<p>
+
 <</deflist coop level options>>
 
 <<defitem {coop set} {$obj coop set <i>driver n f g coop</i> ?-undo?}>>
@@ -991,6 +1033,20 @@ the strength of indirect effects in neighborhoods which are
 A multiplicative factor between 0.0 and 1.0 inclusive; it determines
 the strength of indirect effects in neighborhoods which are
 <b>far</b> from neighborhood <i>n</i>.  Defaults to 0.0.<p>
+
+<<defopt {-athresh <i>threshold</i>}>>
+
+The ascending threshold, a real number between 0.0 and 100.0.
+Defaults to 100.0.  Positive direct and indirect
+effects of this input will be ignored if the current value of the affected
+curve is greater than or equal to <i>threshold</i>.<p>
+
+<<defopt {-dthresh <i>threshold</i>}>>
+
+The descending threshold, a real number between 0.0 and 100.0.
+Defaults to 0.0.  Negative direct and indirect
+effects of this input will be ignored if the current value of the affected
+curve is less than or equal to <i>threshold</i>.<p>
 
 <</deflist coop slope options>>
 

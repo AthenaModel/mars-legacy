@@ -3727,7 +3727,8 @@ snit::type ::simlib::gram {
         # been reached and which has not yet expired, compute its nominal
         # contribution.
         $rdb eval {
-            SELECT ts, te, llimit, tau, nominal, id, curve_type, val 
+            SELECT ts, te, llimit, tau, nominal, id, athresh, dthresh,
+                   curve_type, val 
             FROM gram_effects JOIN gram_curves USING (curve_id)
             WHERE etype = 'L'
             AND active = 1 
@@ -3757,6 +3758,13 @@ snit::type ::simlib::gram {
             # NEXT, add the increment to this effect's nominal
             # contribution to date.
             let row(nominal) {$row(nominal) + $contrib}
+            
+            # NEXT, apply thresholds
+            if {$contrib > 0 && $row(val) >= $row(athresh)} {
+                set contrib 0
+            } elseif {$contrib < 0 && $row(val) <= $row(dthresh)} {
+                set contrib 0
+            }
 
             $rdb eval {
                 UPDATE gram_effects
@@ -3789,6 +3797,8 @@ snit::type ::simlib::gram {
                    te, 
                    gram_effects.slope AS slope,
                    future,
+                   athresh,
+                   dthresh,
                    gram_curves.val AS val,
                    curve_type
             FROM gram_effects JOIN gram_curves USING (curve_id)
@@ -3845,7 +3855,13 @@ snit::type ::simlib::gram {
                 }
             }
 
-            
+            # NEXT, apply thresholds
+            if {$ncontrib > 0 && $row(val) >= $row(athresh)} {
+                set ncontrib 0
+            } elseif {$ncontrib < 0 && $row(val) <= $row(dthresh)} {
+                set ncontrib 0
+            }
+
             $rdb eval {
                 UPDATE gram_effects
                 SET tlast    = $db(time),
@@ -3873,10 +3889,15 @@ snit::type ::simlib::gram {
                    val        AS current
             FROM
             (SELECT curve_id, cause, curve_type, val,
-                    CASE WHEN ncontrib > 0 THEN ncontrib ELSE 0 END AS pos,
-                    CASE WHEN ncontrib < 0 THEN ncontrib ELSE 0 END AS neg
+                    CASE WHEN ncontrib > 0
+                         THEN ncontrib
+                         ELSE 0 END AS pos,
+                    CASE WHEN ncontrib < 0
+                         THEN ncontrib
+                         ELSE 0 END AS neg
              FROM gram_effects JOIN gram_curves USING (curve_id)
-             WHERE active=1)
+             WHERE active=1
+             AND   ncontrib != 0)
             GROUP BY curve_id, cause
         } {
             # FIRST, get the scaling factor.
