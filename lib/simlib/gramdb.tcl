@@ -646,13 +646,24 @@ snit::type ::simlib::gramdb {
         # with compatible types.
         $db eval {
             INSERT OR IGNORE INTO gramdb_ngc(n,g,c)
-            SELECT n, g, c
-            FROM gramdb_n JOIN gramdb_gc
+            SELECT gramdb_ng.n  AS n,
+                   gramdb_ng.g  AS g,
+                   gramdb_c.c   AS c
+            FROM gramdb_ng
+            JOIN gramdb_g USING (g)
+            JOIN gramdb_c USING (gtype)
+            WHERE gramdb_g.gtype = 'ORG'
+            OR    gramdb_ng.population > 0
         }
 
         $db eval {
-            SELECT n, g, c, sat0, trend0, saliency
-            FROM gramdb_n JOIN gramdb_gc
+            SELECT gramdb_ngc.n       AS n,
+                   gramdb_ngc.g       AS g,
+                   gramdb_ngc.c       AS c,
+                   gramdb_gc.sat0     AS sat0,
+                   gramdb_gc.trend0   AS trend0,
+                   gramdb_gc.saliency AS saliency
+            FROM gramdb_ngc JOIN gramdb_gc USING (g,c)
         } {
             $db eval {
                 UPDATE gramdb_ngc
@@ -670,11 +681,11 @@ snit::type ::simlib::gramdb {
         $db eval {
             SELECT gramdb_ngc.g    AS g,
                    gramdb_g.gtype  AS gtype,
-                   gramdb_gc.c     AS c,
+                   gramdb_ngc.c    AS c,
                    gramdb_c.gtype  AS ctype
             FROM gramdb_ngc
             JOIN gramdb_g USING (g)
-            JOIN gramdb_c USING (c)
+            JOIN gramdb_c ON (gramdb_c.c == gramdb_ngc.c)
             WHERE gramdb_ngc.ROWID=$rowid
         } {
             if {$gtype ne $ctype} {
@@ -843,8 +854,11 @@ snit::type ::simlib::gramdb {
             FROM gramdb_nfg
             JOIN gramdb_g AS F ON (gramdb_nfg.f = F.g)
             JOIN gramdb_g AS G ON (gramdb_nfg.g = G.g)
+            JOIN gramdb_ng AS NF ON (NF.n = gramdb_nfg.n AND
+                                     NF.g = gramdb_nfg.f)
             WHERE F.gtype = 'CIV'
             AND   G.gtype = 'FRC'
+            AND   NF.population > 0
             ORDER BY n, f, g
         }]
     }
