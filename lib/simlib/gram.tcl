@@ -3692,11 +3692,11 @@ snit::type ::simlib::gram {
         }
 
         # NEXT, Add the contributions of the level and slope effects.
-        $self ComputeNominalContributionsForLevelEffects
-        $self ComputeNominalContributionsForSlopeEffects
-        $self ComputeActualContributionsByCause
-        $self ExpireEffects
-        $self SaveContribs
+        $self profile $self ComputeNominalContributionsForLevelEffects
+        $self profile $self ComputeNominalContributionsForSlopeEffects
+        $self profile $self ComputeActualContributionsByCause
+        $self profile $self ExpireEffects
+        $self profile $self SaveContribs
 
         # NEXT, Compute the current value and slope, clamping the
         # current value within its upper and lower bounds.
@@ -3789,6 +3789,9 @@ snit::type ::simlib::gram {
         # NEXT, Get each slope effect that's been active during
         # the last time step, and compute and save their nominal 
         # contributions.
+        
+        set futureUpdates {}
+        set contribUpdates {} 
 
         $rdb eval {
             SELECT id, 
@@ -3840,15 +3843,9 @@ snit::type ::simlib::gram {
                     } else {
                         set row(te) [lindex $row(future) 0]
                     }
-
-                    $rdb eval {
-                        UPDATE gram_effects
-                        SET ts     = $row(ts),
-                            te     = $row(te),
-                            slope  = $row(slope),
-                            future = $row(future)
-                        WHERE id=$row(id)
-                    }
+                    
+                    lappend futureUpdates \
+                        $row(id) $row(ts) $row(te) $row(slope) $row(future)
                 } else {
                     # We're done
                     break
@@ -3861,13 +3858,29 @@ snit::type ::simlib::gram {
             } elseif {$ncontrib < 0 && $row(val) <= $row(dthresh)} {
                 set ncontrib 0
             }
-
+            
+            lappend contribUpdates \
+                $row(id) $row(nominal) $ncontrib
+        }
+        
+        foreach {id ts te slope future} $futureUpdates {
+            $rdb eval {
+                UPDATE gram_effects
+                SET ts     = $ts,
+                    te     = $te,
+                    slope  = $slope,
+                    future = $future
+                WHERE id=$id
+            }
+        }
+        
+        foreach {id nominal ncontrib} $contribUpdates {
             $rdb eval {
                 UPDATE gram_effects
                 SET tlast    = $db(time),
-                    nominal  = $row(nominal),
+                    nominal  = $nominal,
                     ncontrib = $ncontrib
-                WHERE id=$row(id)
+                WHERE id=$id
             }
         }
     }
