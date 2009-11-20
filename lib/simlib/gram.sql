@@ -136,9 +136,6 @@ CREATE TABLE gram_effects (
     --------------------------------------------------------------------
     -- General Variables
 
-    -- 1 if the effect might contribute, and 0 otherwise.
-    active     INTEGER DEFAULT 1, 
-
     -- Time of last contribution
     tlast      INTEGER,
 
@@ -187,11 +184,11 @@ ON gram_effects(curve_id,direct_id);
 
 -- This index speeds up termination and rescheduling (?)
 CREATE INDEX gram_effects_index_direct
-ON gram_effects(direct_id,etype,driver,active,cause,prox); 
+ON gram_effects(direct_id,etype,driver,cause,prox); 
 
 -- This speeds up processing of nominal contributions.
 CREATE INDEX gram_effects_index_ncontrib
-ON gram_effects(etype,active,ts,prox);
+ON gram_effects(etype,ts,prox);
 
 -- gram(n) Curve Value History Table
 -- This table contains the actual tock-by-tock value for each curve.
@@ -699,7 +696,6 @@ SELECT -- Effect Identification
        gram_effects.curve_id  AS curve_id,
        gram_effects.cause     AS cause,
        gram_effects.direct_id AS direct_ngc,
-       gram_effects.active    AS active,
        gram_effects.driver    AS driver,
        gram_effects.input     AS input,
        gram_effects.prox      AS prox,
@@ -814,7 +810,6 @@ SELECT -- Effect Identification
        gram_effects.curve_id  AS curve_id,
        gram_effects.cause     AS cause,
        gram_effects.direct_id AS direct_nfg,
-       gram_effects.active    AS active,
        gram_effects.driver    AS driver,
        gram_effects.input     AS input,
        gram_effects.prox      AS prox,

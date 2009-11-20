@@ -2333,7 +2333,6 @@ snit::type ::simlib::gram {
                 AND   direct.c      = $input(c)
                 AND   effect.etype  = 'S'
                 AND   effect.driver = $input(driver)
-                AND   effect.active = 1
                 AND   effect.cause  = $input(cause)
             } row {
                 $self TerminateSlope input row
@@ -2357,7 +2356,6 @@ snit::type ::simlib::gram {
             AND   direct.c      =  $input(c)
             AND   effect.etype  =  'S'
             AND   effect.driver =  $input(driver)
-            AND   effect.active =  1
             AND   effect.cause  = $input(cause)
             AND   effect.prox   >= $plimit
         } row {
@@ -3009,7 +3007,6 @@ snit::type ::simlib::gram {
                 AND   direct.g      = $input(dg) 
                 AND   effect.etype  = 'S'
                 AND   effect.driver = $input(driver)
-                AND   effect.active = 1
                 AND   effect.cause  = $input(cause)
             } effect {
                 $self TerminateSlope input effect
@@ -3033,7 +3030,6 @@ snit::type ::simlib::gram {
             AND   direct.g      =  $input(dg) 
             AND   effect.etype  =  'S'
             AND   effect.driver =  $input(driver)
-            AND   effect.active =  1
             AND   effect.cause  = $input(cause)
             AND   effect.prox   >= $plimit
         } effect {
@@ -3186,7 +3182,6 @@ snit::type ::simlib::gram {
             FROM gram_effects
             WHERE etype  = 'S'
             AND   driver = $driver
-            AND   active = 1
         } row {
             $self TerminateSlope input row
         }
@@ -3523,7 +3518,7 @@ snit::type ::simlib::gram {
         set old(id) ""
 
         $rdb eval {
-            SELECT id, active, cause, ts, te, future 
+            SELECT id, cause, ts, te, future 
             FROM gram_effects
             WHERE etype='S'
             AND driver=$input(driver)
@@ -3534,15 +3529,7 @@ snit::type ::simlib::gram {
 
         # NEXT, if a chain exists, update it.
         if {$old(id) ne ""} {
-            # FIRST, if the chain is inactive, and this 
-            # link has 0 slope, we can skip it; adding another
-            # link won't change anything.
-            if {!$old(active) && $slope == 0.0} {
-                # SKIP!
-                return
-            }
-
-            # NEXT, check the time constraints, and update te if
+            # FIRST, check the time constraints, and update te if
             # necessary.
             if {[llength $old(future)] == 0} {
                 set te $ts
@@ -3558,15 +3545,14 @@ snit::type ::simlib::gram {
             # NEXT, add this link's data to the profile
             lappend old(future) $ts $slope
             
-            # NEXT, update the record, and mark it active.
+            # NEXT, update the record
             $rdb eval {
                 UPDATE gram_effects
                 SET input   = $input(input),
                     te      = $te,
                     future  = $old(future),
                     athresh = $input(athresh),
-                    dthresh = $input(dthresh),
-                    active  = 1  
+                    dthresh = $input(dthresh)
                 WHERE id=$old(id)
             }
 
@@ -3625,8 +3611,7 @@ snit::type ::simlib::gram {
     # Terminates a slope effect by scheduling a slope of 0
     # after the appropriate time delay.
     #
-    # Constraints: The relevant effect must already exist in <gram_effects> 
-    # and be active.
+    # Constraints: The relevant effect must already exist in <gram_effects>.
     #
     # Syntax:
     #   TerminateSlope _inputArray effectArray_
@@ -3704,8 +3689,8 @@ snit::type ::simlib::gram {
         $self profile $self ComputeNominalContributionsForLevelEffects
         $self profile $self ComputeNominalContributionsForSlopeEffects
         $self profile $self ComputeActualContributionsByCause
-        $self profile $self ExpireEffects
         $self profile $self SaveContribs
+        $self profile $self ExpireEffects
 
         # NEXT, Compute the current value and slope, clamping the
         # current value within its upper and lower bounds.
@@ -3724,7 +3709,7 @@ snit::type ::simlib::gram {
 
     # Method: ComputeNominalContributionsForLevelEffects
     #
-    # Computes the nominal contribution of each active level effect to each
+    # Computes the nominal contribution of each level effect to each
     # curve for this time step.
 
     method ComputeNominalContributionsForLevelEffects {} {
@@ -3744,7 +3729,6 @@ snit::type ::simlib::gram {
                    curve_type, val 
             FROM gram_effects JOIN gram_curves USING (curve_id)
             WHERE etype = 'L'
-            AND active = 1 
             AND ts < $db(time)
             AND prox < $plimit
         } row {
@@ -3795,7 +3779,7 @@ snit::type ::simlib::gram {
 
     # Method: ComputeNominalContributionsForSlopeEffects
     #
-    # Computes the nominal contribution of each active slope effect to each
+    # Computes the nominal contribution of each slope effect to each
     # curve for this time advance.
 
     method ComputeNominalContributionsForSlopeEffects {} {
@@ -3823,7 +3807,6 @@ snit::type ::simlib::gram {
                    curve_type
             FROM gram_effects JOIN gram_curves USING (curve_id)
             WHERE etype='S'
-            AND active = 1 
             AND ts <= $db(time)
             AND prox < $plimit
         } row {
@@ -3930,8 +3913,7 @@ snit::type ::simlib::gram {
                          THEN ncontrib
                          ELSE 0 END AS neg
              FROM gram_effects JOIN gram_curves USING (curve_id)
-             WHERE active=1
-             AND   ncontrib != 0)
+             WHERE ncontrib != 0)
             GROUP BY curve_id, cause
         } {
             # FIRST, get the scaling factor.
@@ -3978,8 +3960,7 @@ snit::type ::simlib::gram {
                    cause    AS cause,
                    ncontrib AS ncontrib
             FROM gram_effects
-            WHERE active    = 1
-            AND   ncontrib != 0.0
+            WHERE ncontrib != 0.0
         } {
 
             # NEXT, retrieve the multiplier based on the nominal conribution
@@ -4001,7 +3982,7 @@ snit::type ::simlib::gram {
 
     # Method: ExpireEffects
     #
-    # Mark expired effects inactive.
+    # Mark expired effects.
 
     method ExpireEffects {} {
         # FIRST, get the current proximity limit.
@@ -4018,10 +3999,8 @@ snit::type ::simlib::gram {
         # Expire slope effects if they have reached their end time.
 
         $rdb eval {
-            UPDATE gram_effects
-            SET active = 0
-            WHERE active = 1
-            AND (
+            DELETE FROM gram_effects
+            WHERE
                 -- proxlimit has changed to exclude them, OR
                 (prox >= $plimit) OR 
 
@@ -4029,8 +4008,7 @@ snit::type ::simlib::gram {
                 (etype = 'L' AND te <= $db(time)) OR
 
                 -- slope effect's is endlessly 0.0
-                (etype = 'S' AND slope == 0 AND te = $maxEndTime)
-            )
+                (etype = 'S' AND slope == 0 AND te = $maxEndTime);
         }
     }
 
@@ -4446,7 +4424,7 @@ snit::type ::simlib::gram {
 
     # Method: dump sat levels
     #
-    # Returns a pretty-printed list of active satisfaction level effects,
+    # Returns a pretty-printed list of satisfaction level effects,
     # one per line. If _driver_ is given, only those effects that match are
     # included. 
     #
@@ -4473,7 +4451,7 @@ snit::type ::simlib::gram {
                    format('%6.2f',actual)
             FROM gram_sat_effects
             WHERE etype='L'
-            AND active=1 AND driver GLOB '$driver'
+            AND driver GLOB '$driver'
             
             ORDER BY driver ASC, input ASC, 
                      dn ASC, dg ASC, cause ASC, 
@@ -4582,7 +4560,7 @@ snit::type ::simlib::gram {
 
     # Method: dump coop levels
     #
-    # Returns a pretty-printed list of active cooperation level effects,
+    # Returns a pretty-printed list of cooperation level effects,
     # one per line. If _driver_ is given, only those effects that match are
     # included. 
     #
@@ -4608,7 +4586,7 @@ snit::type ::simlib::gram {
                    format('%6.2f',actual)
             FROM gram_coop_effects
             WHERE etype='L'
-            AND active=1 AND driver GLOB '$driver'
+            AND driver GLOB '$driver'
             
             ORDER BY driver ASC, input ASC, 
                      dn ASC, df ASC, dg ASC, cause ASC, 
@@ -4623,7 +4601,7 @@ snit::type ::simlib::gram {
 
     # Method: dump sat level
     #
-    # Returns a pretty-printed list of the active level effects acting
+    # Returns a pretty-printed list of the level effects acting
     # on the specific satisfaction level, one per line, sorted by
     # cause.
     #
@@ -4655,7 +4633,6 @@ snit::type ::simlib::gram {
                    CASE WHEN prox=-1 THEN 'D' ELSE 'I' END
             FROM gram_sat_effects
             WHERE etype='L'
-            AND active=1 
             AND n='$n' AND g='$g' AND c='$c'
             ORDER BY cause ASC, ts ASC, llimit DESC
         " -labels {
@@ -4667,7 +4644,7 @@ snit::type ::simlib::gram {
 
     # Method: dump coop level
     #
-    # Returns a pretty-printed list of the active level effects acting
+    # Returns a pretty-printed list of the level effects acting
     # on the specific cooperation level, one per line, sorted by
     # cause.
     #
@@ -4700,7 +4677,6 @@ snit::type ::simlib::gram {
                    CASE WHEN prox=-1 THEN 'D' ELSE 'I' END
             FROM gram_coop_effects
             WHERE etype='L'
-            AND active=1 
             AND n='$n' AND f='$f' AND g='$g'
             ORDER BY cause ASC, ts ASC, llimit DESC
         " -labels {
@@ -4765,7 +4741,6 @@ snit::type ::simlib::gram {
                    actual
             FROM gram_sat_effects
             WHERE etype='S'
-            AND active=1 
             AND (($driver != '' AND driver = $driver) OR
                  ($driver =  '' AND driver > 0))
             ORDER BY driver ASC, input ASC,
@@ -4897,7 +4872,6 @@ snit::type ::simlib::gram {
                    actual
             FROM gram_coop_effects
             WHERE etype='S'
-            AND active=1 
             AND driver GLOB '$driver'
             ORDER BY driver ASC, input ASC,
                      dn ASC, df ASC, dg ASC, cause ASC, 
@@ -4981,7 +4955,7 @@ snit::type ::simlib::gram {
 
     # Method: dump sat slope
     #
-    # Returns a pretty-printed list of the active slope effects acting
+    # Returns a pretty-printed list of the slope effects acting
     # on the specific satisfaction level, one per line, sorted by
     # cause.
     #
@@ -5013,7 +4987,6 @@ snit::type ::simlib::gram {
                    CASE WHEN prox=-1 THEN 'D' ELSE 'I' END
             FROM gram_sat_effects
             WHERE etype='S'
-            AND active=1 
             AND n='$n' AND g='$g' AND c='$c'
             ORDER BY cause ASC, ts ASC, slope DESC
         " -labels {
@@ -5026,7 +4999,7 @@ snit::type ::simlib::gram {
 
     # Method: dump coop slope
     #
-    # Returns a pretty-printed list of the active slope effects acting
+    # Returns a pretty-printed list of the slope effects acting
     # on the specific cooperation level, one per line, sorted by
     # cause.
     #
@@ -5059,7 +5032,6 @@ snit::type ::simlib::gram {
                    CASE WHEN prox=-1 THEN 'D' ELSE 'I' END
             FROM gram_coop_effects
             WHERE etype='S'
-            AND active=1 
             AND n='$n' AND f='$f' AND g='$g'
             ORDER BY cause ASC, ts ASC, slope DESC
         " -labels {

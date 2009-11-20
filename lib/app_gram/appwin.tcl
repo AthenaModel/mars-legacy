@@ -216,7 +216,6 @@ snit::widget appwin {
                     { dn       -                   }
                     { dg       -                   }
                     { cause    -                   }
-                    { active   -                   }
                     { prox     - -sortmode integer }
                     { sat      - -sortmode real    }
                     { athresh  - -sortmode real    }
@@ -249,7 +248,6 @@ snit::widget appwin {
                     { dn       -                   }
                     { dg       -                   }
                     { cause    -                   }
-                    { active   -                   }
                     { prox     - -sortmode integer }
                     { sat      - -sortmode real    }
                     { athresh  - -sortmode real    }
@@ -326,7 +324,6 @@ snit::widget appwin {
                     { df       -                   }
                     { dg       -                   }
                     { cause    -                   }
-                    { active   -                   }
                     { prox     - -sortmode integer }
                     { coop     - -sortmode real    }
                     { athresh  - -sortmode real    }
@@ -360,7 +357,6 @@ snit::widget appwin {
                     { df       -                   }
                     { dg       -                   }
                     { cause    -                   }
-                    { active   -                   }
                     { prox     - -sortmode integer }
                     { coop     - -sortmode real    }
                     { athresh  - -sortmode real    }
