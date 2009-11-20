@@ -189,6 +189,10 @@ ON gram_effects(curve_id,direct_id);
 CREATE INDEX gram_effects_index_direct
 ON gram_effects(direct_id,etype,driver,active,cause,prox); 
 
+-- This speeds up processing of nominal contributions.
+CREATE INDEX gram_effects_index_ncontrib
+ON gram_effects(etype,active,ts,prox);
+
 -- gram(n) Curve Value History Table
 -- This table contains the actual tock-by-tock value for each curve.
 CREATE TABLE gram_values (
