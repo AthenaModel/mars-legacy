@@ -109,6 +109,11 @@ snit::type ::simlib::gram {
             that timestep by each driver, as well as the current
             level of each curve.  If no, it doesn't.
         }
+
+        $parm define gram.saveExpired ::snit::boolean no {
+            If yes, GRAM saves the expired effects from the latest time
+            advance in a temporary table, gram_expired_effects.
+        }
     }
 
     #-------------------------------------------------------------------
@@ -3690,7 +3695,7 @@ snit::type ::simlib::gram {
         $self profile $self ComputeNominalContributionsForSlopeEffects
         $self profile $self ComputeActualContributionsByCause
         $self profile $self SaveContribs
-        $self profile $self ExpireEffects
+        $self profile $self DeleteExpiredEffects
 
         # NEXT, Compute the current value and slope, clamping the
         # current value within its upper and lower bounds.
@@ -3980,14 +3985,34 @@ snit::type ::simlib::gram {
         }
     }
 
-    # Method: ExpireEffects
+    # Method: DeleteExpiredEffects
     #
     # Mark expired effects.
 
-    method ExpireEffects {} {
+    method DeleteExpiredEffects {} {
         # FIRST, get the current proximity limit.
         set plimit \
             $proxlimit([$parm get gram.proxlimit])
+
+        # NEXT, save these expired level and slope effects, if 
+        # desired.
+        if {[parm get gram.saveExpired]} {
+            $rdb eval {
+                DROP TABLE IF EXISTS gram_expired_effects;
+
+                CREATE TABLE gram_expired_effects AS
+                SELECT * FROM gram_effects
+                WHERE
+                    -- proxlimit has changed to exclude them, OR
+                    (prox >= $plimit) OR 
+
+                    -- level effect's time has elapsed
+                    (etype = 'L' AND te <= $db(time)) OR
+
+                    -- slope effect's is endlessly 0.0
+                    (etype = 'S' AND slope == 0 AND te = $maxEndTime);
+            }
+        }
 
         # NEXT, Expire level and slope effects.
         #
