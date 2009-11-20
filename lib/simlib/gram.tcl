@@ -54,9 +54,9 @@ snit::enum ::simlib::proxlimit -values {none here near far}
 # TBD:
 #  * We need a "coop drivers" command.
 #  * Need to optimize <cancel>; see the TBD in that routine.
-#  * The <adjust> method is not public, and should be renamed.
 #  * Is there any reason not to delete inactive effects?
-
+#    * Debugging.  Provide a gram.debug option that saves things like
+#      inactive effects in temporary tables.
 #-----------------------------------------------------------------------
 # GRAM engine
 
@@ -1349,6 +1349,9 @@ snit::type ::simlib::gram {
     #
     # The change takes affect on the next time <advance>.
     #
+    # NOTE: This routine updates <gram_ng>; do not call it in the body
+    # of a query on <gram_ng>.
+    #
     # Syntax:
     #   update population _n g population ?...?_
     #
@@ -1993,13 +1996,13 @@ snit::type ::simlib::gram {
 
         # NEXT, do the query.
         set where [join $where " AND "]
-        $rdb eval "
+        foreach curve_id [$rdb eval "
             SELECT curve_id
             FROM gram_sat
             WHERE 
             $where
-        " {
-            $self adjust $driver $curve_id $mag
+        "] {
+            $self AdjustCurve $driver $curve_id $mag
         }
 
         # NEXT, recompute other outputs that depend on sat.ngc
@@ -2095,13 +2098,13 @@ snit::type ::simlib::gram {
         set sat [qsat value $sat]
 
         # NEXT, do the query.
-        $rdb eval "
+        foreach {curve_id mag} [$rdb eval "
             SELECT curve_id, \$sat - sat AS mag
             FROM gram_sat
             WHERE mag != 0.0
             $where
-        " {
-            $self adjust $driver $curve_id $mag
+        "] {
+            $self AdjustCurve $driver $curve_id $mag
         }
 
         # NEXT, recompute other outputs that depend on sat.ngc
@@ -2673,13 +2676,13 @@ snit::type ::simlib::gram {
 
         set where [join $where " AND "]
 
-        $rdb eval "
+        foreach curve_id [$rdb eval "
             SELECT curve_id
             FROM gram_coop
             WHERE 
             $where
-        " {
-            $self adjust $driver $curve_id $mag
+        "] {
+            $self AdjustCurve $driver $curve_id $mag
         }
 
         # NEXT, compute the cooperation roll-ups
@@ -2710,7 +2713,7 @@ snit::type ::simlib::gram {
     # <coop adjust> and <coop set> to be undone.
 
     method "coop set" {driver n f g coop {flag ""}} {
-        $self Log detail "coop adjust driver=$driver n=$n f=$f g=$g C=$coop $flag"
+        $self Log detail "coop set driver=$driver n=$n f=$f g=$g C=$coop $flag"
 
         # FIRST, check the inputs, and accumulate query terms
         set where ""
@@ -2757,13 +2760,13 @@ snit::type ::simlib::gram {
         # NEXT, do the query.  Note that we could do the adjustment
         # in a single UPDATE query, except that we need to save the
         # adjustment to the history.
-        $rdb eval "
+        foreach {curve_id mag} [$rdb eval "
             SELECT curve_id, \$coop - coop AS mag
             FROM gram_coop
             WHERE mag != 0.0
             $where
-        " {
-            $self adjust $driver $curve_id $mag
+        "] {
+            $self AdjustCurve $driver $curve_id $mag
         }
 
         # NEXT, compute the cooperation roll-ups
@@ -3082,6 +3085,7 @@ snit::type ::simlib::gram {
             WHERE driver = $driver
             GROUP BY curve_id
         } {
+            # TBD: Nested UPDATE to same table.
             $rdb eval {
                 UPDATE gram_curves
                 SET val = clamp($curve_type,val - $actual)
@@ -3226,63 +3230,64 @@ snit::type ::simlib::gram {
         $self SaveValues
     }
 
-    # Method: adjust
+    # Method: AdjustCurve
     #
     # Adjusts the curve by the selected amount, clamping appropriately.
     #
     # Syntax:
-    #   adjust _driver curve_id mag_
+    #   AdjustCurve _driver curve_id mag_
     #
     #   driver   - Driver ID
     #   curve_id - ID of the curve to adjust
     #   mag      - Magnitude to adjust by
 
-    method adjust {driver curve_id mag} {
+    method AdjustCurve {driver curve_id mag} {
+        # FIRST, get the curve type and current value of this curve.
         $rdb eval {
             SELECT curve_type, val 
             FROM gram_curves
             WHERE curve_id = $curve_id
-        } {
-            # FIRST, get the new value
-            # TBD: Have a better mechanism for this!
-            # If we had the limits in the gram_curves record, a trigger
-            # could do the job. Or we could look up the quality object
-            # by curve_type.
-            if {$curve_type eq "SAT"} {
-                set newVal [qsat clamp [expr {$val + $mag}]]
-            } else {
-                # COOP
-                set newVal [qcooperation clamp [expr {$val + $mag}]]
-            }
-
-            # Save the new value.
-            $rdb eval {
-                UPDATE gram_curves
-                SET   val = $newVal
-                WHERE curve_id = $curve_id
-            }
-
-            # NEXT, save this to the history.
-            if {[parm get gram.saveHistory]} {
-                let realmag {$newVal - $val}
-
-                $rdb eval {
-                    INSERT OR IGNORE INTO
-                    gram_contribs(time, driver,
-                                  curve_id, acontrib)
-                    VALUES($db(time),
-                           $driver, $curve_id, 0.0);
-
-                    UPDATE gram_contribs
-                    SET acontrib = acontrib + $realmag
-                    WHERE time = $db(time)
-                    AND   driver = $driver
-                    AND   curve_id = $curve_id;
-                }
-            }
-
-            $self SaveValues $curve_id
+        } {}
+        
+        # NEXT, get the new value
+        # TBD: Have a better mechanism for this!
+        # If we had the limits in the gram_curves record, a trigger
+        # could do the job. Or we could look up the quality object
+        # by curve_type.
+        if {$curve_type eq "SAT"} {
+            set newVal [qsat clamp [expr {$val + $mag}]]
+        } else {
+            # COOP
+            set newVal [qcooperation clamp [expr {$val + $mag}]]
         }
+
+        # Save the new value.
+        $rdb eval {
+            UPDATE gram_curves
+            SET   val = $newVal
+            WHERE curve_id = $curve_id
+        }
+
+        # NEXT, save this to the history.
+        if {[parm get gram.saveHistory]} {
+            let realmag {$newVal - $val}
+
+            $rdb eval {
+                INSERT OR IGNORE INTO
+                gram_contribs(time, driver,
+                              curve_id, acontrib)
+                VALUES($db(time),
+                       $driver, $curve_id, 0.0);
+
+                UPDATE gram_contribs
+                SET acontrib = acontrib + $realmag
+                WHERE time = $db(time)
+                AND   driver = $driver
+                AND   curve_id = $curve_id;
+            }
+        }
+
+        $self SaveValues $curve_id
     }
 
     # Method: GetProxLimit
@@ -3766,6 +3771,7 @@ snit::type ::simlib::gram {
                 set contrib 0
             }
 
+            # TBD: Nested UPDATE to same table.
             $rdb eval {
                 UPDATE gram_effects
                 SET tlast    = $db(time),
@@ -3927,6 +3933,7 @@ snit::type ::simlib::gram {
             # NEXT, compute and apply the actual contribution
             set acontrib [expr {$scale * $contrib}]
 
+            # TBD: Nested UPDATE to same table.
             $rdb eval {
                 UPDATE gram_curves
                 SET delta = delta + $acontrib
