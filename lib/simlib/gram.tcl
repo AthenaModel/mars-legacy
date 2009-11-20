@@ -334,7 +334,8 @@ snit::type ::simlib::gram {
         set clock $options(-clock)
         assert {[info commands $clock] ne ""}
 
-        # NEXT, save the RDB component
+        # NEXT, save the RDB component, verifying that no other instance
+        # of GRAM is using it.
         set rdb $options(-rdb)
         assert {[info commands $rdb] ne ""}
 
@@ -347,8 +348,6 @@ snit::type ::simlib::gram {
         }
         
         set rdbTracker($rdb) $self
-
-        # TBD: Verify that no other instance is using this RDB.
 
         # NEXT, initialize db
         array set db $initdb
@@ -3079,13 +3078,18 @@ snit::type ::simlib::gram {
 
     method cancel {driver {option ""}} {
         # FIRST, Update the curves.
+        set updates [list]
+
         $rdb eval {
             SELECT curve_id, curve_type, total(acontrib) AS actual
             FROM gram_contribs JOIN gram_curves USING (curve_id)
             WHERE driver = $driver
             GROUP BY curve_id
         } {
-            # TBD: Nested UPDATE to same table.
+            lappend updates $curve_id $curve_type $actual
+        }
+
+        foreach {curve_id curve_type actual} $updates {
             $rdb eval {
                 UPDATE gram_curves
                 SET val = clamp($curve_type,val - $actual)
@@ -3730,7 +3734,11 @@ snit::type ::simlib::gram {
 
         # NEXT, for each level effect for which the start time has
         # been reached and which has not yet expired, compute its nominal
-        # contribution.
+        # contribution. Accumulate the desired updates, and apply them
+        # once the loop is complete.
+
+        set updates [list]
+
         $rdb eval {
             SELECT ts, te, llimit, tau, nominal, id, athresh, dthresh,
                    curve_type, val 
@@ -3771,13 +3779,16 @@ snit::type ::simlib::gram {
                 set contrib 0
             }
 
-            # TBD: Nested UPDATE to same table.
+            lappend updates $row(id) $row(nominal) $contrib
+        }
+
+        foreach {id nominal contrib} $updates {
             $rdb eval {
                 UPDATE gram_effects
                 SET tlast    = $db(time),
-                    nominal  = $row(nominal),
+                    nominal  = $nominal,
                     ncontrib = $contrib
-                WHERE id=$row(id);
+                WHERE id=$id;
             }
         }
     }
