@@ -54,11 +54,6 @@ snit::enum ::simlib::proxlimit -values {none here near far}
 # TBD:
 #  * We need a "coop drivers" command.
 #  * Need to optimize <cancel>; see the TBD in that routine.
-#  * Is there any reason not to delete inactive effects?
-#    * Debugging.  Provide a gram.debug option that saves things like
-#      inactive effects in temporary tables.
-#-----------------------------------------------------------------------
-# GRAM engine
 
 snit::type ::simlib::gram {
     #-------------------------------------------------------------------
@@ -3776,7 +3771,8 @@ snit::type ::simlib::gram {
                 UPDATE gram_effects
                 SET tlast    = $db(time),
                     nominal  = $nominal,
-                    ncontrib = $contrib
+                    ncontrib = $contrib,
+                    acontrib = 0
                 WHERE id=$id;
             }
         }
@@ -3884,7 +3880,8 @@ snit::type ::simlib::gram {
                 UPDATE gram_effects
                 SET tlast    = $db(time),
                     nominal  = $nominal,
-                    ncontrib = $ncontrib
+                    ncontrib = $ncontrib,
+                    acontrib = 0
                 WHERE id=$id
             }
         }
