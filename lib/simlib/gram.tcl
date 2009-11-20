@@ -3908,6 +3908,10 @@ snit::type ::simlib::gram {
     # for each curve and cause, scale them, and apply them.
 
     method ComputeActualContributionsByCause {} {
+        # FIRST, accumulate the actual contributions to the
+        # curves.
+        set updates [list]
+
         $rdb eval {
             SELECT curve_id   AS curve_id, 
                    cause      AS cause,
@@ -3941,15 +3945,10 @@ snit::type ::simlib::gram {
 
             set scale [ScaleFactor $curve_type $current $sign]
 
-            # NEXT, compute and apply the actual contribution
+            # NEXT, compute and cache the actual contribution
             set acontrib [expr {$scale * $contrib}]
 
-            # TBD: Nested UPDATE to same table.
-            $rdb eval {
-                UPDATE gram_curves
-                SET delta = delta + $acontrib
-                WHERE curve_id=$curve_id
-            }
+            lappend updates $curve_id $acontrib
 
             # NEXT, store the positive effects by id and cause
             if {$maxpos > 0.0} {
@@ -3959,6 +3958,15 @@ snit::type ::simlib::gram {
             # NEXT, store the negative effects by id and cause
             if {$minneg < 0.0} {
                 let negcontribs($curve_id,$cause) {$minneg*$scale/$sumneg}
+            }
+        }
+
+        # NEXT, apply the updates to the curves.
+        foreach {curve_id acontrib} $updates {
+            $rdb eval {
+                UPDATE gram_curves
+                SET delta = delta + $acontrib
+                WHERE curve_id=$curve_id
             }
         }
 
