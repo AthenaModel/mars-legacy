@@ -568,7 +568,7 @@ snit::type ::simlib::gram {
             DELETE FROM gram_curves;
             DELETE FROM gram_effects;
             DELETE FROM gram_contribs;
-            DELETE FROM gram_values;
+            DELETE FROM gram_deltas;
             DELETE FROM gram_n;
             DELETE FROM gram_g;
             DELETE FROM gram_c;
@@ -3093,27 +3093,17 @@ snit::type ::simlib::gram {
             }
         }
 
-        # NEXT, delete the contributions from gram_values
-        #
-        # TBD: This code can be extremely slow, and needs to 
-        # be optimized.  For each contribution for each curve
-        # at each timestep, it updates the entire future stream
-        # of values.  This can easily be fixed by processing the
-        # contributions in time order and keeping a running total
-        # of the contributions to date to each curve_id.  Then
-        # we just subtract the total to date from each value at
-        # each time, as we go.  Or can we?  Will we miss some of
-        # the entries that way?  Anyway, it needs to be fixed.
+        # NEXT, delete the contributions from gram_deltas
         $rdb eval {
             SELECT curve_id, time, acontrib AS actual
             FROM gram_contribs
             WHERE driver = $driver
         } {
             $rdb eval {
-                UPDATE OR IGNORE gram_values
-                SET val = val - $actual
+                UPDATE OR IGNORE gram_deltas
+                SET delta = delta - $actual
                 WHERE curve_id=$curve_id
-                AND   time >= $time
+                AND   time = $time
             }
         }
 
@@ -3145,6 +3135,7 @@ snit::type ::simlib::gram {
 
         # NEXT, recompute other outputs that depend on sat.ngc
         $self ComputeSatRollups
+        $self ComputeCoopRollups
 
         return
     }
@@ -3200,7 +3191,7 @@ snit::type ::simlib::gram {
     #   gram_curves   - One record per curve, including current value.
     #   gram_effects  - One record per level/slope effect
     #   gram_contribs - History of contributions to curves.
-    #   gram_values   - History of curve values.
+    #   gram_deltas   - History of curve values.
     #
     # Other sections of this module will provide identities to specific
     # curves.  The satisfaction section, for example, maps n,g,c
@@ -3216,7 +3207,7 @@ snit::type ::simlib::gram {
         $rdb eval {
             DELETE FROM gram_effects;
             DELETE FROM gram_contribs;
-            DELETE FROM gram_values;
+            DELETE FROM gram_deltas;
             DELETE FROM gram_driver;
 
             UPDATE gram_curves 
@@ -3226,7 +3217,7 @@ snit::type ::simlib::gram {
         }
 
         # NEXT the values as of this time.
-        $self SaveValues
+        $self SaveDeltas
     }
 
     # Method: AdjustCurve
@@ -3283,10 +3274,17 @@ snit::type ::simlib::gram {
                 WHERE time = $db(time)
                 AND   driver = $driver
                 AND   curve_id = $curve_id;
+
+                INSERT OR IGNORE INTO
+                gram_deltas(time, curve_id, delta)
+                VALUES($db(time), $curve_id, 0.0);
+
+                UPDATE gram_deltas
+                SET delta = delta + $realmag
+                WHERE time = $db(time)
+                AND   curve_id = $curve_id;
             }
         }
-
-        $self SaveValues $curve_id
     }
 
     # Method: GetProxLimit
@@ -3703,8 +3701,8 @@ snit::type ::simlib::gram {
                 slope = delta / $deltaDays
         }
 
-        # NEXT, save the current values.
-        $self SaveValues
+        # NEXT, save the current deltas to each curve.
+        $self SaveDeltas
     }
 
     # Method: ComputeNominalContributionsForLevelEffects
@@ -4058,17 +4056,11 @@ snit::type ::simlib::gram {
         }
     }
 
-    # Method: SaveValues
+    # Method: SaveDeltas
     #
-    # Saves the current value of the specified curve, or of all
-    # curves, to <gram_values>.
-    #
-    # Syntax:
-    #   SaveValues _?curve_id?_
-    #
-    #   curve_id - A curve ID; defaults to all curves
+    # Saves the current deltas to all curves to <gram_deltas>.
 
-    method SaveValues {{curve_id ""}} {
+    method SaveDeltas {} {
         # FIRST, save the history data, if that's what we want to do
         set pname gram.saveHistory
 
@@ -4080,15 +4072,9 @@ snit::type ::simlib::gram {
 
         set query {
             INSERT OR REPLACE
-            INTO gram_values(time, curve_id, val)
-            SELECT $db(time), curve_id, val
+            INTO gram_deltas(time, curve_id, delta)
+            SELECT $db(time), curve_id, delta
             FROM gram_curves
-        }
-
-        if {$curve_id ne ""} {
-            append query {
-                WHERE curve_id=$curve_id
-            }
         }
 
         $rdb eval $query

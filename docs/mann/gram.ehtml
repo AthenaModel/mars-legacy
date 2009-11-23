@@ -44,10 +44,27 @@ GRAM differs from JRAM in the following ways:<p>
 
   <li> GRAM slope inputs lack JRAM's "limit" parameter.  In GRAM,
        slope effects continue until explicitly terminated.<p>
-</ul>
 
-An application can create multiple independent instances of the model
-as instances of the <<xref gram(n)>> type; in general, one is sufficient.<p>
+  <li> GRAM inputs have options that JRAM inputs lack: <b>-s</b>, 
+       <b>-athresh</b>, and <b>-dthresh</b>.  See <<iref sat level>>, etc., 
+       for details.<p>
+
+  <li> JRAM saved the curve values over time in the <b>gram_values</b>
+       table.  GRAM saves the curve deltas over time in the 
+       <b>gram_deltas</b> table.<p>
+
+  <li> JRAM saved expired effects indefinitely in the <b>gram_effects</b> 
+       table, setting the <b>active</b> column to 0.  GRAM deletes
+       expired effects.  (They can be preserved temporarily as an aid to
+       debugging in the <b>gram_expired_effects</b> table; see the
+       <<iref gram.saveExpired>> parameter.<p>
+
+  <li> Multiple instances of JRAM could coexist in a single 
+       <<xref sqldocument(n)>>.  This capability was never used, and
+       has been abandoned in the interests of speed.  It is possible
+       to create multiple instances of GRAM, but each instance must
+       be in a separate <<xref sqldocument(n)>>.<p>
+</ul>
 
 <<section "DATABASE SCHEMA">>
 
@@ -60,11 +77,6 @@ Other modules may query any of the tables as needed, but
 should not alter them. Some relevant semantics:<p>
 
 <ul>
-  <li> If there are multiple instances of gram(n), they will
-       share the same database tables.  The <b>object</b> column
-       identifies the the gram(n) object to which the records belong;
-       it will be set to the object's fully-qualified command name.<p>
-
   <li> All cooperation and satisfaction curves are stored in the
        <b>gram_curves</b> table, with ancillary data in the
        <b>gram_ngc</b> and <b>gram_nfg</b> tables respectively.<p>
@@ -72,7 +84,7 @@ should not alter them. Some relevant semantics:<p>
   <li> The <b>gram_sat</b> and <b>gram_coop</b> views are a convenient
        way to query the satisfaction and cooperation curves.<p>
 
-  <li> The <b>gram_sat_history</b> and <b>gram_coop_history</b> views
+  <li> The <b>gram_sat_contribs</b> and <b>gram_coop_contribs</b> views
        are a convenient way to query the history of contributions to
        the satisfaction and cooperation curves.<p>
 
@@ -245,9 +257,11 @@ thereafter.<p>
 
 <<defopt {-rdb <i>name</i>}>>
 
-Specifies the name of an <<xref sqldatabase(n)>> object
+Specifies the name of an <<xref sqldocument(n)>> object
 which gram(n) will use to store its data.
 See <<xref "DATABASE SCHEMA">>.<p>
+
+Multiple instances of gram(n) must be created in distinct RDBs.<p>
 
 This option must be set at creation time, and cannot be changed
 thereafter.<p>

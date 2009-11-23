@@ -190,9 +190,9 @@ ON gram_effects(direct_id,etype,driver,cause,prox);
 CREATE INDEX gram_effects_index_ncontrib
 ON gram_effects(etype,ts,prox);
 
--- gram(n) Curve Value History Table
--- This table contains the actual tock-by-tock value for each curve.
-CREATE TABLE gram_values (
+-- gram(n) Curve Delta History Table
+-- This table contains the actual tock-by-tock deltas for each curve.
+CREATE TABLE gram_deltas (
     --------------------------------------------------------------------
     -- Primary Key Fields
 
@@ -205,8 +205,8 @@ CREATE TABLE gram_values (
     --------------------------------------------------------------------
     -- Variables
 
-    -- Value at this time.
-    val        DOUBLE DEFAULT 0.0,
+    -- Delta at this time.
+    delta      DOUBLE DEFAULT 0.0,
 
     PRIMARY KEY(time,curve_id)
 );
@@ -751,17 +751,17 @@ SELECT -- History values
        gram_ngc.c            AS c
 FROM gram_contribs JOIN gram_ngc USING (curve_id);
 
-CREATE VIEW gram_sat_values AS
+CREATE VIEW gram_sat_deltas AS
 SELECT -- History values
-       gram_values.time      AS time,
-       gram_values.val       AS sat,
-       gram_values.curve_id  AS curve_id,
+       gram_deltas.time      AS time,
+       gram_deltas.delta     AS delta,
+       gram_deltas.curve_id  AS curve_id,
 
        -- Satisfaction Curve identification
        gram_ngc.n            AS n,
        gram_ngc.g            AS g,
        gram_ngc.c            AS c
-FROM gram_values JOIN gram_ngc USING (curve_id);
+FROM gram_deltas JOIN gram_ngc USING (curve_id);
 
 --------------------------------------------------------------------------------
 -- Cooperation Model Tables 
@@ -866,17 +866,17 @@ SELECT -- History values
        gram_nfg.g            AS g
 FROM gram_contribs JOIN gram_nfg USING (curve_id);
 
-CREATE VIEW gram_coop_values AS
+CREATE VIEW gram_coop_deltas AS
 SELECT -- History values
-       gram_values.time      AS time,
-       gram_values.val       AS coop,
-       gram_values.curve_id  AS curve_id,
+       gram_deltas.time      AS time,
+       gram_deltas.delta     AS delta,
+       gram_deltas.curve_id  AS curve_id,
 
        -- Cooperation Curve identification
        gram_nfg.n            AS n,
        gram_nfg.f            AS f,
        gram_nfg.g            AS g
-FROM gram_values JOIN gram_nfg USING (curve_id);
+FROM gram_deltas JOIN gram_nfg USING (curve_id);
 
 -- gram(n) cooperation influence map.  For each n,g
 -- which can receive a satisfaction input, this table records
