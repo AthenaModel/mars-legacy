@@ -124,7 +124,7 @@ neighborhood relationship data might look like this:<p>
 <pre>
     proc MyLoadCommand {gram} {
         ...
-        $gram load nbrel [$rdb eval {
+        $gram load nbrel {*}[$rdb eval {
             SELECT m, n, proximity, effects_delay
             FROM db_mn
             ORDER BY m, n;
