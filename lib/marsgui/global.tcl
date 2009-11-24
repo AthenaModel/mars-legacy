@@ -136,6 +136,9 @@ ttk::style configure Menubox.TCombobox \
 ttk::style map Menubox.TCombobox -fieldbackground {}
 ttk::style map Menubox.TCombobox -foreground {}
 
+# Tabless.TNotebook: A style for tabless ttk::notebook widgets
+ttk::style layout Tabless.TNotebook.Tab null
+
 #-----------------------------------------------------------------------
 # Option Database Settings
 #
