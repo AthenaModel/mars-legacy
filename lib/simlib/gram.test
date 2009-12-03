@@ -5673,6 +5673,18 @@ driver n  g    c    acontrib
         cleanup
     } -result {{N2 SHIA BLUE 5} {N2 SHIA BRIT 5} {N2 SHIA OPFOR 5}}
 
+    test coop_adjust-2.5 {adjustment: n,f,g=*} -setup {
+        create
+    } -body {
+        tableSave gram_coop
+        jr coop adjust 1 * * * 5
+        tableDiff gram_coop nfg_id {n f g} coop
+    } -cleanup {
+        cleanup
+    } -result {{N1 KURD BLUE 5} {N1 KURD BRIT 5} {N1 KURD OPFOR 5} {N1 SHIA BLUE 5} {N1 SHIA BRIT 5} {N1 SHIA OPFOR 5} {N1 SUNN BLUE 5} {N1 SUNN BRIT 5} {N1 SUNN OPFOR 5} {N2 KURD BLUE 5} {N2 KURD BRIT 5} {N2 KURD OPFOR 5} {N2 SHIA BLUE 5} {N2 SHIA BRIT 5} {N2 SHIA OPFOR 5} {N2 SUNN BLUE 5} {N2 SUNN BRIT 5} {N2 SUNN OPFOR 5}}
+
+    
+
     # 3.*: Adjusted values are clamped
 
     test coop_adjust-3.1 {Cooperations over 100.0 are clamped} -setup {

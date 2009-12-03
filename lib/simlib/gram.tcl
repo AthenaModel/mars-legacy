@@ -2671,12 +2671,15 @@ snit::type ::simlib::gram {
         # in a single UPDATE query, except that we need to save the
         # adjustment to the history.
 
-        set where [join $where " AND "]
+        if {[llength $where] > 0} {
+            set where "WHERE [join $where { AND }]"
+        } else {
+            set where ""
+        }
 
         foreach curve_id [$rdb eval "
             SELECT curve_id
             FROM gram_coop
-            WHERE 
             $where
         "] {
             $self AdjustCurve $driver $curve_id $mag
