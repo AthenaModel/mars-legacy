@@ -250,7 +250,6 @@ snit::widget ::marsgui::sqlbrowser {
     #   views           Dictionary of view names by label: The inverse
     #                   of -views.
     #   columns         Column names in the current view, in order.
-    #   sortcol         The last column sorted on, or ""
     #   reloadRequests  Number of reload requests since the last reload.
     
     variable info -array {
@@ -258,14 +257,12 @@ snit::widget ::marsgui::sqlbrowser {
         views          {}
         columns        {}
         reloadRequests 0
-        sortcol        {}
     }
     
     # layout array: layout dicts by column name.  For each column:
     #
     #   name        Column name
     #   cindex      Column index
-    #   sortdir     Sort direction, -increasing | -decreasing
     
     variable layout -array {}
     
@@ -656,8 +653,7 @@ snit::widget ::marsgui::sqlbrowser {
             
             set layout($row(name)) [dict create \
                 name    $row(name)     \
-                cindex  [incr cindex]  \
-                sortdir -increasing]
+                cindex  [incr cindex]]
                     
             if {$row(type) in {DOUBLE INTEGER}} {
                 set align right
@@ -718,8 +714,7 @@ snit::widget ::marsgui::sqlbrowser {
             
             set layout($cname) [dict create \
                 name    $cname              \
-                cindex  [incr cindex]       \
-                sortdir -increasing]
+                cindex  [incr cindex]]
 
             $tlist insertcolumns end 0 $label
             
@@ -740,24 +735,24 @@ snit::widget ::marsgui::sqlbrowser {
     # sort command, and calls the -selectioncmd.
   
     method SortData {} {
-        # FIRST, if we've not sorted on any column, then we're done.
-        if {$info(sortcol) eq ""} {
-            # Call -selectioncmd anyway, as SortData calls it for
-            # reload.
-            callwith $options(-selectioncmd)
-            return
+        # FIRST, if we've sorted previously, sort again.
+        if {[$tlist sortcolumn] > -1} {
+            # FIRST, sort on the same column in the same way as before.
+            $tlist sortbycolumn [$tlist sortcolumn] -[$tlist sortorder]
+
+            # NEXT, update the UID map, if any.
+            $self UpdateUidMap
         }
-        
-        # NEXT, pass the command through to the tablelist widget
-        dict with layout($info(sortcol)) {
-            set sortdir [dict get $layout($info(sortcol)) sortdir]
-        
-            if {$sortdir ne "-none"} {
-                $tlist sortbycolumn $cindex $sortdir
-            }
-        }
-        
-        # NEXT, update the uidmap, if any.
+
+        # NEXT, the selection might have changed.
+        callwith $options(-selectioncmd)
+    }
+
+    # UpdateUidMap
+    #
+    # Updates the mapping between UIDs and row numbers.
+
+    method UpdateUidMap {} {
         if {$options(-uid) ne ""} {
             # FIRST, clear the old map
             array unset uidmap
@@ -772,9 +767,6 @@ snit::widget ::marsgui::sqlbrowser {
                 set uidmap($uid) [incr rindex]
             }
         }
-        
-        # NEXT, the selection might have changed.
-        callwith $options(-selectioncmd)
     }
     
     # SortByColumn w cindex
@@ -785,36 +777,43 @@ snit::widget ::marsgui::sqlbrowser {
     # Sets the sort direction for the specified column, and resorts.
 
     method SortByColumn {w cindex} {
-        # FIRST, get the column name
-        set cname [lindex $info(columns) $cindex]
-        
-        dict with layout($cname) {
-            # FIRST, if they have never sorted on this column, let it
-            # be increasing.
-            
-            if {$sortdir eq "-none"} {
-                set sortdir "-increasing"
-            }
-            
-            # NEXT, if they've clicked on the same column, toggle the
-            # sort order; otherwise, just remember the new column.
-            
-            if {$cname eq $info(sortcol)} {
-                if {$sortdir eq "-increasing"} {
-                    set sortdir "-decreasing"
-                } else {
-                    set sortdir "-increasing"
-                }
-            } else {
-                set info(sortcol) $cname
-            }
-        }
-        
-        # NEXT, re-sort.
-        $self SortData
+        # FIRST, let tablelist sort on the selected column, toggling
+        # the sort direction if necessary.
+        tablelist::sortByColumn $w $cindex
+
+
+        # NEXT, update the UID map, if any.
+        $self UpdateUidMap
+
+        # NEXT, the selection might have changed.
+        callwith $options(-selectioncmd)
     }
 
+    # sortby col ?direction?
+    #
+    # col        The name of the column to sort by
+    # direction  -increasing/-decreasing
+    #
+    # Tells the widget to sort by the specified column.
+    # TBD: Need a way to defer the operation of this until
+    # the widget is layed out.
 
+    method sortby {col {direction "-increasing"}} {
+        require $info(layoutFlag) \
+            "Columns not yet layed out"
+
+        set cindex [$self cname2cindex $col]
+
+        # FIRST, sort in the desired way
+        $tlist sortbycolumn $cindex $direction
+
+        # NEXT, update the UID map, if any.
+        $self UpdateUidMap
+
+        # NEXT, the selection might have changed.
+        callwith $options(-selectioncmd)
+    }
+    
 
     #-------------------------------------------------------------------
     # Public Methods
@@ -868,26 +867,6 @@ snit::widget ::marsgui::sqlbrowser {
         $self reload
     }
 
-    # sortby col ?direction?
-    #
-    # col        The name of the column to sort by
-    # direction  -increasing/-decreasing/-none
-    #
-    # Tells the widget to sort by the specified column.
-    # TBD: Need a way to defer the operation of this until
-    # the widget is layed out.
-
-    method sortby {col {direction "-increasing"}} {
-        require $info(layoutFlag) \
-            "Columns not yet layed out"
-        # FIRST, save the info
-        set info(sortcol) $col
-        dict set layout($col) sortdir $direction
-
-        # NEXT, re-sort
-        $self SortData
-    }
-    
     #-------------------------------------------------------------------
     # Conversions: column name to column index
     
