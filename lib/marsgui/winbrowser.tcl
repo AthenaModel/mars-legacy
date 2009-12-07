@@ -47,7 +47,7 @@ snit::widget ::marsgui::winbrowser {
     # Option: -logcmd
     #
     # A command that takes one additional argument, a status message
-    # to be displayed to the user.
+    # to be displayed to the user.gov
     
     option -logcmd \
         -default ""
@@ -96,6 +96,8 @@ snit::widget ::marsgui::winbrowser {
             -takefocus 1
         $win.paner add $tnb
 
+        # NEXT, we have three pages.  winfo and bindings are scrolled
+        # rotext widgets; options is a tablelist.
         $self AddPage winfo
         $self AddPage options
         $self AddPage bindings
@@ -144,29 +146,52 @@ snit::widget ::marsgui::winbrowser {
             -padding 2        \
             -text    $name
 
-        set pages($name) \
-            [rotext $sw.text \
-                -insertwidth        1                 \
-                -width              50                \
-                -height             15                \
-                -font               codefont          \
-                -highlightthickness 1                 \
-                -yscrollcommand     [list $sw.y set]  \
-                -xscrollcommand     [list $sw.x set]]
-        
-        isearch enable $sw.text
-        isearch logger $sw.text [mymethod Log]
+        if {$name ne "options"} {
+            set pages($name) \
+                [rotext $sw.body \
+                     -insertwidth        1                 \
+                     -width              50                \
+                     -height             15                \
+                     -font               codefont          \
+                     -highlightthickness 1                 \
+                     -yscrollcommand     [list $sw.y set]  \
+                     -xscrollcommand     [list $sw.x set]]
+
+            isearch enable $sw.body
+            isearch logger $sw.body [mymethod Log]
+        } else {
+            set pages($name) \
+                [tablelist::tablelist $sw.body \
+                     -width              50                            \
+                     -height             15                            \
+                     -highlightthickness 1                             \
+                     -activestyle        none                          \
+                     -stretch            end                           \
+                     -background         white                         \
+                     -stripebackground   \#e0e8f0                      \
+                     -labelbackground    $::marsgui::defaultBackground \
+                     -labelcommand       tablelist::sortByColumn       \
+                     -yscrollcommand     [list $sw.y set]              \
+                     -xscrollcommand     [list $sw.x set]              \
+                     -columns {
+                         0 "Option"
+                         0 "Default Value"
+                         0 "Current Value"
+                     }]
+
+        }
+
 
         ttk::scrollbar $sw.y \
-            -command [list $sw.text yview]
+            -command [list $sw.body yview]
         ttk::scrollbar $sw.x \
             -orient  horizontal            \
-            -command [list $sw.text xview]
+            -command [list $sw.body xview]
         
         grid columnconfigure $sw 0 -weight 1
         grid rowconfigure    $sw 0 -weight 1
         
-        grid $sw.text -row 0 -column 0 -sticky nsew
+        grid $sw.body -row 0 -column 0 -sticky nsew
         grid $sw.y    -row 0 -column 1 -sticky ns
         grid $sw.x    -row 1 -column 0 -sticky ew
 
@@ -309,20 +334,34 @@ snit::widget ::marsgui::winbrowser {
     # the options page.
 
     method GetOptions {w} {
-        set fmt "%24s: %s\n"
-        set result ""
+        # FIRST, delete the contents
+        $pages(options) delete 0 end
 
+        # NEXT, get the configuration data
         if {[catch {set records [$w configure]}]} {
             set records [list]
         }
 
         foreach record $records {
-            set opt [lindex $record 0]
+            # FIRST, if the record has only two tokens, it's the short
+            # form of some other option, so we don't need it.
+            if {[llength $record] == 2} {
+                continue
+            }
 
-            append result [format $fmt "$opt" [$w cget $opt]]
+            # NEXT, we don't care about the second and third items.
+            set record [lreplace $record 1 2]
+
+            $pages(options) insert end $record
+
+            if {[lindex $record 1] ne [lindex $record 2]} {
+                $pages(options) cellconfigure end,2 \
+                    -foreground       red           \
+                    -selectforeground yellow
+            }
         }
 
-        $self Display options $result
+        $pages(options) see 0
     }
 
     # GetBindings w
