@@ -10,6 +10,23 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.22, 11 December 2009</h3>
+This build contains mainly some gram(n) improvements and clean up. There are 
+also some improvements in other areas and some documentation for Mars 
+applications. The list of packages is as follows:<p>
+
+<ul>
+  <li> Bug 2353: NaturalDocs documentation for Mars applications
+  <li> Bug 2358: debugger(n): Better status line for isearch messages
+  <li> Bug 2359: reportviewer(n)/reportbrowser(n): isearch and -logcmd
+  <li> Bug 2360: gram(n): Thresholds and Clean-up
+  <li> Bug 2362: gram(n): Optimization and Cleanup
+  <li> Bug 2366: gram(n): Optimize "cancel" method
+  <li> Bug 2367: marsgui(n): Tabless Notebook Widgets
+  <li> Bug 2377: sqlbrowser(n): Simplify sorting code
+  <li> Bug 2378: winbrowser(n): Options are now presented in a tablelist.
+</ul><p>
+
 <h3>Build 1.21, 5 November 2009</h3>
 Shortly after build 1.20 it was discovered that a new Tk widget used in Mars
 was not being packaged properly by the tclapp program that bundles Tcl/Tk
