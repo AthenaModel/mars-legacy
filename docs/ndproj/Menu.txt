@@ -73,6 +73,11 @@ Group: Marsgui  {
    File: winbrowser.tcl  (marsgui/winbrowser.tcl)
    }  # Group: Marsgui
 
+Group: Marsutil  {
+
+   File: mop.tcl  (marsutil/mop.tcl)
+   }  # Group: Marsutil
+
 Group: Index  {
 
    Index: Everything
@@ -87,5 +92,6 @@ Group: Index  {
    Widget Index: Widgets
    Icon Index: Icons
    Object Type Index: Object Types
+   Database Table Index: Database Tables
    }  # Group: Index
 
