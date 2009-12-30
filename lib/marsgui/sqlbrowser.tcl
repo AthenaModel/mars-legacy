@@ -678,10 +678,6 @@ snit::widget ::marsgui::sqlbrowser {
         
         set bspec $options(-layout)
         
-        foreach cspec $bspec {
-            lappend info(columns) [lindex $cspec 0]
-        }
-        
         if {$options(-uid) ne "" &&
             $options(-uid) ni $info(columns)
         } {
