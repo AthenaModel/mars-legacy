@@ -938,6 +938,13 @@ snit::widget ::marsgui::sqlbrowser {
     method {uid curselection} {} {
         require {$options(-uid) ne ""} "-uid is undefined"
 
+        # FIRST, if we've not layed out the columns yet, there's
+        # no selection.
+        if {!$info(layoutFlag)} {
+            return [list]
+        }
+
+        # NEXT, get the selection.
         set cindex [$self cname2cindex $options(-uid)]
         
         set result [list]
