@@ -814,6 +814,8 @@ snit::widget ::marsgui::sqlbrowser {
     #-------------------------------------------------------------------
     # Public Methods
     
+    delegate method cellconfigure   to tlist
+    delegate method cellcget        to tlist
     delegate method columnconfigure to tlist
     delegate method columncget      to tlist
     delegate method curselection    to tlist

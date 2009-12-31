@@ -210,14 +210,16 @@ Returns the value of the specified <i>option</i>.<p>
 
 Sets the values of the specified <i>options</i>.<p>
 
+<<defitem cellcget {<i>win</i> cellcget <i>cellindex option</i>}>>
+<<defitem cellconfigure {<i>win</i> cellconfigure <i>cellindex</i> ?<i>option value...</i>?}>>
 <<defitem columncget {<i>win</i> columncget <i>cindex option</i>}>>
 <<defitem columnconfigure {<i>win</i> columnconfigure <i>cindex</i> ?<i>option value...</i>?}>>
 <<defitem rowcget {<i>win</i> rowcget <i>rindex option</i>}>>
 <<defitem rowconfigure {<i>win</i> rowconfigure <i>rindex</i> ?<i>option value...</i>?}>>
 
 These methods are delegated to the underlying tablelist(n), and query and
-the tablelist(n) row and column options.  See the tablelist(n) documentation
-for details.<p>
+the tablelist(n) row, column and cell options.  See the tablelist(n)
+documentation for details.<p>
 
 <<defitem cindex2cname {<i>win</i> cindex2cname <i>cindex</i>}>>
 
