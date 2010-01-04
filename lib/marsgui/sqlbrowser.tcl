@@ -570,8 +570,12 @@ snit::widget ::marsgui::sqlbrowser {
             return
         }
         
-        # NEXT, Save the selection
-        set ids [$tlist curselection]
+        # NEXT, If we've got a -uid, save the selection. (There's no
+        # point is saving row indices, as the same row index could
+        # refer to an entirely different record after the reload.)
+        if {$options(-uid) ne ""} {
+            set ids [$self uid curselection]
+        }
         
         # NEXT, clear the table
         $self clear
@@ -611,8 +615,10 @@ snit::widget ::marsgui::sqlbrowser {
         # NEXT, sort the contents
         $self SortData
         
-        # NEXT, select the same rows
-        $tlist selection set $ids
+        # NEXT, select the same rows, if we have a -uid.
+        if {$options(-uid) ne ""} {
+            $self uid select $ids
+        }
     }
     
     #-------------------------------------------------------------------
