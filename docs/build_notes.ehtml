@@ -10,6 +10,21 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.23, 5 January 2010</h3>
+
+This build contains a new module, the Mars Order Processor
+(<<xref mop(n)>>), and some fixes to <<xref sqlbrowser(n)>>.<p>
+
+<ul>
+  <li> Bug 2380: mop(n): Mars Order Processor
+  <li> Bug 2391: sqlbrowser(n): error when -uid is not one of the visible columns
+  <li> Bug 2393: sqlbrowser(n): uid curselection fails if columns have not yet been layed out
+  <li> Bug 2394: sqlbrowser(n): cellconfigure/cellcget
+  <li> Bug 2395: sqlbrowser(n): -selectioncmd not called on "reload". 
+</ul><p>
+
+
+
 <h3>Build 1.22, 11 December 2009</h3>
 This build contains mainly some gram(n) improvements and clean up. There are 
 also some improvements in other areas and some documentation for Mars 
