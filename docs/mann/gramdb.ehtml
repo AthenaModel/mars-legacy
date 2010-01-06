@@ -23,7 +23,7 @@ other SQLite3 database.  gramdb(n) adheres to the
 gramdb(n) registers the following schema definitions:<p>
 
 <pre>
-<<gramdb sqlsection schema>>
+<<::simlib::gramdb sqlsection schema>>
 </pre>
 
 <<section COMMANDS>>
