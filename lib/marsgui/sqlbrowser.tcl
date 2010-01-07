@@ -1006,15 +1006,17 @@ snit::widget ::marsgui::sqlbrowser {
         require {$options(-uid) ne ""} "-uid is undefined"
 
         # FIRST, get the row from the view
-        set row(*) ""
+        set gotNothing 1
         
         $db eval "
             SELECT * from $options(-view)
             WHERE $options(-uid) == \$uid
-        " row {}
+        " row {
+            set gotNothing 0
+        }
 
         # NEXT, if we retrieved nothing, there's nothing to do.
-        if {$row(*) eq ""} {
+        if {$gotNothing} {
             return
         }
 
