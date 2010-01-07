@@ -106,7 +106,7 @@ namespace eval ::marsutil::test {
         eventq now
     } -cleanup {
         cleanup
-    } -result {0}
+    } -result {-1}
 
     test init-1.2 {No event types defined by default} -body {
         eventq etypes
@@ -367,8 +367,8 @@ namespace eval ::marsutil::test {
     
     test schedule-1.3 {t not in future} -body {
         eventq define arrival  {dummy} { }
-
-        eventq schedule arrival 0 a b c
+        eventq advance 0
+        eventq schedule arrival 0 dummy
     } -returnCodes {
         error
     } -cleanup {
@@ -462,6 +462,20 @@ id t etype   dummy
 3  3 arrival c     
     }
 
+    test schedule-2.8 {can schedule events at time 0} -body {
+        eventq define arrival  {dummy} { }
+
+        eventq schedule arrival 0 a
+
+        pprint [rdb query {SELECT * FROM eventq_queue_arrival}]
+    } -cleanup {
+        cleanup
+    } -result {
+id t etype   dummy 
+-- - ------- ----- 
+1  0 arrival a     
+    }
+
     #-------------------------------------------------------------------
     # undo schedule
 
@@ -537,8 +551,9 @@ id t etype   dummy
     
     test reschedule-1.3 {Invalid sim time} -body {
         eventq define arrival  {dummy} { }
+        eventq advance 0
         set id [eventq schedule arrival 1 a]
-
+        
         eventq reschedule $id 0
     } -returnCodes {
         error
@@ -726,12 +741,13 @@ id dummy
     } -result {invalid value "foo", expected integer}
 
     test advance-1.2 {max_t not in future} -body {
-        eventq advance 0
+        eventq advance 1
+        eventq advance 1
     } -returnCodes {
         error
     } -cleanup {
         cleanup
-    } -result {specified time not in future: "0"}
+    } -result {specified time not in future: "1"}
     
     # Normal Behavior
     
@@ -759,7 +775,7 @@ id dummy
         cleanup
     } -result {1 3}
 
-    test advance-2.3 {sim time advances to last executed event} -body {
+    test advance-2.3 {sim time advances to max_t} -body {
         eventq define arrival {dummy} { }
         eventq schedule arrival 1 a
         eventq schedule arrival 2 b
@@ -769,9 +785,9 @@ id dummy
         eventq now
     } -cleanup {
         cleanup
-    } -result {3}
+    } -result {10}
 
-    test advance-2.3 {sim time advances to last executed event} -body {
+    test advance-2.4 {trace event exeuctions} -body {
         eventq define arrival {a b} { 
             variable trace
 
@@ -801,7 +817,7 @@ id dummy
 7: departure 1 c=CC
     }
 
-    test advance-2.4 {event can reschedule itself} -body {
+    test advance-2.5 {event can reschedule itself} -body {
         eventq define arrival {a} { 
             eventq reschedule $id 4
         }
@@ -817,6 +833,14 @@ id t etype   a
 -- - ------- - 
 1  4 arrival A 
     }
+
+    test advance-2.6 {can advance to 0} -body {
+        eventq advance 0
+        eventq now
+    } -cleanup {
+        cleanup
+    } -result {0}
+
 
     test advance-3.1 {error thrown in event handler} -body {
         eventq define arrival {a b} { 

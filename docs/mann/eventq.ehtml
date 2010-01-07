@@ -22,9 +22,9 @@ time.<p>
 
 <<subsection "Simulation Time">>
 
-eventq(n) expresses simulated time in integer ticks, starting at 0.
-The simulated time is updated as events execute, and is reset to 0
-on <<iref restart>>.<p>
+eventq(n) expresses simulated time in integer ticks, starting at -1.
+The simulated time is updated as events execute, and is reset to -1
+on <<iref restart>>.  This allows events to be scheduled as of time 0.<p>
 
 eventq(n) is designed to add discrete event simulation capability
 within an existing time-step simulation.  The <<iref advance>> method
@@ -88,7 +88,7 @@ The event queue is manipulated via the subcommands of the
 Advances simulation time, executing all events with execution times
 less than or equal to <i>max_t</i>.  Once all such events have been
 executed, the command returns; the simulation time returned by
-<<iref now>> will be the time of the last executed event.<p>
+<<iref now>> is <i>max_t</i>.<p>
 
 If there are multiple events scheduled for a particular time <i>t</i>,
 they are executed in the order scheduled.  <b>TBD:</b>  Eventually,
@@ -203,7 +203,7 @@ event counter, and so forth unchanged.<p>
 
 <<defitem restart {eventq restart}>>
 
-Resets the event queue to time 0, deleting all scheduled events and
+Resets the event queue to time -1, deleting all scheduled events and
 resetting the event counter to 0.  Note that old event IDs will be
 reused in this case.<p>
 
@@ -218,7 +218,8 @@ Note that the RDB must be restored as well.<p>
 
 Schedules an event of type <i>etype</i> to be executed at time
 <i>t</i>, which must be a time in the future, i.e., strictly greater
-than <<iref now>>.  The <i>args</i> depend on the event type; all
+than <<iref now>>.  Note that it is possible to schedule events to
+execute at time 0.  The <i>args</i> depend on the event type; all
 arguments specified for the type must be included.  See
 <<iref define>> for an example.<p>
 

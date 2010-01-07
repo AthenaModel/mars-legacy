@@ -20,7 +20,8 @@
 # SIMULATION TIME:
 #    The eventq expresses simulated time in integer ticks, starting at
 #    0.  The simulated time is updated as events execute, and is reset
-#    to 0 on "restart".
+#    to "just before" 0 on [eventq restart].  Events can be scheduled
+#    at time 0, and the eventq can be advanced to 0.
 #
 # ADVANCING TIME:
 #    eventq(n) is designed to provide discrete event capability within
@@ -66,9 +67,6 @@ snit::type ::marsutil::eventq {
     # Type Constructor
 
     typeconstructor {
-        namespace import ::marsutil::* 
-        namespace import ::marsutil::*             ;# Unneeded in Tcl 8.5
-
         # FIRST, Define data types
         snit::stringtype eqidentifier -regexp {^[[:alpha:]]+\w*$}
 
@@ -157,11 +155,12 @@ snit::type ::marsutil::eventq {
 
     # info - General info array
     #
-    # time              Current simulation time
+    # time              Current simulation time.  -1 means that time
+    #                   has never been advanced.
     # eventCounter      Generated event IDs
     
     typevariable info -array {
-        time            0
+        time            -1
         eventCounter    0
     }    
 
@@ -229,7 +228,7 @@ snit::type ::marsutil::eventq {
     typemethod advance {max_t} {
         EnsureTimeInFuture $max_t
 
-        set t 0
+        set t -1
 
         while {$t <= $max_t} {
             # FIRST, Get the next event
@@ -244,6 +243,7 @@ snit::type ::marsutil::eventq {
 
             if {$id == 0} {
                 # No more events.
+                set info(time) $max_t
                 break
             }
 
@@ -301,9 +301,9 @@ snit::type ::marsutil::eventq {
         $type reset
         
         # NEXT, reset the event counter
-        set info(time)         0
+        set info(time)         -1
         set info(eventCounter) 0
-        set flags(changed)      1
+        set flags(changed)     1
     }
 
     #-------------------------------------------------------------------
