@@ -20,6 +20,7 @@ package require Tk 8.5
 package require BWidget  1.8
 package require treectrl 2.2.6
 package require tablelist 4.11.2
+package require Plotchart 1.6
 
 #-----------------------------------------------------------------------
 # Package Definition
@@ -69,5 +70,6 @@ source [file join $::marsgui::library rb_bintree.tcl     ]
 source [file join $::marsgui::library sqlbrowser.tcl     ]
 source [file join $::marsgui::library querybrowser.tcl   ]
 source [file join $::marsgui::library isearch.tcl        ]
+source [file join $::marsgui::library timeline.tcl       ]
 
 
