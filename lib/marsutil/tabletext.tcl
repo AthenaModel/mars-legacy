@@ -41,10 +41,12 @@ snit::type ::marsutil::tabletext {
     # rv-$table                Record validator command.
     # fields-$table            List of field names
     # keys-$table              List of key field names
+    # writeable-$table         -writeable table flag
     # fv-$table-$field         Field validator command.
     # unique-$table-$field     -unique field flag
     # required-$table-$field   -required field flag
     # default-$table-$field    -default field value
+    # format-$table-$field     -formatcmd field value
     
     variable schema -array {
         tables {}
@@ -130,6 +132,7 @@ snit::type ::marsutil::tabletext {
         # NEXT, initialize the schema
         set schema(keys-$table)      {}
         set schema(fields-$table)    {}
+        set schema(writeable-$table) 1
         set schema(tv-$table)        ""
         set schema(rv-$table)        ""
         set schema(dependson-$table) {}
@@ -154,6 +157,10 @@ snit::type ::marsutil::tabletext {
                     
                     # NEXT, save the list
                     set schema(dependson-$table) $val
+                }
+
+                -writeable {
+                    set schema(writeable-$table) $val
                 }
 
                 default {
@@ -184,6 +191,9 @@ snit::type ::marsutil::tabletext {
     # -default value
     #    The default value for the field.
     #
+    # -formatcmd cmd
+    #    Command used to output the field's value. 
+    #
     # Defines a field
 
     method field {table field args} {
@@ -199,6 +209,7 @@ snit::type ::marsutil::tabletext {
         set schema(unique-$table-$field) 0
         set schema(required-$table-$field) 0
         set schema(fv-$table-$field) ""
+        set schema(format-$table-$field) ""
 
         # NEXT, process the options.
         while {[llength $args] > 0} {
@@ -216,6 +227,9 @@ snit::type ::marsutil::tabletext {
                 }
                 -validator {
                     set schema(fv-$table-$field) [lshift args]
+                }
+                -formatcmd {
+                    set schema(format-$table-$field) [lshift args]
                 }
                 -default {
                     set schema(default-$table-$field) [lshift args]
@@ -276,6 +290,143 @@ snit::type ::marsutil::tabletext {
         $self clear $db
 
         $self ParseInput $db "$preamble\n$text"
+    }
+
+    #------------------------------------------------------------------
+    # Database writing methods
+
+    # writefile db outfile infile
+    #
+    # db         An sqlite3 database object
+    # outfile    The file to write the simdb(5) file to
+    # infile     The simdb(5) file that was previously read in
+    #
+    # This method writes the tabletext(n) data out to
+    # the simdb(5) file format. Any comments from the
+    # originally read simdb are not retained.
+
+    method writefile {db outfile infile} {
+        # FIRST, open the file for writing
+        set f [open $outfile w]
+
+        # NEXT, write the header
+        puts $f [writeFileHeader $outfile $infile]
+
+        # NEXT, go through the tables in order writing
+        # each one as we go
+        foreach table $schema(tables) {
+            # NEXT, if the table is not writeable, skip it
+            if {!$schema(writeable-$table)} {continue}
+
+            # NEXT, initialize table output
+            set tableout ""
+            $db eval "
+                SELECT * FROM $table 
+            " row {
+                # NEXT, records which are the key fields, if any
+                set recname "\n    record"
+                foreach key $schema(keys-$table) {
+                    append recname " $key $row($key)"
+                }
+
+                set fields ""
+                # NEXT, write the fields associated with the record
+                foreach field $schema(fields-$table) {
+                    # NEXT, No need to write the keys as a field
+                    if {$field in $schema(keys-$table)} {
+                        continue
+                    }
+
+                    # NEXT, No need to write empty fields
+                    if {$row($field) eq ""} {continue}
+
+                    # NEXT, format the field for writing
+                    set ffield $row($field)
+                    if {[string first " " $row($field)] > -1} {
+                        set ffield \
+                            [$self FormatField $table $field $row($field)]
+                    }
+
+                    append fields "\n        field $field [list $ffield]"
+                }
+                # NEXT, make indentation look nice at the end of a record
+                append fields "\n    "
+
+                # NEXT, add the record to the table
+                append tableout "$recname [list $fields]\n"
+            }
+            # NEXT, dump the table to the file
+            puts $f "table $table [list $tableout]\n"
+        }
+        close $f
+    }
+
+    # FormatField table field value
+    #
+    # table     the name of the table the field is from
+    # field     the name of the field
+    # value     the value to be formatted
+    #
+    # This method formats a field value for output. If a -formatcmd was 
+    # specified for a field it is called. If not, the default format
+    # is used.
+    #
+
+    method FormatField {table field value} {
+        # FIRST, if a -formatcmd option was specified call that with the
+        # value
+        if {$schema(format-$table-$field) ne ""} {
+            if {[catch {
+                    callwith $schema(format-$table-$field) $value
+                } result]} {
+                    error "could not format field $field: $value\n$result"
+                }
+
+           set value $result
+
+        } else {
+            # Default behavior
+            # FIRST, split along carriage returns
+            set lines [split $value "\n"]
+
+            # NEXT, if there is one line, assume a single token and
+            # return it.
+            if {[llength $lines] == 1} {
+                return $value
+            }
+
+            # NEXT, build up a single token that consists of properly indented
+            # text so it looks nice on output.
+            set value "\n            [lindex $lines 0]\n"
+            set lines [lrange $lines 1 end]
+            foreach line $lines {
+                append value "            $line\n"
+            }
+            append value "        "
+        }
+
+        return $value
+    }
+
+    # writeFileHeader filename infile
+    #
+    # filename     the name of the file being written
+    # infile       the name of the simdb(5) file that was previously read
+    #
+    # This helper proc outputs a simple file header indicating when the
+    # file was written, what the source file was and the name of the output
+    # file
+
+    proc writeFileHeader {filename infile} {
+        set timeformat {%Y-%m-%d %H:%M:%S}
+        set header "
+        #-------------------------------------------------------------------
+        # TITLE:
+        #     automatically generated simdb: [file tail $filename]
+        #     this file was generated from simdb: [file tail $infile]
+        #     generated on [clock format [clock seconds] -format $timeformat]
+        #"
+        return [outdent "$header\n"]
     }
 
     #-------------------------------------------------------------------
