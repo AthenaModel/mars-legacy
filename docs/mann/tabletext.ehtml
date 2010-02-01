@@ -455,6 +455,13 @@ in some record in the <i>otherTable</i>.<p>
 
 <</deflist validate>>
 
+<<defitem writefile {$tt writefile <i>db outfile infile</i>}>>
+
+Writes the contents of tables, records and fields back out to a file specified
+as <i>outfile</i>. The supplied database object <i>db</i> is used as the source
+of the data. <i>infile</i> is the name of the file used to initially populate
+<i>db</i> and is written to <i>outfile</i>'s header.<p>
+
 <</deflist instance>>
 
 <<section AUTHOR>>
