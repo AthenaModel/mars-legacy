@@ -10,6 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.24, 5 March 2010</h3>
+This build contains a change to how <<xref eventq(n)>> handles events scheduled
+at time 0 and how it advances when given a time greater than the time of the 
+last event in it's queue. It also has a bug fix for <<xref sqlbrowser(n)>>.
+
+
+<ul>
+  <li> Bug 2399: eventq(n): Advance to time 0
+  <li> Bug 2400: sqlbrowser(n): uid update bgerror: can't read "row(id)": no such element in array
+</ul><p>
+
 <h3>Build 1.23, 5 January 2010</h3>
 
 This build contains a new module, the Mars Order Processor
