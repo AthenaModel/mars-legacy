@@ -40,6 +40,12 @@ Timestamp: Internals Documentation Generated d month year
 # --------------------------------------------------------------------------
 
 
+Group: App_cmtool  {
+
+   File: app.tcl  (app_cmtool/app.tcl)
+   File: app_cmtool.tcl  (app_cmtool/app_cmtool.tcl)
+   }  # Group: App_cmtool
+
 Group: App_gram  {
 
    File: app.tcl  (app_gram/app.tcl)
@@ -62,6 +68,7 @@ Group: Simlib  {
    File: gram.sql  (simlib/gram.sql)
    File: gramdb.tcl  (simlib/gramdb.tcl)
    File: gramdb.sql  (simlib/gramdb.sql)
+   File: cellmodel.tcl  (simlib/cellmodel.tcl)
    }  # Group: Simlib
 
 Group: Marsgui  {

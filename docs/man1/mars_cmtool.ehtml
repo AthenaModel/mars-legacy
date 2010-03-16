@@ -1,0 +1,175 @@
+<<manpage {mars(1) mars_cmtool(1)} "cellmodel(5) tool">>
+
+<<section SYNOPSIS>>
+
+<<itemlist>>
+
+<<swallow {
+package require simlib
+namespace import ::simlib::*
+}>>
+
+<<section DESCRIPTION>>
+
+<<deflist program>>
+
+<<defitem {mars cmtool} {mars cmtool <i>subcommand</i> ?<i>options...</i>?}>>
+
+<</deflist program>>
+
+mars_cmtool(1) is a command-line tool for working with <<xref cellmodel(5)>>
+models; see that man page for specifics of the <<xref cellmodel(5)>>
+syntax and semantics.  It defines a number of subcommands, each of
+which has its own syntax.<p>
+
+<<section COMMANDS>>
+
+The application's subcommands are as follows:<p>
+
+<<deflist subcommands>>
+
+<<defitem check {mars cmtool check <i>filename</i>}>>
+
+Loads a <<xref cellmodel(5)>> model from <i>filename</i>.  If the file
+cannot be loaded, outputs an error and halts.  Otherwise, outputs a
+detailed sanity check of the model.  If <<iref run>> or <<iref solve>>
+reject a model becase it is not "sane", use this command to determine
+the problem.<p>
+
+<<defitem dump {mars cmtool dump <i>filename</i> ?-page <i>page</i>?}>>
+
+Produces a dump of the cells in the model, including their values and
+formulas.  If the <b>-page</b> option is included, the output only
+includes the cells from the named <i>page</i>.<p>
+
+<<defitem help {mars cmtool help}>>
+
+Outputs a list of the available subcommands, with a one-line
+description of each.<p>
+
+<<defitem run {mars cmtool run <i>filename</i> ?<i>options...</i>?}>>
+
+Solves the model in the named file one or more times, and outputs a
+comparison of the results for the different cases.  The options are as
+follows:<p>
+
+<<deflist options>>
+
+<<defopt {-epsilon <i>epsilon</i>}>>
+
+Specifies the <i>epsilon</i> to use in the convergence test.  Defaults
+to 0.0001.<p>
+
+<<defopt {-maxiters <i>num</i>}>>
+
+Specifies the maximum number of iterations when iterating a cyclic
+page to convergence.  If the page's "max delta" is still greater than
+the <b>-epsilon</b> after <i>num</i> iterations, the page is said to
+have diverged.  Defaults to 100.<p>
+
+<<defopt {-case <i>name</i> ?<i>cell value...</i>?}>>
+
+This option may be repeated any number of times to define individual
+cases.  Each case has a <i>name</i>, used as a column header in the
+output, and may specify the starting values of one or more cells.
+Before running each case, the model is reset, and the specified values
+are assigned to the cells.<p>
+
+<</deflist options>>
+
+<<defitem solve {mars cmtool solve <i>filename</i> ?<i>options...</i>?}>>
+
+Attempts solve the model, computing acyclic pages and iterating
+acyclic pages to convergence, writing a dump of the final values to
+standard output.  The options allow the computation to be controlled
+and traced.<p>
+
+<<deflist options>>
+
+<<defopt {-epsilon <i>epsilon</i>}>>
+
+Specifies the <i>epsilon</i> to use in the convergence test.  Defaults
+to 0.0001.<p>
+
+<<defopt {-maxiters <i>num</i>}>>
+
+Specifies the maximum number of iterations when iterating a cyclic
+page to convergence.  If the page's "max delta" is still greater than
+the <b>-epsilon</b> after <i>num</i> iterations, the page is said to
+have diverged.  Defaults to 100.<p>
+
+<<defopt {-dumpstart}>>
+
+Dumps the model (as for <<iref dump>>) with its initial cell values,
+before computing any pages.<p>
+
+<<defopt {-dumpfinal}>>
+
+Dumps the model (as for <<iref dump>>) after all computations are
+complete.  If pages diverged, the dumped values might or might not be
+useful.  If no other output is requested, this option is assumed.<p>
+
+<<defopt {-diffpages <i>a b</i>}>>
+
+Dumps a comparison of the content of the two pages named <i>a</i> and
+<i>b</i>.  This option may be repeated multiple times, to request
+comparisons of additional pairs of pages.<p>
+
+<<defopt {-logiters <i>page</i>}>>
+
+Logs the iteration delta for each iteration of the named <i>page</i>.
+This option may be repeated multiple times, to request logging for
+multiple pages.<p>
+
+<<defopt {-dumpiters <i>page</i>}>>
+
+Does a <<iref dump>> of the intermediate values following each
+iteration of <i>page</i>.  This option may be repeated multiple times,
+to request iteration dumping for multiple pages.<p>
+
+<<defopt {-tracevalues <i>page</i>}>>
+
+After the named <i>page</i> has converged or diverged, outputs a table
+of the page's cell values for the first and last three iterations.
+This can be useful when diagnosing divergence errors.  This option may
+be repeated multiple times, to request tracing for multiple
+pages.<p>
+
+<<defopt {-tracedeltas <i>page</i>}>>
+
+After the named <i>page</i> has converged or diverged, outputs a table
+of the deltas for each of the page's cell values for the first and
+last three iterations.  This can be useful when diagnosing divergence
+errors.  This option may be repeated multiple times, to request
+tracing for multiple pages.<p>
+
+<</deflist options>>
+
+<<defitem xref {mars cmtool xref <i>filename</i>}>>
+
+For each cell, in order of definition, outputs a list of the other
+cells whose formulas reference the cell.<p>
+
+<</deflist subcommands>>
+
+
+
+<<section AUTHOR>>
+
+Will Duquette<p>
+
+<<section HISTORY>>
+
+Original application.<p>
+
+<</manpage>>
+
+
+
+
+
+
+
+
+
+
