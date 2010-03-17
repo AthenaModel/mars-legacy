@@ -1161,7 +1161,11 @@ snit::type ::simlib::cellmodel {
     # is not <sane>.
     #
     # Syntax:
-    #    solve
+    #    solve _?start?_
+    #
+    #    start - Name of the page to start with.  The named page and
+    #            all subsequent pages will be solved; prior pages will
+    #            be left alone.
     #
     # Returns the result of the attempt.
     #
@@ -1170,11 +1174,22 @@ snit::type ::simlib::cellmodel {
     #   diverge <page>  - Unsuccessful; the named page diverged.
     #   errors <page>   - There are cell errors on the named page.
     
-    method solve {} {
+    method solve {{start ""}} {
         require {$model(sane)} "Model is not sane."
 
-        # FIRST, solve, each page in sequence.
-        foreach page $model(pages) {
+        # FIRST, get the pages to solve.
+        set pages $model(pages)
+
+        if {$start ne ""} {
+            set ndx [lsearch -exact $pages $start]
+
+            require {$ndx != -1} "Unknown start page: \"$start\""
+
+            set pages [lrange $pages $ndx end]
+        }
+
+        # NEXT, solve, each page in sequence.
+        foreach page $pages {
             # FIRST, solve acyclic pages.
             if {!$model(cyclic-$page)} {
                 # Compute all cells; once is enough.

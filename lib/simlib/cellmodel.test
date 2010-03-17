@@ -44,12 +44,28 @@ namespace eval ::test {
     #-------------------------------------------------------------------
     # Setup
 
+    variable trace
+
     proc Setup {} {
-        cellmodel cm
+        variable trace
+        set trace [list]
+        cellmodel cm -tracecmd ::test::TraceCmd
     }
 
     proc CleanUp {} {
+        variable trace
         cm destroy
+        set trace [list]
+    }
+
+    proc TraceCmd {args} {
+        variable trace
+        lappend trace $args
+    }
+
+    proc dumpTrace {} {
+        variable trace
+        pprint [join $trace \n]\n
     }
 
     # pprint block
@@ -72,7 +88,7 @@ namespace eval ::test {
             [cm cget -tracecmd]
     } -cleanup {
         CleanUp 
-    } -result {0.0001 100 {}}
+    } -result {0.0001 100 ::test::TraceCmd}
 
 
     test creation-1.2 {Empty model} -setup {
@@ -915,6 +931,48 @@ B =            2
     } -result "
 y =           -1 <= 1 - \[x\]/2
 x =            4 <= 2*\[y\] + 6
+    "
+
+    test solve-2.4 {Can trace computation} -setup {
+        Setup
+        # This is a very unsatisfactory model, as it converges
+        # only because I plugged in the right answer.
+        cm load {
+            let y = {1 - [x]/2} -value -1
+            let x = {2*[y] + 6} -value 4
+        }
+    } -body {
+        cm solve
+        dumpTrace
+    } -cleanup {
+        CleanUp
+    } -result "
+iterate null 0 0.0 n/a
+iterate null 1 0.0 \{\}
+converge null 1
+    "
+
+    test solve-2.5 {Can solve starting at a particular page}  -setup {
+        Setup
+        # This is a very unsatisfactory model, as it converges
+        # only because I plugged in the right answer.
+        cm load {
+            let a = {1 - [b]/2} -value -1
+            let b = {2*[a] + 6} -value 4
+
+            page P
+            let y = {1 - [x]/2} -value -1
+            let x = {2*[y] + 6} -value 4
+        }
+    } -body {
+        cm solve P
+        dumpTrace
+    } -cleanup {
+        CleanUp
+    } -result "
+iterate P 0 0.0 n/a
+iterate P 1 0.0 \{\}
+converge P 1
     "
 
     #===================================================================
