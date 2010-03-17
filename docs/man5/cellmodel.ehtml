@@ -110,6 +110,11 @@ If a page contains no circular definitions, it is said to be
 formulas on the page in the most efficient order, regardless of the
 order in which they are defined.<p>
 
+<<subsection "Copying Pages">>
+
+It's possible to create a new page as a copy of an existing page by
+using the <b>-copy</b> option on the <<iref page>> command.<p>
+
 <<section COMMANDS>>
 
 A cell model specification is a Tcl script that uses the following
@@ -164,8 +169,23 @@ The following options are defined:<p>
 <<defopt {-copy <i>page</i>}>>
 
 This option initializes the new page by copying all of the cells from
-the named <i>page</i>.  This allows a new page to be defined with
+the named <i>page</i>; the copied cells can then be left alone or
+redefined by the new page.  This allows a new page to be defined with
 slight modifications or extensions to an existing page.<p>
+
+<<defopt {-except <i>cells</i>}>>
+
+Specifies a list of cell names to exclude when using the <b>-copy</b>
+option.  The new page will not contain the excluded cells.<p>
+
+The cell names should not be qualified.  For example,
+
+<pre>
+    page Q -copy P -except {C1 C2 C3}
+</pre>
+
+will create page Q as a copy of page P, except that the cells P::C1,
+P::C2, and P::C3 will not be copied.<p>
 
 <</deflist options>>
 

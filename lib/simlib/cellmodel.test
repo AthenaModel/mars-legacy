@@ -268,6 +268,32 @@ R::A =            7
 R::B =            8
     }
 
+    test load-2.8 {page -copy -except} -setup {
+        Setup
+    } -body {
+        cm load {
+            page P
+            let A = 5
+            let B = 6
+            let C = 7
+            let D = 8
+
+            page Q -copy P -except {B C}
+            let A = 7
+        }
+
+        pprint [cm dump]
+    } -cleanup {
+        CleanUp
+    } -result {
+P::A =            5
+P::B =            6
+P::C =            7
+P::D =            8
+Q::A =            7
+Q::D =            8
+    }
+
     #-------------------------------------------------------------------
     # get
 

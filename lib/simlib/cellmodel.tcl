@@ -480,6 +480,8 @@ snit::type ::simlib::cellmodel {
     # 
     #   -copy page    - Copies all currently defined cells on the 
     #                   named page
+    #   -except cells - Excludes particular cells from being copied.
+    #                   Ignored if -copy is absent.
 
     method Load_page {loader page args} {
         # FIRST, validate the page name.
@@ -492,6 +494,7 @@ snit::type ::simlib::cellmodel {
         # NEXT, get the options
         array set opts {
             -copy   {}
+            -except {}
         }
 
         while {[llength $args] > 0} {
@@ -507,6 +510,10 @@ snit::type ::simlib::cellmodel {
                     validate {$opts(-copy) in [$self pages]} \
                         "-copy unknown page: \"$opts(-copy)\""
 
+                }
+
+                -except {
+                    set opts(-except) [lshift args]
                 }
 
                 default {
@@ -528,12 +535,17 @@ snit::type ::simlib::cellmodel {
         # Remember the names, because we can override them.
         if {$opts(-copy) ne ""} {
             foreach cell $model(cells-$opts(-copy)) {
+                # Skip excluded cells.
+                if {$model(bare-$cell) in $opts(-except)} {
+                    continue
+                }
+
+                # Add the cell just as it was.
                 $self AddCell $model(bare-$cell)    \
                     -value    $model(value-$cell)   \
                     -formula  $model(formula-$cell)
             }
 
-            # NEXT, each of the new cells can be overridden.
             set trans(copiedCells) $model(cells-$page)
         }
 
