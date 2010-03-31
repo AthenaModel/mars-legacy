@@ -120,7 +120,9 @@ snit::type ::marsgui::gradient {
     # an output color between -mincolor and -maxcolor.  Actually, 
     # inputs from -minlevel to -midlevel scale between -mincolor and
     # -midcolor; inputs from -midlevel to -maxlevel scale between
-    # -midcolor and -maxcolor.
+    # -midcolor and -maxcolor.  Inputs outside of -minlevel,-maxlevel
+    # are clamped.
+   
 
     method color {level} {
         # FIRST, it all depends on where we are relative to the
@@ -130,7 +132,10 @@ snit::type ::marsgui::gradient {
             set out(g) $mid(g)
             set out(b) $mid(b)
         } elseif {$level < $options(-midlevel)} {
-            # FIRST, compute the level fraction
+            # FIRST, clamp.
+            set level [expr {max($options(-minlevel), $level)}]
+
+            # NEXT, compute the level fraction
             set frac \
                 [expr {double($level - $options(-minlevel))/ \
                            double($options(-midlevel) - $options(-minlevel))}]
@@ -145,7 +150,10 @@ snit::type ::marsgui::gradient {
                 }
             }
         } else {
-            # FIRST, compute the level fraction
+            # FIRST, clamp.
+            set level [expr {min($options(-maxlevel), $level)}]
+
+            # NEXT, compute the level fraction
             set frac \
                 [expr {double($level - $options(-midlevel))/ \
                            double($options(-maxlevel) - $options(-midlevel))}]
