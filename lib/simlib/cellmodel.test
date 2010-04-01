@@ -691,7 +691,7 @@ Q::D =            8
         CleanUp
     } -result {constant formula}
 
-    test cellinfo-2.4 {cellinfo value} -setup {
+    test cellinfo-2.4 {cellinfo ivalue} -setup {
         Setup
         cm load {
             let A = 1
@@ -702,9 +702,9 @@ Q::D =            8
         # Note: B's value is 0 because it hasn't yet been evaluated,
         # and no initial -value is given.
         list \
-            [cm cellinfo value A] \
-            [cm cellinfo value B] \
-            [cm cellinfo value C]
+            [cm cellinfo ivalue A] \
+            [cm cellinfo ivalue B] \
+            [cm cellinfo ivalue C]
     } -cleanup {
         CleanUp
     } -result {1 0.0 7}
@@ -792,11 +792,7 @@ Q::D =            8
     #-------------------------------------------------------------------
     # formula
 
-    # formula-1.*: Input validation
-    #
-    # This routine does not yet do input validation.
-
-    test formula-2.1 {formula} -setup {
+    test formula-1.1 {formula} -setup {
         Setup
         cm load {
             let A = 1
@@ -809,6 +805,24 @@ Q::D =            8
     } -cleanup {
         CleanUp
     } -result {{} {[A] + 1}}
+
+    #-------------------------------------------------------------------
+    # value
+    
+    test value-1.1 {value} -setup {
+        Setup
+        cm load {
+            let A = 1
+            let B = {[A] + 1}
+        }
+        cm solve
+    } -body {
+        list \
+            [cm value A] \
+            [cm value B]
+    } -cleanup {
+        CleanUp
+    } -result {1 2.0}
 
     #-------------------------------------------------------------------
     # iterate

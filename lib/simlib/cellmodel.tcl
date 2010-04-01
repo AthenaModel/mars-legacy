@@ -322,7 +322,7 @@ snit::type ::simlib::cellmodel {
     # page-$cell      - The name of the page on which $cell appears.
     # bare-$cell      - The bare name of $cell.
     # type-$cell      - constant|formula
-    # value-$cell     - The initial value of the cell.
+    # ivalue-$cell    - The initial value of the cell.
     # formula-$cell   - The formula expression, or "" for constants.
     # uses-$cell      - List of the fully-qualified names of the cells
     #                   used by $cell's formula.
@@ -395,7 +395,7 @@ snit::type ::simlib::cellmodel {
 
     method reset {} {
         foreach cell $model(cells) {
-            set values($cell) $model(value-$cell)
+            set values($cell) $model(ivalue-$cell)
         }
     }
 
@@ -542,7 +542,7 @@ snit::type ::simlib::cellmodel {
 
                 # Add the cell just as it was.
                 $self AddCell $model(bare-$cell)    \
-                    -value    $model(value-$cell)   \
+                    -value    $model(ivalue-$cell)  \
                     -formula  $model(formula-$cell)
             }
 
@@ -664,7 +664,7 @@ snit::type ::simlib::cellmodel {
         set model(page-$cell)    $trans(page)
         set model(bare-$cell)    $barename
         set model(type-$cell)    $celltype
-        set model(value-$cell)   $value
+        set model(ivalue-$cell)  $value
         set model(formula-$cell) $formula
         set model(uses-$cell)    [list]
         set model(usedby-$cell)  [list]
@@ -1321,6 +1321,17 @@ snit::type ::simlib::cellmodel {
         }
 
         return $model($field-$cell)
+    }
+
+    # value cell
+    #
+    # cell    A cell name
+    #
+    # Returns the current value of the named cell.  The cell must
+    # exist.
+
+    method value {cell} {
+        return $values($cell)
     }
 
     # formula cell

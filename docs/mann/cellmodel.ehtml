@@ -134,7 +134,7 @@ Returns information about the specified <i>cell</i>.  The available
   <li> <b>bare</b> -- The cell's bare (unqualified) name.
   <li> <b>type</b> -- Whether the cell is a <b>constant</b> or a
        <b>formula</b> cell.
-  <li> <b>value</b> -- The cell's current value.
+  <li> <b>ivalue</b> -- The cell's initial value.
   <li> <b>formula</b> -- The cell's formula, or "" if none.
   <li> <b>uses</b> -- A list of the fully-qualified names of the cells
        used by this cell's formula.
@@ -243,6 +243,11 @@ division by zero) on the named page.<p>
 
 Note that it's an error to call <<iref solve>> if the model is not
 <<iref sane>>.<p>
+
+<<defitem value {<i>object</i> value <i>cell</i>}>>
+
+Returns the current value of the named <i>cell</i>.  The cell
+must exist.<p>
 
 <</deflist instance>>
 
