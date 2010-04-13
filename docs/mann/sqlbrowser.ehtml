@@ -364,6 +364,10 @@ name.<p>
 Sets the foreground color of the cell with the given <i>uid</i>
 and column name.<p>
 
+<<defitem {uid setcelltext} {<i>win</i> uid setcelltext <i>uid cname value</i>}>>
+Sets the text of the cell with the given <i>uid</i>
+and column name.<p>
+
 <<defitem {uid setfont} {<i>win</i> uid setfont <i>uid font</i>}>>
 
 Sets the font of the row with the given <i>uid</i>.<p>

@@ -1175,6 +1175,20 @@ snit::widget ::marsgui::sqlbrowser {
         $tlist cellconfigure $uidmap($uid),$cindex -background $color
     }
 
+    # uid setcelltext uid cname value
+    #
+    # uid    A row UID
+    # cname  A column name
+    # value  The value that the column should take
+    #
+    # This method translates UID and cname to a row index and cindex
+    # and sets the text of the cell to the specified value.
+
+    method {uid setcelltext} {uid cname value} {
+        set cindex [$self cname2cindex $cname]
+
+        $tlist cellconfigure -$uidmap($uid),$cindex -text $value
+    }
 
     # uid setfont uid font
     #
