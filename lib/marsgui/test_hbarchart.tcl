@@ -49,7 +49,12 @@ proc main {argv} {
         "United States"
     }
 
-    set numSeries 4
+    set numSeries 1
+
+    if {[llength $argv] > 0} {
+        set numSeries [lindex $argv 0]
+    }
+
     set xmin -100
     set xmax  100
     
@@ -87,7 +92,7 @@ proc main {argv} {
     }
 
 
-    debugger new
+    bind . <Control-F12> {debugger new}
 }
 
 

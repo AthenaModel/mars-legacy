@@ -229,8 +229,9 @@ snit::widgetadaptor ::marsgui::hbarchart {
     # yaxis.font       - Font used for y-axis labels
     #
     # data.barheight   - Height of each data bar, in pixels.
-    # data.gap         - Vertical gap between successive bar groups
+    # data.mingap      - Minimum vertical gap between successive bar groups
     #                    in pixels.
+    # data.maxgap      - Maximum vertical gap between successive bar groups
     # data.color<n>    - Fill color for each data bar,
     #                    0...chart.maxseries.
     #
@@ -269,7 +270,8 @@ snit::widgetadaptor ::marsgui::hbarchart {
         yaxis.font       {"Nimbus Sans" -10}
         yaxis.pad        2
 
-        data.gap         8
+        data.mingap      1
+        data.maxgap      10
         data.barheight   10
         data.color0      \#33FFFF
         data.color1      \#006633
@@ -282,7 +284,7 @@ snit::widgetadaptor ::marsgui::hbarchart {
         data.color8      \#FF6699
         data.color9      \#9999FF
 
-        legend.linkfont  {"Nimbus Sans" -12 underline}
+        legend.linkfont  {"Nimbus Sans" -10 underline}
         legend.linkcolor blue
         legend.font      {"Nimbus Sans" -10}
         legend.gap       5
@@ -521,6 +523,13 @@ snit::widgetadaptor ::marsgui::hbarchart {
 
         set pymax 0.0
         set xmin 0.0
+        let baseGap {
+            min($parms(data.mingap) + $layout(numSeries), $parms(data.maxgap))
+        }
+
+        let gap {
+            max($baseGap - 2*$barOffset, 0)
+        }
 
         foreach lab $options(-ylabels) {
             # Save the y-coordinate of the upper edge of each bar
@@ -541,7 +550,7 @@ snit::widgetadaptor ::marsgui::hbarchart {
             
             let xmin {min($xmin, $x)}
 
-            let pymax {$pymax + $grpHeight + $parms(data.gap)}
+            let pymax {$pymax + $grpHeight + $gap}
         }
 
         # NEXT, move all the ylabels to the right so that they
