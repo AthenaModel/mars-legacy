@@ -130,20 +130,18 @@ snit::widgetadaptor ::marsgui::hbarchart {
 
     # Option: -xmin
     #
-    # Minimum value displayed on the X axis
+    # Minimum value displayed on the X axis, or ""
     
     option -xmin                         \
-        -type            snit::double    \
-        -default         0.0             \
+        -default         ""              \
         -configuremethod ConfigAndRender
 
     # Option: -xmax
     #
-    # Maximum value displayed on the X axis
+    # Maximum value displayed on the X axis, or ""
     
     option -xmax                         \
-        -type            snit::double    \
-        -default         100.0           \
+        -default         ""              \
         -configuremethod ConfigAndRender
 
     # Option: -xformat
@@ -189,6 +187,8 @@ snit::widgetadaptor ::marsgui::hbarchart {
 
         array unset series
         set series(names) [list]
+        set series(min)   ""
+        set series(max)   ""
     }
 
     #-------------------------------------------------------------------
@@ -313,6 +313,8 @@ snit::widgetadaptor ::marsgui::hbarchart {
     #                    area on the main canvas.
     #    cymax         - The y coordinate of the bottom of the plot
     #                    area on the main canvas.
+    #    xmax          - Maximum x data coordinate
+    #    xmin          - Minimum x data coordinate
     #    pxmax         - The x coordinate, in pixels, of xmax in the data.
     #    ppu           - The number of pixels per data unit.
 
@@ -327,9 +329,13 @@ snit::widgetadaptor ::marsgui::hbarchart {
     #   label-$name - Human readable label for the named series
     #   data-$name  - List of data values for the named series.
     #   bar-$id     - List {ylabel series x} for the specified bar.
+    #   min         - Minimum X value across series
+    #   max         - Maximum X value across series
 
     variable series -array { 
         names {}
+        min   {}
+        max   {}
     }
 
     # Variable: info
@@ -459,10 +465,6 @@ snit::widgetadaptor ::marsgui::hbarchart {
         $hull delete !win
         $plot delete all
         array unset layout
-
-        # NEXT, verify the drawing options.
-        require {$options(-xmin) < $options(-xmax)} \
-            "-xmin >= -xmax"
 
         # NEXT, Render the Y-axis labels into the plot widget.
         $self RenderYAxis
@@ -767,31 +769,60 @@ snit::widgetadaptor ::marsgui::hbarchart {
     # Method: RenderXAxis
     #
     # This method renders the X-axis labels and ticks; as part of this,
-    # it computes the scaling from the data range,-xmin to -xmax,
-    # to the pixel range, pxmin to pxmax.
+    # it computes the scaling from the data range to the pixel range, 
+    # pxmin to pxmax.
     #
     # It saves the following layout data.
     #
+    # - xmax
+    # - xmin
     # - pxmax
     # - ppu
 
     method RenderXAxis {} {
-        # FIRST, pxmax is simply the width of the window minus the
+        # FIRST, determine the data min and max.  The purpose of this
+        # little dance is to use the -xmin and -xmax values
+        # if specified, but to use rounded data values otherwise.
+        set dmin $options(-xmin)
+        set dmax $options(-xmax)
+
+        if {$dmin eq "" || $dmin > $series(min)} {
+            set dmin $series(min)
+        }
+
+        if {$dmax eq "" || $dmax > $series(max)} {
+            set dmax $series(max)
+        }
+
+        lassign [roundrange $dmin $dmax] rmin rmax
+
+        set layout(xmin) $options(-xmin)
+        set layout(xmax) $options(-xmax)
+
+        if {$layout(xmin) eq "" || $layout(xmin) > $dmin} {
+            set layout(xmin) $rmin
+        }
+
+        if {$layout(xmax) eq "" || $layout(xmax) < $dmax} {
+            set layout(xmax) $rmax
+        }
+
+        # NEXT, pxmax is simply the width of the window minus the
         # margin.
         let layout(pxmax) $layout(cxmax)
 
         # NEXT, Compute pixels Per Unit
         let layout(ppu) {
             ($layout(pxmax) - $layout(pxmin)) /
-            (double($options(-xmax)) - double($options(-xmin)))
+            (double($layout(xmax)) - double($layout(xmin)))
         }
 
         # NEXT, draw ticks at pxmin, pxmax, and x=0
-        $self DrawTick $options(-xmin)
-        $self DrawTick $options(-xmax)
+        $self DrawTick $layout(xmin)
+        $self DrawTick $layout(xmax)
 
-        if {$options(-xmin) < 0.0 &&
-            $options(-xmax) > 0.0
+        if {$layout(xmin) < 0.0 &&
+            $layout(xmax) > 0.0
         } {
             $self DrawTick 0.0
 
@@ -823,7 +854,7 @@ snit::widgetadaptor ::marsgui::hbarchart {
 
         let py {$py + $parms(xaxis.pad)}
 
-        if {$x == $options(-xmax)} {
+        if {$x == $layout(xmax)} {
             set anchor ne
         } else {
             set anchor n
@@ -846,7 +877,7 @@ snit::widgetadaptor ::marsgui::hbarchart {
     #   x - An X-coordinate in data units
     
     method x2px {x} {
-        expr {($x - $options(-xmin))*$layout(ppu) + $layout(pxmin)}
+        expr {($x - $layout(xmin))*$layout(ppu) + $layout(pxmin)}
     }
 
     # Method: RenderBars
@@ -859,9 +890,9 @@ snit::widgetadaptor ::marsgui::hbarchart {
 
     method RenderBars {} {
         # FIRST, determine the base of each bar.
-        if {$options(-xmin) > 0.0} {
+        if {$layout(xmin) > 0.0} {
             set bx $layout(pxmin)
-        } elseif {$options(-xmax) < 0.0} {
+        } elseif {$layout(xmax) < 0.0} {
             set bx $layout(pxmax)
         } else {
             set bx [$self x2px 0.0]
@@ -1211,7 +1242,24 @@ snit::widgetadaptor ::marsgui::hbarchart {
         }
 
         if {$opts(-data) ne ""} {
+            # FIRST, save the series
             set series(data-$name) $opts(-data)
+
+            # NEXT, get the min and max values
+            set min [tcl::mathfunc::min {*}$opts(-data)]
+            set max [tcl::mathfunc::max {*}$opts(-data)]
+
+            if {$series(min) eq ""} {
+                set series(min) $min
+            } else {
+                let series(min) {min($series(min), $min)}
+            }
+
+            if {$series(max) eq ""} {
+                set series(max) $max
+            } else {
+                let series(max) {min($series(max), $max)}
+            }
         }
 
         # NEXT, make sure we have data.

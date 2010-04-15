@@ -50,7 +50,8 @@ values.  Defaults to "%.1f".<p>
 
 These options specify the displayed range for the X-axis: plotted
 values are expected to be between <i>xmin</i> and <i>xmax</i>,
-inclusive.  The default range is 0.0 to 100.0.<p>
+inclusive.  If either or both values are the empty string, the
+relevant bound is computed from the data.<p>
 
 <<defopt {-xtext <i>text</i>}>>
 

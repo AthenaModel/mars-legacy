@@ -48,6 +48,7 @@ namespace eval ::marsutil:: {
         percent         \
         pickfrom        \
         poisson         \
+        roundrange      \
         readfile        \
         require         \
         stringToRegexp  \
@@ -322,6 +323,20 @@ proc ::marsutil::min {x y} {
 
 proc ::marsutil::max {x y} {
     expr {($x > $y) ? $x : $y}
+}
+
+# roundrange min max
+#
+# Returns a range (rmin, rmax) no narrower than (min, max)
+# where rmin is rounded down and rmax is rounded up a reasonable
+# amount give the size of the interval.
+
+proc roundrange {min max} {
+    set unit [expr {10.0**round(log10($max - $min))}]
+    set max  [expr {$unit * ceil($max/$unit)}]
+    set min  [expr {$unit * floor($min/$unit)}]
+
+    return [list $min $max]
 }
 
 # gettimeofday

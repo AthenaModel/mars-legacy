@@ -49,7 +49,7 @@ proc main {argv} {
         "United States"
     }
 
-    set numSeries 1
+    set numSeries 4
 
     if {[llength $argv] > 0} {
         set numSeries [lindex $argv 0]

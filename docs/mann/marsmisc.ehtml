@@ -141,6 +141,13 @@ Returns the maximum of the two numbers <i>x</i> and <i>y</i>.<p>
 
 Returns the minimum of the two numbers <i>x</i> and <i>y</i>.<p>
 
+<<defitem roundrange {roundrange <i>min max</i>}>>
+
+Given a range of numbers (<i>min, max</i>), rounds <i>min</i> down and
+<i>max</i> up by a power of ten appropriate for the size of the
+interval.  This command is useful when generating min and max bounds
+for a data plot based on the data to be plotted.<p>
+
 <<defitem gettimeofday {gettimeofday}>>
 
 Returns the current wall-clock time in decimal seconds as a
