@@ -169,10 +169,7 @@ snit::widgetadaptor ::marsgui::hbarchart {
         set options($opt) $val
 
         # Render later, when things have settled down.
-
-        if {[winfo ismapped $win]} {
-            $renderer schedule -nocomplain
-        }
+        $self ScheduleRender
     }
 
 
@@ -1135,6 +1132,17 @@ snit::widgetadaptor ::marsgui::hbarchart {
         array unset trans
     }
 
+    # Method: ScheduleRender
+    #
+    # Schedules the renderer timeout, only if the window is currently
+    # mapped.
+
+    method ScheduleRender {} {
+        if {[winfo ismapped $win]} {
+            $renderer schedule -nocomplain
+        }
+    }
+
     #-------------------------------------------------------------------
     # Group: Public Methods
     #
@@ -1212,9 +1220,7 @@ snit::widgetadaptor ::marsgui::hbarchart {
 
 
         # NEXT, schedule the next rendering
-        if {[winfo ismapped $win]} {
-            $renderer schedule -nocomplain
-        }
+        $self ScheduleRender
     }
 
     
