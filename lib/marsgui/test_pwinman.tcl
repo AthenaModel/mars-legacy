@@ -106,7 +106,7 @@ proc main {argv} {
 
     ttk::button .new \
         -text     "New Chart"  \
-        -command  {CreatePwin [.man add]}
+        -command  {CreatePwin [.man insert 0]}
 
     pwinman .man \
         -width 600 \

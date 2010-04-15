@@ -131,7 +131,11 @@ snit::widget ::marsgui::pwinman {
         if {$pos eq "end"} {
             set pos $end
         } elseif {$pos ni $pwins} {
-            $self ValidateIntegerPos $pos
+            require {
+                [string is integer -strict $pos] &&
+                $pos >= 0                        &&
+                $pos <= [llength $pwins]
+            } "Invalid position: \"$pos\""
         }
 
         # NEXT, create a new pwin.
@@ -318,16 +322,16 @@ snit::widget ::marsgui::pwinman {
         [lindex $pwins end] configure -downstate disabled
     }
 
-    # Method: ValidateIntegerPosition
+    # Method: ValidateIntegerPos
     #
     # Validates a window pos specified as an integer index.
     #
     # Syntax:
-    #   ValidateIntegerPosition _pos_
+    #   ValidateIntegerPos _pos_
     #
     #   pos - A position that should be the integer index of a pwin.
 
-    method ValidateIntegerPosition {pos} {
+    method ValidateIntegerPos {pos} {
         require {
             [string is integer -strict $pos] &&
             [lindex $pwins $pos] ne ""
