@@ -91,7 +91,7 @@ proc main {argv} {
         .chart plot series$s -label "Series $s" -data $data($s)
     }
 
-
+    bind .chart <3> {puts "Right-click!"}
     bind . <Control-F12> {debugger new}
 }
 

@@ -397,6 +397,10 @@ snit::widgetadaptor ::marsgui::hbarchart {
                               -anchor ne            \
                               -window $legend]
 
+        # NEXT, let the plot and legend canvases respond to
+        # events on the main widget.
+        bindtags $plot   [linsert [bindtags $plot]   0 $win]
+        bindtags $legend [linsert [bindtags $legend] 0 $win]
 
         # NEXT, do event bindings.
         bind $win <Configure> [list $renderer schedule -nocomplain]
