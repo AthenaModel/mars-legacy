@@ -169,7 +169,10 @@ snit::widgetadaptor ::marsgui::hbarchart {
         set options($opt) $val
 
         # Render later, when things have settled down.
-        $renderer schedule -nocomplain
+
+        if {[winfo ismapped $win]} {
+            $renderer schedule -nocomplain
+        }
     }
 
 
@@ -396,6 +399,9 @@ snit::widgetadaptor ::marsgui::hbarchart {
                               -tags   win           \
                               -anchor ne            \
                               -window $legend]
+
+        # NEXT, render when mapped.
+        bind $win <Map> [list $renderer schedule -nocomplain]
 
         # NEXT, let the plot and legend canvases respond to
         # events on the main widget.
@@ -1206,7 +1212,9 @@ snit::widgetadaptor ::marsgui::hbarchart {
 
 
         # NEXT, schedule the next rendering
-        $renderer schedule -nocomplain
+        if {[winfo ismapped $win]} {
+            $renderer schedule -nocomplain
+        }
     }
 
     
