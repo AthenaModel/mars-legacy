@@ -128,22 +128,6 @@ snit::widgetadaptor ::marsgui::hbarchart {
         -default         {}              \
         -configuremethod ConfigAndRender
 
-    # Option: -xmin
-    #
-    # Minimum value displayed on the X axis, or ""
-    
-    option -xmin                         \
-        -default         ""              \
-        -configuremethod ConfigAndRender
-
-    # Option: -xmax
-    #
-    # Maximum value displayed on the X axis, or ""
-    
-    option -xmax                         \
-        -default         ""              \
-        -configuremethod ConfigAndRender
-
     # Option: -xformat
     #
     # format conversion specifier for formatting X values for display.
@@ -329,13 +313,15 @@ snit::widgetadaptor ::marsgui::hbarchart {
     #   label-$name - Human readable label for the named series
     #   data-$name  - List of data values for the named series.
     #   bar-$id     - List {ylabel series x} for the specified bar.
-    #   min         - Minimum X value across series
-    #   max         - Maximum X value across series
+    #   rmin-$name  - Value of -rmin for named series, or ""
+    #   rmax-$name  - Value of -rmax for named series, or ""
+    #   dmin-$name  - Min data value for named series, or "" if -rmin
+    #                 is given.
+    #   dmax-$name  - Max data value for named series, or "" if -rmax
+    #                 is given.
 
     variable series -array { 
         names {}
-        min   {}
-        max   {}
     }
 
     # Variable: info
@@ -476,6 +462,9 @@ snit::widgetadaptor ::marsgui::hbarchart {
         # NEXT, Position the plot canvas on the main canvas, and
         # set its scroll region.
         $self PositionPlot
+
+        # NEXT, Compute the X-axis bounds.
+        $self ComputeXMinMax
 
         # NEXT, render the X-axis ticks and labels.
         $self RenderXAxis
@@ -766,6 +755,72 @@ snit::widgetadaptor ::marsgui::hbarchart {
         }
     }
 
+    # Method: ComputeXMinMax
+    #
+    # This method computes the minimum and maximum bounds for the
+    # X-axis from the bounds for each plotted series, rounding the
+    # extremes up as needed.    It saves the following layout data.
+    #
+    # - xmin
+    # - xmax
+
+    method ComputeXMinMax {} {
+        # FIRST, we don't know the bounds.
+        set xmin +Inf
+        set xmax -Inf
+
+        # NEXT, loop for the series, and determine the overall
+        # bounds--and whether they are _a priori_ range bounds,
+        # or are derived from the data.
+
+        set dminFlag 0
+        set dmaxFlag 0
+
+        foreach name $series(names) {
+            if {$series(rmin-$name) ne ""} {
+                if {$series(rmin-$name) < $xmin} {
+                    set xmin $series(rmin-$name)
+                    set dminFlag 0
+                }
+            } else {
+                if {$series(dmin-$name) < $xmin} {
+                    set xmin $series(dmin-$name)
+                    set dminFlag 1
+                }
+            }
+
+            if {$series(rmax-$name) ne ""} {
+                if {$series(rmax-$name) > $xmax} {
+                    set xmax $series(rmax-$name)
+                    set dmaxFlag 0
+                }
+            } else {
+                if {$series(dmax-$name) > $xmax} {
+                    set xmax $series(dmax-$name)
+                    set dmaxFlag 1
+                }
+            }
+        }
+
+        # NEXT, if either extreme is based on data, compute and
+        # apply the rounded extreme(s).
+        if {$dminFlag || $dmaxFlag} {
+            lassign [roundrange $xmin $xmax] rxmin rxmax
+
+            if {$dminFlag} {
+                set xmin $rxmin
+            }
+
+            if {$dmaxFlag} {
+                set xmax $rxmax
+            }
+        }
+
+        # FINALLY, save the computed extremes.
+        set layout(xmin) $xmin
+        set layout(xmax) $xmax
+    }
+
     # Method: RenderXAxis
     #
     # This method renders the X-axis labels and ticks; as part of this,
@@ -774,40 +829,11 @@ snit::widgetadaptor ::marsgui::hbarchart {
     #
     # It saves the following layout data.
     #
-    # - xmax
-    # - xmin
     # - pxmax
     # - ppu
 
     method RenderXAxis {} {
-        # FIRST, determine the data min and max.  The purpose of this
-        # little dance is to use the -xmin and -xmax values
-        # if specified, but to use rounded data values otherwise.
-        set dmin $options(-xmin)
-        set dmax $options(-xmax)
-
-        if {$dmin eq "" || $dmin > $series(min)} {
-            set dmin $series(min)
-        }
-
-        if {$dmax eq "" || $dmax > $series(max)} {
-            set dmax $series(max)
-        }
-
-        lassign [roundrange $dmin $dmax] rmin rmax
-
-        set layout(xmin) $options(-xmin)
-        set layout(xmax) $options(-xmax)
-
-        if {$layout(xmin) eq "" || $layout(xmin) > $dmin} {
-            set layout(xmin) $rmin
-        }
-
-        if {$layout(xmax) eq "" || $layout(xmax) < $dmax} {
-            set layout(xmax) $rmax
-        }
-
-        # NEXT, pxmax is simply the width of the window minus the
+        # FIRST, pxmax is simply the width of the window minus the
         # margin.
         let layout(pxmax) $layout(cxmax)
 
@@ -1196,6 +1222,10 @@ snit::widgetadaptor ::marsgui::hbarchart {
     # Options:
     #   -label - The human-readable label; defaults to the _name_.
     #   -data  - A list of X-values, one for each of the -ylabels.
+    #   -rmin  - Lower bound for the plotted data type, or "" if none.
+    #            Defaults to "".
+    #   -rmax  - Upper bound for the plotted data type, or "" if none.
+    #            Defaults to "".
 
     method plot {name args} {
         # FIRST, get the options
@@ -1220,6 +1250,15 @@ snit::widgetadaptor ::marsgui::hbarchart {
             "Number of values to plot doesn't match the number of -ylabels"
                 }
 
+                -rmin -
+                -rmax {
+                    set opts($opt) [lshift args]
+
+                    if {$opts($opt) ne ""} {
+                        snit::double validate $opts($opt)
+                    }
+                }
+
                 default {
                     error "Unknown option: \"$opt\""
                 }
@@ -1234,6 +1273,10 @@ snit::widgetadaptor ::marsgui::hbarchart {
             lappend series(names) $name
             set series(label-$name) $name
             set series(data-$name) {}
+            set series(rmin-$name) {}
+            set series(rmax-$name) {}
+            set series(dmin-$name) {}
+            set series(dmax-$name) {}
         }
 
         # NEXT, apply the options.
@@ -1241,24 +1284,25 @@ snit::widgetadaptor ::marsgui::hbarchart {
             set series(label-$name) $opts(-label)
         }
 
+        if {[info exists opts(-rmin)]} {
+            set series(rmin-$name) $opts(-rmin)
+        }
+
+        if {[info exists opts(-rmax)]} {
+            set series(rmax-$name) $opts(-rmax)
+        }
+
         if {$opts(-data) ne ""} {
             # FIRST, save the series
             set series(data-$name) $opts(-data)
 
-            # NEXT, get the min and max values
-            set min [tcl::mathfunc::min {*}$opts(-data)]
-            set max [tcl::mathfunc::max {*}$opts(-data)]
-
-            if {$series(min) eq ""} {
-                set series(min) $min
-            } else {
-                let series(min) {min($series(min), $min)}
+            # NEXT, get the dmin and dmax values if need be.
+            if {$series(rmin-$name) eq ""} {
+                set series(dmin-$name) [tcl::mathfunc::min {*}$opts(-data)]
             }
 
-            if {$series(max) eq ""} {
-                set series(max) $max
-            } else {
-                let series(max) {min($series(max), $max)}
+            if {$series(rmax-$name) eq ""} {
+                set series(dmax-$name) [tcl::mathfunc::max {*}$opts(-data)]
             }
         }
 

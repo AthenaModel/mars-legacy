@@ -45,14 +45,6 @@ Specifies the widget of the chart window.<p>
 Specifies an <<xref tcl:format(n)>> conversion for formatting data
 values.  Defaults to "%.1f".<p>
 
-<<defopt {-xmin <i>xmin</i>}>>
-<<defopt {-xmax <i>xmax</i>}>>
-
-These options specify the displayed range for the X-axis: plotted
-values are expected to be between <i>xmin</i> and <i>xmax</i>,
-inclusive.  If either or both values are the empty string, the
-relevant bound is computed from the data.<p>
-
 <<defopt {-xtext <i>text</i>}>>
 
 Specifies a label for the X-axis.    If <i>text</i> is the empty
@@ -129,6 +121,15 @@ Specifies a list of numeric data values, one for each label in
 Specifies a label for this series of data.  The label is used in the
 legend.  If no <b>-label</b> is given, the series <i>name</i> is used
 instead.<p>
+
+<<defopt {-rmin <i>min</i>}>>
+<<defopt {-rmax <i>max</i>}>>
+
+These options specify the range bounds for the series--that is, not
+the min and max values in the data, but the logical min and max value
+for the data type.  Strict percentages, for example, have a range
+from 0.0 to 100.0.  If one of these options is omitted or explicitly
+set to the empty string, the relevant bound is computed from the data.<p>
 
 <</deflist options>>
 

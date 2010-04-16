@@ -49,15 +49,20 @@ proc main {argv} {
         "United States"
     }
 
-    set numSeries 4
+    # Generate spec.  xmin,xmax is the range of data to generate;
+    # rmin,rmax is the bounds to give to plot.
+    # xmin xmax rmin rmax
+    set series {
+        {-80 80 -80 80}
+        {-75 85 {}  {}}
+    }
+
+    set numSeries [llength $series]
 
     if {[llength $argv] > 0} {
         set numSeries [lindex $argv 0]
     }
 
-    set xmin -100
-    set xmax  100
-    
     hbarchart .chart \
         -width  400  \
         -height 300  \
@@ -65,8 +70,6 @@ proc main {argv} {
         -titlepos n               \
         -xtext  "Satisfaction"    \
         -ytext  "Countries"       \
-        -xmin   $xmin             \
-        -xmax   $xmax             \
         -xformat %.1f             \
         -yscrollcommand [list .yscroll set] \
         -ylabels  $countries
@@ -80,6 +83,11 @@ proc main {argv} {
     pack .chart -fill both -expand yes
 
     for {set s 0} {$s < $numSeries} {incr s} {
+        # If we have more series than data, use the last set of ranges.
+        if {$s < [llength $series]} {
+            lassign [lindex $series $s] xmin xmax rmin rmax
+        }
+
         set data($s) [list]
 
         foreach c $countries {
@@ -88,7 +96,11 @@ proc main {argv} {
             lappend data($s) $x
         }
 
-        .chart plot series$s -label "Series $s" -data $data($s)
+        .chart plot series$s \
+            -label "Series $s" \
+            -data  $data($s)   \
+            -rmin  $rmin       \
+            -rmax  $rmax
     }
 
     bind .chart <3> {puts "Right-click!"}
