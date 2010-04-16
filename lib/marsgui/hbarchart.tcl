@@ -765,7 +765,14 @@ snit::widgetadaptor ::marsgui::hbarchart {
     # - xmax
 
     method ComputeXMinMax {} {
-        # FIRST, we don't know the bounds.
+        # FIRST, if there are no series, just use defaults.
+        if {[llength $series(names)] == 0} {
+            set layout(xmin) 0.0
+            set layout(xmax) 1.0
+            return
+        }
+
+        # NEXT, we don't know the bounds.
         set xmin +Inf
         set xmax -Inf
 
