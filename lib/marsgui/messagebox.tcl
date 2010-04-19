@@ -13,6 +13,13 @@
 #    "Do not show this message again" check box; ignoring the message the
 #    next time is automatic.
 #
+#    In addition, it provides a dialog for requesting a string value
+#    from the user.
+#
+# TBD:
+#    The caller should be able to specify arbitrary Tk images is
+#    the value of -icon.
+#
 #-----------------------------------------------------------------------
 
 namespace eval ::marsgui:: {
@@ -207,6 +214,10 @@ snit::type ::marsgui::messagebox {
 
     typevariable dialog .messagebox
 
+    # getsdlg -- Name of the gets dialog widget
+
+    typevariable getsdlg .messageboxgets
+
     # opts -- Array of option settings.  See popup for values
 
     typevariable opts -array {}
@@ -217,6 +228,9 @@ snit::type ::marsgui::messagebox {
 
     # choice -- The user's choice
     typevariable choice {}
+
+    # errorText -- Error message, for "gets".
+    typevariable errorText {}
 
 
     #-------------------------------------------------------------------
@@ -251,7 +265,7 @@ snit::type ::marsgui::messagebox {
 
     typemethod popup {args} {
         # FIRST, get the option values
-        $type ParseOptions $args
+        $type ParsePopupOptions $args
 
         # NEXT, ignore it if they've so indicated
         if {[info exists ignore($opts(-ignoretag))] &&
@@ -384,13 +398,13 @@ snit::type ::marsgui::messagebox {
         return $choice
     }
 
-    # ParseOptions arglist
+    # ParsePopupOptions arglist
     #
     # arglist     List of popup args
     #
     # Parses the options into the opts array
 
-    typemethod ParseOptions {arglist} {
+    typemethod ParsePopupOptions {arglist} {
         # FIRST, set the option defaults
         array set opts {
             -buttons       {ok OK}
@@ -484,6 +498,241 @@ snit::type ::marsgui::messagebox {
             array unset ignore
         }
     }
+
+    #-------------------------------------------------------------------
+    # gets
+
+    # gets option value....
+    #
+    # -oktext text           Text for the OK button.
+    # -icon image            error, info, question, warning, peabody
+    # -message string        Message to display.  Will be wrapped.
+    # -parent window         The message box appears over the parent window
+    # -title string          Title of the message box
+    # -validationcmd cmd     Validation command
+    #
+    # Pops up the "get string" message box.  The buttons will appear at 
+    # the bottom, left to right, packed to the right.  The OK button will
+    # have the specified text; it defaults to "OK".  The
+    # -icon will be displayed; defaults to "question".  The -message will be 
+    # wrapped into the message space; the entry widget will be below
+    # the -message. The dialog will be application modal,
+    # and centered over the specified -parent window.  It will have the
+    # specified -title string.
+    #
+    # The command will wait until the user presses a button.  On 
+    # "cancel", it will return "".  On OK, it will call the -validationcmd
+    # on the trimmed string.  If the -validationcmd throws INVALID, the
+    # error message will appear in red below the entry widget.  Otherwise,
+    # the command will return the entered string.
+
+    typemethod gets {args} {
+        # FIRST, get the option values
+        $type ParseGetsOptions $args
+
+        # NEXT, create the dialog if it doesn't already exist.
+        if {![winfo exists $getsdlg]} {
+            # FIRST, create it
+            toplevel $getsdlg         \
+                -borderwidth        4 \
+                -highlightthickness 0
+
+            # NEXT, withdraw it; we don't want to see it yet
+            wm withdraw $getsdlg
+
+            # NEXT, the user can't resize it
+            wm resizable $getsdlg 0 0
+
+            # NEXT, it can't be closed
+            wm protocol $getsdlg WM_DELETE_WINDOW {
+                # Do nothing
+            }
+
+            # NEXT, it must be on top
+            wm attributes $getsdlg -topmost 1
+
+            # NEXT, create and grid the standard widgets
+            
+            # Row 1: Icon and message
+            ttk::frame $getsdlg.top
+
+            ttk::label $getsdlg.top.icon \
+                -image  ${type}::icon::question \
+                -anchor nw
+
+            ttk::label $getsdlg.top.message \
+                -textvariable [mytypevar opts(-message)] \
+                -wraplength   3i                         \
+                -anchor       nw                         \
+                -justify      left
+
+            # Row 2: Entry Widget
+            ttk::entry $getsdlg.top.entry
+
+            bind $getsdlg.top.entry <Return> [mytypemethod GetsOK]
+
+            # Row 3: Error label
+            label $getsdlg.top.error \
+                -textvariable [mytypevar errorText] \
+                -wraplength   3i                    \
+                -anchor       nw                    \
+                -justify      left                  \
+                -foreground   "#BB0000"
+            
+            grid $getsdlg.top.icon \
+                -row 0 -column 0 -padx 8 -pady 4 -sticky nw 
+
+            grid $getsdlg.top.message \
+                -row 0 -column 1 -padx 8 -pady 4 -sticky new
+            
+            grid $getsdlg.top.entry \
+                -row 1 -column 1 -padx 8 -pady 4 -stick ew
+
+            grid $getsdlg.top.error \
+                -row 2 -column 1 -padx 8 -pady 4 -sticky new
+
+            # Button box
+            ttk::frame $getsdlg.button
+
+            # Create the buttons
+            ttk::button $getsdlg.button.cancel     \
+                -text    "Cancel"                  \
+                -command [mytypemethod GetsCancel]
+
+            ttk::button $getsdlg.button.ok     \
+                -text    $opts(-oktext)        \
+                -command [mytypemethod GetsOK]
+            
+            pack $getsdlg.button.ok     -side right -padx 4
+            pack $getsdlg.button.cancel -side right -padx 4
+
+
+            # Pack the top-level components.
+            pack $getsdlg.top    -side top    -fill x
+            pack $getsdlg.button -side bottom -fill x
+        }
+
+        # NEXT, configure the dialog according to the options
+        
+        # Set the title
+        wm title $getsdlg $opts(-title)
+
+        # Set the icon
+        if {$opts(-icon) eq "peabody"} {
+            set icon ::marsgui::icon::peabody32
+        } else {
+            set icon ${type}::icon::$opts(-icon)
+        }
+
+        $getsdlg.top.icon configure -image $icon
+
+        # Make it transient over the -parent
+        wm transient $getsdlg $opts(-parent)
+
+        # NEXT, clear the error message and the entered text.
+        $getsdlg.top.entry delete 0 end
+        set errorText ""
+
+        # NEXT, raise the button and set the focus
+        wm deiconify $getsdlg
+        wm attributes $getsdlg -topmost
+        raise $getsdlg
+        focus $getsdlg.top.entry
+
+        # NEXT, do the grab, and wait until they return.
+        set choice {}
+
+        grab set $getsdlg
+        vwait [mytypevar choice]
+        grab release $getsdlg
+        wm withdraw $getsdlg
+
+        return $choice
+    }
+
+    # ParseGetsOptions arglist
+    #
+    # arglist     List of popup args
+    #
+    # Parses the options into the opts array
+
+    typemethod ParseGetsOptions {arglist} {
+        # FIRST, set the option defaults
+        array set opts {
+            -oktext        "OK"
+            -icon          question
+            -message       {}
+            -parent        {}
+            -title         {}
+            -validationcmd {}
+        }
+
+        # NEXT, get the option values
+        while {[llength $arglist] > 0} {
+            set opt [::marsutil::lshift arglist]
+
+            switch -exact -- $opt {
+                -oktext        -
+                -icon          -
+                -message       -
+                -parent        -
+                -title         -
+                -validationcmd {
+                    set opts($opt) [::marsutil::lshift arglist]
+                }
+                default {
+                    error "Unknown option: \"$opt\""
+                }
+            }
+        }
+
+        # NEXT, validate -icon
+        if {$opts(-icon) ni $iconnames && $opts(-icon) ne "peabody"} {
+            error "-icon: should be one of [join $iconnames {, }]"
+        }
+
+        # NEXT, validate -parent
+        if {$opts(-parent) ne ""} {
+            snit::window validate $opts(-parent)
+        }
+    }
+
+    # GetsCancel
+    #
+    # Returns the empty string.
+
+    typemethod GetsCancel {} {
+        set choice ""
+    }
+
+    # GetsOK
+    #
+    # Validates the string, and returns it.
+    
+    typemethod GetsOK {} {
+        set string [string trim [$getsdlg.top.entry get]]
+
+        if {$opts(-validationcmd) ne ""} {
+            if {[catch {{*}$opts(-validationcmd) $string} result eopts]} {
+                set ecode [dict get $eopts -errorcode]
+
+                if {$ecode ne "INVALID"} {
+                    return {*}$eopts $result
+                }
+
+                set errorText $result
+                return
+            }
+
+            # Allow the validation command to canonicalize the
+            # string.
+            set string $result
+        }
+
+        # Save the string for next time.
+        set choice $string
+    }
+
 }
 
 

@@ -24,7 +24,10 @@ following enhancements:<p>
 
   <li> If desired, the dialog will include a "Do not show this message
        again" checkbox.  See <<xref "Ignoring Messages">> for
-       more information.
+       more information.<p>
+
+  <li> If desired, the user can enter a text string, in addition to
+       just selecting buttons.<p>
 </ul><p>
 
 <<subsection "Ignoring Messages">>
@@ -57,7 +60,8 @@ This module defines the following command:<p>
 
 <<defitem popup {messagebox popup <i>?options...?</i>}>>
 
-Pops up the message box, given the following options:<p>
+Pops up the message box, given the following options.  The
+command returns the symbolic name of the selected button.<p>
 
 <<deflist options>>
 
@@ -109,6 +113,50 @@ The dialog window will have the specified title <i>string</i>.<p>
 Clears the ignore flag for the specified ignore <i>tag</i>.  If no tag
 is given, clears all ignore flags.<p>
 
+<<defitem gets {messagebox gets <i>?options...?</i>}>>
+
+Pops up a message box containing a text entry widget, given the
+following options.  On "Cancel", returns the empty string; on
+"OK", validates and returns the entered text, trimmed of leading
+and trailing whitespace.<p> 
+
+<<deflist options>>
+
+<<defopt {-oktext <i>text</i>}>>
+
+Specifies the text for the OK button.  Defaults to <b>OK</b>.<p>
+
+<<defopt {-icon <i>icon</i>}>>
+
+Specifies which icon should be included in the message box:
+<b>error</b>, <b>info</b>, <b>question</b>, <b>warning</b>, or
+<b>peabody</b>.  Defaults to <b>question</b><p>
+
+<<defopt {-message <i>text</i>}>>
+
+The message <i>text</i> to display.  The text will be wrapped
+automatically; newlines are honored.<p>
+
+<<defopt {-parent <i>window</i>}>>
+
+The message box will appear over the specfied window.<p>
+
+<<defopt {-title <i>string</i>}>>
+
+The dialog window will have the specified title <i>string</i>.<p>
+
+<<defopt {-validatecmd <i>command</i>}>>
+
+Specifies a validation command.  The command should take one
+additional argument, the string to validate.  If the string is
+valid, it should be returned; the validation command can canonicalize
+it if desired (e.g., convert it to uppercase).  If the string is
+invalid, the command should throw an error with error code
+<b>INVALID</b> and a human-readable error message.  The error message
+will be displayed below the entry widget.<p>
+
+<</deflist options>>
+
 <</deflist commands>>
 
 
@@ -121,6 +169,8 @@ Will Duquette<p>
 The original package was written for Athena, and then moved to Mars for
 general use. The icons are based on the appearance of the
 <<xref tk:messageBox(n) tk_messageBox(n)>> icons.<p>
+
+The <<iref gets>> subcommand was added on 4/19/2010.<p>
 
 <</manpage>>
 
