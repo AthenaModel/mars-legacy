@@ -789,7 +789,7 @@ snit::widgetadaptor ::marsgui::hbarchart {
                     set xmin $series(rmin-$name)
                     set dminFlag 0
                 }
-            } else {
+            } elseif {$series(dmin-$name) ne ""} {
                 if {$series(dmin-$name) < $xmin} {
                     set xmin $series(dmin-$name)
                     set dminFlag 1
@@ -801,12 +801,21 @@ snit::widgetadaptor ::marsgui::hbarchart {
                     set xmax $series(rmax-$name)
                     set dmaxFlag 0
                 }
-            } else {
+            } elseif {$series(dmin-$name) ne ""} {
                 if {$series(dmax-$name) > $xmax} {
                     set xmax $series(dmax-$name)
                     set dmaxFlag 1
                 }
             }
+        }
+
+        # NEXT, if either extreme is still infinite then we need to
+        # compute the extremes, but don't have enoug data.  Use the default
+        # extremes.
+        if {$xmin > $xmax} {
+            set layout(xmin) 0.0
+            set layout(xmax) 1.0
+            return
         }
 
         # NEXT, if either extreme is based on data, compute and
@@ -1084,6 +1093,17 @@ snit::widgetadaptor ::marsgui::hbarchart {
             incr s
         }
 
+        # NEXT, if there were no series, add some text.
+        if {$s == 0} {
+            let ty {$cy + $labOffset}
+
+            $legend create text 0.0 $ty     \
+                -anchor w                   \
+                -fill   black               \
+                -font   $parms(legend.font) \
+                -text   "No data plotted"
+        }
+
         # NEXT, move it all by the margin
         $legend move all $parms(legend.margin) $parms(legend.margin)
 
@@ -1312,11 +1332,6 @@ snit::widgetadaptor ::marsgui::hbarchart {
                 set series(dmax-$name) [tcl::mathfunc::max {*}$opts(-data)]
             }
         }
-
-        # NEXT, make sure we have data.
-        require {[llength $series(data-$name)] != 0} \
-            "Series has no data: \"$name\""
-
 
         # NEXT, schedule the next rendering
         $self ScheduleRender
