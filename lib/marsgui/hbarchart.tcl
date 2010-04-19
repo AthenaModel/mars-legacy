@@ -646,13 +646,16 @@ snit::widgetadaptor ::marsgui::hbarchart {
             }
         }
 
-        # NEXT, lay out the legend link at the top right.
-        set id [$hull create text $cx1 $cy0          \
-                    -tags   legendlink               \
-                    -anchor ne                       \
-                    -fill   $parms(legend.linkcolor) \
-                    -font   $parms(legend.linkfont)  \
-                    -text   "Click for Legend"]
+        # NEXT, lay out the legend link at the top right, only if
+        # there are data series for the legend.
+        if {[llength $series(names)] > 0} {
+            $hull create text $cx1 $cy0          \
+                -tags   legendlink               \
+                -anchor ne                       \
+                -fill   $parms(legend.linkcolor) \
+                -font   $parms(legend.linkfont)  \
+                -text   "Click for Legend"
+        }
 
         # NEXT, if there's a ytext, lay it out at the top left.
         if {$options(-ytext) ne ""} {
@@ -1055,6 +1058,11 @@ snit::widgetadaptor ::marsgui::hbarchart {
         # FIRST, clear the legend.
         $legend delete all
 
+        # NEXT, if there are no series we're done.
+        if {[llength $series(names)] == 0} {
+            return
+        }
+
         # NEXT, determine the height of each group and the y offset 
         # for the bar top and the text centerline.
         set barHeight $parms(data.barheight)
@@ -1091,17 +1099,6 @@ snit::widgetadaptor ::marsgui::hbarchart {
             
             let cy {$cy + $barHeight + $parms(legend.gap)}
             incr s
-        }
-
-        # NEXT, if there were no series, add some text.
-        if {$s == 0} {
-            let ty {$cy + $labOffset}
-
-            $legend create text 0.0 $ty     \
-                -anchor w                   \
-                -fill   black               \
-                -font   $parms(legend.font) \
-                -text   "No data plotted"
         }
 
         # NEXT, move it all by the margin
