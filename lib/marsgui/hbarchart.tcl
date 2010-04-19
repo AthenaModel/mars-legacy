@@ -1268,10 +1268,6 @@ snit::widgetadaptor ::marsgui::hbarchart {
 
                 -data {
                     set opts($opt) [lshift args]
-                    require {
-                        [llength $opts($opt)] == [llength $options(-ylabels)]
-                    } \
-            "Number of values to plot doesn't match the number of -ylabels"
                 }
 
                 -rmin -
@@ -1317,6 +1313,11 @@ snit::widgetadaptor ::marsgui::hbarchart {
         }
 
         if {$opts(-data) ne ""} {
+            require {
+                [llength $opts(-data)] == [llength $options(-ylabels)]
+            } \
+            "Number of values to plot doesn't match the number of -ylabels"
+
             # FIRST, save the series
             set series(data-$name) $opts(-data)
 
