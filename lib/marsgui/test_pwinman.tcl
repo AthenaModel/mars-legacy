@@ -25,79 +25,26 @@ namespace import marsutil::* marsgui::*
 #-----------------------------------------------------------------------
 # Main-line Code
 
-set chartCount 0
+set pwinCount 0
 
-proc CreateChart {w args} {
-    set countries {
-        Afghanistan
-        Australia
-        Belgium
-        Burma
-        China
-        Egypt
-        England
-        Ethiopia
-        France
-        Germany
-        India
-        Iran
-        Iraq
-        Italy
-        Japan
-        Nepal
-        Pakistan
-        Somalia
-        Spain
-        Sweden
-        "United States"
-    }
-
-    set numSeries 1
-    set xmin -100
-    set xmax  100
-    
-    hbarchart $w     \
-        -width    500 \
-        -height   250 \
-        -titlepos n               \
-        -title  "Chart #[incr ::chartCount]" \
-        -xtext  "Satisfaction"    \
-        -ytext  "Countries"       \
-        -xmin   $xmin             \
-        -xmax   $xmax             \
-        -xformat %.1f             \
-        -ylabels  $countries      \
-        {*}$args
-
-    for {set s 0} {$s < $numSeries} {incr s} {
-        set data($s) [list]
-
-        foreach c $countries {
-            let x [expr {rand()*($xmax-$xmin) + $xmin}]
-
-            lappend data($s) $x
-        }
-
-        $w plot series$s -label "Series $s" -data $data($s)
-    }
-}
 
 proc echo {args} {
     puts $args
 }
 
 proc CreatePwin {w} {
-    set chart [$w frame].chart
-    set ybar  [$w frame].ybar
+    set f [$w frame]
 
-    ttk::scrollbar $ybar \
-        -command [list [$w frame].chart yview]
+    label $f.label \
+        -text "Pwin #[incr ::pwinCount]" \
+        -width 40 \
+        -height 8 \
+        -background white \
+        -foreground black
 
-    CreateChart $chart \
-        -yscrollcommand [list $ybar set]
-        
-    pack $ybar -side right -fill y
-    pack $chart -fill both -expand yes
+    pack $f.label -fill both -expand yes
+
+    $w configure -title "$::pwinCount"
 }
 
 proc main {argv} {
@@ -105,7 +52,7 @@ proc main {argv} {
     debugger new
 
     ttk::button .new \
-        -text     "New Chart"  \
+        -text     "New Pwin"  \
         -command  {CreatePwin [.man insert 0]}
 
     pwinman .man \

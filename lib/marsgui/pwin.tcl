@@ -82,6 +82,12 @@ snit::widget ::marsgui::pwin {
 
     component bar
 
+    # Component: title
+    #
+    # The title label
+
+    component title
+
     # Component: up
     #
     # The up button
@@ -112,6 +118,9 @@ snit::widget ::marsgui::pwin {
     # Delegate all options to the hull
 
     delegate option * to hull
+
+    delegate option -title     to title as -text
+    delegate option -titlefont to title as -font
 
     # Option: -command
     #
@@ -155,10 +164,13 @@ snit::widget ::marsgui::pwin {
         # NEXT, create the toolbar.
         install bar using ttk::frame $win.bar
 
+        install title using ttk::label $bar.title
+
         $self MakeButton up
         $self MakeButton down
         $self MakeButton close
 
+        pack $bar.title -side left -padx 2
         pack $bar.close -side right -padx {2 0}
         pack $bar.down  -side right
         pack $bar.up    -side right

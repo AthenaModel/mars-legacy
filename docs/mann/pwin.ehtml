@@ -41,6 +41,17 @@ It will be called with one addition argument, one of <b>up</b>,
 Sets the state of the <b>close</b>, <b>down</b>, or
 <b>up</b> frame buttons to <b>normal</b> or
 <b>disabled</b>.<p>
+
+<<defopt {-title <i>text</i>}>>
+
+Specifies the title string to go in the pwin(n)'s title bar.  Defaults
+to the empty string.<p>
+
+<<defopt {-titlefont <i>text</i>}>>
+
+Specifies the font to use for the <b>-title</b>.  Defaults to the normal
+label font.<p>
+
 <</deflist>>
 
 <<section COMMANDS>>
