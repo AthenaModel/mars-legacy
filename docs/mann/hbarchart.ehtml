@@ -104,8 +104,7 @@ redraw the chart accordingly.<p>
 
 Plots a series of data values against each of the entities in
 <b>-ylabels</b>.  The <i>name</i> is used to identify the series for
-future updates.  If this is a new series, the <b>-data</b> option is
-required.<p>
+future updates.<p>
 
 The options are as follows:<p>
 
