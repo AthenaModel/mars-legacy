@@ -126,11 +126,23 @@ and trailing whitespace.<p>
 
 Specifies the text for the OK button.  Defaults to <b>OK</b>.<p>
 
+<<defopt {-helpcmd <i>cmd</i>}>>
+
+Specifies a command to be called, as is, when the "Help" button is
+pressed.  The "Help" button will be visible only when this option's
+value is not the empty string.<p>
+
 <<defopt {-icon <i>icon</i>}>>
 
 Specifies which icon should be included in the message box:
 <b>error</b>, <b>info</b>, <b>question</b>, <b>warning</b>, or
 <b>peabody</b>.  Defaults to <b>question</b><p>
+
+<<defopt {-initvalue <i>text</i>}>>
+
+Specifies an initial value for the entry widget.  If <i>text</i> is
+not the empty string, the widget will contain the <i>text</i>, already
+selected.  Otherwise, the widget will be empty.<p>
 
 <<defopt {-message <i>text</i>}>>
 

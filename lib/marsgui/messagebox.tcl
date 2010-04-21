@@ -509,7 +509,9 @@ snit::type ::marsgui::messagebox {
     # -message string        Message to display.  Will be wrapped.
     # -parent window         The message box appears over the parent window
     # -title string          Title of the message box
+    # -initvalue string      Initial value for the entry field
     # -validationcmd cmd     Validation command
+    # -helpcmd cmd           Help command
     #
     # Pops up the "get string" message box.  The buttons will appear at 
     # the bottom, left to right, packed to the right.  The OK button will
@@ -518,13 +520,16 @@ snit::type ::marsgui::messagebox {
     # wrapped into the message space; the entry widget will be below
     # the -message. The dialog will be application modal,
     # and centered over the specified -parent window.  It will have the
-    # specified -title string.
+    # specified -title string.  If -initvalue is non-empty, its value
+    # will be placed in the entry widget, and selected.
     #
     # The command will wait until the user presses a button.  On 
     # "cancel", it will return "".  On OK, it will call the -validationcmd
     # on the trimmed string.  If the -validationcmd throws INVALID, the
     # error message will appear in red below the entry widget.  Otherwise,
     # the command will return the entered string.
+    #
+    # If there is a -helpcmd, there will be a Help button that calls it.
 
     typemethod gets {args} {
         # FIRST, get the option values
@@ -595,6 +600,10 @@ snit::type ::marsgui::messagebox {
             ttk::frame $getsdlg.button
 
             # Create the buttons
+            ttk::button $getsdlg.button.help       \
+                -text "Help"                       \
+                -command [mytypemethod GetsHelp]
+
             ttk::button $getsdlg.button.cancel     \
                 -text    "Cancel"                  \
                 -command [mytypemethod GetsCancel]
@@ -629,11 +638,21 @@ snit::type ::marsgui::messagebox {
         # Make it transient over the -parent
         wm transient $getsdlg $opts(-parent)
 
-        # NEXT, clear the error message and the entered text.
-        $getsdlg.top.entry delete 0 end
-        set errorText ""
+        # If there's help, make the help button visible
+        if {$opts(-helpcmd) ne ""} {
+            pack $getsdlg.button.help -side right -padx 4
+        } else {
+            pack forget $getsdlg.button.help
+        }
 
-        # NEXT, raise the button and set the focus
+        # NEXT, clear the error message and the entered text, and
+        # apply the initvalue.
+        set errorText ""
+        $getsdlg.top.entry delete 0 end
+        $getsdlg.top.entry insert 0 $opts(-initvalue)
+        $getsdlg.top.entry selection range 0 end
+
+        # NEXT, raise the dialog and set the focus
         wm deiconify $getsdlg
         wm attributes $getsdlg -topmost
         raise $getsdlg
@@ -664,7 +683,9 @@ snit::type ::marsgui::messagebox {
             -message       {}
             -parent        {}
             -title         {}
+            -initvalue     {}
             -validationcmd {}
+            -helpcmd       {}
         }
 
         # NEXT, get the option values
@@ -677,7 +698,9 @@ snit::type ::marsgui::messagebox {
                 -message       -
                 -parent        -
                 -title         -
-                -validationcmd {
+                -initvalue     -
+                -validationcmd -
+                -helpcmd       {
                     set opts($opt) [::marsutil::lshift arglist]
                 }
                 default {
@@ -695,6 +718,14 @@ snit::type ::marsgui::messagebox {
         if {$opts(-parent) ne ""} {
             snit::window validate $opts(-parent)
         }
+    }
+
+    # GetsHelp
+    #
+    # Calls the -helpcmd
+    
+    typemethod GetsHelp {} {
+        uplevel \#0 $opts(-helpcmd)
     }
 
     # GetsCancel

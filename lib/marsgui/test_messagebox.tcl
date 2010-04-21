@@ -32,11 +32,21 @@ set theString ""
 
 snit::stringtype nonempty -minlen 1
 
+set counter 0
+
 proc GetString {} {
+    if {[incr ::counter] % 2 == 0} {
+        set helpCmd Help
+    } else {
+        set helpCmd ""
+    }
+
     set ::theString [messagebox gets \
                          -oktext "Go for it!" \
                          -parent .            \
                          -title "Enter a String" \
+                         -initvalue $::theString \
+                         -helpcmd $helpCmd             \
                          -message [normalize {
                              Enter some string of your choice, and
                              press one of the buttons, so that you
@@ -52,6 +62,10 @@ proc Validate {string} {
     }
 
     return [string toupper $string]
+}
+
+proc Help {} {
+    puts "Help!"
 }
 
 proc main {argv} {
