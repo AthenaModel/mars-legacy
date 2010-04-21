@@ -472,6 +472,9 @@ snit::widgetadaptor ::marsgui::hbarchart {
         # NEXT, render the data (if any)
         $self RenderBars
 
+        # NEXT, render the legend
+        $self RenderLegend
+
         # NEXT, If we had a legend showing, display it again.
         if {[$self LegendIsVisible]} {
             let x {$fx * $layout(chartWidth)}
@@ -1039,9 +1042,6 @@ snit::widgetadaptor ::marsgui::hbarchart {
             return
         }
         
-        # NEXT, render the legend
-        $self RenderLegend
-
         # NEXT, pop it up.
         let cx {[winfo width $win] - $parms(chart.right)}
         set cy $layout(cymin)
