@@ -52,7 +52,7 @@ proc GetString {} {
                              press one of the buttons, so that you
                              can see what happens when you do.
                          }] \
-                         -validationcmd Validate]
+                         -validatecmd Validate]
 }
 
 proc Validate {string} {

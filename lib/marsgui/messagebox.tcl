@@ -510,7 +510,7 @@ snit::type ::marsgui::messagebox {
     # -parent window         The message box appears over the parent window
     # -title string          Title of the message box
     # -initvalue string      Initial value for the entry field
-    # -validationcmd cmd     Validation command
+    # -validatecmd cmd       Validation command
     # -helpcmd cmd           Help command
     #
     # Pops up the "get string" message box.  The buttons will appear at 
@@ -524,8 +524,8 @@ snit::type ::marsgui::messagebox {
     # will be placed in the entry widget, and selected.
     #
     # The command will wait until the user presses a button.  On 
-    # "cancel", it will return "".  On OK, it will call the -validationcmd
-    # on the trimmed string.  If the -validationcmd throws INVALID, the
+    # "cancel", it will return "".  On OK, it will call the -validatecmd
+    # on the trimmed string.  If the -validatecmd throws INVALID, the
     # error message will appear in red below the entry widget.  Otherwise,
     # the command will return the entered string.
     #
@@ -684,7 +684,7 @@ snit::type ::marsgui::messagebox {
             -parent        {}
             -title         {}
             -initvalue     {}
-            -validationcmd {}
+            -validatecmd {}
             -helpcmd       {}
         }
 
@@ -699,7 +699,7 @@ snit::type ::marsgui::messagebox {
                 -parent        -
                 -title         -
                 -initvalue     -
-                -validationcmd -
+                -validatecmd -
                 -helpcmd       {
                     set opts($opt) [::marsutil::lshift arglist]
                 }
@@ -743,8 +743,8 @@ snit::type ::marsgui::messagebox {
     typemethod GetsOK {} {
         set string [string trim [$getsdlg.top.entry get]]
 
-        if {$opts(-validationcmd) ne ""} {
-            if {[catch {{*}$opts(-validationcmd) $string} result eopts]} {
+        if {$opts(-validatecmd) ne ""} {
+            if {[catch {{*}$opts(-validatecmd) $string} result eopts]} {
                 set ecode [dict get $eopts -errorcode]
 
                 if {$ecode ne "INVALID"} {
