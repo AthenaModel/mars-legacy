@@ -10,6 +10,29 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.25, 20 April 2010</h3>
+This build contains many updates to the library. Most are in support of
+Athena including <<xref cellmodel(n)>>, <<xref hbarchart(n)>>, 
+<<xref pwinman(n)>> and <<xref messagebox(n)>>.
+There are also updates to <<xref gradient(n)>> and a slight API addition to 
+<<xref sqlbrowser(n)>>. 
+<ul>
+  <li>Bug 2421: cellmodel(n): Cell Model Infrastructure
+  <li>Bug 2422: cellmodel(5): page -except option
+  <li>Bug 2423: cellmodel(n): Allow partial solutions
+  <li>Bug 2432: gradient(n): Clamp input levels to -minlevel, -maxlevel
+  <li>Bug 2437: hbarchart(n): Horizontal Bar Chart widget
+  <li>Bug 2439: sqlbrowser(n): add API call to allow for the text of a cell to be set
+  <li>Bug 2440: hbarchart(n): Gap between bar groups depends on number of data series
+  <li>Bug 2441: pwinman(n), pwin(n): Pseudo-window manager
+  <li>Bug 2442: pwinman(n): "insert 0" doesn't work when pwinman is empty.
+  <li>Bug 2443: hbarchart(n): Allow subcanvases to respond to events bound to the widget
+  <li>Bug 2445: hbarchart(n): Don't render when unmapped
+  <li>Bug 2446: hbarchart(n): automatic min and max detection
+  <li>Bug 2449: hbarchart(n): Legend fails when there are no data series
+  <li>Bug 2456: messagebox(n): messagebox gets, -helpcmd, -initvalue
+</ul>
+
 <h3>Build 1.24, 5 March 2010</h3>
 This build contains a change to how <<xref eventq(n)>> handles events scheduled
 at time 0 and how it advances when given a time greater than the time of the 
