@@ -20,8 +20,6 @@
 #    The caller should be able to specify arbitrary Tk images is
 #    the value of -icon.
 #
-#    Test message: debugging e-mail link to Bugzilla
-#
 #-----------------------------------------------------------------------
 
 namespace eval ::marsgui:: {
