@@ -511,7 +511,6 @@ snit::type ::marsgui::messagebox {
     # -title string          Title of the message box
     # -initvalue string      Initial value for the entry field
     # -validatecmd cmd       Validation command
-    # -helpcmd cmd           Help command
     #
     # Pops up the "get string" message box.  The buttons will appear at 
     # the bottom, left to right, packed to the right.  The OK button will
@@ -528,8 +527,6 @@ snit::type ::marsgui::messagebox {
     # on the trimmed string.  If the -validatecmd throws INVALID, the
     # error message will appear in red below the entry widget.  Otherwise,
     # the command will return the entered string.
-    #
-    # If there is a -helpcmd, there will be a Help button that calls it.
 
     typemethod gets {args} {
         # FIRST, get the option values
@@ -600,10 +597,6 @@ snit::type ::marsgui::messagebox {
             ttk::frame $getsdlg.button
 
             # Create the buttons
-            ttk::button $getsdlg.button.help       \
-                -text "Help"                       \
-                -command [mytypemethod GetsHelp]
-
             ttk::button $getsdlg.button.cancel     \
                 -text    "Cancel"                  \
                 -command [mytypemethod GetsCancel]
@@ -637,13 +630,6 @@ snit::type ::marsgui::messagebox {
 
         # Make it transient over the -parent
         wm transient $getsdlg $opts(-parent)
-
-        # If there's help, make the help button visible
-        if {$opts(-helpcmd) ne ""} {
-            pack $getsdlg.button.help -side right -padx 4
-        } else {
-            pack forget $getsdlg.button.help
-        }
 
         # NEXT, clear the error message and the entered text, and
         # apply the initvalue.
@@ -684,8 +670,7 @@ snit::type ::marsgui::messagebox {
             -parent        {}
             -title         {}
             -initvalue     {}
-            -validatecmd {}
-            -helpcmd       {}
+            -validatecmd   {}
         }
 
         # NEXT, get the option values
@@ -699,8 +684,7 @@ snit::type ::marsgui::messagebox {
                 -parent        -
                 -title         -
                 -initvalue     -
-                -validatecmd -
-                -helpcmd       {
+                -validatecmd   {
                     set opts($opt) [::marsutil::lshift arglist]
                 }
                 default {
@@ -718,14 +702,6 @@ snit::type ::marsgui::messagebox {
         if {$opts(-parent) ne ""} {
             snit::window validate $opts(-parent)
         }
-    }
-
-    # GetsHelp
-    #
-    # Calls the -helpcmd
-    
-    typemethod GetsHelp {} {
-        uplevel \#0 $opts(-helpcmd)
     }
 
     # GetsCancel
