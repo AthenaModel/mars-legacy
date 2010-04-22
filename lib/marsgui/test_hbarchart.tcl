@@ -103,7 +103,7 @@ proc main {argv} {
             -rmax  $rmax
     }
 
-    bind .chart <3> {puts "Right-click!"}
+    bind .chart <<Context>> {puts "Context <%d> %x,%y %X,%Y"}
     bind . <Control-F12> {debugger new}
 }
 

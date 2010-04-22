@@ -412,6 +412,13 @@ snit::widgetadaptor ::marsgui::hbarchart {
         bind $legend <B1-Motion>       [mymethod LegendDrag %x %y]
         bind $legend <ButtonRelease-1> [mymethod LegendDrop]
 
+        # Generate <<Context>>
+        bind $win  <3>         [mymethod ContextClick %W %x %y %X %Y]
+        bind $win  <Control-1> [mymethod ContextClick %W %x %y %X %Y]
+        bind $plot <3>         [mymethod ContextClick %W %x %y %X %Y]
+        bind $plot <Control-1> [mymethod ContextClick %W %x %y %X %Y]
+
+
         # Allow mouse wheel to scroll the plot widget.  For non-Linux,
         # the <MouseWheel> event is used; for Linux, it's Button-4 and
         # Button-5.
@@ -1224,6 +1231,53 @@ snit::widgetadaptor ::marsgui::hbarchart {
         }
     }
 
+    # Method: ContextClick
+    #
+    # Produces a <<Context>> event on $win corresponding to a 
+    # right-click or control-click.  If the click is on a 
+    # data bar, the %d contains the data bar info.
+    #
+    # Syntax:
+    #   ContextClick _w wx wy rx ry_
+    #
+    #   w     - The window receiving the right-click
+    #   wx,wy - The window coordinates of the click (%x,%y)
+    #   rx,ry - The root window coordinates of the lick (%X,%Y)
+
+    method ContextClick {w wx wy rx ry} {
+        # FIRST, if this is the plot widget we need to translate
+        # the window coordinates, and we need to look for a data
+        # bar.
+        set data "none"
+
+        if {$w eq $plot} {
+            # FIRST, translate the window coordinates.
+            let wx {$wx + [winfo x $plot]}
+            let wy {$wy + [winfo y $plot]}
+
+            # NEXT, get the data bar, if any.
+            set id [$plot find withtag current]
+
+            if {[info exists series(bar-$id)]} {
+                set data [linsert $series(bar-$id) 0 bar]
+            }
+        } elseif {$w eq $legend} {
+            # No context on legend window
+            return
+        }
+
+        # NEXT, generate the event
+        event generate $win <<Context>> \
+            -data  $data                \
+            -x     $wx                  \
+            -y     $wy                  \
+            -rootx $rx                  \
+            -rooty $ry
+
+        return -code break
+    }
+
+
     #-------------------------------------------------------------------
     # Group: Public Methods
     #
@@ -1334,6 +1388,4 @@ snit::widgetadaptor ::marsgui::hbarchart {
         # NEXT, schedule the next rendering
         $self ScheduleRender
     }
-
-    
 }

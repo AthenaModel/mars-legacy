@@ -139,6 +139,39 @@ method, to allow vertical scrolling.<p>
 
 <</deflist>>
 
+<<section "VIRTUAL EVENTS">>
+
+The hbarchart(n) widget generates the following virtual events.<p>
+
+<<deflist events>>
+
+<<defitem Context {&lt;&lt;Context&gt;&gt;}>>
+
+This event is generated when the user right-clicks or control-clicks
+on the chart.  It supports the following substitutions: <b>%x</b>,
+<b>%y</b>, <b>%X</b>, <b>%Y</b>, and <b>%d</b>.<p>
+
+The value of the <b>%d</b> substitution is a list whose first element
+indicates what was clicked on; the remaining items in the list vary
+depending on the first element.  The current possibilities are as
+follows:<p>
+
+<<deflist Context>>
+
+<<defitem Context_none {none}>>
+
+The user right-clicked on nothing in particular.<p>
+
+<<defitem Context_bar {bar <i>ylabel series value</i>}>>
+
+The user right-clicked on a data bar.  The data identifies the bar by
+its <i>ylabel</i> and <i>series</i> name, and also gives the data
+<i>value</i>.<p>
+
+<</deflist Context>>
+
+<</deflist events>>
+
 <<section ENVIRONMENT>>
 
 This package requires Tcl/Tk 8.5 or later.
