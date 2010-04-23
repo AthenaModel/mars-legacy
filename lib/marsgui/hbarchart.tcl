@@ -965,6 +965,7 @@ snit::widgetadaptor ::marsgui::hbarchart {
                 set x [lindex $series(data-$name) $i]
 
                 if {$x eq ""} {
+                    incr s
                     continue
                 }
 
