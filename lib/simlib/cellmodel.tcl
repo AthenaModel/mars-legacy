@@ -936,7 +936,11 @@ snit::type ::simlib::cellmodel {
         # -safe interpreters anyway.
         $interp alias ::tcl::mathfunc::min  ::tcl::mathfunc::min
         $interp alias ::tcl::mathfunc::max  ::tcl::mathfunc::max
-        $interp alias ::tcl::mathfunc::case ::cellmodel::CaseFunc
+        $interp alias ::tcl::mathfunc::case ::simlib::cellmodel::CaseFunc
+
+        # NEXT, add additional functions
+        $interp alias ::tcl::mathfunc::epsilon $self Epsilon
+        $interp alias ::tcl::mathfunc::ediff   $self EpsilonDiff
     }
 
     # Proc: CaseFunc
@@ -948,13 +952,38 @@ snit::type ::simlib::cellmodel {
     proc CaseFunc {args} {
         foreach {flag value} $args {
             if {$flag} {
-                return $value
+                return [expr {double($value)}]
             }
         }
         
         return 0.0
     }
 
+    # Method: Epsilon
+    #
+    # Defines a function epsilon() that returns the current
+    # epsilon value.
+
+    method Epsilon {} {
+        return $options(-epsilon)
+    }
+
+
+    # Method: EpsilonDiff
+    #
+    # Defines a function ediff() that takes the difference of
+    # two values and returns 0 if the difference is within
+    # epsilon (when scaled by the size of the terms).
+
+    method EpsilonDiff {a b} {
+        set diff [expr {$a - $b}]
+        
+        if {abs($diff/max(1.0, abs($a), abs($b))) > $options(-epsilon)} {
+            return $diff
+        } else {
+            return 0.0
+        }
+    }
 
     # SetMode mode
     #

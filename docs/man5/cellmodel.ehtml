@@ -248,6 +248,20 @@ returns 0.  For example, <p>
     }
 </pre>
 
+<<defitem epsilon {epsilon()}>>
+
+The epsilon() function returns the epsilon value used to control
+convergence (the <<xref cellmodel(n)>> object's <b>-epsilon</b>
+option).  It is usually specified as a negative power of 10, i.e.,
+.0001; the number of zeroes is then the number of significant digits
+in the converged outputs.<p>
+
+<<defitem ediff {ediff(<i>a,b</i>)}>>
+
+This function computes and returns the difference <i>a - b</i>.  If
+the difference is smaller than the the number of significant digits,
+as specified by <<iref epsilon>>, then this function returns 0.0.<p>
+
 <</deflist funcs>>
 
 <<section MACROS>>

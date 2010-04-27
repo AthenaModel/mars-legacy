@@ -1102,6 +1102,127 @@ converge P 1
         CleanUp
     } -result {[f]*([A.1])*([A.2])*([A.3])}
 
+    #===================================================================
+    # Functions
+    #
+    # This section tests functions that can be used in formulas.
+
+    #-------------------------------------------------------------------
+    # case
+
+    test case-1.1 {returns first value.} -setup {
+        Setup
+
+        cm load {
+            let A = 5
+            let B = {case([A] > 0, 1, [A] <= 0, -1)}
+        }
+    } -body {
+        cm solve
+        cm value B
+    } -cleanup {
+        CleanUp
+    } -result {1.0}
+
+    test case-1.2 {returns second value.} -setup {
+        Setup
+
+        cm load {
+            let A = -5
+            let B = {case([A] > 0, 1, [A] <= 0, -1)}
+        }
+    } -body {
+        cm solve
+        cm value B
+    } -cleanup {
+        CleanUp
+    } -result {-1.0}
+    
+    test case-1.3 {returns no value.} -setup {
+        Setup
+
+        cm load {
+            let A = 5
+            let B = {case([A] < 0, 1, [A] < 3, -1)}
+        }
+    } -body {
+        cm solve
+        cm value B
+    } -cleanup {
+        CleanUp
+    } -result {0.0}
+
+    #-------------------------------------------------------------------
+    # epsilon
+
+    test epsilon-1.1 {returns default epsilon.} -setup {
+        Setup
+
+        cm load {
+            let A = epsilon()
+        }
+    } -body {
+        cm solve
+        cm value A
+    } -cleanup {
+        CleanUp
+    } -result {0.0001}
+
+
+    test epsilon-1.2 {returns modified epsilon.} -setup {
+        Setup
+
+        cm configure -epsilon .01
+
+        cm load {
+            let A = epsilon()
+        }
+    } -body {
+        cm solve
+        cm value A
+    } -cleanup {
+        CleanUp
+    } -result {0.01}
+
+
+    #-------------------------------------------------------------------
+    # ediff
+
+    test ediff-1.1 {returns actual value.} -setup {
+        Setup
+
+        cm configure -epsilon .1
+
+        cm load {
+            let A = 1.2
+            let B = 1.0
+            let C = {ediff([A],[B])}
+        }
+    } -body {
+        cm solve
+        format %.3f [cm value C]
+    } -cleanup {
+        CleanUp
+    } -result {0.200}
+
+    test ediff-1.2 {returns 0.0.} -setup {
+        Setup
+
+        cm configure -epsilon .1
+
+        cm load {
+            let A = 1.02
+            let B = 1.0
+            let C = {ediff([A],[B])}
+        }
+    } -body {
+        cm solve
+        cm value C
+    } -cleanup {
+        CleanUp
+    } -result {0.0}
+
+
     #-------------------------------------------------------------------
     # Cleanup
 

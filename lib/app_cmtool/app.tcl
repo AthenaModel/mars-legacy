@@ -1040,7 +1040,7 @@ snit::type app {
 #
 # Validation type for -epsilon values.
 
-snit::double epsilon  -min 0.0000001
+snit::double epsilon  -min 0.0
 
 # Type: maxiters
 #
