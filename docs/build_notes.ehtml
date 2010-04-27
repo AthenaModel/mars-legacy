@@ -10,6 +10,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.26, 27 April 2010</h3>
+
+This build makes some minor changes to the <<xref pwin(n)>>,
+<<xref hbarchart(n)>> and <<xref cellmodel(5)>> modules.<p>
+
+<ul>
+  <li> Bug 2450: pwin(n): -title option
+  <li> Bug 2458: hbarchart(n): Legend doesn't update when new series are plotted
+  <li> Bug 2459: hbarchart(n): <<Context>> event
+  <li> Bug 2460: hbarchart(n): Missing values bug
+  <li> Bug 2461: cellmodel(5): epsilon(), ediff() functions 
+</ul>
+
 <h3>Build 1.25, 20 April 2010</h3>
 This build contains many updates to the library. Most are in support of
 Athena including <<xref cellmodel(n)>>, <<xref hbarchart(n)>>, 
