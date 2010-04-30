@@ -72,6 +72,7 @@ source [file join $::marsgui::library querybrowser.tcl   ]
 source [file join $::marsgui::library isearch.tcl        ]
 source [file join $::marsgui::library timeline.tcl       ]
 source [file join $::marsgui::library hbarchart.tcl      ]
+source [file join $::marsgui::library stripchart.tcl     ]
 source [file join $::marsgui::library pwin.tcl           ]
 source [file join $::marsgui::library pwinman.tcl        ]
 

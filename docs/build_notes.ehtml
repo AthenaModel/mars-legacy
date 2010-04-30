@@ -18,7 +18,7 @@ This build makes some minor changes to the <<xref pwin(n)>>,
 <ul>
   <li> Bug 2450: pwin(n): -title option
   <li> Bug 2458: hbarchart(n): Legend doesn't update when new series are plotted
-  <li> Bug 2459: hbarchart(n): <<Context>> event
+  <li> Bug 2459: hbarchart(n): &lt;&lt;Context&gt;&gt; event
   <li> Bug 2460: hbarchart(n): Missing values bug
   <li> Bug 2461: cellmodel(5): epsilon(), ediff() functions 
 </ul>
