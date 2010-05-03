@@ -118,6 +118,10 @@ Creates a new stripchart widget named <i>pathName</i>.<p>
 
 Returns the value of the specified <i>option</i>.<p>
 
+<<defitem clear {<i>win</i> clear}>>
+
+Deletes all plotted data series.<p>
+
 <<defitem configure {<i>win</i> configure <i>option value...</i>}>>
 
 Sets the values of the specified <i>options</i>.  The widget will

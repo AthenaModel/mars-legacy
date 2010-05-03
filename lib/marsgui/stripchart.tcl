@@ -177,24 +177,6 @@ snit::widgetadaptor ::marsgui::stripchart {
     }
 
 
-    # Method: ConfigAndClear
-    #
-    # Saves the option value, schedules a render timeout,
-    # and clears the saved data.
-    #
-    # Syntax:
-    #   ConfigAndClear _opt val_
-    #
-    #   opt - The option name
-    #   val - The new value
-
-    method ConfigAndClear {opt val} {
-        $self ConfigAndRender $opt $val
-
-        array unset series
-        set series(names) [list]
-    }
-
     #-------------------------------------------------------------------
     # Group: Instance Variables
 
@@ -903,8 +885,12 @@ snit::widgetadaptor ::marsgui::stripchart {
 
         let py {$py + $parms(xaxis.pad)}
 
+        set text [{*}$options(-xformatcmd) $x]
+
         if {$x == $layout(xmax)} {
             set anchor ne
+        } elseif {$x == $layout(xmin) && [string length $text] > 4} {
+            set anchor nw
         } else {
             set anchor n
         }
@@ -1354,6 +1340,17 @@ snit::widgetadaptor ::marsgui::stripchart {
     # For the moment, all canvas methods are available.
 
     delegate method * to hull
+
+    # Method: clear
+    #
+    # Clears the saved plot data, and, schedules a render timeout.
+
+    method clear {} {
+        array unset series
+        set series(names) [list]
+
+        $self ScheduleRender
+    }
 
     # Method: plot
     #
