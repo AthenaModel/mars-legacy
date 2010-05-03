@@ -899,7 +899,7 @@ snit::widgetadaptor ::marsgui::stripchart {
             -anchor $anchor                        \
             -fill   black                          \
             -font   $parms(xaxis.font)             \
-            -text   [{*}$options(-xformatcmd) $x]
+            -text   $text
     }
 
     # Method: PositionPlot
@@ -1014,8 +1014,8 @@ snit::widgetadaptor ::marsgui::stripchart {
         let px {$rx - [winfo rootx $win]}
         let py {$ry - [winfo rooty $win]}
 
-        let xtext [{*}$options(-xformatcmd) [$self px2x $px]]
-        let ytext [{*}$options(-yformatcmd) [$self py2y $py]]
+        set xtext [{*}$options(-xformatcmd) [$self px2x $px]]
+        set ytext [{*}$options(-yformatcmd) [$self py2y $py]]
 
         append text "($xtext, $ytext)"
 
