@@ -824,40 +824,39 @@ snit::widgetadaptor ::marsgui::stripchart {
         if {[llength $series(names)] == 0} {
             set layout(xmin) 0.0
             set layout(xmax) 10.0
-            return
-        }
-
-        # NEXT, apply the -xmin, -xmax
-        if {$options(-xmin) ne ""} {
-            set xmin $options(-xmin)
         } else {
-            set xmin +Inf
+            # FIRST, apply the -xmin, -xmax
+            if {$options(-xmin) ne ""} {
+                set xmin $options(-xmin)
+            } else {
+                set xmin +Inf
+                foreach name $series(names) {
+                    let xmin {min($xmin, $series(xmin-$name))}
+                }
+            }
+
+            if {$options(-xmax) ne ""} {
+                set xmax $options(-xmax)
+            } else {
+                set xmax -Inf
+                
+                foreach name $series(names) {
+                    let xmax {max($xmax, $series(xmax-$name))}
+                }
+            }
+
+            # NEXT, loop for the series, and determine the overall
+            # bounds.
+            
             foreach name $series(names) {
                 let xmin {min($xmin, $series(xmin-$name))}
-            }
-        }
-
-        if {$options(-xmax) ne ""} {
-            set xmax $options(-xmax)
-        } else {
-            set xmax -Inf
-
-            foreach name $series(names) {
                 let xmax {max($xmax, $series(xmax-$name))}
             }
+
+            # NEXT, save the computed extremes.
+            set layout(xmin) $xmin
+            set layout(xmax) $xmax
         }
-
-        # NEXT, loop for the series, and determine the overall
-        # bounds.
-
-        foreach name $series(names) {
-            let xmin {min($xmin, $series(xmin-$name))}
-            let xmax {max($xmax, $series(xmax-$name))}
-        }
-
-        # NEXT, save the computed extremes.
-        set layout(xmin) $xmin
-        set layout(xmax) $xmax
 
         # NEXT, Compute pixels Per Unit
         let layout(xppu) {

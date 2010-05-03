@@ -73,6 +73,7 @@ proc main {argv} {
         -yformatcmd  {format %.1f}     \
         -xformatcmd  {format %.1f}
 
+    if 0 {
     .chart plot series1 \
         -label "Series 1" \
         -data  $series(1) \
@@ -90,7 +91,7 @@ proc main {argv} {
         -data  $series(3) \
         -rmin  -60        \
         -rmax  60
-
+    }
 
 
     pack .chart -fill both -expand yes
