@@ -100,7 +100,11 @@ snit::type ::marsutil::lazyupdater {
     # Schedules the lazyupdater to call its -command.
 
     method update {} {
-        $timeout schedule -nocomplain
+        if {$options(-window) eq "" ||
+            [winfo ismapped $options(-window)]
+        } {
+            $timeout schedule -nocomplain
+        }
     }
 }
 

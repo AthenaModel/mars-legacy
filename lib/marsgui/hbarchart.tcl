@@ -57,11 +57,11 @@ snit::widgetadaptor ::marsgui::hbarchart {
     #-------------------------------------------------------------------
     # Group: Components
     
-    # Component: render
+    # Component: lu
     #
-    # timeout(n) which renders the output.
+    # lazyupdater(n) which renders the output.
 
-    component renderer
+    component lu
 
     # Component: plot
     #
@@ -151,7 +151,7 @@ snit::widgetadaptor ::marsgui::hbarchart {
         set options($opt) $val
 
         # Render later, when things have settled down.
-        $self ScheduleRender
+        $lu update
     }
 
 
@@ -358,9 +358,9 @@ snit::widgetadaptor ::marsgui::hbarchart {
             -highlightthickness 0     \
             -borderwidth        0
 
-        # NEXT, create the renderer timeout
-        install renderer using timeout ${selfns}::renderer \
-            -interval 1                                    \
+        # NEXT, create the lazy updater
+        install lu using lazyupdater ${selfns}::lu \
+            -window   $win                         \
             -command  [mymethod Render]
 
         # NEXT, create the plot canvas and add it to the main canvas.
@@ -389,16 +389,15 @@ snit::widgetadaptor ::marsgui::hbarchart {
                               -anchor ne            \
                               -window $legend]
 
-        # NEXT, render when mapped.
-        bind $win <Map> [list $renderer schedule -nocomplain]
-
         # NEXT, let the plot and legend canvases respond to
         # events on the main widget.
         bindtags $plot   [linsert [bindtags $plot]   0 $win]
         bindtags $legend [linsert [bindtags $legend] 0 $win]
 
         # NEXT, do event bindings.
-        bind $win <Configure> [list $renderer schedule -nocomplain]
+
+        # redraw on configure
+        bind $win <Configure> [list $lu update]
 
         $hull   bind legendlink <1> [mymethod PopupLegend]
         $legend bind closer     <1> [mymethod PopdownLegend]
@@ -1221,17 +1220,6 @@ snit::widgetadaptor ::marsgui::hbarchart {
         array unset trans
     }
 
-    # Method: ScheduleRender
-    #
-    # Schedules the renderer timeout, only if the window is currently
-    # mapped.
-
-    method ScheduleRender {} {
-        if {[winfo ismapped $win]} {
-            $renderer schedule -nocomplain
-        }
-    }
-
     # Method: ContextClick
     #
     # Produces a <<Context>> event on $win corresponding to a 
@@ -1387,6 +1375,6 @@ snit::widgetadaptor ::marsgui::hbarchart {
         }
 
         # NEXT, schedule the next rendering
-        $self ScheduleRender
+        $lu update
     }
 }
