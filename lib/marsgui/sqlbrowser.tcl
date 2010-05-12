@@ -1187,7 +1187,7 @@ snit::widget ::marsgui::sqlbrowser {
     method {uid setcelltext} {uid cname value} {
         set cindex [$self cname2cindex $cname]
 
-        $tlist cellconfigure -$uidmap($uid),$cindex -text $value
+        $tlist cellconfigure $uidmap($uid),$cindex -text $value
     }
 
     # uid setfont uid font
