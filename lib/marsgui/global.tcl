@@ -122,6 +122,13 @@ proc ::tk_textPaste w {
 # Use the clam theme for ttk widgets.
 ttk::style theme use clam
 
+# Get the default background and active background colors
+# from the Ttk theme; we'll configure the classic widgets to use it
+# as appropriate.
+
+set ::marsgui::defaultBackground [ttk::style configure . -background]
+set ::marsgui::activeBackground  [ttk::style lookup . -background active]
+
 # Entrybutton.Toolbutton: A style for buttons used in entries.
 ttk::style configure Entrybutton.Toolbutton -background white
 ttk::style map Entrybutton.Toolbutton -background {disabled white}
@@ -139,18 +146,16 @@ ttk::style map Menubox.TCombobox -foreground {}
 # Tabless.TNotebook: A style for tabless ttk::notebook widgets
 ttk::style layout Tabless.TNotebook.Tab null
 
+# TEntry: Set background for readonly ttk::entry widgets
+ttk::style map TEntry \
+    -fieldbackground [list readonly $::marsgui::defaultBackground]
+
 #-----------------------------------------------------------------------
 # Option Database Settings
 #
 # This section redefines a number of option database settings to give
 # a better default appearance.
 #
-# FIRST, get the default background and active background colors
-# from the Ttk theme; we'll configure the classic widgets to use it
-# as appropriate.
-
-set ::marsgui::defaultBackground [ttk::style configure . -background]
-set ::marsgui::activeBackground  [ttk::style lookup . -background active]
 
 . configure -background $::marsgui::defaultBackground
 
