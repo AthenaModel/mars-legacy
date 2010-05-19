@@ -194,7 +194,7 @@ namespace eval ::test {
         error
     } -cleanup {
         CleanUp
-    } -result {Name is reserved: "all"}
+    } -result {cell name is reserved word: "all"}
 
     test load-2.3 {Duplicate cell name} -setup {
         Setup
@@ -308,6 +308,24 @@ P::C =            7
 P::D =            8
 Q::A =            7
 Q::D =            8
+    }
+
+    test load-3.1 {letsym cells} -setup {
+        Setup
+    } -body {
+        cm load {
+            let    x = 5
+            letsym A = {"Foo"}
+            letsym B = {[x] == 5 ? "is" : "isn't"}
+        }
+        cm solve
+        pprint [cm dump]
+    } -cleanup {
+        CleanUp
+    } -result {
+x =            5
+A =        "Foo" <= "Foo"
+B =         "is" <= [x] == 5 ? "is" : "isn't"
     }
 
     #-------------------------------------------------------------------
@@ -679,14 +697,14 @@ Q::D =            8
         CleanUp
     } -result {A}
 
-    test cellinfo-2.3 {cellinfo type} -setup {
+    test cellinfo-2.3 {cellinfo ctype} -setup {
         Setup
         cm load {
             let A = 1
             let B = {[A] + 1}
         }
     } -body {
-        list [cm cellinfo type A] [cm cellinfo type B]
+        list [cm cellinfo ctype A] [cm cellinfo ctype B]
     } -cleanup {
         CleanUp
     } -result {constant formula}
@@ -788,6 +806,18 @@ Q::D =            8
     } -cleanup {
         CleanUp
     } -result {cell B is Inf}
+
+    test cellinfo-2.11 {cellinfo vtype} -setup {
+        Setup
+        cm load {
+            let    A = 1
+            letsym B = {"Foo"}
+        }
+    } -body {
+        list [cm cellinfo vtype A] [cm cellinfo vtype B]
+    } -cleanup {
+        CleanUp
+    } -result {number symbol}
 
     #-------------------------------------------------------------------
     # formula
@@ -966,17 +996,19 @@ iterate null 1 0.0 \{\}
 converge null 1
     "
 
-    test solve-2.5 {Can solve starting at a particular page}  -setup {
+    test solve-2.5 {Can solve a single page}  -setup {
         Setup
-        # This is a very unsatisfactory model, as it converges
-        # only because I plugged in the right answer.
         cm load {
-            let a = {1 - [b]/2} -value -1
-            let b = {2*[a] + 6} -value 4
+            let a = -1
+            let b = 4
 
             page P
-            let y = {1 - [x]/2} -value -1
-            let x = {2*[y] + 6} -value 4
+            let x = {[a] + [b]} 
+            let y = {[a] * [b]}
+
+            page Q
+            let x = {[a] + [b]} 
+            let y = {[a] * [b]}
         }
     } -body {
         cm solve P
@@ -985,8 +1017,68 @@ converge null 1
         CleanUp
     } -result "
 iterate P 0 0.0 n/a
-iterate P 1 0.0 \{\}
+iterate P 1 4.0 P::y
 converge P 1
+    "
+
+    test solve-2.6 {Can solve starting at a particular page}  -setup {
+        Setup
+        cm load {
+            let a = -1
+            let b = 4
+
+            page P
+            let x = {[a] + [b]} 
+            let y = {[a] * [b]}
+
+            page Q
+            let x = {[a] + [b]} 
+            let y = {[a] * [b]}
+        }
+    } -body {
+        cm solve P end
+        dumpTrace
+    } -cleanup {
+        CleanUp
+    } -result "
+iterate P 0 0.0 n/a
+iterate P 1 4.0 P::y
+converge P 1
+iterate Q 0 0.0 n/a
+iterate Q 1 4.0 Q::y
+converge Q 1
+    "
+
+    test solve-2.7 {Can solve a range of pages}  -setup {
+        Setup
+        cm load {
+            let a = -1
+            let b = 4
+
+            page P
+            let x = {[a] + [b]} 
+            let y = {[a] * [b]}
+
+            page Q
+            let x = {[a] + [b]} 
+            let y = {[a] * [b]}
+
+            page R
+            let x = {[a] + [b]} 
+            let y = {[a] * [b]}
+        }
+    } -body {
+        cm solve P Q
+        dumpTrace
+    } -cleanup {
+        CleanUp
+    } -result "
+iterate P 0 0.0 n/a
+iterate P 1 4.0 P::y
+converge P 1
+iterate Q 0 0.0 n/a
+iterate Q 1 4.0 Q::y
+converge Q 1
     "
 
     #===================================================================
@@ -1066,6 +1158,42 @@ converge P 1
     } -cleanup {
         CleanUp
     } -result {1}
+
+    test index-3.1 {Introspection: invalid index name} -setup {
+        Setup
+    } -body {
+        cm load {
+            index i {1 2 3}
+        }
+
+        cm index NONESUCH
+    } -returnCodes {
+        error
+    } -cleanup {
+        CleanUp
+    } -result {Unknown index name: "NONESUCH"}
+
+    test index-3.2 {Introspection: no indices defined} -setup {
+        Setup
+    } -body {
+        cm index
+    } -cleanup {
+        CleanUp
+    } -result {}
+
+    test index-3.3 {Introspection: indices defined} -setup {
+        Setup
+    } -body {
+        cm load {
+            index i {1 2 3}
+            index j {4 5 6}
+        }
+
+        list [cm index] [cm index i] [cm index j]
+    } -cleanup {
+        CleanUp
+    } -result {{i j} {1 2 3} {4 5 6}}
+
 
     #-------------------------------------------------------------------
     # sum
@@ -1222,6 +1350,143 @@ converge P 1
         CleanUp
     } -result {0.0}
 
+    #-------------------------------------------------------------------
+    # format
+
+    test format-1.1 {can call format function} -setup {
+        Setup
+
+        cm load {
+            let A = 1.23456
+            let B = {format("%.2f",[A])}
+        }
+    } -body {
+        cm solve
+        cm value B
+    } -cleanup {
+        CleanUp
+    } -result {1.23}
+
+
+    #-------------------------------------------------------------------
+    # User-defined Functions
+    #
+    # This section tests user-defined functions.
+
+    test function-1.1 {No arguments} -setup {
+        Setup
+    } -body {
+        cm load {
+            function pi {} { return 3.14159 }
+            let Result = {pi()}
+        }
+
+        cm solve
+        cm value Result
+    } -cleanup {
+        CleanUp
+    } -result {3.14159}
+
+    test function-1.2 {Uses expr} -setup {
+        Setup
+    } -body {
+        cm load {
+            function six {} { expr {2 * 3} }
+            let Result = {six()}
+        }
+
+        cm solve
+        cm value Result
+    } -cleanup {
+        CleanUp
+    } -result {6}
+
+    test function-1.3 {1 argument} -setup {
+        Setup
+    } -body {
+        cm load {
+            function triple {x} {
+                expr {3*$x}
+            }
+
+            let Result = {triple(6)}
+        }
+
+        cm solve
+        cm value Result
+    } -cleanup {
+        CleanUp
+    } -result {18}
+
+    test function-1.4 {2 arguments} -setup {
+        Setup
+    } -body {
+        cm load {
+            function mult {a b} { expr {$a * $b} }
+            let Result = {mult(2,5)}
+        }
+
+        cm solve
+        cm value Result
+    } -cleanup {
+        CleanUp
+    } -result {10}
+
+    test function-1.5 {Uses if} -setup {
+        Setup
+    } -body {
+        cm load {
+            function sign {x} {
+                if {$x > 0.0} {
+                    return 1.0
+                } elseif {$x < 0.0} {
+                    return -1.0
+                } else {
+                    return 0.0
+                }
+            }
+
+            let Result = {sign(-5)}
+        }
+
+        cm solve
+        cm value Result
+    } -cleanup {
+        CleanUp
+    } -result {-1.0}
+
+    test function-1.6 {Uses set} -setup {
+        Setup
+    } -body {
+        cm load {
+            function copy {x} {
+                set y $x
+                return $y
+            }
+
+            let Result = {copy(7.0)}
+        }
+
+        cm solve
+        cm value Result
+    } -cleanup {
+        CleanUp
+    } -result {7.0}
+
+    test function-1.7 {References cell} -setup {
+        Setup
+    } -body {
+        cm load {
+            function BaseTimes {x} { expr {[Base] * $x} }
+            let Base = 7
+            let Result = {BaseTimes(5.0)}
+        }
+
+        cm solve
+        cm value Result
+    } -cleanup {
+        CleanUp
+    } -result {35.0}
 
     #-------------------------------------------------------------------
     # Cleanup

@@ -82,8 +82,15 @@ snit::type ::simlib::cellmodel {
     # or page names.
     typevariable reserved {
         all
+        append
         error
+        expr
+        format
+        if
         invalid
+        return
+        set
+        string
         unknown
         unused
     }
@@ -150,31 +157,6 @@ snit::type ::simlib::cellmodel {
 
             # NEXT, define
             uplevel 1 [list proc $name $arglist $body]
-        }
-
-        # index name list
-        #
-        # name     The index name, e.g., "i"
-        # list     The list of values for the index
-        #
-        # Defines an index that can be used with sum and prod.
-
-        proc index {name list} {
-            global indices
-
-            if {[info exists indices($name)]} {
-                return -code error -errorcode invalid \
-                    "Duplicate index name: \"$name\""
-            }
-
-            if {![regexp {^\w+$} $name]} {
-                return -code error -errorcode invalid \
-                    "Invalid index name: \"$name\""
-            }
-
-            set indices($name) $list
-
-            return
         }
 
         # sum index formula
@@ -302,6 +284,9 @@ snit::type ::simlib::cellmodel {
     #
     # sane            - 1 if the model appears to be "sane", and 0 
     #                   if there are problems.
+    # functions       - Flat list of function definitions:
+    #                   name arglist body...
+    # indices         - Dictionary of index names and lists
     # pages           - List of page IDs, in the order of definition, 
     #                   which is also the order of computation.
     # cells           - List of fully-qualified cell names, in the order 
@@ -321,7 +306,8 @@ snit::type ::simlib::cellmodel {
     #                   $page, in computation order.
     # page-$cell      - The name of the page on which $cell appears.
     # bare-$cell      - The bare name of $cell.
-    # type-$cell      - constant|formula
+    # ctype-$cell     - Cell Type: constant|formula
+    # vtype-$cell     - Value Type: number|symbol
     # ivalue-$cell    - The initial value of the cell.
     # formula-$cell   - The formula expression, or "" for constants.
     # uses-$cell      - List of the fully-qualified names of the cells
@@ -410,6 +396,8 @@ snit::type ::simlib::cellmodel {
         set info(mode) null
 
         set model(sane)           0
+        set model(functions)      [list]
+        set model(indices)        [list]
         set model(pages)          [list null]
         set model(cells)          [list]
         set model(barecells)      [list]
@@ -432,8 +420,11 @@ snit::type ::simlib::cellmodel {
     method load {text} {
         # FIRST, create the load interpreter.
         set loader [interp create -safe]
-        $loader alias page $self Load_page $loader
-        $loader alias let  $self Load_let  $loader
+        $loader alias index    $self Load_index    $loader
+        $loader alias function $self Load_function $loader
+        $loader alias page     $self Load_page     $loader
+        $loader alias let      $self Load_let      $loader
+        $loader alias letsym   $self Load_letsym   $loader
 
         $loader eval $loaderProcs
 
@@ -462,6 +453,54 @@ snit::type ::simlib::cellmodel {
 
         # NEXT, notify the user whether the model is sane or not.
         return $model(sane)
+    }
+
+    # Method: Load_index
+    #
+    # Defines an index that can be used with sum and prod in load
+    # scripts.  The index list is saved for introspection.
+    #
+    # Syntax:
+    #   index _name list_
+    #
+    #   name    - The index name
+    #   list    - The values it iterates over.
+
+    method Load_index {loader name list} {
+        # FIRST, validate the index
+        validate {![dict exists $model(indices) $name]} \
+            "Duplicate index name: \"$name\""
+    
+        validate {[regexp {^\w+$} $name]} \
+            "Invalid index name: \"$name\""
+
+        # NEXT, save it for introspection
+        dict set model(indices) $name $list
+
+        # NEXT, save it into the loader, for use by macros
+        $loader eval [list set ::indices($name) $list]
+
+        return
+
+    }
+
+    # Method: Load_function
+    #
+    # Defines a function in the formula interpreter's tcl::mathfunc
+    # namespace, so that it can be used in formulas.  The function
+    # is just a Tcl proc; it can access cell values and use normal
+    # Tcl logic.
+    #
+    # Syntax:
+    #   function _name arglist body_
+    #
+    #   name    - The function's name
+    #   arglist - The argument list
+    #   body    - The function's body
+
+    method Load_function {loader name arglist body} {
+        # TBD: What kind of error checking can we do?
+        lappend model(functions) $name $arglist $body
     }
 
     # Method: Load_page
@@ -541,7 +580,7 @@ snit::type ::simlib::cellmodel {
                 }
 
                 # Add the cell just as it was.
-                $self AddCell $model(bare-$cell)    \
+                $self AddCell $model(vtype-$cell) $model(bare-$cell)    \
                     -value    $model(ivalue-$cell)  \
                     -formula  $model(formula-$cell)
             }
@@ -591,21 +630,37 @@ snit::type ::simlib::cellmodel {
     # The implementation of the definition script's "let" command.
     # If _formula_ is a real number, defines a constant;
     # otherwise, defines a formula.
-    #
-    # TBD: Consider merging AddCell into this routine.
 
     method Load_let {loader name "=" formula args} {
         if {[string is double -strict $formula]} {
-            $self AddCell $name -value $formula {*}$args
+            $self AddCell number $name -value $formula {*}$args
         } else {
             set formula [$loader eval [list fsubst $formula]]
-            $self AddCell $name -formula $formula {*}$args
+            $self AddCell number $name -formula $formula {*}$args
         }
     }
 
 
-    # AddCell name options...
+    # Load_letsym name = formula ?options...?
     #
+    #   name     - The cell name
+    #   =        - Sugar
+    #   formula  - The formula
+    #   options  - Cell options
+    #
+    # The implementation of the definition script's "letsym" command.
+    # Defines a formula that returns a symbolic value, rather than
+    # a number.
+
+    method Load_letsym {loader name "=" formula args} {
+        set formula [$loader eval [list fsubst $formula]]
+        $self AddCell symbol $name -formula $formula {*}$args
+    }
+
+
+    # AddCell vtype name options...
+    #
+    # vtype    - number|symbol
     # name     - The cell's unqualified name
     # options  - The cell's options.
     #
@@ -616,7 +671,7 @@ snit::type ::simlib::cellmodel {
     # and formula (if any).  If the cell has no formula, it's a 
     # constant.  The cell is added to the current page.
 
-    method {AddCell} {name args} {
+    method AddCell {vtype name args} {
         # FIRST, get some data about the new cell.
         set barename [string trim $name]
         set ns       [pagens $trans(page)]
@@ -630,7 +685,8 @@ snit::type ::simlib::cellmodel {
         $self ValidateNewCellName $barename
 
         # The barename can't be a reserved word.
-        validate {$barename ni $reserved} "Name is reserved: \"$barename\""
+        validate {$barename ni $reserved} \
+            "cell name is reserved word: \"$barename\""
 
         # The full cell name must be unique, unless it was copied from
         # another page.
@@ -650,7 +706,11 @@ snit::type ::simlib::cellmodel {
         }
 
         # NEXT, get the rest of the options.
-        set value [from args -value 0.0]
+        if {$vtype eq "number"} {
+            set value [from args -value 0.0]
+        } else {
+            set value [from args -value ""]
+        }
 
         validate {[llength $args] == 0} \
             "Invalid option: \"[lindex $args 0]\""
@@ -663,7 +723,8 @@ snit::type ::simlib::cellmodel {
 
         set model(page-$cell)    $trans(page)
         set model(bare-$cell)    $barename
-        set model(type-$cell)    $celltype
+        set model(ctype-$cell)   $celltype
+        set model(vtype-$cell)   $vtype
         set model(ivalue-$cell)  $value
         set model(formula-$cell) $formula
         set model(uses-$cell)    [list]
@@ -760,8 +821,8 @@ snit::type ::simlib::cellmodel {
             }
 
             if {[catch {
-                $interp invokehidden -namespace $ns \
-                    expr $model(formula-$cell)
+                $interp invokehidden namespace eval $ns \
+                    [list expr $model(formula-$cell)]
             } result opts]} {
                 # Sometimes div/0 get us a result of Inf,
                 # and sometimes it gets us an "ARITH DOMAIN" error.
@@ -931,6 +992,15 @@ snit::type ::simlib::cellmodel {
             $interp hide $command
         }
 
+        # NEXT, add a few back in.
+        $interp expose append
+        $interp expose expr
+        $interp expose format
+        $interp expose if
+        $interp expose return
+        $interp expose set
+        $interp expose string
+
         # NEXT, alias in min and max funcs; the default versions
         # use commands we've hidden, and don't currently work in
         # -safe interpreters anyway.
@@ -941,6 +1011,13 @@ snit::type ::simlib::cellmodel {
         # NEXT, add additional functions
         $interp alias ::tcl::mathfunc::epsilon $self Epsilon
         $interp alias ::tcl::mathfunc::ediff   $self EpsilonDiff
+        $interp alias ::tcl::mathfunc::format  ::format
+
+        # NEXT, define user functions
+        foreach {name arglist body} $model(functions) {
+            $interp invokehidden -global -- \
+                proc ::tcl::mathfunc::$name $arglist $body
+        }
     }
 
     # Proc: CaseFunc
@@ -1146,17 +1223,23 @@ snit::type ::simlib::cellmodel {
 
             if {$formula ne ""} {
                 if {[catch {
-                    set new [$interp invokehidden -namespace $ns \
-                                 expr $formula]
+                    set new [$interp invokehidden namespace eval $ns \
+                                 [list expr $model(formula-$cell)]]
 
-                    if {$new eq "Inf"} {
-                        error "cell $cell is Inf"
-                    }
+                    if {$model(vtype-$cell) eq "number"} {
+                        if {$new eq "Inf"} {
+                            error "cell $cell is Inf"
+                        }
 
-                    if {abs($values($cell)) > 1.0} {
-                        let delta {abs(($new - $values($cell))/$values($cell))}
+                        if {abs($values($cell)) > 1.0} {
+                            let delta {
+                                abs(($new - $values($cell))/$values($cell))
+                            }
+                        } else {
+                            let delta {abs($new - $values($cell))}
+                        }
                     } else {
-                        let delta {abs($new - $values($cell))}
+                        set delta 0.0
                     }
 
                     set values($cell) $new
@@ -1189,12 +1272,17 @@ snit::type ::simlib::cellmodel {
     # computation.  Note that it's an error to call solve if the model
     # is not <sane>.
     #
-    # Syntax:
-    #    solve _?start?_
+    # By default, all pages are solved.  If _from_ is given, it is
+    # the name of a single page to solve.  If _from_ and _to_ are given,
+    # the pages in that sequence are solved.  It's an error for 
+    # _to_ to precede _from_ in the list of pages.
     #
-    #    start - Name of the page to start with.  The named page and
-    #            all subsequent pages will be solved; prior pages will
-    #            be left alone.
+    # Syntax:
+    #    solve _?from ?to??_
+    #
+    #    from -  Name of the page to start with.
+    #    to   -  Name of the page to end with; can be "end", meaning
+    #            the final page.
     #
     # Returns the result of the attempt.
     #
@@ -1203,18 +1291,27 @@ snit::type ::simlib::cellmodel {
     #   diverge <page>  - Unsuccessful; the named page diverged.
     #   errors <page>   - There are cell errors on the named page.
     
-    method solve {{start ""}} {
+    method solve {{from ""} {to ""}} {
         require {$model(sane)} "Model is not sane."
 
         # FIRST, get the pages to solve.
-        set pages $model(pages)
+        if {$from eq ""} {
+            set pages $model(pages)
+        } else {
+            if {$to eq ""} {
+                set to $from
+            } elseif {$to eq "end"} {
+                set to [lindex $model(pages) end]
+            }
 
-        if {$start ne ""} {
-            set ndx [lsearch -exact $pages $start]
+            set ifrom [lsearch -exact $model(pages) $from]
+            set ito   [lsearch -exact $model(pages) $to]
 
-            require {$ndx != -1} "Unknown start page: \"$start\""
+            require {$ifrom != -1}   "Unknown from page: \"$from\""
+            require {$ito != -1}     "Unknown to page: \"$to\""
+            require {$ifrom <= $ito} "To page precedes from page"
 
-            set pages [lrange $pages $ndx end]
+            set pages [lrange $model(pages) $ifrom $ito]
         }
 
         # NEXT, solve, each page in sequence.
@@ -1374,6 +1471,23 @@ snit::type ::simlib::cellmodel {
         return $model(formula-$cell)
     }
 
+    # index ?name?
+    #
+    # name   An index name
+    #
+    # Called with no arguments, returns a list of the defined index
+    # names.  Called with an index name, returns the associated list.
+
+    method index {{name ""}} {
+        if {$name eq ""} {
+            return [lsort [dict keys $model(indices)]]
+        } elseif {[dict exist $model(indices) $name]} {
+            return [dict get $model(indices) $name]
+        } else {
+            error "Unknown index name: \"$name\""
+        }
+    }
+
     #-------------------------------------------------------------------
     # Debugging dumps
 
@@ -1389,7 +1503,11 @@ snit::type ::simlib::cellmodel {
         foreach cell [$self cells $page] {
             set value $values($cell)
 
-            append out [format "%-*s = %12g" $wid $cell $value]
+            if {$model(vtype-$cell) eq "number"} {
+                append out [format "%-*s = %12g" $wid $cell $value]
+            } else {
+                append out [format "%-*s = %12s" $wid $cell \"$value\"]
+            }
 
             if {$model(formula-$cell) ne ""} {
                 append out " <= $model(formula-$cell)"

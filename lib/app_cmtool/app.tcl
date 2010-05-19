@@ -324,7 +324,7 @@ snit::type app {
         puts [cs dump $opts(-page)]
 
         if {![cs sane]} {
-            puts "Error, model is not sane.  Run \"cs check\" for details."
+            puts "Error, model is not sane.  Run \"mars cmtool check\" for details."
         }
     }
 
@@ -364,7 +364,7 @@ snit::type app {
         $type LoadModel [lshift argv]
 
         if {![cs sane]} {
-            puts "Error, model is not sane.  Run \"cs check\" for details."
+            puts "Error, model is not sane.  Run \"mars cmtool check\" for details."
             exit 1
         }
 
@@ -566,7 +566,7 @@ snit::type app {
         $type LoadModel [lshift argv]
 
         if {![cs sane]} {
-            puts "Error, model is not sane.  Run \"cs check\" for details."
+            puts "Error, model is not sane.  Run \"mars cmtool check\" for details."
             exit 1
         }
 
@@ -988,7 +988,7 @@ snit::type app {
             cs load [readfile $filename]
         } result]} {
             puts "Error reading model: $result"
-            puts "$::errorInfo"
+            # puts "$::errorInfo"
             exit 1
         }
     }

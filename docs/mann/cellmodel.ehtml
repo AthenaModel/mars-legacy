@@ -132,8 +132,10 @@ Returns information about the specified <i>cell</i>.  The available
   <li> <b>page</b> -- The name of the page on which the <i>cell</i>
        appears.
   <li> <b>bare</b> -- The cell's bare (unqualified) name.
-  <li> <b>type</b> -- Whether the cell is a <b>constant</b> or a
+  <li> <b>ctype</b> -- Cell Type: whether the cell is a <b>constant</b> or a
        <b>formula</b> cell.
+  <li> <b>vtype</b> -- Value Type: whether the cell is a <b>number</b> or a
+       <b>symbol</b> cell.
   <li> <b>ivalue</b> -- The cell's initial value.
   <li> <b>formula</b> -- The cell's formula, or "" if none.
   <li> <b>uses</b> -- A list of the fully-qualified names of the cells
@@ -180,6 +182,13 @@ names, e.g., the <b>MyNumber</b> cell on the <b>Data</b> page is
 called <b>Data::MyNumber</b>.  When retrieving a single page, however,
 the dictionary can be retrieved with unqualified cell names by
 specifying the <b>-bare</b> option.<p>
+
+<<defitem index {<i>object</i> index ?<i>name</i>?}>>
+
+Called with no arguments, this method returns a list of the names of
+the indices defined in the current model using the
+<<xref cellmodel(5) index>> command.  If <i>name</i> is given, returns
+the list of values associated with the named index.<p>
 
 <<defitem iterate {<i>object</i> iterate <i>page</i>}>>
 
@@ -229,12 +238,9 @@ cell names and values.  By default the cell names must be
 fully-qualified.  If the <i>dict</i> contains unqualified cell names
 for a particular page, specify the <i>page</i> name as well.<p>
 
-<<defitem solve {<i>object</i> solve ?<i>start</i>?}>>
+<<defitem solve {<i>object</i> solve ?<i>from</i> ?<i>to</i>??}>>
 
-Attempts to solve the model, computing each page in order, starting
-with the page called <i>start</i>.  If <i>start</i> is omitted,
-computation starts with the <b>null</b> page.<p>
-
+Attempts to solve the model, computing each page in order.
 Acyclic pages are computed once, and cyclic pages are iterated to
 convergence (if possible).  Returns "<b>ok</b>" if the computation was
 successful; "<b>diverge <i>page</i></b>" if the named page diverged,
@@ -243,6 +249,11 @@ division by zero) on the named page.<p>
 
 Note that it's an error to call <<iref solve>> if the model is not
 <<iref sane>>.<p>
+
+By default, all pages are solved.  If <i>from</i> is given, the named
+page is solved.  If <i>from</i> and <i>to</i> are given, the specified
+range of pages are solved.  If <i>to</i> is <b>end</b>, then all pages
+are solved from the <i>from</i> page to the end of the set of pages.<p>
 
 <<defitem value {<i>object</i> value <i>cell</i>}>>
 

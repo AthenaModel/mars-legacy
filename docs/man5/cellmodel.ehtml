@@ -126,10 +126,11 @@ be used as well.)<p>
 <<defitem let {let <i>name</i> = <i>constant</i>}>>
 <<defitem let {let <i>name</i> = <i>formula</i> ?<i>options...</i>?}>>
 
-The <<iref let>> command defines a new cell on the current page.  The
-cell <i>name</i> must begin with a letter, and can contain letters,
-digits, underscores, and internal periods.  The formula must be a
-single token; thus, formulas containing whitespace must be braced:<p>
+The <<iref let>> command defines a new <b>number</b> cell on the
+current page.  The cell <i>name</i> must begin with a letter, and can
+contain letters, digits, underscores, and internal periods.  The
+formula must be a single token; thus, formulas containing whitespace
+must be braced:<p>
 
 <pre>
     let A = 5             ;# Constant cell
@@ -153,6 +154,30 @@ acyclic pages; on cyclic pages, however, at least one cell will be
 referenced before its value has been computed.  Because convergence
 often depends on having a good starting point, it's useful to be able
 to specify the cell's initial value explicitly.<p>
+
+<</deflist options>>
+
+<<defitem letsym {letsym <i>name</i> = <i>formula</i> ?<i>options...</i>?}>>
+
+The <<iref letsym>> command defines a new <b>symbol</b> cell on the
+current page.  The cell <i>name</i> must begin with a letter, and can
+contain letters, digits, underscores, and internal periods.  The
+formula must be a single token; thus, formulas must be braced:<p>
+
+<pre>
+    letsym A = {"Constant String"}
+    let    B = 7                   
+    letsym C = {[B] &lt; 10 ? "Under 10" : "Over 10"}
+</pre>
+
+At present, only one option is defined:<p>
+
+<<deflist options>>
+
+<<defopt {-value <i>initialValue</i>}>>
+
+This option allows the model to assign the cell's initial value
+explicitly.<p>
 
 <</deflist options>>
 
@@ -213,6 +238,15 @@ evaluated when the model is defined.<p>
 See <<xref MACROS>> for more information on how to use macros, and for
 a list of predefined macros.<p>
 
+<<defitem function {function <i>name arglist body</i>}>>
+
+Defines a function for use in formulas.  Note that a function is
+simply a Tcl <<xref tcl:proc(n)>> that the formula interpreter sees as
+a function.  It can take any number of arguments, and should return a
+single value.  The body can contain a small subset of the standard Tcl
+commands: <<xref tcl:expr(n)>>, <<xref tcl:set(n)>>,
+<<xref tcl:if(n)>>, and <<xref tcl:return(n)>>.<p>
+
 <<defitem index {index <i>name indexlist</i>}>>
 
 Defines an index for use with the <<iref sum>> and <<iref prod>>
@@ -228,7 +262,8 @@ the set {1 2 3}, you'd define the index <code>i</code> like this:<p>
 <<section FUNCTIONS>>
 
 Cell model formulas may contain the following functions, in addition
-to the standard Tcl <<xref tcl:mathfunc(n)>> functions.<p>
+to the standard Tcl <<xref tcl:mathfunc(n)>> functions; plus, new
+functions may be defined using the <<iref function>> command.<p>
 
 <<deflist funcs>>
 
@@ -255,6 +290,13 @@ convergence (the <<xref cellmodel(n)>> object's <b>-epsilon</b>
 option).  It is usually specified as a negative power of 10, i.e.,
 .0001; the number of zeroes is then the number of significant digits
 in the converged outputs.<p>
+
+<<defitem format {format(<i>fmt,value,...</i>)}>>
+
+Formats the <i>value</i> or values given the <i>fmt</i> string,
+just as <<xref tcl:format(n)>> does.  This can be used in
+<b>symbol</b> formulas (see <<iref letsym>>); it can also be used to
+round numeric values to a specified number of decimals places.<p>
 
 <<defitem ediff {ediff(<i>a,b</i>)}>>
 
