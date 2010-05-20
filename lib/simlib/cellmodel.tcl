@@ -159,6 +159,30 @@ snit::type ::simlib::cellmodel {
             uplevel 1 [list proc $name $arglist $body]
         }
 
+        # forall index script
+        #
+        # index     An index name
+        # script    A script of cellmodel(5) commands.
+        #
+        # Evaluates the script for all values of the index.
+
+        proc forall {index script} {
+            global indices
+            upvar 1 $index i
+
+            if {![info exists indices($index)]} {
+                return -code error -errorcode invalid \
+                    "Invalid index: \"$index\""
+            }
+
+            foreach i $indices($index) {
+                uplevel 1 $script
+            }
+
+            return
+        }
+
+
         # sum index formula
         #
         # index      The index name, e.g., "i"
@@ -208,6 +232,7 @@ snit::type ::simlib::cellmodel {
 
             return [join $terms "*"]
         }
+
     }
 
 

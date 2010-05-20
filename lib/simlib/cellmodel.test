@@ -1194,7 +1194,38 @@ converge Q 1
         CleanUp
     } -result {{i j} {1 2 3} {4 5 6}}
 
+    #-------------------------------------------------------------------
+    # forall
 
+    test forall-1.1 {forall iterates over indices.} -setup {
+        Setup
+    } -body {
+        cm load {
+            index i {a b c}
+            index j {a b c}
+            
+            forall i {
+                forall j {
+                    let X.$i.$j = 1.0
+                }
+            }
+        }
+
+        pprint [cm dump]
+    } -cleanup {
+        CleanUp
+    } -result {
+X.a.a =            1
+X.a.b =            1
+X.a.c =            1
+X.b.a =            1
+X.b.b =            1
+X.b.c =            1
+X.c.a =            1
+X.c.b =            1
+X.c.c =            1
+    }
+ 
     #-------------------------------------------------------------------
     # sum
 

@@ -214,6 +214,38 @@ P::C2, and P::C3 will not be copied.<p>
 
 <</deflist options>>
 
+<<defitem function {function <i>name arglist body</i>}>>
+
+Defines a function for use in formulas.  Note that a function is
+simply a Tcl <<xref tcl:proc(n)>> that the formula interpreter sees as
+a function.  It can take any number of arguments, and should return a
+single value.  The body can contain a small subset of the standard Tcl
+commands: <<xref tcl:expr(n)>>, <<xref tcl:set(n)>>,
+<<xref tcl:if(n)>>, and <<xref tcl:return(n)>>.<p>
+
+<<defitem index {index <i>name indexlist</i>}>>
+
+Defines an index for use with the <<iref sum>> and <<iref prod>>
+macros.  For example, if you want to sum over cells A.$i where i is in
+the set {1 2 3}, you'd define the index <code>i</code> like this:<p>
+
+<pre>
+    index i {1 2 3}
+</pre>
+
+<<defitem forall {forall <i>index script</i>}>>
+
+Includes a <i>script</i> of cellmodel(5) commands for all values of
+the named <i>index</i>.  For example,<p>
+
+<pre>
+    index i {a b c}
+
+    forall i {
+        let X.$i = {[Y.$i] + [Z.$i]}
+    }
+</pre>
+
 <<defitem define {define <i>name arglist</i> ?<i>initbody</i>? <i>template</i>}>>
 
 The <<iref define>> command defines a macro that may be used in
@@ -237,25 +269,6 @@ evaluated when the model is defined.<p>
 
 See <<xref MACROS>> for more information on how to use macros, and for
 a list of predefined macros.<p>
-
-<<defitem function {function <i>name arglist body</i>}>>
-
-Defines a function for use in formulas.  Note that a function is
-simply a Tcl <<xref tcl:proc(n)>> that the formula interpreter sees as
-a function.  It can take any number of arguments, and should return a
-single value.  The body can contain a small subset of the standard Tcl
-commands: <<xref tcl:expr(n)>>, <<xref tcl:set(n)>>,
-<<xref tcl:if(n)>>, and <<xref tcl:return(n)>>.<p>
-
-<<defitem index {index <i>name indexlist</i>}>>
-
-Defines an index for use with the <<iref sum>> and <<iref prod>>
-macros.  For example, if you want to sum over cells A.$i where i is in
-the set {1 2 3}, you'd define the index <code>i</code> like this:<p>
-
-<pre>
-    index i {1 2 3}
-</pre>
 
 <</deflist commands>>
 
