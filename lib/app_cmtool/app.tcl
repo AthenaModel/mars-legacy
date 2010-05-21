@@ -474,6 +474,8 @@ snit::type app {
                 # Otherwise, print the cell value.
                 if {$result($case) ne "ok"} {
                     set new [format " %12s" $result($case)]
+                } elseif {[cs cellinfo vtype $cell] eq "symbol"} {
+                    set new [format " %12s" [dict get $values($case) $cell]]
                 } else {
                     set new [format " %12g" [dict get $values($case) $cell]]
                 }
@@ -768,6 +770,14 @@ snit::type app {
                 continue
             }
 
+            # NEXT, if either is symbolic we're done.
+            if {[cs cellinfo vtype ${pa}::$cell] eq "symbol" ||
+                [cs cellinfo vtype ${pb}::$cell] eq "symbol"
+            } {
+                continue
+            }
+
+            # NEXT, get the numeric values.
             set aval [format %12g $avalues($cell)]
             set bval [format %12g $value]
 
@@ -895,9 +905,11 @@ snit::type app {
             lappend iters $i
         }
 
-        for {set i [expr {$num - 2}]} {$i <= $num} {incr i} {
-            if {$i ni $iters} {
-                lappend iters $i
+        if {$num > 3} {
+            for {set i [expr {$num - 2}]} {$i <= $num} {incr i} {
+                if {$i ni $iters} {
+                    lappend iters $i
+                }
             }
         }
 
@@ -919,17 +931,28 @@ snit::type app {
             foreach cell [dict keys $snap(0)] {
                 puts -nonewline [format "%-*s =" $wid $cell]
 
-                set new [format " %12g" [dict get $snap(0) $cell]]
-                puts -nonewline [format " %12g" $new]
+                set new [dict get $snap(0) $cell]
 
-                foreach i [lrange $iters 1 end] {
-                    set old $new
-                    set new [format " %12g" [dict get $snap($i) $cell]]
+                if {[cs cellinfo vtype $cell] eq "symbol"} {
+                    puts -nonewline [format " %12s" $new]
 
-                    if {$new ne $old} {
+                    foreach i [lrange $iters 1 end] {
+                        set new [format " %12s" [dict get $snap($i) $cell]]
                         puts -nonewline $new
-                    } else {
-                        puts -nonewline [format " %12s" ""]
+                    }
+                } else {
+                    set new [format " %12g" [dict get $snap(0) $cell]]
+                    puts -nonewline [format " %12g" $new]
+
+                    foreach i [lrange $iters 1 end] {
+                        set old $new
+                        set new [format " %12g" [dict get $snap($i) $cell]]
+
+                        if {$new ne $old} {
+                            puts -nonewline $new
+                        } else {
+                            puts -nonewline [format " %12s" ""]
+                        }
                     }
                 }
                 puts ""
@@ -952,6 +975,11 @@ snit::type app {
             puts ""
 
             foreach cell [dict keys $snap(0)] {
+                # FIRST, skip symbol cells.
+                if {[cs cellinfo vtype $cell] eq "symbol"} {
+                    continue
+                }
+
                 puts -nonewline [format "%-*s =" $wid $cell]
                 
                 set new [dict get $snap(0) $cell]

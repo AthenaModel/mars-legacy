@@ -1243,7 +1243,7 @@ snit::type ::simlib::cellmodel {
         set maxDelta 0.0
         set maxCell  ""
 
-        foreach cell $model(cells-$page) {
+        foreach cell $model(order-$page) {
             set formula $model(formula-$cell)
 
             if {$formula ne ""} {
