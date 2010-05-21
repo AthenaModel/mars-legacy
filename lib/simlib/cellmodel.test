@@ -947,7 +947,8 @@ B =         "is" <= [x] == 5 ? "is" : "isn't"
         Setup
         cm load {
             let A = {[B]+1}
-            let B = 2
+            let B = {[C]+1}
+            let C = 2
         }
     } -body {
         cm solve
@@ -955,8 +956,9 @@ B =         "is" <= [x] == 5 ? "is" : "isn't"
     } -cleanup {
         CleanUp
     } -result "
-A =            3 <= \[B\]+1
-B =            2
+A =            4 <= \[B\]+1
+B =            3 <= \[C\]+1
+C =            2
     "
 
     test solve-2.3 {cyclic page is computed} -setup {
