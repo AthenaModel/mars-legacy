@@ -438,7 +438,7 @@ should be "$xyz" or "{xyz}" or "xyz(...)" or ...}
 
     test identifier-1.1 {identifier validates valid values} -body {
         identifier validate abc_ABC_123 
-    } -result {}
+    } -result {abc_ABC_123}
 
     test identifier-1.2 {identifier fails on the empty string} -body {
         identifier validate ""
