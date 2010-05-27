@@ -20,7 +20,7 @@ package require snit
 
 package require marsutil
 package require sqlite3
-package require tdom
+package require tdom ;# Why is this here?
 
 #-----------------------------------------------------------------------
 # Package Definition
@@ -45,7 +45,7 @@ source [file join $::simlib::library coverage.tcl ]
 source [file join $::simlib::library rmf.tcl      ]
 source [file join $::simlib::library gram.tcl     ]
 source [file join $::simlib::library gramdb.tcl   ]
-source [file join $::simlib::library cellmodel.tcl]
+
 
 
 

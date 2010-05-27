@@ -4,7 +4,7 @@
 #   Pseudo-Spreadsheet Cell Model
 #
 # PACKAGE:
-#   simlib(n) -- Simulation Infrastructure Package
+#   marsutil(n) -- Tcl Utilities
 #
 # PROJECT:
 #   Mars Simulation Infrastructure Library
@@ -14,7 +14,7 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::simlib:: {
+namespace eval ::marsutil:: {
     namespace export cellmodel
 }
 
@@ -67,7 +67,7 @@ namespace eval ::simlib:: {
 #
 #-----------------------------------------------------------------------
 
-snit::type ::simlib::cellmodel {
+snit::type ::marsutil::cellmodel {
     #-------------------------------------------------------------------
     # Type Constructor
 
@@ -1031,7 +1031,7 @@ snit::type ::simlib::cellmodel {
         # -safe interpreters anyway.
         $interp alias ::tcl::mathfunc::min  ::tcl::mathfunc::min
         $interp alias ::tcl::mathfunc::max  ::tcl::mathfunc::max
-        $interp alias ::tcl::mathfunc::case ::simlib::cellmodel::CaseFunc
+        $interp alias ::tcl::mathfunc::case ::marsutil::cellmodel::CaseFunc
 
         # NEXT, add additional functions
         $interp alias ::tcl::mathfunc::epsilon $self Epsilon

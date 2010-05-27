@@ -1,10 +1,10 @@
-<<manpage {simlib(n) cellmodel(n)} "Cell Model">>
+<<manpage {marsutil(n) cellmodel(n)} "Cell Model">>
 
 <<section SYNOPSIS>>
 
 <pre>
-package require simlib 1.0
-namespace import ::simlib::cellmodel
+package require marsutil 1.0
+namespace import ::marsutil::cellmodel
 </pre>
 
 <<itemlist>>

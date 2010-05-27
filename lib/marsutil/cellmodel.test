@@ -22,7 +22,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 #-----------------------------------------------------------------------
 # Load the package to be tested
 
-package require simlib 1.0
+package require marsutil 1.0
 
 
 #-----------------------------------------------------------------------
@@ -39,7 +39,7 @@ namespace eval ::test {
     namespace import ::tcltest::*
 
     # Import the code to be tested
-    namespace import ::simlib::*
+    namespace import ::marsutil::*
 
     #-------------------------------------------------------------------
     # Setup

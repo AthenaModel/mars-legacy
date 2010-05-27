@@ -39,10 +39,8 @@ package require snit
 
 # JNEM Packages
 package require marsutil
-package require simlib
 
 namespace import ::marsutil::* 
-namespace import ::simlib::*
 
 #-----------------------------------------------------------------------
 # Load app_cmtool(n) submodules
