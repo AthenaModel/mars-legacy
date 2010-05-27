@@ -21,6 +21,7 @@ package require BWidget  1.8
 package require treectrl 2.2.6
 package require tablelist 4.11.2
 package require Plotchart 1.6
+package require Tktable 2.10
 
 #-----------------------------------------------------------------------
 # Package Definition
@@ -75,5 +76,6 @@ source [file join $::marsgui::library hbarchart.tcl      ]
 source [file join $::marsgui::library stripchart.tcl     ]
 source [file join $::marsgui::library pwin.tcl           ]
 source [file join $::marsgui::library pwinman.tcl        ]
+source [file join $::marsgui::library cmsheet.tcl        ]
 
 
