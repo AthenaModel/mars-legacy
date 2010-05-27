@@ -43,6 +43,10 @@ in the global scope.  This is to be used when calling callback
 commands.  If <i>prefix</i> is the empty list, then <<iref callwith>>
 does and returns nothing.<p>
 
+<<defitem commafmt {commafmt <i>value</i>}>>
+
+Formats numbers as integers with commas inserted every three digits.<p>
+
 <<defitem getcode {getcode <i>command</i> <i>subcommands...</i>}>>
 
 When possible, returns the code that defines the <i>command</i>.
@@ -140,6 +144,36 @@ Returns the maximum of the two numbers <i>x</i> and <i>y</i>.<p>
 <<defitem min {min <i>x y</i>}>>
 
 Returns the minimum of the two numbers <i>x</i> and <i>y</i>.<p>
+
+<<defitem moneyfmt {moneyfmt <i>value</i>}>>
+
+Formats numbers for display in minimal space; it is especially useful
+for outputs that can span a wide range, e.g., from pennies to
+trillions of dollars.  In particular:<p>
+
+<ul>
+  <li> Numbers with an absolute value less than 10,000 are formatted
+       with two decimal places and a comma (if needed), e.g.,
+       "1,234.56", "99.95", "100.00".<p>
+
+  <li> Numbers greater than 10,000 but less than a million are
+       formatted as integers with a comma, e.g., "12,345",
+       "999,999".<p>
+
+  <li> Numbers in the millions, billions, and trillions are formatted
+       with three decimal places and a suffix, e.g., "1.234M",
+       "12.345B", "123.456T".<p>
+
+  <li> Numbers in the quadrillions and up are formatted as some large,
+       uncomma'd number of trillions, e.g., "1234.567T".  We can
+       address this again if ever seriously becomes an issue.<p>
+</ul>
+
+<<defitem moneyscan {moneyscan <i>value</i>}>>
+
+Converts numbers as formatted by <<iref moneyfmt>> back into standard
+real values: commas are stripped, and if the value ends in "M", "B",
+or "T" it is multiplied by the appropriate factor.<p>
 
 <<defitem roundrange {roundrange <i>min max</i>}>>
 

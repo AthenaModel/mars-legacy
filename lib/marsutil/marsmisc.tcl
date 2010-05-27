@@ -22,6 +22,7 @@ namespace eval ::marsutil:: {
         assert          \
         bgcatch         \
         callwith        \
+        commafmt        \
         count           \
         discrete        \
         distance        \
@@ -42,6 +43,8 @@ namespace eval ::marsutil:: {
         lshift          \
         max             \
         min             \
+        moneyfmt        \
+        moneyscan       \
         normalize       \
         optval          \
 	outdent         \
@@ -373,6 +376,130 @@ proc ::marsutil::percent {frac} {
     } else {
         return [format "%3.0f%%" [expr {100.0 * $frac}]]
     }
+}
+
+# commafmt value
+#
+# value   A number
+#
+# Formats the integer part of the value with commas every three digits.
+
+proc ::marsutil::commafmt {value} {
+    # FIRST, save the sign.
+    if {$value < 0} {
+        set sign "-"
+    } else {
+        set sign ""
+    }
+
+    # NEXT, round to the nearest integer, remove the sign, and
+    # convert to a list for easy processing.
+    set old [lreverse [split [expr {abs(int(round($value)))}] ""]]
+
+    # NEXT, build up the new string with commas.
+    set new [list]
+
+    set count 0
+    foreach digit $old {
+        lappend new $digit
+        incr count
+
+        if {$count % 3 == 0} {
+            lappend new ,
+        }
+    }
+
+    if {[lindex $new end] eq ","} {
+        set new [lrange $new 0 end-1]
+    }
+
+    set num [join [lreverse $new] ""] 
+    return "$sign$num"
+}
+
+# moneyfmt value
+#
+# value   A numeric value
+#
+# Formats value so that it is no longer than 9 or 10 characters:
+# This is intended for display of data that can span a wide range
+# of values (e.g., pennies to trillions of dollars).
+#
+# The formats are as follows:
+#
+# 0.00 to 999.99
+# 1,000.00 to 9,999.99
+# 10,000 to 999,999
+# 1.000M to 999.999M
+# 1.000B to 999.999B
+# 1.000T and up
+# 
+proc ::marsutil::moneyfmt {value} {
+    # FIRST, save the sign
+    if {$value < 0} {
+        set sign "-"
+        set value [expr {abs($value)}]
+    } else {
+        set sign ""
+    }
+
+    # NEXT, handle small numbers
+    if {$value < 1000.0} {
+        return [format "%s%.2f" $sign $value]
+    }
+
+    # NEXT, get pennies
+    if {$value < 10000} {
+        lassign [split [format %.2f $value] .] dollars pennies
+        return "$sign[commafmt $dollars].$pennies"
+    }
+
+    if {$value < 1e6} {
+        return $sign[commafmt $value]
+    } elseif {$value < 1e9} {
+        set value [expr {$value / 1.0e6}]
+        return [format "%s%.3fM" $sign $value]
+    } elseif {$value < 1e12} {
+        set value [expr {$value / 1.0e9}]
+        return [format "%s%.3fB" $sign $value]
+    } else {
+        set value [expr {$value / 1.0e12}]
+        return [format "%s%.3fT" $sign $value]
+    }
+}
+
+# moneyscan value
+#
+# value    A formatted number, as returned by moneyfmt.
+#
+# Converts the number to a normal real number.  If the value
+# cannot be converted, throws INVALID.
+
+proc ::marsutil::moneyscan {value} {
+    array set factor {
+        "" 1.0
+        K  1e3
+        M  1e6
+        B  1e9
+        T  1e12
+    }
+
+    # FIRST, Get rid of whitespace and commas
+    set value [string map [list , "" \n "" \t "" " " ""] $value]
+
+    set lastchar [string toupper [string index $value end]]
+
+    if {$lastchar in {"K" "M" "B" "T"}} {
+        set value [string range $value 0 end-1]
+    } else {
+        set lastchar ""
+    }
+
+    if {![string is double -strict $value]} {
+        return -code error -errorcode INVALID "Invalid input: \"$value\""
+    }
+
+    return [expr {$value * $factor($lastchar)}]
 }
 
 # pickfrom list

@@ -99,6 +99,120 @@ should be "$xyz" or "{xyz}" or "xyz(...)" or ...}
         callwith "" a b c d
     } -result {}
 
+    #-------------------------------------------------------------------
+    # commafmt
+
+    test commafmt-1.1 {Small integers are left alone} -body {
+        commafmt 123
+    } -result {123}
+
+    test commafmt-1.2 {Large integers are formatted with commas} -body {
+        commafmt 123456789
+    } -result {123,456,789}
+
+    test commafmt-1.3 {Negative integers are handled properly} -body {
+        commafmt -123456789
+    } -result {-123,456,789}
+
+    test commafmt-1.4 {Real numbers are rounded} -body {
+        commafmt 12345.6
+    } -result {12,346}
+
+    #-------------------------------------------------------------------
+    # moneyfmt
+    
+    test moneyfmt-1.1 {x < 1000} -body {
+        list [moneyfmt 0] [moneyfmt 999.99]
+    } -result {0.00 999.99}
+
+    test moneyfmt-1.2 {1000 <= x < 10,000} -body {
+        list [moneyfmt 1000] [moneyfmt 9999.99]
+    } -result {1,000.00 9,999.99}
+
+    test moneyfmt-1.3 {10,000 <= x < 1M} -body {
+        list [moneyfmt 10000.0] [moneyfmt 999999.0]
+    } -result {10,000 999,999}
+
+    test moneyfmt-1.4 {1M <= x < 1B} -body {
+        list [moneyfmt 1e6] [moneyfmt 999.999e6]
+    } -result {1.000M 999.999M}
+
+    test moneyfmt-1.5 {1B <= x < 1T} -body {
+        list [moneyfmt 1e9] [moneyfmt 999.999e9]
+    } -result {1.000B 999.999B}
+
+    test moneyfmt-1.6 {1T <= x} -body {
+        moneyfmt 1.5e12
+    } -result {1.500T}
+
+    test moneyfmt-1.7 {x < 1000, negative} -body {
+        list [moneyfmt 0] [moneyfmt -999.99]
+    } -result {0.00 -999.99}
+
+    test moneyfmt-1.8 {1000 <= x < 10,000, negative} -body {
+        list [moneyfmt -1000] [moneyfmt -9999.99]
+    } -result {-1,000.00 -9,999.99}
+
+    test moneyfmt-1.9 {10,000 <= x < 1M, negative} -body {
+        list [moneyfmt -10000.0] [moneyfmt -999999.0]
+    } -result {-10,000 -999,999}
+
+    test moneyfmt-1.10 {1M <= x < 1B, negative} -body {
+        list [moneyfmt -1e6] [moneyfmt -999.999e6]
+    } -result {-1.000M -999.999M}
+
+    test moneyfmt-1.11 {1B <= x < 1T, negative} -body {
+        list [moneyfmt -1e9] [moneyfmt -999.999e9]
+    } -result {-1.000B -999.999B}
+
+    test moneyfmt-1.12 {1T <= x, negative} -body {
+        moneyfmt -1.5e12
+    } -result {-1.500T}
+
+    #-------------------------------------------------------------------
+    # moneyscan
+
+    test moneyscan-1.1 {Invalid input} -body {
+        moneyscan 1.1Q
+    } -returnCodes {
+        error
+    } -result {Invalid input: "1.1Q"}
+
+    test moneyscan-2.1 {Scan 0.0} -body {
+        moneyscan 0.0
+    } -result {0.0}
+
+    test moneyscan-2.2 {Scan 1,234.56} -body {
+        moneyscan 1,234.56
+    } -result {1234.56}
+
+    test moneyscan-2.3 {Scan -1,234.56} -body {
+        moneyscan -1,234.56
+    } -result {-1234.56}
+
+    test moneyscan-2.4 {Scan 12.345M} -body {
+        moneyscan 12.345M
+    } -result {12345000.0}
+
+    test moneyscan-2.5 {Scan -12.345M} -body {
+        moneyscan -12.345M
+    } -result {-12345000.0}
+
+    test moneyscan-2.6 {Scan 12.345B} -body {
+        moneyscan 12.345B
+    } -result {12345000000.0}
+
+    test moneyscan-2.7 {Scan -12.345B} -body {
+        moneyscan -12.345B
+    } -result {-12345000000.0}
+
+    test moneyscan-2.8 {Scan 12.345T} -body {
+        moneyscan 12.345T
+    } -result {12345000000000.0}
+
+    test moneyscan-2.9 {Scan -12.345T} -body {
+        moneyscan -12.345T
+    } -result {-12345000000000.0}
 
     #-------------------------------------------------------------------
     # require
