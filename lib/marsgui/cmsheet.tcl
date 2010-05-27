@@ -159,6 +159,16 @@ snit::widget ::marsgui::cmsheet {
     option -validatecmd \
         -default ""
 
+    # Option: -formatcmd
+    #
+    # Specifies the default command for formatting cell values.
+    # The command should take one command, the value to format, and
+    # return the formatted value.  This command can be overridden
+    # by the -formatcmd option on the <mapcell> command and its peers.
+
+    option -formatcmd \
+        -default ""
+
     # Option: -state
     #
     # The widget may be editable (normal) or readonly (disabled)
@@ -872,6 +882,8 @@ snit::widget ::marsgui::cmsheet {
     method Format {cellname} {
         if {$formatcmd($cellname) ne ""} {
             return [{*}$formatcmd($cellname) [$cm value $cellname]]
+        } elseif {$options(-formatcmd) ne ""} {
+            return [{*}$options(-formatcmd) [$cm value $cellname]]
         } else {
             return [$cm value $cellname]
         }

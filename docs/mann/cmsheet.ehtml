@@ -63,7 +63,17 @@ columns.<p>
 
 <<defopt {-font <i>font</i>}>>
 
-The default font; cell options can override this for specific cells.<p>
+The default font; cell options can override this for specific
+cells.<p>
+
+<<defopt {-formatcmd <i>cmd</i>}>>
+
+Specifies a command to format cell model values for display.  The
+<i>cmd</i> must be a command prefix taken one additional argument, the
+value to format, and returning the formatted output.<p>
+
+This command can be overridden for particular cells using
+the <b>-formatcmd</b> option on <<iref mapcell>> and its peers.<p>
 
 <<defopt {-height <i>rows</i>}>>
 

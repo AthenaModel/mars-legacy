@@ -55,29 +55,28 @@ proc main {argv} {
     let nrows {$n + 2}
     let ncols {$n + 2}
 
-    cmsheet .sheet              \
-        -cellmodel   ::cm       \
-        -rows        $nrows     \
-        -cols        $ncols     \
-        -roworigin   -1         \
-        -colorigin   -1         \
-        -titlerows   1          \
-        -titlecols   1          \
-        -validatecmd ::Validate \
-        -refreshcmd  ::Refresh 
+    cmsheet .sheet                 \
+        -cellmodel   ::cm          \
+        -rows        $nrows        \
+        -cols        $ncols        \
+        -roworigin   -1            \
+        -colorigin   -1            \
+        -titlerows   1             \
+        -titlecols   1             \
+        -validatecmd ::Validate    \
+        -refreshcmd  ::Refresh     \
+        -formatcmd   {format %.3f}
 
     pack .sheet -fill both -expand yes
 
     .sheet textrow -1,0 [concat [cm index j] {"Sum"}]
     .sheet textcol 0,-1 [concat [cm index i] {"Sum"}]
 
-    .sheet map 0,0 i j X.%i.%j %cell \
-        -formatcmd {format %.2f}
+    .sheet map 0,0 i j X.%i.%j %cell
 
     .sheet maprow $n,0 j COL.%j %cell \
         -background brown             \
-        -foreground white             \
-        -formatcmd {format %.2f}
+        -foreground white
 
     .sheet mapcol 0,$n i ROW.%i %cell \
         -background blue              \
