@@ -10,6 +10,24 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.27, 28 May 2010</h3>
+This build contains some updates mainly to the <<xref cellmodel(n)>> package.
+There is a bug fix for the <<xref sqlbrowser(n)>> and a few other odds and ends.
+
+<ul>
+  <li> Bug 2471: stripchart(n): Strip Chart Widget
+  <li> Bug 2475: lazyupdater(n): lazy update manager
+  <li> Bug 2476: hbarchart(n), stripchart(n) should use lazyupdater(n)
+  <li> Bug 2478: sqlbrowser setcelltext method error relating to tablelist option
+  <li> Bug 2481: marsgui(n): ttk::entry has white background when -state is readonly
+  <li> Bug 2483: cellmodel(5): Enhancements
+  <li> Bug 2485: cellmodel(5): forall command
+  <li> Bug 2489: cellmodel(n): Acyclic pages are computed in the wrong order
+  <li> Bug 2494: cellmodel(n): Move from simlib(n) to marsutil(n)
+  <li> Bug 2496: marsmisc(n): commafmt, moneyfmt, moneyscan
+  <li> Bug 2497: cmsheet(n) -- Add -formatcmd option
+</ul>
+
 <h3>Build 1.26, 27 April 2010</h3>
 
 This build makes some minor changes to the <<xref pwin(n)>>,
