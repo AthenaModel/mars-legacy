@@ -137,10 +137,16 @@ ttk::style map Entrybutton.Toolbutton -background {disabled white}
 # of icons. 
 ttk::style configure Text.Toolbutton -font tinyfont
 
+# Give a combobox with focus the same kind of halo as a ttk::entry.
+ttk::style map TCombobox \
+    -lightcolor      [list  focus "#6f9dc6"] \
+    -darkcolor       [list  focus "#6f9dc6"] \
+    -fieldbackground [list disabled $::marsgui::defaultBackground]
+
 # Menubox.TCombobox: A style for comboboxes used as pulldown menus.
 ttk::style configure Menubox.TCombobox \
     -fieldbackground white -foreground black
-ttk::style map Menubox.TCombobox -fieldbackground {}
+# ttk::style map Menubox.TCombobox -fieldbackground {}
 ttk::style map Menubox.TCombobox -foreground {}
 
 # Tabless.TNotebook: A style for tabless ttk::notebook widgets
