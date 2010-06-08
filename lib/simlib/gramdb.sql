@@ -66,7 +66,6 @@ CREATE TABLE gramdb_gc (
     c              TEXT,                     -- Symbolic concern name
 
     sat0           DOUBLE DEFAULT 0.0,       -- Initial satisfaction
-    trend0         DOUBLE DEFAULT 0.0,       -- Long-term Trend
     saliency       DOUBLE DEFAULT 1.0,       -- Saliency
 
     PRIMARY KEY (g, c)
@@ -91,7 +90,6 @@ CREATE TABLE gramdb_ngc (
     c              TEXT,                     -- Symbolic concern name
 
     sat0           DOUBLE,                   -- Initial satisfaction
-    trend0         DOUBLE,                   -- Long-term Trend
     saliency       DOUBLE,                   -- Saliency
     
     PRIMARY KEY (n, g, c)

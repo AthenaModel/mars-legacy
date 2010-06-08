@@ -172,7 +172,6 @@ snit::widget appwin {
                     { c        -                   }
                     { gtype    -                   }
                     { saliency - -sortmode real    }
-                    { trend    - -sortmode real    }
                     { curve_id - -sortmode integer }
                     { sat0     - -sortmode real    }
                     { sat      - -sortmode real    }

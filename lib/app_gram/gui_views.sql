@@ -21,7 +21,6 @@ SELECT ngc_id,
        c,
        gtype,
        saliency,
-       trend,
        curve_id, 
        format('%.3f',sat0)  AS sat0, 
        format('%.3f',sat)   AS sat, 
@@ -103,7 +102,7 @@ WHERE etype='S';
 -- gv_gram_sat_slopes
 CREATE TEMPORARY VIEW gv_gram_sat_slopes AS
 SELECT * FROM gv_gram_sat_slopes_trend
-WHERE cause != 'TREND';
+WHERE driver != 0;
 
 -- gv_gram_coop
 CREATE TEMPORARY VIEW gv_gram_coop AS

@@ -399,13 +399,12 @@ CIV and ORG groups.  Population must be non-zero for at least one CIV
 group in each neighborhood; population is ignored for ORG groups, and
 should be left at 0 to avoid confusion.<p>
 
-<<defitem "load sat" {$obj load sat ?<i>n g c sat0 saliency trend</i>...?}>>
+<<defitem "load sat" {$obj load sat ?<i>n g c sat0 saliency</i>...?}>>
 
 GRAM creates default satisfaction data for each group for which
 satisfaction is tracked: all ORG groups in all neighborhoods, and all
 CIV groups with non-zero population in each neighborhood.  In each
-case the saliency is 1.0 and the initial satisfaction level and trend
-are both 0.0.<p>
+case the saliency is 1.0 and the initial satisfaction level is 0.0.<p>
 
 This command is used to specifies the set of non-default satisfaction
 data.  If the defaults are acceptable, this command must be called
@@ -1148,9 +1147,10 @@ Dumps a list of all scheduled satisfaction slope effects.  If
 <i>driver</i> is specified, dumps only the effects
 related to that driver.<p>
 
-As of JNEM 4, the long-term trend is implemented as a collection
-of slope effects associated with driver 0.  Because there are a lot of
-them, they are not included in the <<iref dump sat slopes>> output
+As of Mars 1.27, it is up to the application to define any desired
+long-term trends; driver 0 is still reserved for this purpose.
+Because there may be many slope effects associated with driver 0,
+they are not included in the <<iref dump sat slopes>> output
 unless <i>driver</i> is explicitly passed a 0.<p>
 
 <<defitem "dump sat slope" {$obj dump sat slope <i>n g c</i>}>>

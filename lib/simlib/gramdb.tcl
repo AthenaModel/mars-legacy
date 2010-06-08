@@ -234,8 +234,6 @@ snit::type ::simlib::gramdb {
 
         $tt field gramdb_gc sat0 \
             -validator [mytypemethod ValidateQuality qsat]
-        $tt field gramdb_gc trend0 \
-            -validator [mytypemethod ValidateQuality qtrend]
         $tt field gramdb_gc saliency \
             -validator [mytypemethod ValidateQuality qsaliency]
         
@@ -271,8 +269,6 @@ snit::type ::simlib::gramdb {
 
         $tt field gramdb_ngc sat0 \
             -validator [mytypemethod ValidateQuality qsat]
-        $tt field gramdb_ngc trend0 \
-            -validator [mytypemethod ValidateQuality qtrend]
         $tt field gramdb_ngc saliency \
             -validator [mytypemethod ValidateQuality qsaliency]
 
@@ -661,14 +657,12 @@ snit::type ::simlib::gramdb {
                    gramdb_ngc.g       AS g,
                    gramdb_ngc.c       AS c,
                    gramdb_gc.sat0     AS sat0,
-                   gramdb_gc.trend0   AS trend0,
                    gramdb_gc.saliency AS saliency
             FROM gramdb_ngc JOIN gramdb_gc USING (g,c)
         } {
             $db eval {
                 UPDATE gramdb_ngc
                 SET sat0     = COALESCE(sat0,$sat0),
-                    trend0   = COALESCE(trend0,$trend0),
                     saliency = COALESCE(saliency,$saliency)
                 WHERE n=$n AND g=$g AND c=$c;
             }
@@ -835,7 +829,7 @@ snit::type ::simlib::gramdb {
         }]
 
         $gram load sat {*}[$db eval {
-            SELECT n, g, c, sat0, saliency, trend0
+            SELECT n, g, c, sat0, saliency
             FROM gramdb_ngc JOIN gramdb_g USING (g)
             ORDER BY n, gtype, g, c
         }]

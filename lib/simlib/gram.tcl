@@ -463,8 +463,8 @@ snit::type ::simlib::gram {
         # NEXT, Initialize the curves.  This includes deleting all history.
         $self CurvesInit
 
-        # NEXT, Create the long-term trend slope effects
-        $self CreateLongTermTrends
+        # NEXT, Create the long-term trend driver
+        $self CreateLongTermTrendDriver
 
         # NEXT, compute the initial roll-ups.
         $self ComputeSatRollups
@@ -487,43 +487,16 @@ snit::type ::simlib::gram {
         return
     }
 
-    # Method: CreateLongTermTrends
+    # Method: CreateLongTermTrendDrive
     #
-    # The long-term trends are entered as a single driver with 
-    # driver ID 0; a single slope effect is created for each ngc.
+    # Creates a driver against which the application can create long-term
+    # trends of various kinds.
 
-    method CreateLongTermTrends {} {
+    method CreateLongTermTrendDriver {} {
         # FIRST, create the Driver
         $rdb eval {
             INSERT INTO gram_driver(driver,name,dtype,oneliner)
-            VALUES(0,"Trend","Trend","Satisfaction Long-Term Trend")
-        }
-
-        set input(driver)  0
-        set input(input)  [$self DriverGetInput $input(driver)]
-        set input(cause)   "TREND"
-        set input(ts)      $db(time)
-        set input(p)          0.0
-        set input(q)          0.0
-        set input(s)          1.0
-        set input(athresh)  100.0
-        set input(dthresh) -100.0
-
-        set chain(prox)    -1
-        set chain(factor)  1.0
-        set chain(delay)   0
-
-        # NEXT, enter a slope effect for each ngc with a non-zero trend.
-        $rdb eval {
-            SELECT * FROM gram_ngc
-            WHERE trend != 0.0
-        } row {
-            set input(slope)     $row(trend)
-
-            set chain(curve_id)  $row(curve_id)
-            set chain(direct_id) $row(ngc_id)
-
-            $self ScheduleSlope input chain 0.0
+            VALUES(0,"Trend","Trend","Long-Term Trends")
         }
     }
 
@@ -1109,7 +1082,7 @@ snit::type ::simlib::gram {
 
     method PopulateDefaultsAfterNbgroups {} {
         # FIRST, populate gram_ngc. Saliency is 1.0 if sat_tracked,
-        # and 0.0 otherwise; trend is always 0.0; there's a curve
+        # and 0.0 otherwise; there's a curve
         # only if sat_tracked.
         $rdb eval {
             SELECT ng_id, 
@@ -1133,17 +1106,17 @@ snit::type ::simlib::gram {
                     -- Note: ngc_id is set automatically
                     INSERT INTO 
                     gram_ngc(ng_id, curve_id, n, g, c,
-                             gtype, saliency, trend)
+                             gtype, saliency)
                     VALUES($ng_id, last_insert_rowid(),  $n, $g, $c, 
-                           $gtype, 1.0, 0.0);
+                           $gtype, 1.0);
                 }
 
             } else {
                 $rdb eval {
                     -- Note: ngc_id is set automatically
                     INSERT INTO 
-                    gram_ngc(ng_id, n, g, c, gtype, saliency, trend)
-                    VALUES($ng_id, $n, $g, $c, $gtype, 0.0, 0.0);
+                    gram_ngc(ng_id, n, g, c, gtype, saliency)
+                    VALUES($ng_id, $n, $g, $c, $gtype, 0.0);
                 }
             }
         }
@@ -1199,19 +1172,18 @@ snit::type ::simlib::gram {
     # <gram_ngc>.
     #
     # Syntax:
-    #   load sat _n g c sat0 saliency trend ?...?_
+    #   load sat _n g c sat0 saliency ?...?_
     #
     #   n        - Neighborhood name
     #   g        - Group name
     #   c        - Concern name
     #   sat0     - Initial satisfaction level
     #   saliency - Saliency
-    #   trend    - Long-term trend
 
     method {load sat} {args} {
         assert {$db(loadstate) eq "nbgroups"}
 
-        foreach {n g c sat0 saliency trend} $args {
+        foreach {n g c sat0 saliency} $args {
             set curve_id [$rdb onecolumn {
                 SELECT curve_id 
                 FROM gram_ngc
@@ -1227,8 +1199,7 @@ snit::type ::simlib::gram {
                 WHERE curve_id = $curve_id;
                 
                 UPDATE gram_ngc
-                SET saliency = $saliency,
-                    trend    = $trend
+                SET saliency = $saliency
                 WHERE curve_id = $curve_id;
             }
         }
@@ -4406,7 +4377,6 @@ snit::type ::simlib::gram {
                    format('%7.2f', gram_sat.sat - gram_sat.sat0),
                    format('%7.2f', gram_sat.sat0),
                    format('%7.2f', gram_sat.slope),
-                   format('%7.2f', gram_sat.trend), 
                    ngc_id,
                    curve_id
             FROM gram_sat
@@ -4421,7 +4391,7 @@ snit::type ::simlib::gram {
 
         set labels {
             "Nbhood" "Group" "Con" "Sat" "Delta" "Sat0"
-            "Slope" "Trend0" "NGC ID" "Curve ID"
+            "Slope" "NGC ID" "Curve ID"
         }
 
         set result [$rdb query $query -headercols 2 -labels $labels]

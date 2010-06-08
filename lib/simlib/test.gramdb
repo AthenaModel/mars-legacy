@@ -119,73 +119,61 @@ table gramdb_fg {
 table gramdb_gc {
     record g SHIA c AUT {
         field sat0 S
-        field trend0 H
         field saliency CR
     }
 
     record g SHIA c QOL {
         field sat0 D
-        field trend0 L
         field saliency CR
     }
 
     record g SHIA c CUL {
         field sat0 D
-        field trend0 N
         field saliency CR
     }
 
     record g SHIA c SFT {
         field sat0 S
-        field trend0 H
         field saliency CR
     }
 
     record g KURD c AUT {
         field sat0 A
-        field trend0 N
         field saliency CR
     }
 
     record g KURD c QOL {
         field sat0 A
-        field trend0 L
         field saliency CR
     }
 
     record g KURD c CUL {
         field sat0 A
-        field trend0 N
         field saliency CR
     }
 
     record g KURD c SFT {
         field sat0 VD
-        field trend0 L
         field saliency CR
     }
 
     record g SUNN c AUT {
         field sat0 VD
-        field trend0 VL
         field saliency CR
     }
 
     record g SUNN c QOL {
         field sat0 D
-        field trend0 VL
         field saliency CR
     }
 
     record g SUNN c CUL {
         field sat0 VD
-        field trend0 L
         field saliency CR
     }
 
     record g SUNN c SFT {
         field sat0 VD
-        field trend0 VL
         field saliency CR
     }
 }

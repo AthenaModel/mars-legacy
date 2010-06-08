@@ -399,17 +399,6 @@ The initial satisfaction at time 0.0, a numeric or symbolic
 </tr>
 
 <tr valign=top>
-<td>trend0</td>
-<td>0.0</td>
-<td>
-The long-term trend (i.e., slope) of the satisfaction curve, a
-numeric or symbolic <<xref simtypes(n) qtrend>> value:
-
-<<qtrend html>>
-</td>
-</tr>
-
-<tr valign=top>
 <td>saliency</td>
 <td>1.0</td>
 <td>
@@ -428,13 +417,11 @@ For example,<p>
 table gramdb_gc {
     record g SUNB c AUT {
         field sat0     -61
-        field trend0   -8
         field saliency 1
     }
 
     record g SUNB c CUL {
         field sat0     -61
-        field trend0   -4
         field saliency 1
     }
 
@@ -831,17 +818,6 @@ The initial satisfaction at time 0.0, a numeric or symbolic
 </tr>
 
 <tr valign=top>
-<td>trend0</td>
-<td>0.0</td>
-<td>
-The long-term trend (i.e., slope) of the satisfaction curve, a
-numeric or symbolic <<xref simtypes(n) qtrend>> value:
-
-<<qtrend html>>
-</td>
-</tr>
-
-<tr valign=top>
 <td>saliency</td>
 <td>1.0</td>
 <td>
@@ -864,12 +840,10 @@ table gramdb_ngc {
 
     record n N1 g SHIF c QOL {
         field sat0     -60
-        field trend0   -3
     }
 
     record n N2 g SHIF c QOL {
         field sat0     -20
-        field trend0   -1
     }
 
     .

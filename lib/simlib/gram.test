@@ -243,11 +243,9 @@ namespace eval ::simlib::test {
     #
     # Other options
     #
-    # -drivers    Defaults to 4.  This many event/situation IDs
+    # -drivers  Defaults to 4.  This many event/situation IDs
     #           will be automatically created.  Specify -driver 0
     #           If none should be created.
-    #
-    # -trend    Defaults to yes. Long-term trend is included.
 
     proc create {args} {
         # FIRST, set up the RDB
@@ -257,7 +255,6 @@ namespace eval ::simlib::test {
 
         # NEXT, get create options
         set drivers [optval args -drivers 4]
-        set trend [optval args -trend yes]
         
         gram jr \
             -clock   [namespace current]::myclock        \
@@ -272,11 +269,6 @@ namespace eval ::simlib::test {
             jr driver add -oneliner "Dummy DRIVER"
         }
 
-        # Get rid of the long-term trend, if desired
-        if {!$trend} {
-            jr cancel 0
-        }
-
         return
     }
 
@@ -288,13 +280,10 @@ namespace eval ::simlib::test {
     # -drivers    Defaults to 4.  This many event/situation IDs
     #           will be automatically created.  Specify -driver 0
     #           If none should be created.
-    #
-    # -trend    Defaults to yes. Long-term trend is included.
 
     proc init {args} {
         # get options
         set drivers [optval args -drivers 4]
-        set trend [optval args -trend yes]
 
         # re-initialize gram
         jr init
@@ -302,11 +291,6 @@ namespace eval ::simlib::test {
         # Add some dummy events/situations
         for {set i 0} {$i < $drivers} {incr i} {
             jr driver add -oneliner "Dummy DRIVER"
-        }
-
-        # Get rid of the long-term trend, if desired
-        if {!$trend} {
-            jr cancel 0
         }
 
         return
@@ -615,9 +599,9 @@ curve_id curve_type val0  val   delta slope
     } -cleanup {
         cleanup
     } -result {
-driver dtype name  oneliner                     last_input 
------- ----- ----- ---------------------------- ---------- 
-0      Trend Trend Satisfaction Long-Term Trend 1          
+driver dtype name  oneliner         last_input 
+------ ----- ----- ---------------- ---------- 
+0      Trend Trend Long-Term Trends 0          
     }
 
     test init-2.3 {initial contents: gram_effects} -setup {
@@ -629,32 +613,6 @@ driver dtype name  oneliner                     last_input
     } -cleanup {
         cleanup
     } -result {
-id curve_id direct_id driver input etype cause prox ts te       athresh dthresh tlast ncontrib acontrib nominal actual days tau llimit delay slope future 
--- -------- --------- ------ ----- ----- ----- ---- -- -------- ------- ------- ----- -------- -------- ------- ------ ---- --- ------ ----- ----- ------ 
-1  1        1         0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         
-2  2        2         0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         
-3  3        3         0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         
-4  4        4         0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         
-5  5        5         0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     4.0          
-6  6        6         0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         
-7  7        7         0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         
-8  8        8         0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     4.0          
-9  9        9         0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         
-10 10       10        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         
-11 11       11        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         
-12 12       12        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         
-13 17       17        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         
-14 18       18        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         
-15 19       19        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         
-16 20       20        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         
-17 21       21        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     4.0          
-18 22       22        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         
-19 23       23        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         
-20 24       24        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     4.0          
-21 25       25        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         
-22 26       26        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         
-23 27       27        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         
-24 28       28        0      1     S     TREND -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         
     }
 
     test init-2.4 {initial contents: gram_contribs} -setup {
@@ -1040,40 +998,40 @@ gc_id g    c   sat   sat0  slope
     } -cleanup {
         cleanup
     } -result {
-ngc_id ng_id curve_id n  g    c   gtype saliency trend 
------- ----- -------- -- ---- --- ----- -------- ----- 
-1      1     1        N1 KURD AUT CIV   1.0      -1.0  
-2      1     2        N1 KURD CUL CIV   1.0      -1.0  
-3      1     3        N1 KURD QOL CIV   1.0      -4.0  
-4      1     4        N1 KURD SFT CIV   1.0      -4.0  
-5      2     5        N1 SHIA AUT CIV   1.0      4.0   
-6      2     6        N1 SHIA CUL CIV   1.0      -1.0  
-7      2     7        N1 SHIA QOL CIV   1.0      -4.0  
-8      2     8        N1 SHIA SFT CIV   1.0      4.0   
-9      3     9        N1 SUNN AUT CIV   1.0      -8.0  
-10     3     10       N1 SUNN CUL CIV   1.0      -4.0  
-11     3     11       N1 SUNN QOL CIV   1.0      -8.0  
-12     3     12       N1 SUNN SFT CIV   1.0      -8.0  
-13     4     13       N1 ORGA CAS ORG   1.0      0.0   
-14     4     14       N1 ORGA SVC ORG   1.0      0.0   
-15     5     15       N1 ORGB CAS ORG   1.0      0.0   
-16     5     16       N1 ORGB SVC ORG   1.0      0.0   
-17     6     17       N2 KURD AUT CIV   1.0      -1.0  
-18     6     18       N2 KURD CUL CIV   1.0      -1.0  
-19     6     19       N2 KURD QOL CIV   1.0      -4.0  
-20     6     20       N2 KURD SFT CIV   1.0      -4.0  
-21     7     21       N2 SHIA AUT CIV   1.0      4.0   
-22     7     22       N2 SHIA CUL CIV   1.0      -1.0  
-23     7     23       N2 SHIA QOL CIV   1.0      -4.0  
-24     7     24       N2 SHIA SFT CIV   1.0      4.0   
-25     8     25       N2 SUNN AUT CIV   1.0      -8.0  
-26     8     26       N2 SUNN CUL CIV   1.0      -4.0  
-27     8     27       N2 SUNN QOL CIV   1.0      -8.0  
-28     8     28       N2 SUNN SFT CIV   1.0      -8.0  
-29     9     29       N2 ORGA CAS ORG   1.0      0.0   
-30     9     30       N2 ORGA SVC ORG   1.0      0.0   
-31     10    31       N2 ORGB CAS ORG   1.0      0.0   
-32     10    32       N2 ORGB SVC ORG   1.0      0.0   
+ngc_id ng_id curve_id n  g    c   gtype saliency 
+------ ----- -------- -- ---- --- ----- -------- 
+1      1     1        N1 KURD AUT CIV   1.0      
+2      1     2        N1 KURD CUL CIV   1.0      
+3      1     3        N1 KURD QOL CIV   1.0      
+4      1     4        N1 KURD SFT CIV   1.0      
+5      2     5        N1 SHIA AUT CIV   1.0      
+6      2     6        N1 SHIA CUL CIV   1.0      
+7      2     7        N1 SHIA QOL CIV   1.0      
+8      2     8        N1 SHIA SFT CIV   1.0      
+9      3     9        N1 SUNN AUT CIV   1.0      
+10     3     10       N1 SUNN CUL CIV   1.0      
+11     3     11       N1 SUNN QOL CIV   1.0      
+12     3     12       N1 SUNN SFT CIV   1.0      
+13     4     13       N1 ORGA CAS ORG   1.0      
+14     4     14       N1 ORGA SVC ORG   1.0      
+15     5     15       N1 ORGB CAS ORG   1.0      
+16     5     16       N1 ORGB SVC ORG   1.0      
+17     6     17       N2 KURD AUT CIV   1.0      
+18     6     18       N2 KURD CUL CIV   1.0      
+19     6     19       N2 KURD QOL CIV   1.0      
+20     6     20       N2 KURD SFT CIV   1.0      
+21     7     21       N2 SHIA AUT CIV   1.0      
+22     7     22       N2 SHIA CUL CIV   1.0      
+23     7     23       N2 SHIA QOL CIV   1.0      
+24     7     24       N2 SHIA SFT CIV   1.0      
+25     8     25       N2 SUNN AUT CIV   1.0      
+26     8     26       N2 SUNN CUL CIV   1.0      
+27     8     27       N2 SUNN QOL CIV   1.0      
+28     8     28       N2 SUNN SFT CIV   1.0      
+29     9     29       N2 ORGA CAS ORG   1.0      
+30     9     30       N2 ORGA SVC ORG   1.0      
+31     10    31       N2 ORGB CAS ORG   1.0      
+32     10    32       N2 ORGB SVC ORG   1.0      
     }
 
 
@@ -1087,40 +1045,40 @@ ngc_id ng_id curve_id n  g    c   gtype saliency trend
     } -cleanup {
         cleanup
     } -result {
-ngc_id ng_id n  g    c   gtype saliency trend curve_id sat0  sat   delta slope 
------- ----- -- ---- --- ----- -------- ----- -------- ----- ----- ----- ----- 
-1      1     N1 KURD AUT CIV   1.0      -1.0  1        0.0   0.0   0.0   0.0   
-2      1     N1 KURD CUL CIV   1.0      -1.0  2        0.0   0.0   0.0   0.0   
-3      1     N1 KURD QOL CIV   1.0      -4.0  3        0.0   0.0   0.0   0.0   
-4      1     N1 KURD SFT CIV   1.0      -4.0  4        -80.0 -80.0 0.0   0.0   
-5      2     N1 SHIA AUT CIV   1.0      4.0   5        40.0  40.0  0.0   0.0   
-6      2     N1 SHIA CUL CIV   1.0      -1.0  6        -40.0 -40.0 0.0   0.0   
-7      2     N1 SHIA QOL CIV   1.0      -4.0  7        -40.0 -40.0 0.0   0.0   
-8      2     N1 SHIA SFT CIV   1.0      4.0   8        40.0  40.0  0.0   0.0   
-9      3     N1 SUNN AUT CIV   1.0      -8.0  9        -80.0 -80.0 0.0   0.0   
-10     3     N1 SUNN CUL CIV   1.0      -4.0  10       -80.0 -80.0 0.0   0.0   
-11     3     N1 SUNN QOL CIV   1.0      -8.0  11       -40.0 -40.0 0.0   0.0   
-12     3     N1 SUNN SFT CIV   1.0      -8.0  12       -80.0 -80.0 0.0   0.0   
-13     4     N1 ORGA CAS ORG   1.0      0.0   13       0.0   0.0   0.0   0.0   
-14     4     N1 ORGA SVC ORG   1.0      0.0   14       0.0   0.0   0.0   0.0   
-15     5     N1 ORGB CAS ORG   1.0      0.0   15       0.0   0.0   0.0   0.0   
-16     5     N1 ORGB SVC ORG   1.0      0.0   16       0.0   0.0   0.0   0.0   
-17     6     N2 KURD AUT CIV   1.0      -1.0  17       0.0   0.0   0.0   0.0   
-18     6     N2 KURD CUL CIV   1.0      -1.0  18       0.0   0.0   0.0   0.0   
-19     6     N2 KURD QOL CIV   1.0      -4.0  19       0.0   0.0   0.0   0.0   
-20     6     N2 KURD SFT CIV   1.0      -4.0  20       -80.0 -80.0 0.0   0.0   
-21     7     N2 SHIA AUT CIV   1.0      4.0   21       40.0  40.0  0.0   0.0   
-22     7     N2 SHIA CUL CIV   1.0      -1.0  22       -40.0 -40.0 0.0   0.0   
-23     7     N2 SHIA QOL CIV   1.0      -4.0  23       -40.0 -40.0 0.0   0.0   
-24     7     N2 SHIA SFT CIV   1.0      4.0   24       40.0  40.0  0.0   0.0   
-25     8     N2 SUNN AUT CIV   1.0      -8.0  25       -80.0 -80.0 0.0   0.0   
-26     8     N2 SUNN CUL CIV   1.0      -4.0  26       -80.0 -80.0 0.0   0.0   
-27     8     N2 SUNN QOL CIV   1.0      -8.0  27       -40.0 -40.0 0.0   0.0   
-28     8     N2 SUNN SFT CIV   1.0      -8.0  28       -80.0 -80.0 0.0   0.0   
-29     9     N2 ORGA CAS ORG   1.0      0.0   29       0.0   0.0   0.0   0.0   
-30     9     N2 ORGA SVC ORG   1.0      0.0   30       0.0   0.0   0.0   0.0   
-31     10    N2 ORGB CAS ORG   1.0      0.0   31       0.0   0.0   0.0   0.0   
-32     10    N2 ORGB SVC ORG   1.0      0.0   32       0.0   0.0   0.0   0.0   
+ngc_id ng_id n  g    c   gtype saliency curve_id sat0  sat   delta slope 
+------ ----- -- ---- --- ----- -------- -------- ----- ----- ----- ----- 
+1      1     N1 KURD AUT CIV   1.0      1        0.0   0.0   0.0   0.0   
+2      1     N1 KURD CUL CIV   1.0      2        0.0   0.0   0.0   0.0   
+3      1     N1 KURD QOL CIV   1.0      3        0.0   0.0   0.0   0.0   
+4      1     N1 KURD SFT CIV   1.0      4        -80.0 -80.0 0.0   0.0   
+5      2     N1 SHIA AUT CIV   1.0      5        40.0  40.0  0.0   0.0   
+6      2     N1 SHIA CUL CIV   1.0      6        -40.0 -40.0 0.0   0.0   
+7      2     N1 SHIA QOL CIV   1.0      7        -40.0 -40.0 0.0   0.0   
+8      2     N1 SHIA SFT CIV   1.0      8        40.0  40.0  0.0   0.0   
+9      3     N1 SUNN AUT CIV   1.0      9        -80.0 -80.0 0.0   0.0   
+10     3     N1 SUNN CUL CIV   1.0      10       -80.0 -80.0 0.0   0.0   
+11     3     N1 SUNN QOL CIV   1.0      11       -40.0 -40.0 0.0   0.0   
+12     3     N1 SUNN SFT CIV   1.0      12       -80.0 -80.0 0.0   0.0   
+13     4     N1 ORGA CAS ORG   1.0      13       0.0   0.0   0.0   0.0   
+14     4     N1 ORGA SVC ORG   1.0      14       0.0   0.0   0.0   0.0   
+15     5     N1 ORGB CAS ORG   1.0      15       0.0   0.0   0.0   0.0   
+16     5     N1 ORGB SVC ORG   1.0      16       0.0   0.0   0.0   0.0   
+17     6     N2 KURD AUT CIV   1.0      17       0.0   0.0   0.0   0.0   
+18     6     N2 KURD CUL CIV   1.0      18       0.0   0.0   0.0   0.0   
+19     6     N2 KURD QOL CIV   1.0      19       0.0   0.0   0.0   0.0   
+20     6     N2 KURD SFT CIV   1.0      20       -80.0 -80.0 0.0   0.0   
+21     7     N2 SHIA AUT CIV   1.0      21       40.0  40.0  0.0   0.0   
+22     7     N2 SHIA CUL CIV   1.0      22       -40.0 -40.0 0.0   0.0   
+23     7     N2 SHIA QOL CIV   1.0      23       -40.0 -40.0 0.0   0.0   
+24     7     N2 SHIA SFT CIV   1.0      24       40.0  40.0  0.0   0.0   
+25     8     N2 SUNN AUT CIV   1.0      25       -80.0 -80.0 0.0   0.0   
+26     8     N2 SUNN CUL CIV   1.0      26       -80.0 -80.0 0.0   0.0   
+27     8     N2 SUNN QOL CIV   1.0      27       -40.0 -40.0 0.0   0.0   
+28     8     N2 SUNN SFT CIV   1.0      28       -80.0 -80.0 0.0   0.0   
+29     9     N2 ORGA CAS ORG   1.0      29       0.0   0.0   0.0   0.0   
+30     9     N2 ORGA SVC ORG   1.0      30       0.0   0.0   0.0   0.0   
+31     10    N2 ORGB CAS ORG   1.0      31       0.0   0.0   0.0   0.0   
+32     10    N2 ORGB SVC ORG   1.0      32       0.0   0.0   0.0   0.0   
     }
 
     test init-2.16 {initial contents: gram_sat_influence} -setup {
@@ -1344,32 +1302,6 @@ prox delay factor direct_ng direct_id dn dg   c   curve_id n  g
     } -cleanup {
         cleanup
     } -result {
-id etype curve_id cause direct_ngc driver input prox ts te       athresh dthresh tlast ncontrib acontrib nominal actual days tau llimit delay slope future n  g    c   sat   dn dg   
--- ----- -------- ----- ---------- ------ ----- ---- -- -------- ------- ------- ----- -------- -------- ------- ------ ---- --- ------ ----- ----- ------ -- ---- --- ----- -- ---- 
-1  S     1        TREND 1          0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         N1 KURD AUT 0.0   N1 KURD 
-2  S     2        TREND 2          0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         N1 KURD CUL 0.0   N1 KURD 
-3  S     3        TREND 3          0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         N1 KURD QOL 0.0   N1 KURD 
-4  S     4        TREND 4          0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         N1 KURD SFT -80.0 N1 KURD 
-5  S     5        TREND 5          0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     4.0          N1 SHIA AUT 40.0  N1 SHIA 
-6  S     6        TREND 6          0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         N1 SHIA CUL -40.0 N1 SHIA 
-7  S     7        TREND 7          0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         N1 SHIA QOL -40.0 N1 SHIA 
-8  S     8        TREND 8          0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     4.0          N1 SHIA SFT 40.0  N1 SHIA 
-9  S     9        TREND 9          0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN AUT -80.0 N1 SUNN 
-10 S     10       TREND 10         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         N1 SUNN CUL -80.0 N1 SUNN 
-11 S     11       TREND 11         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN QOL -40.0 N1 SUNN 
-12 S     12       TREND 12         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         N1 SUNN SFT -80.0 N1 SUNN 
-13 S     17       TREND 17         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         N2 KURD AUT 0.0   N2 KURD 
-14 S     18       TREND 18         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         N2 KURD CUL 0.0   N2 KURD 
-15 S     19       TREND 19         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         N2 KURD QOL 0.0   N2 KURD 
-16 S     20       TREND 20         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         N2 KURD SFT -80.0 N2 KURD 
-17 S     21       TREND 21         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     4.0          N2 SHIA AUT 40.0  N2 SHIA 
-18 S     22       TREND 22         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -1.0         N2 SHIA CUL -40.0 N2 SHIA 
-19 S     23       TREND 23         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         N2 SHIA QOL -40.0 N2 SHIA 
-20 S     24       TREND 24         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     4.0          N2 SHIA SFT 40.0  N2 SHIA 
-21 S     25       TREND 25         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN AUT -80.0 N2 SUNN 
-22 S     26       TREND 26         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -4.0         N2 SUNN CUL -80.0 N2 SUNN 
-23 S     27       TREND 27         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN QOL -40.0 N2 SUNN 
-24 S     28       TREND 28         0      1     -1   0  99999999 100.0   -100.0        0.0      0.0      0.0     0.0                    0     -8.0         N2 SUNN SFT -80.0 N2 SUNN 
     }
 
     test init-2.19 {initial contents: gram_sat_contribs} -setup {
@@ -1742,125 +1674,6 @@ N2 ORGB 0
         cleanup
     } -result {0}
     
-    # 2.*: Effect of the long-term trend on sat
-
-    test table_gram_sat-2.1 {trend on sat, scaling up from -100.0} -setup {
-        create
-    } -body {
-        rdb eval {
-            UPDATE gram_sat
-            SET sat0 = 0.0,
-                trend = 0.0;
-
-            UPDATE gram_sat
-            SET sat0 = -100,
-                trend = 20
-            WHERE n='N2' AND g='KURD' AND c='QOL';
-        }
-
-        jr init
-
-        # By advancing a whole day, we'll get one day's worth of trend.
-        # Because the base for {N2, KURD, QOL} is -100.0, we should get the
-        # twice the full value (40.0 points)
-        myclock advance 1440
-        jr advance
-        tableDiffCols gram_sat {n g c} sat sat0
-    } -cleanup {
-        cleanup
-    } -result {{N2 KURD QOL 40}}
-
-    test table_gram_sat-2.2 {trend on sat, scaling up from 0.0} -setup {
-        create
-    } -body {
-        rdb eval {
-            UPDATE gram_sat
-            SET sat0 = 0.0,
-                trend = 0.0;
-
-            UPDATE gram_sat
-            SET trend = 20
-            WHERE n='N2' AND g='KURD' AND c='QOL';
-        }
-
-        jr init
-
-        # By advancing a whole day, we'll get one day's worth of trend.
-        # Because the base for {N2 KURD QOL} is 0.0, we should get the exact
-        # value (20.0 points)
-        myclock advance 1440
-        jr advance
-        tableDiffCols gram_sat {n g c} sat sat0
-    } -cleanup {
-        cleanup
-    } -result {{N2 KURD QOL 20}}
-
-    test table_gram_sat-2.3 {trend on sat, scaling down from 100.0} -setup {
-        create
-    } -body {
-        rdb eval {
-            UPDATE gram_sat
-            SET sat0 = 0.0,
-                trend = 0.0;
-
-            UPDATE gram_sat
-            SET sat0 = 100,
-                trend = -20
-            WHERE n='N2' AND g='KURD' AND c='QOL'
-        }
-        jr init
-
-        # By advancing a whole day, we'll get one day's worth of trend.
-        # Because the base for {N2 KURD QOL} is 100.0, we should get twice the
-        # full value (-40.0 points)
-        myclock advance 1440
-        jr advance
-        tableDiffCols gram_sat {n g c} sat sat0
-    } -cleanup {
-        cleanup
-    } -result {{N2 KURD QOL -40}}
-
-    test table_gram_sat-2.4 {trend on sat, scaling down from 0.0} -setup {
-        create
-    } -body {
-        rdb eval {
-            UPDATE gram_sat
-            SET sat0 = 0.0,
-                trend = 0.0;
-
-            UPDATE gram_sat
-            SET trend = -20
-            WHERE n='N2' AND g='KURD' AND c='QOL';
-        }
-
-        jr init
-
-        # By advancing a whole day, we'll get one day's worth of trend.
-        # Because the base for {N2 KURD QOL} is 0.0, we should get the exact
-        # value (-20.0 points)
-        myclock advance 1440
-        jr advance
-        tableDiffCols gram_sat {n g c} sat sat0
-    } -cleanup {
-        cleanup
-    } -result {{N2 KURD QOL -20}}
-
-    # 3.*: Effect of long-term-trend on slope
-
-    test table_gram_sat-3.1 {trend on slope, value after one day} -setup {
-        create
-    } -body {
-        myclock advance 1440
-        jr advance
-
-        rdb onecolumn {
-            SELECT count(ngc_id) FROM gram_sat
-            WHERE abs(slope - (sat - sat0)) > 0.00000001
-        }
-    } -cleanup {
-        cleanup
-    } -result {0}
-
 
     #-------------------------------------------------------------------
     # Table gram_gc
@@ -1903,44 +1716,6 @@ N2 ORGB 0
         cleanup
     } -result {0}
     
-    # 2.*: Effect of long term trend
-
-    test table_gram_gc-2.1 {sat after one day} -setup {
-        create
-    } -body {
-        # Given our current test.simdb, the neighborhood inputs are
-        # all identical.  Further, all CIV pgroups are represented in
-        # each neighborhood.  Consequently, after one day sat.gc 
-        # should be the same as sat0.gc plus the slope.ngc for
-        # neighborhood 0.
-
-        myclock advance 1440
-        jr advance
-
-        rdb eval {
-            SELECT count(ngc_id)
-            FROM gram_sat JOIN gram_gc USING (g,c)
-            WHERE gram_gc.sat = gram_gc.sat0 + gram_sat.slope
-        }
-    } -cleanup {
-        cleanup
-    } -result {32}
-
-    test table_gram_gc-2.2 {slope value after one day} -setup {
-        create
-    } -body {
-        myclock advance 1440
-        jr advance
-
-        # The overall slope should be the same as the difference between
-        # the current and initial toplevel satisfaction
-        rdb onecolumn {
-            SELECT count(gc_id) FROM gram_gc
-            WHERE abs(slope - (sat - sat0)) > 0.0000001
-        }
-    } -cleanup {
-        cleanup
-    } -result {0}
 
     #-------------------------------------------------------------------
     # Table gram_ng
@@ -1977,33 +1752,7 @@ N2 ORGB 0.0
         cleanup
     } -result {}
 
-    test table_gram_ng-1.3 {value after one day} -setup {
-        create
-    } -body {
-        # Advance by a day.
-        myclock advance 1440
-        jr advance
-
-        pprint [rdb query {
-            SELECT n, g, format('%.1f',sat) FROM gram_ng
-            ORDER BY ng_id
-        }]
-    } -cleanup {
-        cleanup
-    } -result {
-n  g    format('%.1f',sat) 
--- ---- ------------------ 
-N1 KURD -21.7              
-N1 SHIA 0.4                
-N1 SUNN -72.2              
-N1 ORGA 0.0                
-N1 ORGB 0.0                
-N2 KURD -21.7              
-N2 SHIA 0.4                
-N2 SUNN -72.2              
-N2 ORGA 0.0                
-N2 ORGB 0.0                
-    }
+    # table_gram_ng-1.3: test deleted, depended on trend0
 
     test table_gram_ng-1.4 {value with different saliencies} -setup {
         create
@@ -2074,35 +1823,7 @@ N2 SVC 0.0
         cleanup
     } -result {}
 
-    test table_gram_nc-1.3 {value after one day} -setup {
-        create
-    } -body {
-        # Advance by a day.
-        myclock advance 1440
-        jr advance
-
-        pprint [rdb query {
-            SELECT n, c, format('%.1f',sat) FROM gram_nc
-            ORDER BY nc_id
-        }]
-    } -cleanup {
-        cleanup
-    } -result {
-n  c   format('%.1f',sat) 
--- --- ------------------ 
-N1 AUT -13.4              
-N1 CUL -40.8              
-N1 QOL -30.4              
-N1 SFT -40.0              
-N1 CAS 0.0                
-N1 SVC 0.0                
-N2 AUT -13.4              
-N2 CUL -40.8              
-N2 QOL -30.4              
-N2 SFT -40.0              
-N2 CAS 0.0                
-N2 SVC 0.0                
-    }
+    # table_gram_nc-1.3: test deleted, depended on trend0
 
     test table_gram_nc-1.4 {value with different saliencies} -setup {
         create
@@ -2199,23 +1920,7 @@ N2 -30.0000
         cleanup
     } -result {}
 
-    test table_gram_n-1.3 {value after one day} -setup {
-        create
-    } -body {
-        myclock advance 1440
-        jr advance
-        # Numbers checked by hand
-        pprint [rdb query {
-            SELECT n,format('%8.4f',sat) FROM gram_n
-        }]
-    } -cleanup {
-        cleanup
-    } -result {
-n  format('%8.4f',sat) 
--- ------------------- 
-N1 -31.1500            
-N2 -31.1500            
-    }
+    # table_gram_n-1.3: test deleted, depended on trend0
 
     test table_gram_n-1.4 {value with different saliences} -setup {
         create
@@ -2299,30 +2004,7 @@ ORGB  0.0000
         cleanup
     } -result {}
 
-    test table_gram_g-1.3 {value after one day} -setup {
-        create
-    } -body {
-        myclock advance 1440
-        jr advance
-        # Numbers checked by hand
-        pprint [rdb query {
-            SELECT g,format('%.4f',sat) FROM gram_g
-            ORDER BY g_id
-        }]
-    } -cleanup {
-        cleanup
-    } -result {
-g     format('%.4f',sat) 
------ ------------------ 
-KURD  -21.7000           
-SHIA  0.4500             
-SUNN  -72.2000           
-BLUE  0.0000             
-BRIT  0.0000             
-OPFOR 0.0000             
-ORGA  0.0000             
-ORGB  0.0000             
-    }
+    # table_gram_g-1.3: test deleted, depended on trend0
 
     #-------------------------------------------------------------------
     # Table gram_c
@@ -2347,21 +2029,6 @@ ORGB  0.0000
     } -cleanup {
         cleanup
     } -result {}
-
-    test table_gram_c-2.3 {value after one day} -setup {
-        create
-    } -body {
-        myclock advance 1440
-        jr advance
-        # Numbers checked by hand
-        rdb eval {
-            SELECT c, format('%.4f',sat) 
-            FROM gram_c 
-            ORDER BY c_id
-        }
-    } -cleanup {
-        cleanup
-    } -result {AUT -13.4000 CUL -40.8000 QOL -30.4000 SFT -40.0000 CAS 0.0000 SVC 0.0000}
 
     #-------------------------------------------------------------------
     # Tables gram_coop, gram_nfg
@@ -2391,33 +2058,6 @@ ORGB  0.0000
         cleanup
     } -result {0}
     
-    # 2.*: Effect of the long-term trend on coop
-
-    test table_gram_coop-2.1 {No long-term trend for coop.} -setup {
-        create
-    } -body {
-        myclock advance 1440
-        jr advance
-        tableDiffCols gram_coop {n f g} coop coop0
-    } -cleanup {
-        cleanup
-    } -result {}
-
-
-    test table_gram_coop-2.2 {No long-term trend for slope} -setup {
-        create
-    } -body {
-        myclock advance 1440
-        jr advance
-
-        rdb onecolumn {
-            SELECT count(nfg_id) FROM gram_coop
-            WHERE slope != 0.0
-        }
-    } -cleanup {
-        cleanup
-    } -result {0}
-
 
     #-------------------------------------------------------------------
     # Table gram_contribs, gram_sat_contribs, gram_coop_contribs
@@ -2481,9 +2121,9 @@ time driver n  g    c   acontrib
 1440 1      N1 KURD QOL  6.0     
 1440 1      N1 SHIA QOL 14.0     
 1440 1      N1 SUNN QOL -1.8     
-2880 1      N1 KURD QOL  5.9     
-2880 1      N1 SHIA QOL 12.8     
-2880 1      N1 SUNN QOL -1.6     
+2880 1      N1 KURD QOL  5.6     
+2880 1      N1 SHIA QOL 12.6     
+2880 1      N1 SUNN QOL -1.7     
     }
 
     test table_gram_contribs-2.1 {coop contribs retained} -setup {
@@ -2575,7 +2215,7 @@ time driver n  f    g     acontrib
 time delta n  g    c   
 ---- ----- -- ---- --- 
 0    0.0   N1 KURD AUT 
-1440 -1.0  N1 KURD AUT 
+1440 0.0   N1 KURD AUT 
     }
 
     test table_gram_deltas-1.2 {Coop deltas retained over time} -setup {
@@ -3624,16 +3264,7 @@ I 1440 1584 N2 SUNN QOL -0.15
     test sat_level-3.1 {level increases during interval} -setup {
         create
     } -body {
-        # FIRST, eliminate the trend effect.
-        rdb eval {
-            UPDATE gram_sat
-            SET trend = 0.0
-        }
-        
-        init
-
-
-        # NEXT, do a level effect.
+        # FIRST, do a level effect.
         jr sat level 1 0 N2 KURD QOL 10.0 1
 
         # Advance to noon.
@@ -3648,16 +3279,7 @@ I 1440 1584 N2 SUNN QOL -0.15
     test sat_level-3.2 {level increases to limit} -setup {
         create
     } -body {
-        # FIRST, eliminate the trend effect.
-        rdb eval {
-            UPDATE gram_sat
-            SET trend = 0.0
-        }
-        
-        init
-
-
-        # NEXT, do a level effect.
+        # FIRST, do a level effect.
         jr sat level 1 0 N2 KURD QOL 10.0 1
 
         # Advance a full day
@@ -3718,11 +3340,10 @@ I 1440 1584 N2 SUNN QOL -0.15
         myclock advance 2880
         jr advance
 
-        # Note: the difference won't quite be zero.
         tableDiff gram_sat ngc_id {n g c} slope
     } -cleanup {
         cleanup 
-    } -result {{N2 KURD QOL -0.4} {N2 SHIA QOL -0.336} {N2 SUNN QOL 0.288}}
+    } -result {}
 
     test sat_level-4.1 {level effects expire from list} -setup {
         create
@@ -3767,7 +3388,7 @@ I 1440 1584 N2 SUNN QOL -0.15
         }
     } -cleanup {
         cleanup 
-    } -result {0.1 1.1 1.2 1.3 2.1 2.2 2.3}
+    } -result {1.1 1.2 1.3 2.1 2.2 2.3}
 
 
     test sat_level-6.1 {Inputs with the same cause overlap} -setup {
@@ -3830,20 +3451,13 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    6.09   6.093  1.1   N1 
         # based on the 10.  A1 should get credit for ~2/3 of the actual
         # contribution and A2 should get credit for ~1/3.
         pprint [jr dump sat level N1 SHIA SFT]
-
-        # Hand check
-        # Ratio of SContribs in second time step is 1.993 to 1.081, or 1.84.
-        # Ratio of AContribs in second time step is 1.292 to 0.701, or 1.84.  Check
-        # Sum of AContribs in second time step is 1.292 + 0.701, or 1.993.    Check
-        # Ratio of NTotals over the two time steps is 9.00 to 4.29 or 2.1
-        # Ratio of ATotals over the two time steps is 5.99 to 2.84 or 2.1     Check
     } -cleanup {
         cleanup
     } -result {
 Cause  Start Time   End Time     Limit NTotal NContrib ATotal AContrib Input DN DG   E 
 ------ ------------ ------------ ----- ------ -------- ------ -------- ----- -- ---- - 
-CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   2.162    5.99   1.292  1.1   N1 SHIA D 
-'      '            '              5.0   4.29   1.173    2.84   0.701  1.2   N1 SHIA D 
+CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   2.162    6.00   1.306  1.1   N1 SHIA D 
+'      '            '              5.0   4.29   1.173    2.85   0.709  1.2   N1 SHIA D 
     }
 
     test sat_level-6.3 {Inputs with different causes are independent} -setup {
@@ -3966,7 +3580,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
         }
     } -cleanup {
         cleanup
-    } -result {D1 TREND}
+    } -result {D1}
 
     # sat_level-8.*: "level" returns input
 
@@ -4002,7 +3616,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     # sat_level-9.*: Thresholds
     
     test sat_level-9.1 {Positive, sat0 >= athresh} -setup {
-        create -trend no
+        create
     } -body {
         set a [jr sat.ngc N1 SHIA AUT]
         
@@ -4020,7 +3634,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     } -result {1}
 
     test sat_level-9.2 {Positive, sat0+delta < athresh} -setup {
-        create -trend no
+        create
     } -body {
         set a [jr sat.ngc N1 SHIA CUL]
         
@@ -4038,7 +3652,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     } -result {-40.0 -26.0}
     
     test sat_level-9.3 {Positive, sat0+delta > athresh} -setup {
-        create -trend no
+        create
     } -body {
         set a [format %.1f [jr sat.ngc N1 SHIA SFT]]
         
@@ -4062,7 +3676,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     } -result {40.0 45.5 45.5}
 
     test sat_level-9.4 {Negative, sat0 <= dthresh} -setup {
-        create -trend no
+        create
     } -body {
         set a [jr sat.ngc N1 SHIA CUL]
         
@@ -4080,7 +3694,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     } -result {1}
     
     test sat_level-9.5 {Negative, sat0+delta > dthresh} -setup {
-        create -trend no
+        create
     } -body {
         set a [jr sat.ngc N1 SHIA SFT]
         
@@ -4098,7 +3712,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     } -result {40.0 26.0}
     
     test sat_level-9.6 {Negative, sat0+delta < dthresh} -setup {
-        create -trend no
+        create
     } -body {
         set a [format %.1f [jr sat.ngc N1 SHIA CUL]]
         
@@ -4329,7 +3943,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0   5.23   5.225    2.61   2.613  1.2   N1 
     # sat_slope-2.*: Scheduling
 
     test sat_slope-2.1 {schedule slope for one n,g,c.} -setup {
-        create -trend no
+        create
     } -body {
         jr sat slope 1 0 N2 KURD SFT 100.0
         dumpSlopes
@@ -4344,7 +3958,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
     }
 
     test sat_slope-2.2 {schedule slope for one n,g,c, -s 0.5} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat slope 1 0 N2 KURD SFT 100.0 -s 0.5
         dumpSlopes
@@ -4359,7 +3973,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
     }
 
     test sat_slope-2.3 {successive inputs for a driver stack} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat slope 1  0 N2 KURD SFT 100.0
         jr sat slope 1  5 N2 KURD SFT  75.0
@@ -4396,7 +4010,7 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actu
             WHERE n='N1' AND g='SHIA'
         }
         
-        init -trend no
+        init 
     } -body {
 
 
@@ -4423,7 +4037,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
             WHERE n='N1' AND g='SHIA'
         }
         
-        init -trend no
+        init 
     } -body {
         jr sat slope 1 0 N1 KURD SFT 100.0
 
@@ -4451,7 +4065,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
             WHERE m='N2' AND n='N1'
         }
 
-        init -trend no
+        init 
     }  -body {
         # Enter slope input
         jr sat slope 1 0 N1 KURD SFT 100.0 -p 0.5 -q 0.1
@@ -4473,7 +4087,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
     }
 
     test sat_slope-2.8 {Indirect effects in all nbhoods, N2 far} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat slope 1 0 N1 KURD SFT 100.0 -p 0.5 -q 0.1
 
@@ -4505,7 +4119,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
             WHERE m='N2' AND n='N1'
         }
 
-        init -trend no
+        init 
     } -body {
         # Enter a slope input.
         jr sat slope 1 0 N1 KURD SFT 100.0 -p 0.5 -q 0.1
@@ -4533,7 +4147,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
             WHERE n='N1' AND g='KURD'
         }
 
-        init -trend no
+        init 
     }  -body {
         # Create a slope input
         jr sat slope 1 0 N1 KURD SFT 100.0 -p 0.5 -q 0.1
@@ -4564,7 +4178,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
             WHERE m='N2' AND n='N1'
         }
 
-        init -trend no
+        init 
     }  -body {
         # Enter a slope input.
         jr sat slope 1 0 N1 KURD SFT 100.0 -p 0.5 -q 0.1
@@ -4595,7 +4209,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
             WHERE m='N2' AND n='N1'
         }
 
-        init -trend no
+        init 
     }  -body {
         # At time 0, schedule a slope input with far effects.
         jr sat slope 1 0 N1 KURD SFT 100.0 -p 1.0 -q 1.0
@@ -4628,7 +4242,7 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actu
     }
     
     test sat_slope-2.13 {Causes are tagged automatically if -cause is not given} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat slope 1 0 N1 SHIA SFT 10
 
@@ -4640,7 +4254,7 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actu
     # sat_slope-3.*: Effect on sat.ngc
 
     test sat_slope-3.1 {sat increases} -setup {
-        create -trend no
+        create 
     } -body {
         # NEXT, do a slope effect.
         jr sat slope 1 0 N2 KURD QOL 100.0
@@ -4657,7 +4271,7 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actu
     # test sat_slope-3.2 {sat increases to limit} -setup OBSOLETE
 
     test sat_slope-3.3 {successive slope records take effect} -setup {
-        create -trend no
+        create 
     } -body {
         # NEXT, do a level effect.
         jr sat slope 1 0   N2 KURD QOL 100.0
@@ -4677,7 +4291,7 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actu
     # test sat_slope-4.1 {slope records expire due to limit} obsolete
 
     test sat_slope-4.2 {slope records expire due to time} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat slope 1 0   N2 KURD QOL 100.0
         jr sat slope 1 360 N2 KURD QOL   0.0
@@ -4693,7 +4307,7 @@ Input DN DG   Cause E Start Time   End Time     Nbhd Grp  Con Slope Nominal Actu
     }
 
     test sat_slope-4.3 {negative slopes don't expire immediately} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat slope 1 [myclock now] N1 SHIA SFT -10
         myclock advance 5
@@ -4714,7 +4328,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
     # sat_slope-5.*: Tracking of contributions
 
     test sat_slope-5.1 {gram_effects tracks total change} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat slope 1 0 N2 KURD QOL 100.0
 
@@ -4734,7 +4348,7 @@ Input DN DG   Cause E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
     }
 
     test sat_slope-5.2 {change is tracked across sequential effects} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat slope 1    0 N2 KURD QOL 100.0
         jr sat slope 1  360 N2 KURD QOL   0.0
@@ -4765,7 +4379,7 @@ id ts  te       slope nominal actual
 
         # Set sat0 to all zeros so that scaling is simple
         rdb eval {UPDATE gram_sat SET sat0 = 0.0}
-        init -trend no
+        init 
     } -body {
         # Schedule two effects of differing strength but the same cause
         # on the same pgroup.  The total effect over the timestep should
@@ -4817,20 +4431,13 @@ CIVCAS 010000ZJAN70 n/a       10.0   5.00   5.000    3.33   3.333  1.1   N1 SHIA
         # based on the 10.  A1 should get credit for ~2/3 of the actual
         # contribution and A2 should get credit for ~1/3.
         pprint [jr dump sat slope N1 SHIA SFT]
-
-        # Hand check
-        # Ratio of AContribs in second time step is 1.608 to 0.804, or 2.0    Check
-        # Sum of AContribs in second time step is 1.608 + 0.804, or 2.412.    Check
-        # Ratio of NTotals over the two time steps is 5.00 to 2.5 or 2.0
-        # Ratio of ATotals over the two time steps is 3.27 to 1.64 or 2.0     Check
     } -cleanup {
         cleanup
     } -result {
 Cause  Start Time   End Time Slope NTotal NContrib ATotal AContrib Input DN DG   E 
 ------ ------------ -------- ----- ------ -------- ------ -------- ----- -- ---- - 
-CIVCAS 010000ZJAN70 n/a       10.0   5.00   2.500    3.27   1.608  1.1   N1 SHIA D 
-'      '            '          5.0   2.50   1.250    1.64   0.804  2.1   N1 SHIA D 
-TREND  '            '          4.0   2.00   1.000    1.96   0.965  0.1   N1 SHIA D 
+CIVCAS 010000ZJAN70 n/a       10.0   5.00   2.500    3.29   1.625  1.1   N1 SHIA D 
+'      '            '          5.0   2.50   1.250    1.65   0.812  2.1   N1 SHIA D 
     }
    
     test sat_slope-6.3 {Inputs with different causes are independent} -setup {
@@ -4838,7 +4445,7 @@ TREND  '            '          4.0   2.00   1.000    1.96   0.965  0.1   N1 SHIA
 
         # Set sat0 to all zeros so that scaling is simple
         rdb eval {UPDATE gram_sat SET sat0 = 0.0}
-        init -trend no
+        init 
     } -body {
 
         # Schedule two effects of differing strength but the same cause
@@ -4869,7 +4476,7 @@ HOSCAP '            '          5.0   2.50   2.500    2.50   2.500  2.1   N1 SHIA
 
         # Set sat0 to all zeros so that scaling is simple
         rdb eval {UPDATE gram_sat SET sat0 = 0.0}
-        init -trend no
+        init 
     } -body {
         # Schedule effects on SHIA and KURD, and look at the indirect effects
         # on SUNN.
@@ -4901,7 +4508,7 @@ CIVCAS 010000ZJAN70 n/a       -3.0  -1.50  -1.500   -1.00  -1.000  1.1   N1 SHIA
 
         # Set sat0 to all zeros so that scaling is simple
         rdb eval {UPDATE gram_sat SET sat0 = 0.0}
-        init -trend no
+        init 
     } -body {
         # Schedule chained effects
         jr sat slope 1   0 N1 SHIA SFT 10 -cause CIVCAS
@@ -4932,7 +4539,7 @@ CIVCAS 011200ZJAN70 n/a       10.0   5.00   5.000    5.00   5.000  1.3   N1 SHIA
     }
 
     test sat_slope-6.6 {different causes have distinct chains} -setup {
-        create -trend no
+        create 
     } -body {
         # If we create two inputs for the same n,g,c with different
         # causes, we get different chains
@@ -4954,7 +4561,7 @@ Input DN DG   Cause  E Start Time   End Time Nbhd Grp  Con Slope Nominal Actual
     }
     
     test sat_slope-6.7 {different causes have distinct chains: update} -setup {
-        create -trend no
+        create 
     } -body {
         # If we update for one cause, it doesn't affect the other
         jr sat slope 1  5 N1 SHIA SFT 10.0 -cause PATROL
@@ -4979,7 +4586,7 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     }
     
     test sat_slope-6.8 {different causes have distinct chains: end} -setup {
-        create -trend no
+        create 
     } -body {
         # If we update for one cause, it doesn't affect the other
         jr sat slope 1  5 N1 SHIA SFT 10.0 -cause PATROL
@@ -5006,7 +4613,7 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     # sat_slope-7.*: Scheduling returns input
 
     test sat_slope-7.1 {Return input, case 1: one nbhood, 0 limit} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr sat slope 1 0 N1 SHIA SFT 0]
         set b [jr sat slope 1 0 N1 SHIA QOL 0]
@@ -5018,7 +4625,7 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     } -result {1 2 {}}
 
     test sat_slope-7.2 {Return input, case 2: one nbhood, terminate} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr sat slope 1 0 N1 SHIA SFT 10]
         set b [jr sat slope 1 0 N1 SHIA QOL 10]
@@ -5036,7 +4643,7 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     # sat_slope-7.4 OBSOLETE
 
     test sat_slope-7.5 {Return input, case 5: nominal case} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr sat slope 1 0 N1 SHIA SFT 10]
         set b [jr sat slope 1 0 N1 SHIA QOL 10]
@@ -5050,7 +4657,7 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     # sat_slope-8.*: Thresholds
     
     test sat_slope-8.1 {Positive, sat0 >= athresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr sat.ngc N1 SHIA AUT]
         
@@ -5068,7 +4675,7 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     } -result {1}
 
     test sat_slope-8.2 {Positive, sat0+delta < athresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr sat.ngc N1 SHIA CUL]
         
@@ -5086,7 +4693,7 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     } -result {-40.0 -33.0}
     
     test sat_slope-8.3 {Positive, sat0+delta > athresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [format %.1f [jr sat.ngc N1 SHIA SFT]]
         
@@ -5110,7 +4717,7 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     } -result {40.0 43.0 43.0}
 
     test sat_slope-8.4 {Negative, sat0 <= dthresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr sat.ngc N1 SHIA CUL]
         
@@ -5128,7 +4735,7 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     } -result {1}
     
     test sat_slope-8.5 {Negative, sat0+delta > dthresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr sat.ngc N1 SHIA SFT]
         
@@ -5146,7 +4753,7 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     } -result {40.0 33.0}
     
     test sat_slope-8.6 {Negative, sat0+delta < dthresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [format %.1f [jr sat.ngc N1 SHIA CUL]]
         
@@ -5186,9 +4793,6 @@ Input DN DG   Cause  E Start Time   End Time     Nbhd Grp  Con Slope Nominal Act
     # set of simply history values using "sat adjust".
 
     proc mkhistory {} {
-        # Get rid of the trend.
-        jr cancel 0
-
         jr sat adjust 1 N1 KURD AUT 1
         jr sat adjust 1 N1 KURD QOL 2
         jr sat adjust 1 N1 SHIA AUT 3
@@ -6568,7 +6172,7 @@ I 1440 1584 N2 SHIA OPFOR -0.80
     } -result {1 2}
 
     test coop_level-5.2 {input runs from 1 for each driver} -setup {
-        create -trend no
+        create 
     } -body {
         jr coop level 1 0 N1 SHIA BLUE  10.0 1
         jr coop level 1 0 N1 SHIA BRIT  10.0 1
@@ -6723,7 +6327,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     # coop_level-7.*: Automatic causes
 
     test coop_level-7.1 {Causes are tagged automatically if -cause is not given} -setup {
-        create -trend no
+        create 
     } -body {
         jr coop level 1 0 N1 SHIA OPFOR 10 10
 
@@ -6738,7 +6342,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     # coop_level-8.*: "level" returns input
 
     test coop_level-8.1 {Returns input, case 1: input is ignored.} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop level 1 0 N1 SHIA OPFOR 0 1]
         set b [jr coop level 1 0 N1 SHIA BRIT 0 1]
@@ -6765,7 +6369,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     # coop_level-9.*: Thresholds
     
     test coop_level-9.1 {Positive, coop0 >= athresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop.nfg N1 SHIA BLUE]
         
@@ -6783,7 +6387,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     } -result {1}
 
     test coop_level-9.2 {Positive, coop0+delta < athresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop.nfg N1 SHIA BLUE]
         
@@ -6801,7 +6405,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     } -result {50.0 55.0}
     
     test coop_level-9.3 {Positive, coop0+delta > athresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [format %.1f [jr coop.nfg N1 SHIA BLUE]]
         
@@ -6825,7 +6429,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     } -result {50.0 54.6 54.6}
 
     test coop_level-9.4 {Negative, coop0 <= dthresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop.nfg N1 SHIA BLUE]
         
@@ -6843,7 +6447,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     } -result {1}
     
     test coop_level-9.5 {Negative, coop0+delta > dthresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop.nfg N1 SHIA BLUE]
         
@@ -6861,7 +6465,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0   9.00   9.000    4.50   4.500  1.1   N1 
     } -result {50.0 45.0}
     
     test coop_level-9.6 {Negative, coop0+delta < dthresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [format %.1f [jr coop.nfg N1 SHIA BLUE]]
         
@@ -7360,7 +6964,7 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Nominal
     }
     
     test coop_slope-2.11 {Causes are tagged automatically if -cause is not given} -setup {
-        create -trend no
+        create 
     } -body {
         jr coop slope 1 0 N1 SHIA BRIT 10
 
@@ -7464,7 +7068,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
     }
 
     test coop_slope-5.2 {change is tracked across sequential effects} -setup {
-        create -trend no
+        create 
     } -body {
         jr coop slope 1    0 N2 KURD BLUE 100.0
         jr coop slope 1  360 N2 KURD BLUE   0.0
@@ -7733,7 +7337,7 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
     # coop_slope-7.*: Scheduling returns input
 
     test coop_slope-7.1 {Return input, case 1: one nbhood, 0 limit} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop slope 1 0 N1 SHIA BRIT 0]
         set b [jr coop slope 1 0 N1 SHIA BLUE 0]
@@ -7745,7 +7349,7 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
     } -result {1 2 {}}
 
     test coop_slope-7.2 {Return input, case 2: one nbhood, terminate} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop slope 1 0 N1 SHIA BRIT 10]
         set b [jr coop slope 1 0 N1 SHIA BLUE 10]
@@ -7777,7 +7381,7 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
     # coop_slope-8.*: Thresholds
     
     test coop_slope-8.1 {Positive, coop0 >= athresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop.nfg N1 SHIA BLUE]
         
@@ -7795,7 +7399,7 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
     } -result {1}
 
     test coop_slope-8.2 {Positive, coop0+delta < athresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop.nfg N1 SHIA BLUE]
         
@@ -7813,7 +7417,7 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
     } -result {50.0 52.5}
     
     test coop_slope-8.3 {Positive, coop0+delta > athresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [format %.1f [jr coop.nfg N1 SHIA BLUE]]
         
@@ -7837,7 +7441,7 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
     } -result {50.0 52.5 52.5}
 
     test coop_slope-8.4 {Negative, coop0 <= dthresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop.nfg N1 SHIA BLUE]
         
@@ -7855,7 +7459,7 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
     } -result {1}
     
     test coop_slope-8.5 {Negative, coop0+delta > dthresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [jr coop.nfg N1 SHIA BLUE]
         
@@ -7873,7 +7477,7 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
     } -result {50.0 47.5}
     
     test coop_slope-8.6 {Negative, coop0+delta < dthresh} -setup {
-        create -trend no
+        create 
     } -body {
         set a [format %.1f [jr coop.nfg N1 SHIA BLUE]]
         
@@ -7900,7 +7504,7 @@ Input DN DF   DG   Cause  E Start Time   End Time     N  F    G     Slope Nomina
     # cancel
 
     test cancel-1.1 {cancel situations by driver} -setup {
-        create -trend no
+        create 
     } -body {
         # Create two pairs of inputs; verify that only one pair
         # gets deleted.
@@ -7944,7 +7548,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
     }
 
     test cancel-2.1 {cancel deletes gram_contribs} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat  level 1 0 N1 SHIA SFT  10 1 
         jr sat  slope 1 0 N1 SHIA SFT  10
@@ -7960,7 +7564,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
     } -result {}
 
     test cancel-3.1 {cancel removes satisfaction contributions} -setup {
-        create -trend no
+        create 
     } -body {
         # FIRST, set satisfaction to 0.0, for easy scaling and detection.
         rdb eval {
@@ -8027,6 +7631,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
     } -body {
         # FIRST, advance time by several steps.  The satisfaction trend
         # will update the values.
+        jr sat slope 0 0 N1 SHIA AUT 20
         myclock advance 1440
         jr advance
 
@@ -8056,7 +7661,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
         list $a $b
     } -cleanup {
         cleanup
-    } -result {24 0}
+    } -result {3 0}
 
     test cancel-5.1 {cancel leaves driver in place} -setup {
         create
@@ -8126,7 +7731,7 @@ Input DN DF   DG   Cause E Start Time   End Time N  F    G     Slope Nominal Act
     # 2.*: Basic Operations
 
     test terminate-2.1 {terminates sat slopes} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat slope 1 0  N1 SHIA QOL 10 -p 1.0 -q 1.0
         jr terminate 1 60
@@ -8179,7 +7784,7 @@ Input DN DF   DG   Cause E Start Time   End Time     N  F    G     Slope Nominal
     }
 
     test terminate-2.3 {terminates only for the given driver} -setup {
-        create -trend no
+        create 
     } -body {
         jr sat slope 1 0  N1 SHIA QOL 10
         jr sat slope 2 0  N1 SUNN SFT 10
@@ -8666,10 +8271,7 @@ I 0  7200 N1 SUNN QOL -3.00
     test bug_1830-1.1 {Slopes don't create 0.0 contributions} -setup {
         create
     } -body {
-        # FIRST, get rid of the trend
-        jr cancel 0
-
-        # NEXT, create a slope effect at time 5, and advance to time 5.
+        # FIRST, create a slope effect at time 5, and advance to time 5.
         jr sat slope 1 5 N1 SHIA AUT 10
 
         myclock advance 5

@@ -561,8 +561,6 @@ CREATE TABLE gram_ngc (
 
     saliency   DOUBLE,  -- Saliency, 0.0 to 1.0, of c to g in n.
 
-    trend      DOUBLE,  -- Long-term trend, points/day.
-
     -- Indicate that the n,g,c coordinates are unique,
     -- and index on them for fast lookups
     UNIQUE (n, g, c)
@@ -591,7 +589,6 @@ SELECT -- This instance
        c,
        gtype,
        saliency,
-       trend    AS trend,
 
        -- Effects Curve index and values
        curve_id, 
@@ -602,15 +599,11 @@ SELECT -- This instance
 FROM gram_ngc 
 JOIN gram_curves USING (curve_id);
 
--- gram_sat Triggers: These allow trend, sat0, and sat to be
+-- gram_sat Triggers: These allow sat0, and sat to be
 -- set by updates to gram_sat.
 CREATE TRIGGER gram_sat_trigger 
-INSTEAD OF UPDATE OF trend, sat0, sat ON gram_sat
+INSTEAD OF UPDATE OF sat0, sat ON gram_sat
 BEGIN
-    UPDATE gram_ngc
-    SET trend = new.trend
-    WHERE curve_id = old.curve_id;
-
     UPDATE gram_curves
     SET val0  = new.sat0,
         val   = new.sat
