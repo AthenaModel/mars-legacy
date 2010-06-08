@@ -4428,6 +4428,8 @@ snit::type ::simlib::gram {
                    c,
                    format('%5.3f',days),
                    format('%5.1f',llimit),
+                   format('%5.1f',athresh),
+                   format('%5.1f',dthresh),
                    format('%6.2f',nominal),
                    format('%6.2f',actual)
             FROM gram_sat_effects
@@ -4441,7 +4443,7 @@ snit::type ::simlib::gram {
             "Input" "DN" "DG" "Cause" "E" 
             "Start Time" "End Time" 
             "Nbhd" "Grp" "Con" 
-            "Days" "Limit" "Nominal" "Actual"
+            "Days" "Limit" "AThresh" "DThresh" "Nominal" "Actual"
         } -headercols 4]
     }
 
@@ -4563,6 +4565,8 @@ snit::type ::simlib::gram {
                    g,
                    format('%5.3f',days),
                    format('%5.1f',llimit),
+                   format('%5.1f',athresh),
+                   format('%5.1f',dthresh),
                    format('%6.2f',nominal),
                    format('%6.2f',actual)
             FROM gram_coop_effects
@@ -4576,7 +4580,7 @@ snit::type ::simlib::gram {
             "Input" "DN" "DF" "DG" "Cause" "E" 
             "Start Time" "End Time" 
             "N" "F" "G" 
-            "Days" "Limit" "Nominal" "Actual"
+            "Days" "Limit" "AThresh" "DThresh" "Nominal" "Actual"
         } -headercols 5]
     }
 
@@ -4604,6 +4608,8 @@ snit::type ::simlib::gram {
                    tozulu(ts),
                    tozulu(te),
                    format('%5.1f',llimit),
+                   format('%5.1f',athresh),
+                   format('%5.1f',dthresh),
                    format('%6.2f',nominal),
                    format('%7.3f',ncontrib),
                    format('%6.2f',actual),
@@ -4618,7 +4624,7 @@ snit::type ::simlib::gram {
             ORDER BY cause ASC, ts ASC, llimit DESC
         " -labels {
             "Cause" "Start Time" "End Time" 
-            "Limit" "NTotal" "NContrib" "ATotal" "AContrib" 
+            "Limit" "AThr" "DThr" "NTotal" "NContrib" "ATotal" "AContrib" 
             "Input" "DN" "DG" "E"
         } -headercols 3]
     }
@@ -4647,6 +4653,8 @@ snit::type ::simlib::gram {
                    tozulu(ts),
                    tozulu(te),
                    format('%5.1f',llimit),
+                   format('%5.1f',athresh),
+                   format('%5.1f',dthresh),
                    format('%6.2f',nominal),
                    format('%7.3f',ncontrib),
                    format('%6.2f',actual),
@@ -4662,7 +4670,7 @@ snit::type ::simlib::gram {
             ORDER BY cause ASC, ts ASC, llimit DESC
         " -labels {
             "Cause" "Start Time" "End Time" 
-            "Limit" "NTotal" "NContrib" "ATotal" "AContrib" 
+            "Limit" "AThr" "DThr" "NTotal" "NContrib" "ATotal" "AContrib" 
             "Input" "DN" "DF" "DG" "E"
         } -headercols 3]
     }
@@ -4699,6 +4707,8 @@ snit::type ::simlib::gram {
                 g,
                 c,
                 slope,
+                athresh,
+                dthresh,
                 nominal,
                 actual
             );
@@ -4718,6 +4728,8 @@ snit::type ::simlib::gram {
                    g,
                    c,
                    slope,
+                   athresh,
+                   dthresh,
                    nominal,
                    actual
             FROM gram_sat_effects
@@ -4754,6 +4766,8 @@ snit::type ::simlib::gram {
                         g,
                         c,
                         slope,
+                        athresh,
+                        dthresh,
                         nominal,
                         actual
                     )
@@ -4770,6 +4784,8 @@ snit::type ::simlib::gram {
                         $row(g),
                         $row(c),
                         $slope,
+                        $row(athresh),
+                        $row(dthresh),
                         $row(nominal),
                         $row(actual)
                     );
@@ -4789,13 +4805,15 @@ snit::type ::simlib::gram {
                    g,
                    c,
                    format('%5.1f',slope),
+                   format('%5.1f',athresh),
+                   format('%5.1f',dthresh),
                    format('%5.1f',nominal),
                    format('%5.1f',actual)
             FROM temp_gram_slope_query
         " -labels {
             "Input" "DN" "DG" "Cause" "E" 
             "Start Time" "End Time" "Nbhd" "Grp" "Con"  
-            "Slope" "Nominal" "Actual"
+            "Slope" "AThresh" "DThresh" "Nominal" "Actual"
         } -headercols 4]
 
         return $out
@@ -4830,6 +4848,8 @@ snit::type ::simlib::gram {
                 n,
                 g,
                 slope,
+                athresh,
+                dthresh,
                 nominal,
                 actual
             );
@@ -4849,6 +4869,8 @@ snit::type ::simlib::gram {
                    n,
                    g,
                    slope,
+                   athresh,
+                   dthresh,
                    nominal,
                    actual
             FROM gram_coop_effects
@@ -4884,6 +4906,8 @@ snit::type ::simlib::gram {
                         n,
                         g,
                         slope,
+                        athresh,
+                        dthresh,
                         nominal,
                         actual
                     )
@@ -4900,6 +4924,8 @@ snit::type ::simlib::gram {
                         $row(n),
                         $row(g),
                         $slope,
+                        $row(athresh),
+                        $row(dthresh),
                         $row(nominal),
                         $row(actual)
                     );
@@ -4921,13 +4947,15 @@ snit::type ::simlib::gram {
                    df,
                    g,
                    format('%5.1f',slope),
+                   format('%5.1f',athresh),
+                   format('%5.1f',dthresh),
                    format('%5.1f',nominal),
                    format('%5.1f',actual)
             FROM temp_gram_slope_query
         " -labels {
             "Input" "DN" "DF" "DG" "Cause" "E" 
             "Start Time" "End Time" "N" "F" "G"  
-            "Slope" "Nominal" "Actual"
+            "Slope" "AThresh" "DThresh" "Nominal" "Actual"
         } -headercols 5]
 
         return $out
@@ -4958,6 +4986,8 @@ snit::type ::simlib::gram {
                    tozulu(ts),
                    CASE WHEN te=$maxEndTime THEN 'n/a' ELSE tozulu(te) END,
                    format('%5.1f',slope),
+                   format('%5.1f',athresh),
+                   format('%5.1f',dthresh),
                    format('%6.2f',nominal),
                    format('%7.3f',ncontrib),
                    format('%6.2f',actual),
@@ -4972,7 +5002,7 @@ snit::type ::simlib::gram {
             ORDER BY cause ASC, ts ASC, slope DESC
         " -labels {
             "Cause" "Start Time" "End Time" 
-            "Slope" "NTotal" "NContrib"
+            "Slope" "AThr" "DThr" "NTotal" "NContrib"
             "ATotal" "AContrib" 
             "Input" "DN" "DG" "E"
         } -headercols 3]
@@ -5002,6 +5032,8 @@ snit::type ::simlib::gram {
                    tozulu(ts),
                    CASE WHEN te=$maxEndTime THEN 'n/a' ELSE tozulu(te) END,
                    format('%5.1f',slope),
+                   format('%5.1f',athresh),
+                   format('%5.1f',dthresh),
                    format('%6.2f',nominal),
                    format('%7.3f',ncontrib),
                    format('%6.2f',actual),
@@ -5017,7 +5049,7 @@ snit::type ::simlib::gram {
             ORDER BY cause ASC, ts ASC, slope DESC
         " -labels {
             "Cause" "Start Time" "End Time" 
-            "Slope" "NTotal" "NContrib"
+            "Slope" "AThr" "DThr" "NTotal" "NContrib"
             "ATotal" "AContrib" 
             "Input" "DN" "DF" "DG" "E"
         } -headercols 3]
