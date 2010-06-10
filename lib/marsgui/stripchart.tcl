@@ -799,18 +799,21 @@ snit::widgetadaptor ::marsgui::stripchart {
     # - xppu
 
     method ComputeXMinMax {} {
-        # FIRST, if there are no series, just use defaults.
-        if {[llength $series(names)] == 0} {
-            set layout(xmin) 0.0
-            set layout(xmax) 10.0
-        } else {
+        # FIRST, Set defaults.
+        set layout(xmin) 0.0
+        set layout(xmax) 10.0
+
+        # NEXT, if there are series, see if we can do better.
+        if {[llength $series(names)] >= 0} {
             # FIRST, apply the -xmin, -xmax
             if {$options(-xmin) ne ""} {
                 set xmin $options(-xmin)
             } else {
                 set xmin +Inf
                 foreach name $series(names) {
-                    let xmin {min($xmin, $series(xmin-$name))}
+                    if {$series(xmin-$name) ne ""} {
+                        let xmin {min($xmin, $series(xmin-$name))}
+                    }
                 }
             }
 
@@ -820,7 +823,9 @@ snit::widgetadaptor ::marsgui::stripchart {
                 set xmax -Inf
                 
                 foreach name $series(names) {
-                    let xmax {max($xmax, $series(xmax-$name))}
+                    if {$series(xmax-$name) ne ""} {
+                        let xmax {max($xmax, $series(xmax-$name))}
+                    }
                 }
             }
 
@@ -828,13 +833,26 @@ snit::widgetadaptor ::marsgui::stripchart {
             # bounds.
             
             foreach name $series(names) {
-                let xmin {min($xmin, $series(xmin-$name))}
-                let xmax {max($xmax, $series(xmax-$name))}
+                if {[llength $series(data-$name)] > 0} {
+                    let xmin {min($xmin, $series(xmin-$name))}
+                    let xmax {max($xmax, $series(xmax-$name))}
+                }
             }
 
             # NEXT, save the computed extremes.
-            set layout(xmin) $xmin
-            set layout(xmax) $xmax
+            if {$xmin ne "+Inf"} {
+                set layout(xmin) $xmin
+            }
+
+            if {$xmax ne "-Inf"} {
+                set layout(xmax) $xmax
+            }
+        }
+
+        # If there is only one point plotted, xmin will equal xmax.
+        # We need some distance between them.
+        if {$layout(xmin) == $layout(xmax)} {
+            let layout(xmax) {$layout(xmin) + 1.0}
         }
 
         # NEXT, Compute pixels Per Unit
@@ -963,6 +981,11 @@ snit::widgetadaptor ::marsgui::stripchart {
 
             foreach {x y} $series(data-$name) {
                 lappend coords [$self x2px $x] [$self y2py $y]
+            }
+
+            # NEXT, if there's only one point, double it to make a valid line.
+            if {[llength $coords] == 2} {
+                set coords [concat $coords $coords]
             }
 
             # NEXT, plot the line
@@ -1403,6 +1426,8 @@ snit::widgetadaptor ::marsgui::stripchart {
             set series(rmax-$name) {}
             set series(dmin-$name) {}
             set series(dmax-$name) {}
+            set series(xmin-$name) {}
+            set series(xmax-$name) {}
         }
 
         # NEXT, apply the options.
