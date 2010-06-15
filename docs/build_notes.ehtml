@@ -10,6 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.28, 15 June 2010</h3>
+
+This build primarily contains changes to GRAM, along with some minor
+cosmetic changes to the appearance of combobox widgets.<p>
+
+<ul>
+  <li> Bug 2507: marsgui(n) ttk::combobox colors
+  <li> Bug 2510: gram(n): Long-term-trend is deleted.
+  <li> Bug 2512: gram(n): dump commands should show thresholds 
+</ul><p>
+
 <h3>Build 1.27, 28 May 2010</h3>
 This build contains some updates mainly to the <<xref cellmodel(n)>> package.
 There is a bug fix for the <<xref sqlbrowser(n)>> and a few other odds and ends.
