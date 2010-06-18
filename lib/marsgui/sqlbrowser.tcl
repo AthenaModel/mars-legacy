@@ -193,6 +193,28 @@ snit::widget ::marsgui::sqlbrowser {
         $self reload
     }
     
+    # -where condition
+    #
+    # An sql condition.  Reloads the content on change.
+    
+    option -where \
+        -configuremethod ConfigureWhere
+    
+    method ConfigureWhere {opt val} {
+        # FIRST, if it didn't change, ignore it.
+        set val [string trim $val]
+
+        if {$val eq $options($opt)} {
+            return
+        }
+        
+        # NEXT, save the change
+        set options($opt) $val
+
+        # NEXT, schedule a reload.
+        $self reload
+    }
+    
     
     # -views viewdict
     #
@@ -582,10 +604,14 @@ snit::widget ::marsgui::sqlbrowser {
         
         # NEXT, request and insert all rows from the current view
         set rindex -1
+
+        set query "SELECT * FROM $options(-view)"
+
+        if {[llength $options(-where)] > 0} {
+            append query "\nWHERE $options(-where)"
+        }
         
-        $db eval "
-            SELECT * FROM $options(-view)
-        " row {
+        $db eval $query row {
             incr rindex
             
             # FIRST, insert the data

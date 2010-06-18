@@ -194,6 +194,11 @@ the "View" pulldown will update itself to match.<p>
 Note that all of the views should provide the same columns, or, at least,
 all of the columns called out in the <b>-layout</b>.<p>
 
+<<defopt {-where <i>expression</i>}>>
+
+Specifies an SQL expression to use in a WHERE clause to filter the
+rows being displayed, or the empty string.<p>
+
 <</deflist sqlbrowser options>>
 
 <</deflist commands>>
