@@ -24,6 +24,8 @@ namespace eval ::marsutil:: {
         callwith        \
         commafmt        \
         count           \
+        dicteq          \
+        dictglob        \
         discrete        \
         distance        \
         fstringmap      \
@@ -287,6 +289,57 @@ proc ::marsutil::lmerge {listvar list} {
     set dest [array names items]
 
     return $dest
+}
+
+#-----------------------------------------------------------------------
+# Dict Functions
+
+# dicteq dict key value ?key value...?
+#
+# dict     A dictionary
+# key      A key
+# value    A value to match
+#
+# Returns one if the dictionary has the specified keys and values.
+# Matching is by "eq".  If a key isn't in the dictionary,
+# the match fails.
+
+proc ::marsutil::dicteq {dict args} {
+    foreach {key value} $args {
+        if {![dict exists $dict $key]} {
+            return 0
+        }
+
+        if {[dict get $dict $key] ne $value} {
+            return 0
+        } 
+    }
+
+    return 1
+}
+
+# dictglob dict key pattern ?key pattern...?
+#
+# dict     A dictionary
+# key      A key
+# pattern  A pattern to match
+#
+# Returns one if the dictionary has the specified keys and values.
+# Matching is by [string match].  If a key isn't in the dictionary,
+# the match fails.
+
+proc ::marsutil::dictglob {dict args} {
+    foreach {key pattern} $args {
+        if {![dict exists $dict $key]} {
+            return 0
+        }
+
+        if {![string match $pattern [dict get $dict $key]]} {
+            return 0
+        } 
+    }
+
+    return 1
 }
 
 

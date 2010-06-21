@@ -94,6 +94,9 @@ snit::type ::marsutil::sqldocument {
     typemethod {sqlsection functions} {} {
         set functions [list]
 
+        lappend functions dicteq    [list ::marsutil::dicteq]
+        lappend functions dictget   [list ::marsutil::sqldocument::dictget]
+        lappend functions dictglob  [list ::marsutil::dictglob]
         lappend functions error     [list ::error]
         lappend functions format    [list ::format]
         lappend functions joinlist  [list ::join]
@@ -595,6 +598,18 @@ snit::type ::marsutil::sqldocument {
 
     #-------------------------------------------------------------------
     # Utility Procs
+
+    # dictget dict key
+    #
+    # Returns a value from a dictionary, or "" if the key isn't found.
+
+    proc dictget {dict key} {
+        if {[dict exists $dict $key]} {
+            return [dict get $dict $key]
+        } else {
+            return ""
+        }
+    }
 
     # NullDatabase args
     #
