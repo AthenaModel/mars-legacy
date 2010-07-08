@@ -296,6 +296,17 @@ returns 0.  For example, <p>
     }
 </pre>
 
+To do an "else" case, use "true" as the condition:<p>
+
+<pre>
+    let sign = {
+        case([A] <  0, -1,
+             [A] == 0,  0,
+             true,      1)
+    }
+</pre>
+
+
 <<defitem epsilon {epsilon()}>>
 
 The epsilon() function returns the epsilon value used to control
@@ -303,6 +314,18 @@ convergence (the <<xref cellmodel(n)>> object's <b>-epsilon</b>
 option).  It is usually specified as a negative power of 10, i.e.,
 .0001; the number of zeroes is then the number of significant digits
 in the converged outputs.<p>
+
+<<defitem fif {fif(<i>condition, value1,</i> ?<i>value2</i>?)}>>
+
+The fif() function evaluates the <i>condition</i>; if it is true, it
+returns <i>value1</i> and if not, <i>value2</i>.  If <i>value2</i> is
+omitted, it defaults to 0.0.  For example, <p>
+
+<pre>
+    let sign = {
+        fif([A] >=  0, 1, -1)
+    }
+</pre>
 
 <<defitem format {format(<i>fmt,value,...</i>)}>>
 

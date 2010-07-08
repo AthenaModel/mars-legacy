@@ -1032,6 +1032,7 @@ snit::type ::marsutil::cellmodel {
         $interp alias ::tcl::mathfunc::min  ::tcl::mathfunc::min
         $interp alias ::tcl::mathfunc::max  ::tcl::mathfunc::max
         $interp alias ::tcl::mathfunc::case ::marsutil::cellmodel::CaseFunc
+        $interp alias ::tcl::mathfunc::fif  ::marsutil::cellmodel::IfFunc
 
         # NEXT, add additional functions
         $interp alias ::tcl::mathfunc::epsilon $self Epsilon
@@ -1059,6 +1060,19 @@ snit::type ::marsutil::cellmodel {
         }
         
         return 0.0
+    }
+
+    # Proc: IfFunc
+    #
+    # Defines a function fif(condition,value1,?value2?)
+    # that returns value1 if condition is true, and value2 otherwise.
+
+    proc IfFunc {condition value1 {value2 0.0}} {
+        if {$condition} {
+            return [expr {double($value1)}]
+        } else {
+            return [expr {double($value2)}]
+        }
     }
 
     # Method: Epsilon

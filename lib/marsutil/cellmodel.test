@@ -1313,6 +1313,66 @@ X.c.c =            1
         CleanUp
     } -result {0.0}
 
+    test case-1.4 {Can use "true" as an else condition.} -setup {
+        Setup
+
+        cm load {
+            let A = 5
+            let B = {case([A] < 0, 1, true, -1)}
+        }
+    } -body {
+        cm solve
+        cm value B
+    } -cleanup {
+        CleanUp
+    } -result {-1.0}
+
+    #-------------------------------------------------------------------
+    # fif
+
+    test fif-1.1 {returns first value.} -setup {
+        Setup
+
+        cm load {
+            let A = 5
+            let B = {fif([A] > 0, 1, -1)}
+        }
+    } -body {
+        cm solve
+        cm value B
+    } -cleanup {
+        CleanUp
+    } -result {1.0}
+
+    test fif-1.2 {returns second value.} -setup {
+        Setup
+
+        cm load {
+            let A = -5
+            let B = {fif([A] > 0, 1, -1)}
+        }
+    } -body {
+        cm solve
+        cm value B
+    } -cleanup {
+        CleanUp
+    } -result {-1.0}
+    
+
+    test fif-1.3 {second value omitted; returns 0} -setup {
+        Setup
+
+        cm load {
+            let A = -5
+            let B = {fif([A] > 0, 1)}
+        }
+    } -body {
+        cm solve
+        cm value B
+    } -cleanup {
+        CleanUp
+    } -result {0.0}
+
     #-------------------------------------------------------------------
     # epsilon
 
