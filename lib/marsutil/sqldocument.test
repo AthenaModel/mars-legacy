@@ -150,7 +150,7 @@ namespace eval ::marsutil::test {
 
     test sqlsection_functions-1.1 {Standard functions are defined} -body {
         sqldocument sqlsection functions
-    } -result {error ::error format ::format joinlist ::join nonempty ::marsutil::sqldocument::NonEmpty percent ::marsutil::percent wallclock {::clock seconds}}
+    } -result {dicteq ::marsutil::dicteq dictget ::marsutil::sqldocument::dictget dictglob ::marsutil::dictglob error ::error format ::format joinlist ::join nonempty ::marsutil::sqldocument::NonEmpty percent ::marsutil::percent wallclock {::clock seconds}}
 
     #-------------------------------------------------------------------
     # Constructor

@@ -10,6 +10,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.29, 13 July 2010</h3>
+
+This build contains minor enhancements to Mars packages.<p>
+
+<ul>
+  <li> Bug 2491: Update Mars to ATEE 2010Q2
+  <li> Bug 2508: bgerror: can't read "series(xmin-sat.ANG.BIG.AUT)": no such element in array
+  <li> Bug 2522: sqlbrowser(n): -where option
+  <li> Bug 2524: sqldocument(n): dictget(), dicteq(), dictglob()
+  <li> Bug 2532: libMarsutil: compilation warnings
+  <li> Bug 2533: cellmodel(5): Add fif() function. 
+</ul>
+
 <h3>Build 1.28, 15 June 2010</h3>
 
 This build primarily contains changes to GRAM, along with some minor
