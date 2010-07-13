@@ -146,6 +146,15 @@ snit::type ::marsutil::sqldocument {
         -readonly yes
 
 
+    # -commitcmd
+    #
+    # Specifies an optional callback command to be executed after the
+    # database has been committed but before a new transaction is 
+    # started.
+    
+    option -commitcmd \
+        -default "" 
+
     #-------------------------------------------------------------------
     # Instance variables
 
@@ -484,6 +493,13 @@ snit::type ::marsutil::sqldocument {
             try {
                 $db eval {
                     COMMIT TRANSACTION;
+                }
+
+                # If there is a commit command to be executed, do it.
+                if {$options(-commitcmd) ne ""} {
+                    if {[catch {uplevel \#0 $options(-commitcmd)} result]} {
+                        bgerror "-commitcmd: $result"
+                    }
                 }
             } finally {
                 $db eval {

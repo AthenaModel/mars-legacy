@@ -178,6 +178,14 @@ transactions as it chooses, and <<iref commit>> has no effect.<p>
 If <b>on</b>, transactions can be rolled back instead of committed.
 If <b>off</b>, the default, they cannot.<p>
 
+<<defopt {-commitcmd <i>command</i>}>>
+
+If specified, this command is called after the database is committed but 
+before a new transaction is begun. This is most useful when the
+<b>-autotrans</b> option is <b>on</b> since it gives the ability to perform
+some task while the database is not locked due to an open transaction.
+<p>
+
 <</deflist options>>
 
 <<defitem {sqldocument sqlsection} {sqldocument sqlsection <i>subcommand</i>}>>
