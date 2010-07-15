@@ -46,7 +46,12 @@ namespace import ::marsutil::*
 # Load app_cmtool(n) submodules
 
 source [file join $::app_cmtool::library app.tcl]
-
+source [file join $::app_cmtool::library app_check.tcl]
+source [file join $::app_cmtool::library app_dump.tcl]
+source [file join $::app_cmtool::library app_mash.tcl]
+source [file join $::app_cmtool::library app_run.tcl]
+source [file join $::app_cmtool::library app_solve.tcl]
+source [file join $::app_cmtool::library app_xref.tcl]
 
 
 

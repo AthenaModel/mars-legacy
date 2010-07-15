@@ -1418,6 +1418,19 @@ snit::type ::marsutil::cellmodel {
         return 0
     }
 
+    # Method: eval
+    #
+    # Evaluates an arbitrary expression in the cellmodel given the
+    # current cell values, and returns the value.
+    #
+    # Syntax:
+    #   eval _formula_
+    #
+    #   formula - A cellmodel(5) formula.
+
+    method eval {formula} {
+        return [$interp eval [list expr $formula]]
+    }
 
     #-------------------------------------------------------------------
     # Queries
