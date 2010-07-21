@@ -91,13 +91,6 @@ snit::type app_mash {
         
     }
 
-    # Type Variable: values
-    #
-    # Array of the values of the current combination of inputs, by
-    # cell name.
-
-    typevariable values -array {}
-
     #-------------------------------------------------------------------
     # Group: Subcommand Execution
 
@@ -165,6 +158,7 @@ snit::type app_mash {
                     }
 
                     set info(flog) [open $logfile w]
+                    fconfigure $info(flog) -buffering line
 
                     puts "Log File: $logfile"
 
@@ -181,6 +175,7 @@ snit::type app_mash {
                     }
 
                     set info(fcsv) [open $csvfile w]
+                    fconfigure $info(fcsv) -buffering line
 
                     puts "CSV File: $csvfile"
 
@@ -198,6 +193,7 @@ snit::type app_mash {
                     }
 
                     set info(ferr) [open $errfile w]
+                    fconfigure $info(ferr) -buffering line
 
                     puts "Error File: $errfile"
                 }
@@ -259,15 +255,43 @@ snit::type app_mash {
             return
         }
 
-        lassign $info(range-$cell) lower upper step
+        lassign $info(range-$cell) flower fupper fstep
 
+        set lower [$cm eval $flower]
+        set upper [$cm eval $fupper]
+        set step  [$cm eval $fstep]
+
+        if {$lower > $upper} {
+            $type masherr "Stepping $cell, lower = $lower > upper = $upper"
+        }
+
+        if {$step <= 0} {
+            $type masherr "Stepping $cell, step $step <= 0"
+        }
+
+        set i 0
         for {
-            set values($cell) $lower
+            set value $lower
         } {
-            $values($cell) <= $upper 
+            $value <= $upper 
         } {
-            set values($cell) [expr {$values($cell) + $step}]
+            incr i
+            set value [expr {$lower + $i*$step}]
         } {
+            # FIRST, set this value
+            $cm set [list $cell $value]
+
+            # NEXT, compute the "let" cells
+            if {[llength $info(lets)] > 0} {
+                
+                foreach cell $info(lets) {
+                    set letv($cell) [$cm eval $info(let-$cell)]
+                }
+
+                $cm set [array get letv]
+            }
+
+            # NEXT, step the next cell.
             $type StepInput $next
         }
     }
@@ -279,19 +303,6 @@ snit::type app_mash {
     typemethod RunCase {} {
         # FIRST, get the case ID
         set cid [incr info(count)]
-
-        # NEXT, load the case into the cell model, and try to solve it.
-        $cm reset
-        $cm set [array get values]
-
-        if {[llength $info(lets)] > 0} {
-
-            foreach cell $info(lets) {
-                set letv($cell) [$cm eval $info(let-$cell)]
-            }
-
-            $cm set [array get letv]
-        }
 
         set result [$cm solve]
 
@@ -329,7 +340,11 @@ snit::type app_mash {
         }
 
         if {$info(ferr) ne "" && $result ne "ok"} {
-            puts $info(ferr) "$cid [array get values]"
+            foreach cell $info(inputs) {
+                lappend errInputs $cell [$cm value $cell]
+            }
+
+            puts $info(ferr) "$cid $errInputs"
 
             if {[llength $problems] == 0} {
                 puts $info(ferr) "    DIVERGED"
@@ -399,13 +414,9 @@ snit::type app_mash {
 
         # NEXT, validate the range values:
         set prefix "Error in range \"$cell\", " 
-        app validate "$prefix invalid lower bound" snit::double $lower
-        app validate "$prefix invalid upper bound" snit::double $upper
-        app validate "$prefix invalid step" dpositive $step
-
-        if {$lower >= $upper} {
-            $type masherr "$prefix, lower >= upper"
-        }
+        $type ValidateFormula "$prefix invalid lower bound formula" $lower
+        $type ValidateFormula "$prefix invalid upper bound formula" $upper
+        $type ValidateFormula "$prefix invalid upper bound formula" $step
 
         # NEXT, save the range
         lappend info(cells)  $cell
@@ -442,12 +453,7 @@ snit::type app_mash {
         }
 
         # NEXT, validate the formula:
-        if {[catch {
-            $cm eval $formula
-        } result]} {
-            $type masherr "cannot evaluate formula \"$formula\""
-        }
-
+        $type ValidateFormula "let $cell" $formula
 
         # NEXT, save the range
         lappend info(cells)  $cell
@@ -455,6 +461,23 @@ snit::type app_mash {
         
         set info(let-$cell) $formula
     }
+
+    # Type Method: ValidateFormula
+    #
+    # Verifies that a formula can be evaluated without error.
+    # Calls <masherr> if an error is detected.
+    #
+    # Syntax:
+    #   ValidateFormula _prefix formula_
+
+    typemethod ValidateFormula {name formula} {
+        if {[catch {
+            $cm eval $formula
+        } result]} {
+            $type masherr "$prefix, cannot evaluate formula \"$formula\""
+        }
+    }
+    
 
     # Type Method: Load_log
     #

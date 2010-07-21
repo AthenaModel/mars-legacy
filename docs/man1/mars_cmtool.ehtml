@@ -252,6 +252,18 @@ difference between <i>upper</i> and <i>lower</i> is a multiple of
 If the mash file contains multiple <<iref range>> commands, the model
 will be run for all combinations.<p>
 
+Note that <i>lower</i>, <i>upper</i>, and <i>step</i> can be either
+numbers or formulas; the formulas will be evaluated in the context of
+the cell model, given the values of the other cells.  For example,<p>
+
+<pre>
+    range A 1 100 1
+    range B 1 {[A]} 1
+</pre>
+
+For each value of A from 1 to 100, B will range from 1 to the current
+value of A.<p>
+
 <<defitem let {let <i>cell</i> = <i>formula</i>}>>
 
 Assigns an input <i>cell</i> the value indicated by the
