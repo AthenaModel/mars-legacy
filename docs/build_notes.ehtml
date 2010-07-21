@@ -10,6 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.30, 21 July 2010</h3>
+This build contains a minor enhancement to sqldocument(n) and a new subcommand
+to the mars CM tool called "mash" (aka "monster mash") which is used to
+solve a cellmodel(5) model for all combination of values. The list of packages
+is:<p>
+<ul> 
+  <li> Bug 2542: mars_cmtool(1): "mash" subcommand
+  <li> Bug 2544: mars_cmtool(1): "mash", range bounds should be expressions
+  <li> Bug 2537: Implement Real Time Viewing
+</ul>
+
 <h3>Build 1.29, 13 July 2010</h3>
 
 This build contains minor enhancements to Mars packages.<p>
