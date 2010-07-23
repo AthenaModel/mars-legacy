@@ -246,6 +246,19 @@ the named <i>index</i>.  For example,<p>
     }
 </pre>
 
+The <i>index</i> can also be specified as a pair {<i>ivar index</i>};
+in this case, the variable name need not be the same as the index
+name.  For example,<p>
+
+<pre>
+    index letters {a b c}
+
+    forall {i letters} {
+        let X.$i = {[Y.$i] + [Z.$i]}
+    }
+</pre>
+
+
 <<defitem define {define <i>name arglist</i> ?<i>initbody</i>? <i>template</i>}>>
 
 The <<iref define>> command defines a macro that may be used in
@@ -398,10 +411,20 @@ following cell definitions are equivalent:<p>
     index i {1 2 3 4 5}
 
     let Sum = {([A.1] + [A.2] + [A.3] + [A.4] + [A.5])}
-    let Sum = [sum i {[A.$i]}]
+    let Sum = {<:sum i {[A.$i]}:>}
 </pre>
 
 Note the summation formula is parenthesized automatically.<p>
+
+The <i>index</i> can also be specified as a pair {<i>ivar index</i>};
+in this case, the variable name need not be the same as the index
+name.  For example,<p>
+
+<pre>
+    index numbers {1 2 3 4 5}
+
+    let Sum = {<:sum {i numbers} {[A.$i]}:>}
+</pre>
 
 <<defitem prod {prod <i>index formula</i>}>>
 
@@ -414,10 +437,20 @@ following cell definitions are equivalent:<p>
     index i {1 2 3 4 5}
 
     let Product = {([A.1])*([A.2])*([A.3])*([A.4])*([A.5])}
-    let Product = [prod i {[A.$i]}]
+    let Product = {<:prod i {[A.$i]}:>}
 </pre>
 
 Note that the factors are parenthesized automatically.<p>
+
+The <i>index</i> can also be specified as a pair {<i>ivar index</i>};
+in this case, the variable name need not be the same as the index
+name.  For example,<p>
+
+<pre>
+    index numbers {1 2 3 4 5}
+
+    let Product = {<:prod {i numbers} {[A.$i]}:>}
+</pre>
 
 <</deflist macros>>
 

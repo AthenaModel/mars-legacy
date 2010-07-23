@@ -161,21 +161,27 @@ snit::type ::marsutil::cellmodel {
 
         # forall index script
         #
-        # index     An index name
+        # index     An index name or {ivar iname} pair
         # script    A script of cellmodel(5) commands.
         #
         # Evaluates the script for all values of the index.
 
         proc forall {index script} {
             global indices
-            upvar 1 $index i
+            lassign $index ivar iname
 
-            if {![info exists indices($index)]} {
+            if {$iname eq ""} {
+                set iname $ivar
+            }
+
+            upvar $ivar i
+
+            if {![info exists indices($iname)]} {
                 return -code error -errorcode invalid \
                     "Invalid index: \"$index\""
             }
 
-            foreach i $indices($index) {
+            foreach i $indices($iname) {
                 uplevel 1 $script
             }
 
@@ -185,7 +191,7 @@ snit::type ::marsutil::cellmodel {
 
         # sum index formula
         #
-        # index      The index name, e.g., "i"
+        # index      The index name, e.g., "i", or a list {ivar iname}
         # formula    The formula to sum up, in terms of $index, e.g.,
         #            A.$i
         #
@@ -194,14 +200,20 @@ snit::type ::marsutil::cellmodel {
 
         proc sum {index formula} {
             global indices
-            upvar $index i
+            lassign $index ivar iname
 
-            if {![info exists indices($index)]} {
-                return -code error -errorcode invalid \
-                    "Invalid index: \"$index\""
+            if {$iname eq ""} {
+                set iname $ivar
             }
 
-            foreach i $indices($index) {
+            upvar $ivar i
+
+            if {![info exists indices($iname)]} {
+                return -code error -errorcode invalid \
+                    "Invalid index: \"$iname\""
+            }
+
+            foreach i $indices($iname) {
                 lappend terms [uplevel 1 [list subst $formula]]
             }
 
@@ -219,14 +231,20 @@ snit::type ::marsutil::cellmodel {
 
         proc prod {index formula} {
             global indices
-            upvar $index i
+            lassign $index ivar iname
 
-            if {![info exists indices($index)]} {
-                return -code error -errorcode invalid \
-                    "Invalid index: \"$index\""
+            if {$iname eq ""} {
+                set iname $ivar
             }
 
-            foreach i $indices($index) {
+            upvar $ivar i
+
+            if {![info exists indices($iname)]} {
+                return -code error -errorcode invalid \
+                    "Invalid index: \"$iname\""
+            }
+
+            foreach i $indices($iname) {
                 lappend terms "([uplevel 1 [list subst $formula]])"
             }
 

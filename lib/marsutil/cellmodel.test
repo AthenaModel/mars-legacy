@@ -1244,6 +1244,35 @@ X.c.b =            1
 X.c.c =            1
     }
  
+    test forall-1.2 {index names and vars can differ} -setup {
+        Setup
+    } -body {
+        cm load {
+            index iset {a b c}
+            index jset {a b c}
+            
+            forall {i iset} {
+                forall {j jset} {
+                    let X.$i.$j = 1.0
+                }
+            }
+        }
+
+        pprint [cm dump]
+    } -cleanup {
+        CleanUp
+    } -result {
+X.a.a =            1
+X.a.b =            1
+X.a.c =            1
+X.b.a =            1
+X.b.b =            1
+X.b.c =            1
+X.c.a =            1
+X.c.b =            1
+X.c.c =            1
+    }
+
     #-------------------------------------------------------------------
     # sum
 
@@ -1262,10 +1291,26 @@ X.c.c =            1
     } -result {[f]*([A.1] + [A.2] + [A.3])}
 
 
+    test sum-1.2 {variable and index name can differ} -setup {
+        Setup
+    } -body {
+        cm load {
+            index i    {1 2 3}
+            index iset {4 5 6}
+
+            let s = {[f]*<:sum {i iset} {[A.$i]}:>}
+        }
+
+        cm formula s
+    } -cleanup {
+        CleanUp
+    } -result {[f]*([A.4] + [A.5] + [A.6])}
+
+
     #-------------------------------------------------------------------
     # prod
 
-    test prod-1.1 {sum defines products of formulas.} -setup {
+    test prod-1.1 {prod defines products of formulas.} -setup {
         Setup
 
         cm load {
@@ -1278,6 +1323,21 @@ X.c.c =            1
     } -cleanup {
         CleanUp
     } -result {[f]*([A.1])*([A.2])*([A.3])}
+
+    test prod-1.2 {prod index var and name can differ.} -setup {
+        Setup
+
+        cm load {
+            index i    {1 2 3}
+            index iset {4 5 6}
+
+            let p = {[f]*<:prod {i iset} {[A.$i]}:>}
+        }
+    } -body {
+        cm formula p
+    } -cleanup {
+        CleanUp
+    } -result {[f]*([A.4])*([A.5])*([A.6])}
 
     #===================================================================
     # Functions
