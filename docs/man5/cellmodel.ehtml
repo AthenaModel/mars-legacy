@@ -112,8 +112,8 @@ order in which they are defined.<p>
 
 <<subsection "Copying Pages">>
 
-It's possible to create a new page as a copy of an existing page by
-using the <b>-copy</b> option on the <<iref page>> command.<p>
+It's possible to copy cell definitions onto a new page from a previous
+page using the <<iref copypage>> command.<p>
 
 <<section COMMANDS>>
 
@@ -181,22 +181,47 @@ explicitly.<p>
 
 <</deflist options>>
 
-<<defitem page {page <i>name</i> ?<i>options...</i>?}>>
+<<defitem page {page <i>name</i>}>>
 
 Creates a new page called <i>name</i>; subsequent cells will be
 defined on this page.  The <i>name</i> must begin with a letter, and
 may contains letters, digits, and underscores.<p>
 
+<<defitem copypage {copypage <i>page</i> ?<i>options...</i>?}>>
+
+Copies cell definitions from the named <i>page</i> to the current
+page.  Formula cells are copied as is; constant cells are copied as
+formulas referring to the constant value on the copied page.  For
+example,<p>
+
+<pre>
+    page A
+
+    let X = 5
+    let Y = {2*[X]}
+
+    page B
+    copypage A
+</pre>
+
+will result in the following cell definitions:<p>
+
+<pre>
+    A::X = 5
+    A::Y = 10 &lt;= 2*[X]
+    B::X = 5  &lt;= [A::X]
+    B::Y = 10 &lt;= 2*[X]
+</pre>
+
+Thus, changing the value of A::Y will change the values of both
+A::Y and B::Y.<p>
+
+Copied cell definitions can be overridden using the <<iref let>>
+command.<p>
+
 The following options are defined:<p>
 
 <<deflist options>>
-
-<<defopt {-copy <i>page</i>}>>
-
-This option initializes the new page by copying all of the cells from
-the named <i>page</i>; the copied cells can then be left alone or
-redefined by the new page.  This allows a new page to be defined with
-slight modifications or extensions to an existing page.<p>
 
 <<defopt {-except <i>cells</i>}>>
 
@@ -206,11 +231,11 @@ option.  The new page will not contain the excluded cells.<p>
 The cell names should not be qualified.  For example,
 
 <pre>
-    page Q -copy P -except {C1 C2 C3}
+    copypage P -except {C1 C2 C3}
 </pre>
 
-will create page Q as a copy of page P, except that the cells P::C1,
-P::C2, and P::C3 will not be copied.<p>
+will copy the definitions from page P, except for the definitions of
+cells P::C1, P::C2, and P::C3.<p>
 
 <</deflist options>>
 

@@ -146,29 +146,44 @@ namespace eval ::test {
         CleanUp
     } -result {duplicate page name: "null"}
 
-    test load-1.4 {-copy null page} -setup {
+    test load-1.4 {copy null page} -setup {
         Setup
     } -body {
         cm load {
-            page a -copy null
+            page a
+            copypage null
         }
     } -returnCodes {
         error
     } -cleanup {
         CleanUp
-    } -result {Can't -copy the null page}
+    } -result {Can't copy the null page}
 
-    test load-1.5 {-copy unknown page} -setup {
+    test load-1.5 {copy unknown page} -setup {
         Setup
     } -body {
         cm load {
-            page a -copy nonesuch
+            page a
+            copypage nonesuch
         }
     } -returnCodes {
         error
     } -cleanup {
         CleanUp
-    } -result {-copy unknown page: "nonesuch"}
+    } -result {copy unknown page: "nonesuch"}
+
+    test load-1.6 {copy self} -setup {
+        Setup
+    } -body {
+        cm load {
+            page a
+            copypage a
+        }
+    } -returnCodes {
+        error
+    } -cleanup {
+        CleanUp
+    } -result {page can't copy itself: "a"}
 
     # load-2.*: "let" errors
 
@@ -235,7 +250,7 @@ namespace eval ::test {
         CleanUp
     } -result {Invalid option: "-nonesuch"}
 
-    test load-2.6 {page -copy once} -setup {
+    test load-2.6 {copy page once} -setup {
         Setup
     } -body {
         cm load {
@@ -243,7 +258,8 @@ namespace eval ::test {
             let A = 5
             let B = 6
 
-            page Q -copy P
+            page Q 
+            copypage P
             let A = 7
         }
 
@@ -254,10 +270,10 @@ namespace eval ::test {
 P::A =            5
 P::B =            6
 Q::A =            7
-Q::B =            6
+Q::B =            6 <= [P::B]
     }
 
-    test load-2.7 {page -copy twice} -setup {
+    test load-2.7 {copy page twice} -setup {
         Setup
     } -body {
         cm load {
@@ -265,10 +281,12 @@ Q::B =            6
             let A = 5
             let B = 6
 
-            page Q -copy P
+            page Q
+            copypage P
             let A = 7
 
-            page R -copy Q
+            page R
+            copypage Q
             let B = 8
         }
 
@@ -279,12 +297,12 @@ Q::B =            6
 P::A =            5
 P::B =            6
 Q::A =            7
-Q::B =            6
-R::A =            7
+Q::B =            6 <= [P::B]
+R::A =            7 <= [Q::A]
 R::B =            8
     }
 
-    test load-2.8 {page -copy -except} -setup {
+    test load-2.8 {copypage -except} -setup {
         Setup
     } -body {
         cm load {
@@ -294,7 +312,8 @@ R::B =            8
             let C = 7
             let D = 8
 
-            page Q -copy P -except {B C}
+            page Q
+            copypage P -except {B C}
             let A = 7
         }
 
@@ -307,7 +326,39 @@ P::B =            6
 P::C =            7
 P::D =            8
 Q::A =            7
+Q::D =            8 <= [P::D]
+    }
+
+    test load-2.9 {copypage two pages} -setup {
+        Setup
+    } -body {
+        cm load {
+            page P
+            let A = 5
+            let B = 6
+
+            page Q
+            let C = 7
+            let D = 8
+
+            page R
+            copypage P
+            copypage Q
+            let A = 7
+        }
+
+        pprint [cm dump]
+    } -cleanup {
+        CleanUp
+    } -result {
+P::A =            5
+P::B =            6
+Q::C =            7
 Q::D =            8
+R::A =            7
+R::B =            6 <= [P::B]
+R::C =            7 <= [Q::C]
+R::D =            8 <= [Q::D]
     }
 
     test load-3.1 {letsym cells} -setup {
@@ -483,7 +534,8 @@ B =         "is" <= [x] == 5 ? "is" : "isn't"
             let A = 5
             page P
             let B = {1 + [A]} -value 6
-            page Q -copy P
+            page Q
+            copypage P
             let B = {2 + [A]} -value 7
             page R
             let diff = {[Q::B] - [P::B]}

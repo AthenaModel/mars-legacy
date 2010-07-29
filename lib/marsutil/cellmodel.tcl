@@ -466,6 +466,7 @@ snit::type ::marsutil::cellmodel {
         $loader alias index    $self Load_index    $loader
         $loader alias function $self Load_function $loader
         $loader alias page     $self Load_page     $loader
+        $loader alias copypage $self Load_copypage $loader
         $loader alias let      $self Load_let      $loader
         $loader alias letsym   $self Load_letsym   $loader
 
@@ -554,28 +555,59 @@ snit::type ::marsutil::cellmodel {
     # letter, and may contain letters, numbers, and underscores.
     #
     # Syntax:
-    #   page _page ?options?_
+    #   page _page_
     #
     #   page - The page name
-    #
-    # The options are as follows:
-    # 
-    #   -copy page    - Copies all currently defined cells on the 
-    #                   named page
-    #   -except cells - Excludes particular cells from being copied.
-    #                   Ignored if -copy is absent.
 
-    method Load_page {loader page args} {
+    method Load_page {loader page} {
         # FIRST, validate the page name.
         $self ValidatePageName $page
 
         # NEXT, make it the current page.
         set trans(page)        $page
         set trans(copiedCells) {}
+        
+        # NEXT, create the page.
+        lappend model(pages) $page
+
+        set model(cyclic-$page)    0
+        set model(cells-$page)     [list]
+        set model(barecells-$page) [list]
+        set model(order-$page)     [list]
+
+        return
+    }
+
+    # Method: Load_copypage
+    #
+    # The implementation of the definition script's "copypage" command.
+    # Copies cell definitions from another page.  Formula cells are
+    # copied "as is" and constant cells are copied as formulas referencing
+    # the copied cell.
+    #
+    # Syntax:
+    #   copypage _page ?options?_
+    #
+    #   page - The name of the page to copy
+    #
+    # The options are as follows:
+    # 
+    #   -except cells - Excludes particular cells from being copied.
+
+    method Load_copypage {loader page args} {
+        # FIRST, validate the page name.
+        validate {$page ne "null"} \
+            "Can't copy the null page"
+
+        validate {$page ne $trans(page)} \
+            "page can't copy itself: \"$page\""
+
+        validate {$page in [$self pages]} \
+            "copy unknown page: \"$page\""
+
 
         # NEXT, get the options
         array set opts {
-            -copy   {}
             -except {}
         }
 
@@ -583,17 +615,6 @@ snit::type ::marsutil::cellmodel {
             set opt [lshift args]
 
             switch -exact -- $opt {
-                -copy { 
-                    set opts(-copy) [lshift args]
-
-                    validate {$opts(-copy) ne "null"} \
-                        "Can't -copy the null page"
-
-                    validate {$opts(-copy) in [$self pages]} \
-                        "-copy unknown page: \"$opts(-copy)\""
-
-                }
-
                 -except {
                     set opts(-except) [lshift args]
                 }
@@ -605,30 +626,26 @@ snit::type ::marsutil::cellmodel {
         }
 
         
-        # NEXT, create the page.
-        lappend model(pages) $page
-
-        set model(cyclic-$page)    0
-        set model(cells-$page)     [list]
-        set model(barecells-$page) [list]
-        set model(order-$page)     [list]
-
-        # NEXT, copy the cells from the copy page, if any.  
+        # NEXT, copy the cells from the copy page.
         # Remember the names, because we can override them.
-        if {$opts(-copy) ne ""} {
-            foreach cell $model(cells-$opts(-copy)) {
-                # Skip excluded cells.
-                if {$model(bare-$cell) in $opts(-except)} {
-                    continue
-                }
+        foreach cell $model(cells-$page) {
+            # Skip excluded cells.
+            if {$model(bare-$cell) in $opts(-except)} {
+                continue
+            }
 
-                # Add the cell just as it was.
+            # Add the cell just as it was.
+            if {$model(ctype-$cell) eq "formula"} {
                 $self AddCell $model(vtype-$cell) $model(bare-$cell)    \
                     -value    $model(ivalue-$cell)  \
                     -formula  $model(formula-$cell)
+            } else {
+                $self AddCell $model(vtype-$cell) $model(bare-$cell)    \
+                    -value    $model(ivalue-$cell)  \
+                    -formula  "\[$cell\]"
             }
 
-            set trans(copiedCells) $model(cells-$page)
+            ladd trans(copiedCells) $model(bare-$cell)
         }
 
         return
@@ -734,8 +751,8 @@ snit::type ::marsutil::cellmodel {
         # The full cell name must be unique, unless it was copied from
         # another page.
 
-        if {$cell in $trans(copiedCells)} {
-            ldelete trans(copiedCells) $cell 
+        if {$barename in $trans(copiedCells)} {
+            ldelete trans(copiedCells) $barename 
         } else {
             validate {$cell ni $model(cells)} \
                 "Duplicate cell name: \"$cell\""
