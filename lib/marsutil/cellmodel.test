@@ -250,7 +250,9 @@ namespace eval ::test {
         CleanUp
     } -result {Invalid option: "-nonesuch"}
 
-    test load-2.6 {copy page once} -setup {
+    # 3.*: copypage errors
+
+    test load-3.1 {copy page once} -setup {
         Setup
     } -body {
         cm load {
@@ -273,7 +275,7 @@ Q::A =            7
 Q::B =            6 <= [P::B]
     }
 
-    test load-2.7 {copy page twice} -setup {
+    test load-3.2 {copy page twice} -setup {
         Setup
     } -body {
         cm load {
@@ -302,7 +304,7 @@ R::A =            7 <= [Q::A]
 R::B =            8
     }
 
-    test load-2.8 {copypage -except} -setup {
+    test load-3.3 {copypage -except} -setup {
         Setup
     } -body {
         cm load {
@@ -329,7 +331,7 @@ Q::A =            7
 Q::D =            8 <= [P::D]
     }
 
-    test load-2.9 {copypage two pages} -setup {
+    test load-3.4 {copypage two pages} -setup {
         Setup
     } -body {
         cm load {
@@ -361,7 +363,104 @@ R::C =            7 <= [Q::C]
 R::D =            8 <= [Q::D]
     }
 
-    test load-3.1 {letsym cells} -setup {
+    # 4.* initfrom
+    test initfrom-4.1 {initfrom null page} -setup {
+        Setup
+    } -body {
+        cm load {
+            page P
+            initfrom null
+        }
+    } -returnCodes {
+        error
+    } -cleanup {
+        CleanUp
+    } -result {Can't init from the null page}
+
+    test initfrom-4.2 {initfrom own page} -setup {
+        Setup
+    } -body {
+        cm load {
+            page P
+            initfrom P
+        }
+    } -returnCodes {
+        error
+    } -cleanup {
+        CleanUp
+    } -result {Can't init from the page itself: "P"}
+
+    test initfrom-4.3 {initfrom unknown page} -setup {
+        Setup
+    } -body {
+        cm load {
+            page P
+            initfrom Q
+        }
+    } -returnCodes {
+        error
+    } -cleanup {
+        CleanUp
+    } -result {Can't init from unknown page: "Q"}
+
+    test initfrom-4.4 {initfrom known page} -setup {
+        Setup
+    } -body {
+        cm load {
+            page P
+            let A = 1
+            let B = 2
+
+            page Q
+            let A = 0
+            let B = 0
+
+            initfrom P
+        }
+
+        cm solve 
+        pprint [cm dump]
+    } -cleanup {
+        CleanUp
+    } -result {
+P::A =            1
+P::B =            2
+Q::A =            1
+Q::B =            2
+    }
+
+    test initfrom-4.5 {initfrom known pages} -setup {
+        Setup
+    } -body {
+        cm load {
+            page P
+            let A = 1
+            let B = 2
+
+            page Q
+            let B = 3
+
+            page R
+            let A = 0
+            let B = 0
+
+            initfrom P Q
+        }
+
+        cm solve 
+        pprint [cm dump]
+    } -cleanup {
+        CleanUp
+    } -result {
+P::A =            1
+P::B =            2
+Q::B =            3
+R::A =            1
+R::B =            3
+    }
+
+    # 5.* letsym
+    test load-5.1 {letsym cells} -setup {
         Setup
     } -body {
         cm load {

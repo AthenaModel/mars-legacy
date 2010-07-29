@@ -347,6 +347,8 @@ snit::type ::marsutil::cellmodel {
     #                   order of definition.
     # order-$page     - List of fully-qualified names of cells on page
     #                   $page, in computation order.
+    # initfrom-$page  - List of pages used to initialize cells on $page
+    #                   prior to computing $page.
     # page-$cell      - The name of the page on which $cell appears.
     # bare-$cell      - The bare name of $cell.
     # ctype-$cell     - Cell Type: constant|formula
@@ -449,6 +451,7 @@ snit::type ::marsutil::cellmodel {
         set model(invalid)        [list]
         set model(cells-null)     [list]
         set model(barecells-null) [list]
+        set model(initfrom-null)  [list]
     }
 
     # Method: load
@@ -467,6 +470,7 @@ snit::type ::marsutil::cellmodel {
         $loader alias function $self Load_function $loader
         $loader alias page     $self Load_page     $loader
         $loader alias copypage $self Load_copypage $loader
+        $loader alias initfrom $self Load_initfrom $loader
         $loader alias let      $self Load_let      $loader
         $loader alias letsym   $self Load_letsym   $loader
 
@@ -574,6 +578,7 @@ snit::type ::marsutil::cellmodel {
         set model(cells-$page)     [list]
         set model(barecells-$page) [list]
         set model(order-$page)     [list]
+        set model(initfrom-$page)  [list]
 
         return
     }
@@ -679,6 +684,41 @@ snit::type ::marsutil::cellmodel {
         return $name
     }
     
+
+    # Method: Load_initfrom
+    #
+    # The implementation of the definition script's "initfrom" command.
+    # Directs the object to initialize this page's cells from the 
+    # identically named cells on the specified pages just prior to 
+    # solving this page.  (Normally, the cell values default to their
+    # -values, or whatever was previously computed.)
+    #
+    # Syntax:
+    #   initfrom _page..._
+    #
+    #   page - The name of a page to initialize from.
+
+    method Load_initfrom {loader args} {
+        set pages [list]
+
+        foreach page $args {
+            # FIRST, validate the page name.
+            validate {$page ne "null"} \
+                "Can't init from the null page"
+
+            validate {$page ne $trans(page)} \
+                "Can't init from the page itself: \"$page\""
+
+            validate {$page in [$self pages]} \
+                "Can't init from unknown page: \"$page\""
+
+            lappend pages $page
+        }
+
+        set model(initfrom-$trans(page)) $pages
+
+        return
+    }
 
     # Load_let name = formula ?options...?
     #
@@ -1390,7 +1430,12 @@ snit::type ::marsutil::cellmodel {
 
         # NEXT, solve, each page in sequence.
         foreach page $pages {
-            # FIRST, solve acyclic pages.
+            # FIRST, initialize the page from other pages, if requested.
+            foreach fpage $model(initfrom-$page) {
+                $self set [$self get $fpage -bare] $page
+            }
+
+            # NEXT, solve acyclic pages.
             if {!$model(cyclic-$page)} {
                 # Compute all cells; once is enough.
                 callwith $options(-tracecmd) iterate $page 0 0.0 n/a

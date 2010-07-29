@@ -239,6 +239,24 @@ cells P::C1, P::C2, and P::C3.<p>
 
 <</deflist options>>
 
+<<defitem initfrom {initfrom <i>page</i> ?<i>page...</i>?}>>
+
+Causes the cells on the current page to be initialized from the named
+<i>page</i> or pages whenever the current page's cells are to be solved.<p>
+
+Every cell in the model has a default value, as specified by the
+<code>-value</code> option when the cell is defined.  When the model
+is first loaded or reset, every cell will
+have this value.  If a page is solved repeatedly subsequently, each
+cell on the page will begin with the value computed the last time.<p>
+
+Sometimes, though, it's desirable to start a page with the values from
+some other page or pages.  For example, suppose there are two pages, A
+and B.  B uses <<iref copypage>> to copy A's formulas, and then
+modifies a few of them.  The intent is that B should take A's results,
+and then modify them.  For this to work, B must not only have A's
+formulas; it must also use A's results as its starting point.<p>
+
 <<defitem function {function <i>name arglist body</i>}>>
 
 Defines a function for use in formulas.  Note that a function is
