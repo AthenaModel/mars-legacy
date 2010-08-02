@@ -10,6 +10,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.31, 2 August 2010</h3>
+
+This build contains some enhancements to cellmodel(n) for Athena.<p>
+
+<ul>
+  <li> Bug 2548: cellmodel(5): sum and prod indices
+  <li> Bug 2549: cellmodel(5): Enhanced page copying
+  <li> Bug 2551: cellmodel(5): initfrom command 
+</ul><p>
+
 <h3>Build 1.30, 21 July 2010</h3>
 This build contains a minor enhancement to sqldocument(n) and a new subcommand
 to the mars CM tool called "mash" (aka "monster mash") which is used to
