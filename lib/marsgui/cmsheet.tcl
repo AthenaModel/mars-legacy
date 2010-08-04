@@ -620,9 +620,11 @@ snit::widget ::marsgui::cmsheet {
         # otherwise, make it white.
 
         if {[$cm cellinfo ctype $cellname] eq "constant"} {
-            set args [linsert $args 0 -background white]
+            if {![$tab tag exists $tag]} {
+                $tab tag configure $tag -background white
+            }
         } else {
-            set args [linsert $args 0 -state disabled]
+            $tab tag configure $tag -state disabled
         }
 
         $tab tag configure $tag {*}$args
