@@ -10,6 +10,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.32, 16 August 2010</h3>
+
+This build contains one fix to the cmsheet(n) widget:<p>
+
+<ul>
+  <li> Bug 2563: cmsheet(n): -background is ignored on mapcell method 
+</ul><p>
+
+
 <h3>Build 1.31, 2 August 2010</h3>
 
 This build contains some enhancements to cellmodel(n) for Athena.<p>
