@@ -15,7 +15,7 @@ Library</h1>
 This build contains one fix to the cmsheet(n) widget:<p>
 
 <ul>
-  <li> Bug 2563: cmsheet(n): -background is ignored on mapcell method
+  <li> Bug 2563: cmsheet(n): -background is ignored on mapcell method 
 </ul><p>
 
 
