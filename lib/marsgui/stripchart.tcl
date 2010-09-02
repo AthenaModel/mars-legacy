@@ -642,7 +642,12 @@ snit::widgetadaptor ::marsgui::stripchart {
             } else {
                 if {$series(dmin-$name) eq ""} {
                     set ylist [dict values $series(data-$name)]
-                    set series(dmin-$name) [tcl::mathfunc::min {*}$ylist]
+                    
+                    if {[llength $ylist] > 0} {
+                        set series(dmin-$name) [tcl::mathfunc::min {*}$ylist]
+                    } else {
+                        set series(dmin-$name) +Inf
+                    }
                 }
 
                 if {$series(dmin-$name) < $ymin} {
@@ -659,7 +664,12 @@ snit::widgetadaptor ::marsgui::stripchart {
             } else {
                 if {$series(dmax-$name) eq ""} {
                     set ylist [dict values $series(data-$name)]
-                    set series(dmax-$name) [tcl::mathfunc::max {*}$ylist]
+                    
+                    if {[llength $ylist] > 0} {
+                        set series(dmax-$name) [tcl::mathfunc::max {*}$ylist]
+                    } else {
+                        set series(dmax-$name) -Inf
+                    }
                 }
 
                 if {$series(dmax-$name) > $ymax} {
