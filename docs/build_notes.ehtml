@@ -10,6 +10,14 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.33,  9 September 2010</h3>
+
+This build contains a fix to the stripchart(n) widget:<p>
+
+<ul>
+  <li> Bug 2590: stripchart(n): error on plot of empty series 
+</ul><p>
+
 <h3>Build 1.32, 16 August 2010</h3>
 
 This build contains one fix to the cmsheet(n) widget:<p>
