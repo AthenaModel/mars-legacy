@@ -1,0 +1,43 @@
+<<manpage formlib(n) "Mars Forms Library">>
+
+<<section SYNOPSIS>>
+
+<pre>
+package require formlib 1.0
+namespace import ::formlib::*
+</pre>
+
+<<itemlist>>
+
+<<section DESCRIPTION>>
+
+formlib(n) is a package of non-application-specific code for creating
+data entry forms (e.g., order dialogs).  It contains a widget, the
+<<xref form(n)>>, which provides simplified layout and management for
+forms, and a variety of <<xref field(i)>> widgets.<p>
+
+<<section ENVIRONMENT>>
+
+Requires Tcl 8.5 or later.<p>
+
+To use this package in a Tcl script, the environment variable
+<code>TCLLIBPATH</code> must include the parent of the package
+directory.<p>
+
+<<section AUTHOR>>
+
+Will Duquette<p>
+
+<<section HISTORY>>
+
+Original package.
+
+<</manpage>>
+
+
+
+
+
+
+
+
