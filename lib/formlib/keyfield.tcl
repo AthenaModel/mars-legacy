@@ -119,6 +119,14 @@ snit::widget ::formlib::keyfield {
         # FIRST, apply the options
         $self configurelist $args
 
+        # NEXT, verify that we have -table and -keys.
+
+        require {$options(-table) ne ""} "Missing -table value"
+
+        require {[llength $options(-keys)] > 0} "Missing -keys value"
+
+        set widlen [llength $options(-widths)]
+
         # NEXT, create a menubox each key.
         set c -1
 
