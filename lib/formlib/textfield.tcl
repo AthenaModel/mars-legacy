@@ -68,8 +68,9 @@ snit::widget ::formlib::textfield {
     # -editcmd command
     #
     # If given, the widget will have an "Edit" button that executes this
-    # command when pressed.  The command should take one argument,
-    # the current value, and should return a new value or "" on cancel.
+    # command when pressed.  The command should take two arguments,
+    # the field window and the current value, and should return a new 
+    # value or "" on cancel.
 
     option -editcmd   \
         -default ""   \
@@ -167,7 +168,7 @@ snit::widget ::formlib::textfield {
         focus $win
 
         # NEXT, call the editor command given the current data value
-        set value [{*}$options(-editcmd) [$entry get]]
+        set value [{*}$options(-editcmd) $win [$entry get]]
 
         # NEXT, if the value is not "", set it.
         if {$value ne ""} {

@@ -41,6 +41,14 @@ From <<xref field(i)>>.  textfield(i) widgets have states, just as the
 normal <code>tk::</code> and <code>ttk::</code> widgets do.  The valid
 states are <b>normal</b> and <b>disabled</b>.<p>
 
+<<defopt {-editcmd <i>cmd</i>}>>
+
+If given, the field with have an "Edit" button at the right end
+of the field.  Pressing the button will call this <i>cmd</i> with two
+additional arguments: the textfield(n) widget's name, and its current
+value.  The command is expected to pop up some kind of editor dialog,
+and return the new value.<p>
+
 <</deflist commands>>
 
 <<section "INSTANCE COMMAND">>
