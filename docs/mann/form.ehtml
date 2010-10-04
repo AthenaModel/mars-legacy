@@ -333,6 +333,7 @@ See <<xref "LAYOUT SPECIFICATION">> for details on layout specs.<p>
 
 
 <<defitem set {<i>pathName</i> set <i>dict</i>}>>
+<<defitem set {<i>pathName</i> set <i>key value...</i>}>>
 
 Explicitly sets the form's field values given a dictionary of
 symbolic field names and field values, and calls

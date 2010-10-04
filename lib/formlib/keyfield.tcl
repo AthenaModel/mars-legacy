@@ -140,7 +140,8 @@ snit::widget ::formlib::keyfield {
                 -exportselection yes                        \
                 -takefocus       1                          \
                 -postcommand     [mymethod KeyValues $name] \
-                -command         [mymethod KeyChange $name]
+                -command         [mymethod KeyChange $name] \
+                -width           10
 
             if {$width ne ""} {
                 $fields($name) configure \

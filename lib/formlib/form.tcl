@@ -604,15 +604,24 @@ snit::widget ::formlib::form {
     # Syntax:
     #   set _dict_
     #
+    #   set _field value..._
+    #
     #   dict - A dictionary of field names and values.
    
-    method set {dict} {
+    method set {args} {
         # FIRST, mark that we're in the set method.
         set info(inSet) 1
 
         # NEXT, try to set all of the field values, keeping track
         # of the fields that changed.
         set changed [list]
+
+        # NEXT, if there's only one arg it's the dict.
+        if {[llength $args] == 1} {
+            set dict [lindex $args 0]
+        } else {
+            set dict $args
+        }
 
         try {
             # Process the data in the order in which the fields are
