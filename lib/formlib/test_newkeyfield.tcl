@@ -42,6 +42,7 @@ proc main {argv} {
         -table     nbgroups          \
         -keys      {n g}             \
         -widths    {8 8}             \
+        -labels    {"In" "Grp"}      \
         -changecmd GotChanges
 
     grid .lab -row 0 -column 0 -sticky w   -pady 4 -padx 4
