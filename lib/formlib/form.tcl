@@ -728,6 +728,7 @@ snit::widget ::formlib::form {
 #-----------------------------------------------------------------------
 # Register standard field types
 
+::formlib::form register disp        ::formlib::dispfield
 ::formlib::form register enum        ::formlib::enumfield
 ::formlib::form register key         ::formlib::keyfield
 ::formlib::form register newkey      ::formlib::newkeyfield
