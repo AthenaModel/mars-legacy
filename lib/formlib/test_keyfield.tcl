@@ -32,11 +32,21 @@ proc main {argv} {
     sqldocument db
     db open "./test.db"
 
+    db eval {
+        CREATE TEMPORARY VIEW sat_ngc_view AS
+        SELECT n, g, c, 
+               '*' || n || '*' AS nv,
+               '+' || g || '+' AS gv,
+               '=' || c || '=' AS cv
+        FROM sat_ngc
+    }
+
     ttk::label .lab -text "Curve:"
     keyfield .key                     \
         -db        ::db               \
-        -table     sat_ngc            \
+        -table     sat_ngc_view       \
         -keys      {n g c}            \
+        -dispcols  {nv gv cv}         \
         -widths    {6 6 4}            \
         -changecmd GotChanges
 

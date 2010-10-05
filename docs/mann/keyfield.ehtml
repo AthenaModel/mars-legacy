@@ -62,6 +62,19 @@ which records are to be selected.<p>
 
 Specifies the names of the key columns in the <code>-table</code>.<p>
 
+<<defopt {-dispcols <i>list</i>}>>
+
+Specifies the names of columns whose values are to be displayed in
+place of the <code>-keys</code> columns in the pulldowns.  The values
+in the <code>-dispcols</code> columns need to be paired one-to-one
+with the matching values in the <code>-keys</code> columns.<p>
+
+This is usually used when the <code>-table</code>'s key is a bare
+integer.  The <code>-table</code> can be a view that provides
+a human-readable version of the key as a parallel column.  The
+GUI then uses the human-readable text, while the underlying order
+uses the integer key.<p>
+
 <<defopt {-widths <i>widths</i>}>>
 
 Specifies a list of <i>widths</i>, in characters of the current font,

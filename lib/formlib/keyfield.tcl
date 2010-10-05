@@ -86,6 +86,14 @@ snit::widget ::formlib::keyfield {
     option -keys \
         -readonly yes
 
+    # Option: -dispcols
+    #
+    # A list of columns parallel to the -keys columns that contain
+    # the actual strings to display in the pulldowns.
+
+    option -dispcols \
+        -readonly yes
+
     # Option: -widths
     #
     # If given, a list of widths for the menuboxes.
@@ -115,6 +123,13 @@ snit::widget ::formlib::keyfield {
 
     variable fields -array {}
 
+    # Variable: xltr
+    #
+    # Translation table, from key column names to disp column names,
+    # and back again.
+
+    variable xltr -array {}
+
     #-------------------------------------------------------------------
     # Group: Constructor/Destructor
 
@@ -132,7 +147,15 @@ snit::widget ::formlib::keyfield {
 
         require {[llength $options(-keys)] > 0} "Missing -keys value"
 
-        set widlen [llength $options(-widths)]
+        # NEXT, set up the xltr table.
+        foreach key $options(-keys) dc $options(-dispcols) {
+            if {$dc ne ""} {
+                set xltr($key) $dc
+                set xltr($dc) $key
+            } else {
+                set xltr($key) $key
+            }
+        }
 
         # NEXT, create a menubox for each key.  k is the key number,
         # and c is the grid column.
@@ -187,6 +210,46 @@ snit::widget ::formlib::keyfield {
     #-------------------------------------------------------------------
     # Group: Helper Methods
 
+    # K2D name value
+    #
+    # Converts the value from a key value to a display value.
+
+    method K2D {name value} {
+        # FIRST, get the dispcol name.
+        set dc $xltr($name)
+
+        # NEXT, trivial translation
+        if {$dc eq $name} {
+            return $value
+        }
+
+        # NEXT, query for the value.
+        $options(-db) onecolumn "
+            SELECT DISTINCT $dc FROM $options(-table)
+            WHERE $name = \$value
+        "
+    }
+
+    # D2K name value
+    #
+    # Converts the value from a display value to a key value.
+
+    method D2K {name value} {
+        # FIRST, get the dispcol name.
+        set dc $xltr($name)
+
+        # NEXT, trivial translation
+        if {$dc eq $name} {
+            return $value
+        }
+
+        # NEXT, query for the value.
+        $options(-db) onecolumn "
+            SELECT DISTINCT $name FROM $options(-table)
+            WHERE $dc = \$value
+        "
+    }
+
     # Method: KeyValues
     #
     # Gets the list of enumerated values for the specified key column.
@@ -209,7 +272,7 @@ snit::widget ::formlib::keyfield {
 
             set key($kname) [$fields($kname) get]
 
-            lappend conditions "$kname=\$key($kname)"
+            lappend conditions "$xltr($kname)=\$key($kname)"
         }
 
         if {[llength $conditions] > 0} {
@@ -220,7 +283,7 @@ snit::widget ::formlib::keyfield {
 
         # NEXT, get the list of values.
         set values [$options(-db) eval "
-            SELECT DISTINCT $name 
+            SELECT DISTINCT $xltr($name)
             FROM $options(-table)
             $where
             ORDER BY $name
@@ -294,13 +357,13 @@ snit::widget ::formlib::keyfield {
             set result [list]
 
             foreach name $options(-keys) {
-                lappend result [$fields($name) get]
+                lappend result [$self D2K $name [$fields($name) get]]
             }
 
             return $result
         } else {
             set name [lindex $options(-keys) 0]
-            return [$fields($name) get]
+            return [$self D2K $name [$fields($name) get]]
         }
     }
 
@@ -325,10 +388,10 @@ snit::widget ::formlib::keyfield {
         # FIRST, save the new values into the menuboxes.
         if {[llength $options(-keys)] == 1} {
             set name [lindex $options(-keys) 0]
-            $fields($name) set $value
+            $fields($name) set [$self K2D $name $value]
         } else {
-            foreach name $options(-keys) key $value {
-                $fields($name) set $key
+            foreach name $options(-keys) keyval $value {
+                $fields($name) set [$self K2D $name $keyval]
             }
         }
 
