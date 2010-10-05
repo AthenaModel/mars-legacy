@@ -33,11 +33,11 @@ proc main {argv} {
     db open "./test.db"
 
     ttk::label .lab -text "Curve:"
-    keyfield .key             \
-        -db        ::db       \
-        -table     sat_ngc   \
-        -keys      {n g c}    \
-        -widths    {6 6 4}    \
+    keyfield .key                     \
+        -db        ::db               \
+        -table     sat_ngc            \
+        -keys      {n g c}            \
+        -widths    {6 6 4}            \
         -changecmd GotChanges
 
     grid .lab -row 0 -column 0 -sticky w   -pady 4 -padx 4

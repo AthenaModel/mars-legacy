@@ -93,6 +93,13 @@ snit::widget ::formlib::keyfield {
     option -widths \
         -readonly yes
 
+    # Option: -labels
+    #
+    # If given, a list of label strings for the menuboxes.
+
+    option -labels \
+        -readonly yes
+
     #-------------------------------------------------------------------
     # Instance Variables
 
@@ -127,15 +134,35 @@ snit::widget ::formlib::keyfield {
 
         set widlen [llength $options(-widths)]
 
-        # NEXT, create a menubox each key.
+        # NEXT, create a menubox for each key.  k is the key number,
+        # and c is the grid column.
+        set k -1
         set c -1
 
         foreach name $options(-keys) {
             # FIRST, create and grid the field.
-            set fields($name) $win.field[incr c]
+            set fields($name) $win.field[incr k]
 
-            set width [lindex $options(-widths) $c]
+            set width [lindex $options(-widths) $k]
+            set label [lindex $options(-labels) $k]
   
+            if {$k == 0} {
+                set pad 0
+            } else {
+                set pad 4
+            }
+
+            if {$label ne ""} {
+                ttk::label $win.label$k \
+                    -text $label
+
+                grid $win.label$k -row 0 -column [incr c] \
+                    -sticky ew -padx [list $pad 0]
+                grid columnconfigure $win $c -weight 0
+
+                set pad 0
+            }
+
             menubox $fields($name)                          \
                 -exportselection yes                        \
                 -takefocus       1                          \
@@ -148,13 +175,8 @@ snit::widget ::formlib::keyfield {
                     -width $width
             }
 
-            if {$c > 0} {
-                set pad {4 0}
-            } else {
-                set pad 0
-            }
-
-            grid $fields($name) -row 0 -column $c -sticky ew -padx $pad
+            grid $fields($name) -row 0 -column [incr c] \
+                -sticky ew -padx [list $pad 0]
             grid columnconfigure $win $c -weight 1
         }
 
