@@ -209,6 +209,12 @@ option add *Spinbox.background              white
 option add *Spinbox.foreground              black
 option add *Spinbox.repeatInterval          15
 
+# scale widget
+option add *Scale.highlightColor            \#6f9dc6
+option add *Scale.highlightThickness        2
+option add *Scale.highlightBackground       $::marsgui::defaultBackground
+option add *Scale.sliderLength              10
+
 # BWidget ComboBox widget
 option add *ComboBox*Entry.background       white
 option add *ComboBox*Entry.foreground       black

@@ -71,6 +71,12 @@ The following field types are defined as part of <<xref formlib(n)>>:<p>
 </tr>
 
 <tr valign="baseline">
+<td><b>range</b></td>
+<td><code>::formlib::rangefield</code></td>
+<td>n/a</td>
+</tr>
+
+<tr valign="baseline">
 <td><b>text</b></td>
 <td><code>::formlib::textfield</code></td>
 <td>n/a</td>

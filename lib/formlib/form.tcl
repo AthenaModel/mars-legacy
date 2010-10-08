@@ -400,6 +400,8 @@ snit::widget ::formlib::form {
 
             incr r
         }
+
+        grid columnconfigure $win 1 -weight 1
     }
 
     # Method: LayoutFromSpec
@@ -490,11 +492,13 @@ snit::widget ::formlib::form {
                 }
 
                 field {
+                    grid columnconfigure $pw $c -weight 1
                     set wid $info(w-$value)
                     set sticky ew
                 }
 
                 labelframe {
+                    grid columnconfigure $pw $c -weight 1
                     set wid $pw.frame${r}_$c
                     ttk::labelframe $wid \
                         -text $value
@@ -728,11 +732,12 @@ snit::widget ::formlib::form {
 #-----------------------------------------------------------------------
 # Register standard field types
 
-::formlib::form register disp        ::formlib::dispfield
-::formlib::form register enum        ::formlib::enumfield
-::formlib::form register key         ::formlib::keyfield
-::formlib::form register newkey      ::formlib::newkeyfield
-::formlib::form register text        ::formlib::textfield
+::formlib::form register disp    ::formlib::dispfield
+::formlib::form register enum    ::formlib::enumfield
+::formlib::form register key     ::formlib::keyfield
+::formlib::form register newkey  ::formlib::newkeyfield
+::formlib::form register range   ::formlib::rangefield
+::formlib::form register text    ::formlib::textfield
 
 
 
