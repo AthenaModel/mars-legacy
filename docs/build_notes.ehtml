@@ -10,6 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.35, 11 October 2010</h3>
+
+This build adds the new formlib(n) library, which takes user interface
+code from Athena, along with significant new code, and makes it
+available for general use.  The full set of packages is as follows:<p>
+
+<ul>
+  <li> Bug 2609: formlib(n): Data entry form library
+  <li> Bug 2615: formlib(n): rangefield(n)
+</ul><p>
+
 <h3>Build 1.34, 29 September 2010</h3>
 
 This build contains minor updates to the Mars documentation tree,
