@@ -4,12 +4,12 @@
 
 <<swallow {
     # Get some help
-    package require simlib
+    package require simlib 2.0
     namespace import ::simlib::*
 }>>
 
 <pre>
-package require simlib 1.0
+package require simlib 2.0
 namespace import ::simlib::*
 </pre>
 

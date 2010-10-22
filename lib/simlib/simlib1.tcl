@@ -1,12 +1,14 @@
 #-----------------------------------------------------------------------
 # TITLE:
-#	simlib.tcl
+#	simlib1.tcl
 #
 # AUTHOR:
 #	Will Duquette
 #
 # DESCRIPTION:
-#       Mars: simlib(n) main package
+#       Mars: simlib(n) main package for simlib 1.0
+#
+#       simlib 1.0 contains gram(n) and gramdb(n) V1.0.
 #
 #-----------------------------------------------------------------------
 

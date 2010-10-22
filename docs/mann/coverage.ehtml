@@ -4,7 +4,7 @@
 
 <<swallow {
     # Get some help
-    package require simlib
+    package require simlib 2.0
     namespace import ::simlib::*
 }>>
 

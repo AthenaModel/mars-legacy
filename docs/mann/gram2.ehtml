@@ -1,9 +1,9 @@
-<<manpage {simlib(n) gram(n)} "Generalized Regional Analysis Model">>
+<<manpage {simlib(n) gram2(n)} "Generalized Regional Analysis Model">>
 
 <<section SYNOPSIS>>
 
 <pre>
-package require -exact simlib 1.0
+package require simlib 2.0
 namespace import ::simlib::*
 </pre>
 
@@ -17,61 +17,14 @@ namespace import ::simlib::*
 
 <<section DESCRIPTION>>
 
-<<xref gram(n)>> is the Tcl API for V1.0 of the Generalized Regional Analysis
-Model (GRAM); it has been superseded by <<xref gram2(n)>>, and
-will eventually go away.<p>
-
-GRAM models group satisfaction
-and inter-group cooperation within neighborhoods; see the Mars
-Analyst's Guide for full details.  As such, GRAM is a descendant of
-the JRAM model used in the Joint Non-Kinetic Effects Model (JNEM).
-GRAM differs from JRAM in the following ways:<p>
-
-<ul>
-  <li> JRAM expects to load its input data from simdb(5) tables in the
-       run-time database (RDB).  GRAM relies on a
-       <code>-loadcmd</code> to initially populate its RDB tables;
-       see <<xref "LOADING DATA">> for more details.<p>
-
-  <li> JRAM loads its input data immediately upon creation.  GRAM
-       requires an explicit call to the <<iref init>> method.<p>
-
-  <li> JRAM requires the <i>cause</i> specified with inputs to be a
-       member of a JNEM-specific enumeration.  The list of valid
-       causes differs in different domains; and as GRAM treats the
-       cause as an arbitrary string, there's no need to validate
-       them.  Thus, in GRAM this is left up to the client.<p>
-
-  <li> GRAM supports the full <<xref saveable(i)>> API; JRAM supports
-       the simpler checkpoint/restore API used in JNEM.<p>
-
-  <li> GRAM slope inputs lack JRAM's "limit" parameter.  In GRAM,
-       slope effects continue until explicitly terminated.<p>
-
-  <li> GRAM inputs have options that JRAM inputs lack: <b>-s</b>, 
-       <b>-athresh</b>, and <b>-dthresh</b>.  See <<iref sat level>>, etc., 
-       for details.<p>
-
-  <li> JRAM saved the curve values over time in the <b>gram_values</b>
-       table.  GRAM saves the curve deltas over time in the 
-       <b>gram_deltas</b> table.<p>
-
-  <li> JRAM saved expired effects indefinitely in the <b>gram_effects</b> 
-       table, setting the <b>active</b> column to 0.  GRAM deletes
-       expired effects.  (They can be preserved temporarily as an aid to
-       debugging in the <b>gram_expired_effects</b> table; see the
-       <<iref gram.saveExpired>> parameter.<p>
-
-  <li> Multiple instances of JRAM could coexist in a single 
-       <<xref sqldocument(n)>>.  This capability was never used, and
-       has been abandoned in the interests of speed.  It is possible
-       to create multiple instances of GRAM, but each instance must
-       be in a separate <<xref sqldocument(n)>>.<p>
-</ul>
+<<xref gram2(n)>> is the Tcl API for V2.0 of the Generalized Regional
+Analysis Model (GRAM).  (See <<xref gram(n)>> for V1.0.)  GRAM models
+group satisfaction and inter-group cooperation; see the Mars Analyst's
+Guide for full details.
 
 <<section "DATABASE SCHEMA">>
 
-gram(n) stores almost all of its working data in an
+gram2(n) stores almost all of its working data in an
 <<xref sqldocument(n)>> "run-time database", or RDB.  
 The names of all of the tables, views, indices, and so forth defined
 by GRAM begin with the string "gram_".<p>
@@ -82,7 +35,7 @@ should not alter them. Some relevant semantics:<p>
 <ul>
   <li> All cooperation and satisfaction curves are stored in the
        <b>gram_curves</b> table, with ancillary data in the
-       <b>gram_ngc</b> and <b>gram_nfg</b> tables respectively.<p>
+       <b>gram_gc</b> and <b>gram_coop_fg</b> tables respectively.<p>
 
   <li> The <b>gram_sat</b> and <b>gram_coop</b> views are a convenient
        way to query the satisfaction and cooperation curves.<p>
@@ -99,12 +52,11 @@ should not alter them. Some relevant semantics:<p>
        the database.  Instead, the <b>active</b> attribute is set to
        0.<p>
 
-  <li> Satisfaction roll-ups may be read from the <b>gram_gc</b>,
-       <b>gram_ng</b>, <b>gram_nc</b>, <b>gram_n</b>, <b>gram_g</b>,
-       and <b>gram_c</b> tables.<p>
+  <li> Neighborhood and group moods may be read from the
+       <b>gram_n</b> and <b>gram_g</b> tables.
 </ul><p>
 
-gram(n) registers the following schema definitions with
+gram2(n) registers the following schema definitions with
 <<xref sqldocument(n)>>:<p>
 
 <pre>
@@ -120,12 +72,13 @@ entity; they be called in the following order:<p>
 
 <ul>
   <li> <<iref load nbhoods>>
-  <li> <<iref load groups>>
-  <li> <<iref load concerns>>
   <li> <<iref load nbrel>>
-  <li> <<iref load nbgroups>>
+  <li> <<iref load civg>>
+  <li> <<iref load civrel>>
+  <li> <<iref load concerns>>
   <li> <<iref load sat>>
-  <li> <<iref load rel>>
+  <li> <<iref load frcg>>
+  <li> <<iref load frcrel>>
   <li> <<iref load coop>>
 </ul>
 
@@ -149,14 +102,14 @@ neighborhood relationship data might look like this:<p>
 </pre>
 
 The database is populated automatically with default neighborhood
-relationships, neighborhood groups, initial satisfactions, group
+relationships, initial satisfactions, group
 relationships, and initial cooperations; consequently, only
 non-default entities need to be passed to the related <<iref load>>
 commands.<p>
 
 <<section "CONFIGURATION PARAMETERS">>
 
-gram(n) is a <<xref parm(i)>>, and defines the following configuration
+gram2(n) is a <<xref parm(i)>>, and defines the following configuration
 parameters.  The <<iref gram parm>> subcommand can be used to set and query
 their values.<p>
 
@@ -253,7 +206,7 @@ fully initialized, as if <<iref init>> had been called with the
 <<defopt {-clock <i>clock</i>}>>
 
 Specifies the name of a <<xref simclock(n)>> object which will
-govern gram(n)'s simulation time.<p>
+govern gram2(n)'s simulation time.<p>
 
 This option must be set at creation time, and cannot be changed
 thereafter.<p>
@@ -261,10 +214,10 @@ thereafter.<p>
 <<defopt {-rdb <i>name</i>}>>
 
 Specifies the name of an <<xref sqldocument(n)>> object
-which gram(n) will use to store its data.
+which gram2(n) will use to store its data.
 See <<xref "DATABASE SCHEMA">>.<p>
 
-Multiple instances of gram(n) must be created in distinct RDBs.<p>
+Multiple instances of gram2(n) must be created in distinct RDBs.<p>
 
 This option must be set at creation time, and cannot be changed
 thereafter.<p>
@@ -273,7 +226,7 @@ thereafter.<p>
 
 Defines a command which will populate the GRAM tables with data.  The
 command must take a single additional argument, the name of the
-instance of <<xref gram(n)>> in question.  See
+instance of <<xref gram2(n)>> in question.  See
 <<xref "LOADING DATA">> for more details.<p>
 
 <<defopt {-logger <i>name</i>}>>
@@ -292,7 +245,7 @@ logging messages; defaults to "gram".<p>
 
 <<defitem {gram parm} {gram parm <i>subcommand</i> ?<i>args..</i>?}>>
 
-The <<iref gram parm>> subcommand gives access to the gram(n) module's
+The <<iref gram parm>> subcommand gives access to the gram2(n) module's
 configuration <<xref parmset(n)>>; see
 <<xref "CONFIGURATION PARAMETERS">> for details.  The subcommands
 of <<iref gram parm>> are exactly those of <<xref parmset(n)>>
@@ -300,7 +253,7 @@ instances.<p>
 
 <<defitem {gram sqlsection} {gram sqlsection <i>subcommand</i>}>>
 
-gram(n) is an <<xref sqlsection(i)>>, as it defines
+gram2(n) is an <<xref sqlsection(i)>>, as it defines
 schema entities (see <<xref "DATABASE SCHEMA">>).
 See <<xref sqlsection(i)>> for a description
 of this method's subcommands.<p>
@@ -322,7 +275,7 @@ not read-only).<p>
 
 <<defitem init {$obj init ?-reload?}>>
 
-Resets gram(n) to the initial satisfaction and cooperation levels,
+Resets gram2(n) to the initial satisfaction and cooperation levels,
 restoring all variables to their initial values and deleting all
 history.  The simulation time is reset to the
 <code>-simclock</code>'s current time, which will be used as
@@ -341,7 +294,7 @@ advancing time, and 0 otherwise.<p>
 
 <<defitem clear {$obj clear}>>
 
-Returns the instance of gram(n) to its state at creation: the RDB
+Returns the instance of gram2(n) to its state at creation: the RDB
 tables are cleared, and the in-memory variables are returned to their
 initial values.<p>
 
@@ -354,28 +307,10 @@ the order shown here.<p>
 
 <<deflist load>>
 
-<<defitem "load nbhoods" {$obj load nbhoods <i>name</i> ?<i>name</i>...?}>>
+<<defitem "load nbhoods" {$obj load nbhoods <i>n</i> ?<i>n</i>...?}>>
 
 Specifies the set of neighborhood names.  Requires at least one name.
 The names should be pre-sorted in alphabetical order.<p>
-
-<<defitem "load groups" {$obj load groups <i>name gtype</i> ?<i>name gtype</i>...?}>>
-
-Specifies the set of groups, with their group types.  The groups
-should be sorted first by group type, and then by name.  There should
-be at least one group of each type.<p>
-
-The group types are defined by the <<xref simtypes(n) egrouptype>>
-enumeration:<p>
-
-<<::simlib::egrouptype html>><p>
-
-<<defitem "load concerns" {$obj load concerns <i>name gtype</i> ?<i>name gtype</i>...?}>>
-
-Specifies the set of concerns, with their group types.  The concerns
-should be sorted first by group type, and then by name.  There should
-be at least one CIV concern and one ORG concern.  (There are no FRC
-concerns; satisfaction is not tracked for FRC groups.)<p>
 
 <<defitem "load nbrel" {$obj load nbrel ?<i>m n proximity effects_delay</i>...?}>>
 
@@ -388,45 +323,53 @@ This command is used to specifies the set of non-default neighborhood
 relationships.  If all defaults are acceptable, this command must be
 called with no arguments.<p>
 
+<<defitem "load civg" {$obj load civg <i>g n population</i> ?<i>g n population</i>...?}>>
 
-<<defitem "load nbgroups" {$obj load nbgroups ?<i>n g population rollup_weight effects_factor</i>...?}>>
+Specifies the set of civilian groups, with their neighborhoods of
+residence and their populations.  The groups
+should be sorted by name.  There should be at least one group.<p>
 
-GRAM creates default neighborhood group entities automatically for all
-CIV and ORG groups in all neighborhoods.  CIV populations default to 0 and
-the rollup weights and effects factors default to 1.0.  As a result,
-all ORG groups are represented in all neighborhoods, and no CIV group
-is represented (by default) in any neighborhood.
+<<defitem "load civrel" {$obj load civrel ?<i>f g rel</i>...?}>>
 
-This command is used to specifies the set of non-default neighborhood
-CIV and ORG groups.  Population must be non-zero for at least one CIV
-group in each neighborhood; population is ignored for ORG groups, and
-should be left at 0 to avoid confusion.<p>
+GRAM creates default relationships for every pair of civilian groups in
+every neighborhood: 1.0 when f=g and 0.0 otherwise.<p>
 
-<<defitem "load sat" {$obj load sat ?<i>n g c sat0 saliency</i>...?}>>
+This command is used to specify the set of non-default relationship
+data.  If the defaults are acceptable, this command must be called
+with no arguments.<p>
 
-GRAM creates default satisfaction data for each group for which
-satisfaction is tracked: all ORG groups in all neighborhoods, and all
-CIV groups with non-zero population in each neighborhood.  In each
+<<defitem "load concerns" {$obj load concerns <i>name gtype</i> ?<i>name gtype</i>...?}>>
+
+Specifies the set of satisfaction concerns, sorted by name.<p>
+
+<<defitem "load sat" {$obj load sat ?<i>g c sat0 saliency</i>...?}>>
+
+GRAM creates default satisfaction data for each civilian group
+and concern.  In each
 case the saliency is 1.0 and the initial satisfaction level is 0.0.<p>
 
-This command is used to specifies the set of non-default satisfaction
+This command is used to specify the set of non-default satisfaction
 data.  If the defaults are acceptable, this command must be called
 with no arguments.<p>
 
-<<defitem "load rel" {$obj load rel ?<i>n f g rel</i>...?}>>
+<<defitem "load frcg" {$obj load frcg <i>g</i> ?<i>g</i>...?}>>
 
-GRAM creates default relationships for every pair of groups in
-every neighborhood.  All relationships default to 0.0.<p>
+Specifies the set of force groups, sorted by name.
+There should be at least one group.<p>
 
-This command is used to specifies the set of non-default relationships
+<<defitem "load frcrel" {$obj load frcrel ?<i>f g rel</i>...?}>>
+
+GRAM creates default relationships for every pair of force groups in
+every neighborhood: 1.0 when f=g and 0.0 otherwise.<p>
+
+This command is used to specify the set of non-default relationship
 data.  If the defaults are acceptable, this command must be called
 with no arguments.<p>
 
-<<defitem "load coop" {$obj load coop ?<i>n f g coop0</i>...?}>>
+<<defitem "load coop" {$obj load coop ?<i>f g coop0</i>...?}>>
 
-GRAM creates default cooperation data for every neighborhood CIV group
-(with non-zero population) with each force group.  All cooperations
-default to 50.0.<p>
+GRAM creates default cooperation data for every CIV group
+with every force group.  All cooperations default to 50.0.<p>
 
 This command is used to specifies the set of non-default initial
 cooperation values.  If the defaults are acceptable, this command must
@@ -441,10 +384,10 @@ scenario data after the initial load.<p>
 
 <<deflist update>>
 
-<<defitem "update population" {$obj update population ?<i>n g population</i>...?}>>
+<<defitem "update population" {$obj update population ?<i>g population</i>...?}>>
 
-This command updates the population of civilian neighborhood groups
-for the specified <i>n</i>, <i>g</i>, and <i>population</i> triples
+This command updates the population of civilian groups
+for the specified <i>g</i>, and <i>population</i> pairs
 specified on the command line.<p>
 
 <b>NOTE:</b>  This command is optimized for speed, and consequently
@@ -452,14 +395,8 @@ does little error checking.  The following constraints apply:<p>
 
 <ul>
   <li> Only civilian groups are allowed.
-  <li> A group with non-zero population must not be assigned a
-       population of zero.
-  <li> A group with zero population must not be assigned a population
-       greater than zero.
+  <li> Groups must not be assigned a population of zero.
 </ul><p>
-
-In other words, the update may not change the set of groups for which
-satisfaction is tracked.<p>
 
 <</deflist update>>
 
@@ -550,27 +487,10 @@ just as though a slope of 0.0 was explicitly scheduled for each.  This
 command is thus a convenient way of terminating a situation's slope effects
 when the situation ends or is disabled.<p>
 
-<<defitem sat.ngc {$obj sat.ngc <i>n g c</i>}>>
-
-Returns group <i>g</i>'s satisfaction with respect to concern <i>c</i>
-in neighborhood <i>n</i>.  The group and concern must have the same
-type, CIV or ORG.<p>
-
-<<defitem sat.ng {$obj sat.ng <i>n g</i>}>>
-
-Returns group <i>g</i>'s mood (its rolled-up satisfaction across concerns)
-in neighborhood <i>n</i>.<p>
-
-<<defitem sat.nc {$obj sat.nc <i>n c</i>}>>
-
-Returns the rolled-up with respect to concern <i>c</i>
-in neighborhood <i>n</i>.<p>
-
 <<defitem sat.gc {$obj sat.gc <i>g c</i>}>>
 
-Returns group <i>g</i>'s rolled-up satisfaction with respect to
-concern <i>c</i>, playbox-wide.  The group and concern must have the same
-type, CIV or ORG.<p>
+Returns group <i>g</i>'s satisfaction with respect to concern
+<i>c</i>.<p>
 
 <<defitem sat.n {$obj sat.n <i>n</i>}>>
 
@@ -579,31 +499,17 @@ of neighborhood <i>n</i>.<p>
 
 <<defitem sat.g {$obj sat.g <i>g</i>}>>
 
-Returns group <i>g</i>'s mood (its rolled-up satisfaction across concerns)
-playbox-wide.<p>
+Returns group <i>g</i>'s mood (its rolled-up satisfaction across
+concerns).<p>
 
-<<defitem sat.c {$obj sat.c <i>c</i>}>>
+<<defitem coop.fg {$obj coop.fg <i>f g</i>}>>
 
-Returns the rolled-up with respect to concern <i>c</i>,
-playbox-wide.<p>
-
-<<defitem coop.nfg {$obj coop.nfg <i>n f g</i>}>>
-
-Returns civilian group <i>f</i>'s cooperation with force group <i>g</i>
-in neighborhood <i>n</i>.  Group <i>f</i> must reside in neighborhood
-<i>n</i>.<p>
-
-<<defitem coop.ng {$obj coop.ng <i>n g</i>}>>
-
-Returns the cooperation of neighborhood <i>n</i> with force group
-<i>g</i> (the rolled-up cooperation of the neighborhood groups with
-<i>g</i>).<p>
+Returns civilian group <i>f</i>'s cooperation with force group <i>g</i>.<p>
 
 <<defitem nbhoodGroups {$obj nbhoodGroups <i>nbhood</i>}>>
 
-Returns a list of the names of the CIV groups for which
-satisfaction and cooperation are tracked in neighborhood <i>nbhood</i>,
-i.e., those with non-zero population in the neighborhood.<p>
+Returns a list of the names of the CIV groups which reside
+in neighborhood <i>nbhood</i>.<p>
 
 <<defitem sat {$obj sat <i>subcommand</i> ?<i>args..</i>?}>>
 
@@ -612,36 +518,31 @@ submit inputs for the satisfaction curves.<p>
 
 <<deflist sat>>
 
-<<defitem {sat adjust} {$obj sat adjust <i>driver n g c mag</i>}>>
+<<defitem {sat adjust} {$obj sat adjust <i>driver g c mag</i>}>>
 
-Adjusts group <i>g</i>'s satisfaction with concern <i>c</i> in
-neighborhood <i>n</i> by <i>mag</i>.  The adjustment is related to
-the specified <i>driver</i>. The <i>n</i> argument is a neighborhood 
-name; <i>g</i> is the name of a CIV or ORG group; <i>c</i> is the name
-of a CIV or ORG concern.  Note that <i>g</i> and <i>c</i> must have
-the same type.  The <i>mag</i> is a <<xref simtypes(n) qmag>>
-value.  The specified satisfaction curve is then clamped to the range
-(-100.0, +100.0).<p>
+Adjusts group <i>g</i>'s satisfaction with concern <i>c</i>
+by <i>mag</i>.  The adjustment is related to
+the specified <i>driver</i>. The <i>g</i> argument is the name of a
+CIV group; <i>c</i> is the name of a concern.  The <i>mag</i> is a
+<<xref simtypes(n) qmag>> value.  The specified satisfaction curve is
+then clamped to the range (-100.0, +100.0).<p>
 
-The <i>n</i>, <i>g</i>, and <i>c</i> arguments may also be passed a
+The <i>g</i> and <i>c</i> arguments may also be passed a
 wildcard, "*"; this means that the adjustment is to be made for all
-entities of that type.  Note that <i>g</i> and <i>c</i> may not both
-be "*".<p>
+entities of that type.<p>
 
 After making the adjustments, GRAM recomputes all satisfaction
 roll-ups.<p>
 
-The command returns an <i>esinput</i>, a serial number that increments
+The command returns an <i>input</i>, a serial number that increments
 with each input made for this <i>driver</i>.<p>
 
-<<defitem {sat level} {$obj sat level <i>driver ts n g c limit days</i> ?<i>options...</i>?}>>
+<<defitem {sat level} {$obj sat level <i>driver ts g c limit days</i> ?<i>options...</i>?}>>
 
 Schedules a satisfaction level input.  The input is for
 the specific <i>driver</i>, and begins to take effect at time <i>ts</i>,
 which should be no earlier than the current simulation time.  It affects
-neighborhood <i>n</i>, CIV or ORG group <i>g</i> and CIV or ORG
-concern <i>c</i>, all of which are specified by name.  Note that <i>g</i>
-and <i>c</i> must have the same group type, CIV or ORG.<p>
+CIV <i>g</i> and concern <i>c</i>.<p>
 
 The input has a maximum satisfaction change of <i>limit</i>
 (a <<xref simtypes(n) qmag>> value), and a
@@ -649,14 +550,9 @@ realization time of <i>days</i>
 (a <<xref simtypes(n) qduration>> value).<p>
 
 The input is decomposed into its direct effect on group <i>g</i>
-and its indirect effects on the other groups of the same type.
-Note that effects are only scheduled for neighborhood-groups for which
-satisfaction is tracked, i.e., all organization groups, and all
-civilian groups with non-zero population in the neighborhood.<p>
-Note that an input can have indirect effects on other groups even if
-group <i>g</i> has zero population.<p>
+and its indirect effects on the other civilian groups.<p>
 
-The command returns an <i>esinput</i>, a serial number that increments
+The command returns an <i>input</i>, a serial number that increments
 with each input made for this <i>driver</i>.<p>
 
 The options are as follows:<p>
@@ -704,25 +600,21 @@ curve is less than or equal to <i>threshold</i>.<p>
 
 <</deflist sat level options>>
 
-<<defitem {sat set} {$obj sat set <i>driver n g c sat</i> ?-undo?}>>
+<<defitem {sat set} {$obj sat set <i>driver g c sat</i> ?-undo?}>>
 
-Sets group <i>g</i>'s satisfaction with concern <i>c</i> in
-neighborhood <i>n</i> to <i>sat</i>.  The adjustment is related to
-the specified <i>driver</i>. The <i>n</i> argument is a neighborhood 
-name; <i>g</i> is the name of a CIV or ORG group; <i>c</i> is the name
-of a CIV or ORG concern.  Note that <i>g</i> and <i>c</i> must have
-the same type.  The <i>sat</i> is a <<xref simtypes(n) qsat>>
+Sets group <i>g</i>'s satisfaction with concern <i>c</i>
+to <i>sat</i>.  The adjustment is related to
+the specified <i>driver</i>.  The <i>sat</i> is a <<xref simtypes(n) qsat>>
 value.<p>
 
-The <i>n</i>, <i>g</i>, and <i>c</i> arguments may also be passed a
+The <i>g</i> and <i>c</i> arguments may also be passed a
 wildcard, "*"; this means that the adjustment is to be made for all
-entities of that type.  Note that <i>g</i> and <i>c</i> may not both
-be "*".<p>
+entities of that type.<p>
 
 After making the adjustments, GRAM recomputes all satisfaction
 roll-ups.<p>
 
-By default, the command returns an <i>esinput</i>, a serial number
+By default, the command returns an <i>input</i>, a serial number
 that increments with each input made for this <i>driver</i>.  If the
 <code>-undo</code> flag is given, the command decrements the
 <i>esinput</i> counter, and returns the empty string.  <b>NOTE:</b>
@@ -730,33 +622,25 @@ the <code>-undo</code> flag is a stopgap measure to allow Athena to
 use <<iref sat set>> to undo particular calls to <<iref sat adjust>>
 and <<iref sat set>>.<p>
 
-<<defitem {sat slope} {$obj sat slope <i>driver ts n g c slope</i> ?<i>options...</i>?}>>
+<<defitem {sat slope} {$obj sat slope <i>driver ts g c slope</i> ?<i>options...</i>?}>>
 
 Schedules a satisfaction slope input.  The input is for
 the specific <i>driver</i>, and begins to take effect at time <i>ts</i>,
 which should be no earlier than the current simulation time.  It affects
-neighborhood <i>n</i>, CIV or ORG group <i>g</i> and CIV or ORG
-concern <i>c</i>, all of which are specified by name.
-Note that <i>g</i> and <i>c</i>
-must have the same group type, CIV or ORG.<p>
+CIV group <i>g</i> and concern <i>c</i>.<p>
 
 The input has a nominal satisfaction change per day, the <i>slope</i>,
 a <<xref simtypes(n) qmag>> value.<p>
 
 The input is decomposed into its direct effect on group <i>g</i>
-and its indirect effects on the other groups of the same type. Note
-that effects are only scheduled for
-neighborhood-groups for which satisfaction is tracked, i.e., all
-organization groups, and all civilian groups with non-zero population
-in the neighborhood.<p> Note that an input can have indirect effects
-on other groups even if group <i>g</i> has zero population.<p>
+and its indirect effects on the other civilian groups.<p>
 
 
 Once scheduled, a slope input remain active with the specified
 <i>slope</i> until one of the following things happens:<p>
 
 <ul>
-  <li> A new input is entered for the same <i>driver</i>, <i>n</i>,
+  <li> A new input is entered for the same <i>driver</i>, 
        <i>g</i>, <i>c</i>, and <i>cause</i>; the new <i>slope</i> then
        replaces the old <i>slope</i>.  If the <i>slope</i> is 0.0,
        then the input and its effects are terminated.  (Note that
@@ -838,16 +722,10 @@ neighborhoods if <i>n</i> is "*" (the default).<p>
 Limits the results to the group with name <i>g</i>, or all
 groups if <i>g</i> is "*" (the default).<p>
 
-If <b>-concern</b> is also given, then the group and concern must have
-the same group type, CIV or ORG.<p>
-
 <<defopt {-concern <i>c</i>}>>
 
 Limits the results to the concern with name <i>c</i>, or all
 concerns if <i>c</i> is "*" (the default).<p>
-
-If <b>-group</b> is also given, then the group and concern must have
-the same group type, CIV or ORG.<p>
 
 If <i>c</i> is the special value <b>mood</b>, then results will be
 computed for all concerns, and then the contribution to mood will be
@@ -876,33 +754,30 @@ submit inputs for the cooperation curves.<p>
 
 <<deflist coop>>
 
-<<defitem {coop adjust} {$obj coop adjust <i>driver n f g mag</i>}>>
+<<defitem {coop adjust} {$obj coop adjust <i>driver f g mag</i>}>>
 
-Adjusts CIV group <i>f</i>'s cooperation with FRC group <i>g</i> in
-neighborhood <i>n</i> by <i>mag</i>.  The adjustment is related to
-the specific <i>driver</i>.
-The <i>n</i> argument is a neighborhood
-name; <i>f</i> and <i>g</i> are group names. The <i>mag</i> is a
+Adjusts CIV group <i>f</i>'s cooperation with FRC group <i>g</i>
+by <i>mag</i>.  The adjustment is related to
+the specific <i>driver</i>.  The <i>mag</i> is a
 <<xref simtypes(n) qmag>> value.  The specified cooperation curve is
 then clamped to the range 
 (0.0, +100.0).<p>
 
-The <i>n</i>, <i>f</i>, and <i>g</i> arguments may also be passed a
+The <i>f</i> and <i>g</i> arguments may also be passed a
 wildcard, "*"; this means that the adjustment is to be made for all
 entities of that type.<p>
 
 After the adjustments are made, cooperation roll-ups are computed.<p>
 
-The command returns an <i>esinput</i>, a serial number
+The command returns an <i>input</i>, a serial number
 that increments with each input made for this <i>driver</i>.<p>
 
-<<defitem {coop level} {$obj coop level <i>driver ts n f g limit days</i> ?<i>options...</i>?}>>
+<<defitem {coop level} {$obj coop level <i>driver ts f g limit days</i> ?<i>options...</i>?}>>
 
 Schedules a cooperation level input.  The input is for
 the specific <i>driver</i>, and begins to take effect at time <i>ts</i>,
 which should be no earlier than the current simulation time.  It affects
-neighborhood <i>n</i>, CIV group <i>f</i> and FRC group <i>g</i>, all
-of which are specified by name.<p>
+CIV group <i>f</i> and FRC group <i>g</i>.<p>
 
 The input has a maximum cooperation change of <i>limit</i>
 (a <<xref simtypes(n) qmag>> value), and a
@@ -911,13 +786,9 @@ realization time of <i>days</i>
 
 The input is decomposed into its direct effect on <i>f</i>'s
 cooperation with group <i>g</i>, and its indirect effects on
-<i>f</i>'s cooperation with other FRC groups.
-Note that effects are only scheduled in a neighborhood if <i>f</i>
-has non-zero population in <i>n</i>.<p>
-Note that an input can have indirect effects in other neighborhood even if
-<i>f</i> has zero population in <i>n</i>.<p>
+other CIV groups' cooperation with other FRC groups.<p>
 
-The command returns an <i>esinput</i>, a serial number that increments
+The command returns an <i>input</i>, a serial number that increments
 with each input made for this <i>driver</i>.<p>
 
 The options are as follows:<p>
@@ -965,22 +836,20 @@ curve is less than or equal to <i>threshold</i>.<p>
 
 <</deflist coop level options>>
 
-<<defitem {coop set} {$obj coop set <i>driver n f g coop</i> ?-undo?}>>
+<<defitem {coop set} {$obj coop set <i>driver f g coop</i> ?-undo?}>>
 
-Sets CIV group <i>f</i>'s cooperation with FRC group <i>g</i> in
-neighborhood <i>n</i> to <i>coop</i>.  The adjustment is related to
+Sets CIV group <i>f</i>'s cooperation with FRC group <i>g</i>
+to <i>coop</i>.  The adjustment is related to
 the specific <i>driver</i>.
-The <i>n</i> argument is a neighborhood
-name; <i>f</i> and <i>g</i> are group names. The <i>coop</i> is a
-<<xref simtypes(n) qcooperation>> value.<p>
+The <i>coop</i> is a <<xref simtypes(n) qcooperation>> value.<p>
 
-The <i>n</i>, <i>f</i>, and <i>g</i> arguments may also be passed a
+The <i>f</i> and <i>g</i> arguments may also be passed a
 wildcard, "*"; this means that the adjustment is to be made for all
 entities of that type.<p>
 
 After the adjustments are made, cooperation roll-ups are computed.<p>
 
-By default, the command returns an <i>esinput</i>, a serial number
+By default, the command returns an <i>input</i>, a serial number
 that increments with each input made for this <i>driver</i>.  If the
 <code>-undo</code> flag is given, the command decrements the
 <i>esinput</i> counter, and returns the empty string.  <b>NOTE:</b>
@@ -989,27 +858,22 @@ use <<iref coop set>> to undo particular calls to <<iref coop adjust>>
 and <<iref coop set>>.<p>
 
 
-<<defitem {coop slope} {$obj coop slope <i>driver ts n f g slope</i> ?<i>options...</i>?}>>
+<<defitem {coop slope} {$obj coop slope <i>driver ts f g slope</i> ?<i>options...</i>?}>>
 
 Schedules a cooperation slope input.  The input is for
 the specific <i>driver</i>, and begins to take effect at time <i>ts</i>,
 which should be no earlier than the current simulation time.  It affects
-neighborhood <i>n</i>, CIV group <i>f</i> and FRC group <i>g</i>, all
-of which are specified by name.<p>
+CIV group <i>f</i> and FRC group <i>g</i>.<p>
 
 The input has a nominal cooperation change per day, the <i>slope</i>,
 a <<xref simtypes(n) qmag>> value.<p>
 
 The input is decomposed into its direct effect on <i>f</i>'s
 cooperation with group <i>g</i>, and its indirect effects on
-<i>f</i>'s cooperation with other FRC groups.
-Note that effects are only scheduled in a neighborhood if <i>f</i>
-has non-zero population in <i>n</i>.<p>
-Note that an input can have indirect effects in other neighborhood even if
-<i>f</i> has zero population in <i>n</i>.<p>
+other civilian groups' cooperation with other FRC groups.<p>
 
 <ul>
-  <li> A new input is entered for the same <i>driver</i>, <i>n</i>,
+  <li> A new input is entered for the same <i>driver</i>, 
        <i>f</i>, <i>g</i>, and <i>cause</i>; the new <i>slope</i> then
        replaces the old <i>slope</i>.  If the <i>slope</i> is 0.0,
        then the input and its effects are terminated.  (Note that
@@ -1095,22 +959,13 @@ collections of debugging data.<p>
 
 <<deflist dump>>
 
-<<defitem "dump sat.ngc" {$obj dump sat.ngc ?options...?}>>
+<<defitem "dump sat.gc" {$obj dump sat.gc ?options...?}>>
 
-Dumps the contents of the <b>gram_sat</b> view for all neighborhoods,
-groups, and concerns, of both CIV and ORG types.  The following
+Dumps the contents of the <b>gram_sat</b> view for all
+groups and concerns.  The following
 options tailor the output:<p>
 
 <<deflist options>>
-
-<<defopt {-civ}>>
-<<defopt {-org}>>
-
-By default, both CIV and ORG groups are included.  These options will
-limit the output to CIV or ORG groups, respectively.  If both are
-specified, all groups are included.<p>
-
-These options are ignored if <code>-group</code> is specified.<p>
 
 <<defopt {-nbhood <i>n</i>}>>
 
@@ -1118,8 +973,7 @@ Includes only the neighborhood named <i>n</i>.<p>
 
 <<defopt {-group <i>g</i>}>>
 
-Includes only the group named <i>g</i>.  If this option is specified, 
-then the <code>-civ</code> and <code>-org</code> options are ignored.<p>
+Includes only the group named <i>g</i>.<p>
 
 <</deflist options>>
 
@@ -1136,11 +990,11 @@ Dumps a list of all scheduled satisfaction direct and indirect level
 effects, in tabular format.  If <i>driver</i> is specified, dumps only
 the effects related to that driver.<p>
 
-<<defitem "dump sat level" {$obj dump sat level <i>n g c</i>}>>
+<<defitem "dump sat level" {$obj dump sat level <i>g c</i>}>>
 
 Dumps a list of all direct and indirect level effects which
-currently affect the satisfaction for neighborhood <i>n</i>, group
-<i>g</i>, and concern <i>c</i>. The effects are grouped by cause, so
+currently affect the satisfaction for group <i>g</i>
+and concern <i>c</i>. The effects are grouped by cause, so
 that it's easy to determine that multiple effects with the same cause
 are handled properly.<p>
 
@@ -1156,20 +1010,20 @@ Because there may be many slope effects associated with driver 0,
 they are not included in the <<iref dump sat slopes>> output
 unless <i>driver</i> is explicitly passed a 0.<p>
 
-<<defitem "dump sat slope" {$obj dump sat slope <i>n g c</i>}>>
+<<defitem "dump sat slope" {$obj dump sat slope <i>g c</i>}>>
 
 Dumps a list of all active direct and indirect slope effects which
-currently affect the satisfaction for neighborhood <i>n</i>, group
-<i>g</i>, and concern <i>c</i>. The effects are grouped by cause, so
+currently affect the satisfaction for group
+<i>g</i> and concern <i>c</i>. The effects are grouped by cause, so
 that it's easy to determine that multiple effects with the same cause
 are handled properly.<p>
 
 <</deflist dump sat>>
 
-<<defitem "dump coop.nfg" {$obj dump coop.nfg ?options...?}>>
+<<defitem "dump coop.fg" {$obj dump coop.fg ?options...?}>>
 
-Dumps the contents of the <b>gram_coop</b> view for all neighborhoods,
-CIV groups, and FRC groups.  The following
+Dumps the contents of the <b>gram_coop</b> view for all
+CIV groups and FRC groups.  The following
 options tailor the output:<p>
 
 <<deflist options>>
@@ -1188,7 +1042,7 @@ Includes only the FRC group named <i>g</i>.<p>
 
 <<defopt {-ids}>>
 
-Includes the <b>curve_id</b> and <b>nfg_id</b> fields from
+Includes the <b>curve_id</b> and <b>fg_id</b> fields from
 <b>gram_coop</b>.<p>
 
 <</deflist options>>
@@ -1206,11 +1060,11 @@ Dumps a list of all scheduled cooperation direct and indirect level
 effects, in tabular format.  If <i>driver</i> is specified, dumps only
 the effects related to that driver.<p>
 
-<<defitem "dump coop level" {$obj dump coop level <i>n f g</i>}>>
+<<defitem "dump coop level" {$obj dump coop level <i>f g</i>}>>
 
 Dumps a list of all direct and indirect level effects which
-currently affect the cooperation for neighborhood <i>n</i>, CIV group
-<i>f</i>, and FRC group <i>g</i>. The effects are grouped by cause, so
+currently affect the cooperation for CIV group
+<i>f</i> and FRC group <i>g</i>. The effects are grouped by cause, so
 that it's easy to determine that multiple effects with the same cause
 are handled properly.<p>
 
@@ -1220,11 +1074,11 @@ Dumps a list of all scheduled cooperation slope effects.  If
 <i>driver</i> is specified, dumps only the effects
 related to that driver.<p>
 
-<<defitem "dump coop slope" {$obj dump coop slope <i>n f g</i>}>>
+<<defitem "dump coop slope" {$obj dump coop slope <i>f g</i>}>>
 
 Dumps a list of all active direct and indirect slope effects which
-currently affect the cooperation for neighborhood <i>n</i>, CIV group
-<i>f</i>, and FRC group <i>g</i>. The effects are grouped by cause, so
+currently affect the cooperation for CIV group
+<i>f</i> and FRC group <i>g</i>. The effects are grouped by cause, so
 that it's easy to determine that multiple effects with the same cause
 are handled properly.<p>
 
