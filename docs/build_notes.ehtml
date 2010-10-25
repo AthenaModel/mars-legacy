@@ -10,6 +10,32 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.36, 25 October 2010</h3>
+
+This build adds a new version of GRAM, gram2(n), with a new internal
+schema which excludes ORG satisfaction and requires that each civilian
+group reside in a single neighborhood.  The old version can be used by
+requesting<p>
+
+<pre>
+    package require -exact simlib 1.0
+</pre>
+
+and the new version by requesting
+
+<pre>
+    package require simlib 2.0
+</pre>
+
+The gramdb(n) package similarly has a new version, gramdb2(n).  All
+other simlib(n) packages are identical across the two versions.<p>
+
+This build has exactly one new package:<p>
+
+<ul>
+  <li> Bug 2632: gram2(n): Pull the experimental GRAM into simlib(n)
+</ul><p>
+
 <h3>Build 1.35, 11 October 2010</h3>
 
 This build adds the new formlib(n) library, which takes user interface
