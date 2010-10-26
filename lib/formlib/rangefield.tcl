@@ -306,7 +306,7 @@ snit::widget ::formlib::rangefield {
     #
     # Returns the current value.
 
-    method get {value} {
+    method get {} {
         return [$scale get]
     }
 
