@@ -300,7 +300,6 @@ snit::widget ::formlib::rangefield {
     method SetQmenu {value} {
         if {$qmenu ne ""} {
             set qmenuGuard [$options(-type) name $value]
-            puts "qmenuGuard <= <$qmenuGuard>"
             $qmenu set $qmenuGuard
             set inSetQmenu 0
         }
@@ -313,7 +312,6 @@ snit::widget ::formlib::rangefield {
 
     method QmenuChanged {value} {
         if {$value ne $qmenuGuard} {
-            puts "value <$value> ne qmenuGuard <$qmenuGuard>, set"
             $self set [$options(-type) value $value]
         }
     }
