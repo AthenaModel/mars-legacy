@@ -118,9 +118,10 @@ snit::widget ::formlib::rangefield {
     #-------------------------------------------------------------------
     # Instance Variables
 
-    variable current    0    ;# Current value
-    variable scaleGuard ""   ;# ScaleChanged guard value
-    variable qmenuGuard ""   ;# QmenuChanged guard value
+    variable current       0    ;# Current value
+    variable inConstructor 1    ;# Don't call -changecmd in constructor.
+    variable scaleGuard    ""   ;# ScaleChanged guard value
+    variable qmenuGuard    ""   ;# QmenuChanged guard value
 
 
     #-------------------------------------------------------------------
@@ -213,6 +214,8 @@ snit::widget ::formlib::rangefield {
 
         # NEXT, initialize the widget
         $self set ""
+
+        set inConstructor 0
     }
 
     #-------------------------------------------------------------------
@@ -297,6 +300,7 @@ snit::widget ::formlib::rangefield {
     method SetQmenu {value} {
         if {$qmenu ne ""} {
             set qmenuGuard [$options(-type) name $value]
+            puts "qmenuGuard <= <$qmenuGuard>"
             $qmenu set $qmenuGuard
             set inSetQmenu 0
         }
@@ -309,6 +313,7 @@ snit::widget ::formlib::rangefield {
 
     method QmenuChanged {value} {
         if {$value ne $qmenuGuard} {
+            puts "value <$value> ne qmenuGuard <$qmenuGuard>, set"
             $self set [$options(-type) value $value]
         }
     }
@@ -357,7 +362,9 @@ snit::widget ::formlib::rangefield {
         }
 
         # NEXT, notify the client.
-        callwith $options(-changecmd) $current
+        if {!$inConstructor} {
+            callwith $options(-changecmd) $current
+        }
     }
 }
 
