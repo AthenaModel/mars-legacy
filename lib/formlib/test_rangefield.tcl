@@ -42,7 +42,8 @@ namespace import formlib::*
 proc main {argv} {
     ttk::label .lab -text "Satisfaction:"
 
-    form .form
+    form .form \
+        -changecmd ChangeCmd
 
     form register sat rangefield \
         -type ::simlib::qsat \
@@ -59,7 +60,12 @@ proc main {argv} {
 
     .form layout
 
+    ttk::button .clear \
+        -text "Clear" \
+        -command ClearFields
+
     grid .form  -row 0 -column 0 -sticky ew  -pady 4 -padx 4
+    grid .clear -row 1 -column 0 -sticky ew  -pady 4 -padx 4
 
     grid columnconfigure . 0 -weight 1
     
@@ -67,10 +73,16 @@ proc main {argv} {
     bind . <Control-F12> {debugger new}
 }
 
-set inChangeCmd 0
+proc ChangeCmd {fields} {
+    foreach field $fields {
+        puts "$field is now: <[.form field get $field]>"
+    }
+}
 
-proc ChangeCmd {args} {
-    puts "Value = <[.form get]>"
+proc ClearFields {} {
+    foreach field [.form field names] {
+        .form set $field ""
+    }
 }
 
 #-------------------------------------------------------------------

@@ -118,8 +118,10 @@ snit::widget ::formlib::rangefield {
     #-------------------------------------------------------------------
     # Instance Variables
 
-    variable current        0    ;# Current value
-    variable inScaleChanged 0    ;# Flag
+    variable current    0    ;# Current value
+    variable scaleGuard ""   ;# ScaleChanged guard value
+    variable qmenuGuard ""   ;# QmenuChanged guard value
+
 
     #-------------------------------------------------------------------
     # Constructor
@@ -135,9 +137,7 @@ snit::widget ::formlib::rangefield {
             -orient    horizontal              \
             -showvalue no                      \
             -takefocus 1                       \
-            -length    150                     \
-            -variable  [myvar current]         \
-            -command   [mymethod ScaleChanged]
+            -length    150
 
         # NEXT, clicking on the scale should give it the focus.
         bind $scale <1> {focus %W}
@@ -160,8 +160,6 @@ snit::widget ::formlib::rangefield {
             -resolution $options(-resolution)
 
         set vlabelWidth [$self GetLabelWidth]
-
-        $self Reset
 
         $scale configure \
             -command    [mymethod ScaleChanged]
@@ -190,7 +188,7 @@ snit::widget ::formlib::rangefield {
             install qmenu as enumfield $win.qmenu     \
                 -enumtype    $options(-type)          \
                 -displaylong 1                        \
-                -changecmd   [mymethod SymbolChanged] \
+                -changecmd   [mymethod QmenuChanged] \
                 -width       $width
         } else {
             set qmenu ""
@@ -212,7 +210,9 @@ snit::widget ::formlib::rangefield {
         if {$qmenu ne ""} {
             grid $qmenu -row 0 -column [incr c] -sticky ew -padx {4 0}
         }
-        
+
+        # NEXT, initialize the widget
+        $self set ""
     }
 
     #-------------------------------------------------------------------
@@ -264,18 +264,53 @@ snit::widget ::formlib::rangefield {
         return [expr {max($a,$b)}]
     }
 
+    # SetScale value
+    #
+    # Sets the current value of the scale widget, disabled
+    # ScaleChanged.
+
+    method SetScale {value} {
+        if {$value eq ""} {
+            set value $options(-resetvalue)
+        }
+
+        set scaleGuard $value
+        $scale set $value
+    }
+
+
     # ScaleChanged value
     #
     # The value of the scale widget changed.
 
     method ScaleChanged {value} {
-        if {$qmenu ne ""} {
-            set inScaleChanged 1
-            $qmenu set [$options(-type) name $current]
-            set inScaleChanged 0
+        if {$value != $scaleGuard} {
+            $self set $value
         }
+    }
 
-        callwith $options(-changecmd) $current
+    # SetQmenu value
+    #
+    # Sets the current value of the qmenu widget, disabled
+    # ScaleChanged.
+
+    method SetQmenu {value} {
+        if {$qmenu ne ""} {
+            set qmenuGuard [$options(-type) name $value]
+            $qmenu set $qmenuGuard
+            set inSetQmenu 0
+        }
+    }
+
+
+    # QmenuChanged value
+    #
+    # The value of the qmenu widget changed.
+
+    method QmenuChanged {value} {
+        if {$value ne $qmenuGuard} {
+            $self set [$options(-type) value $value]
+        }
     }
 
     # Reset
@@ -286,19 +321,6 @@ snit::widget ::formlib::rangefield {
         $self set $options(-resetvalue)
     }
 
-    # SymbolChanged value
-    #
-    # A new symbol was selected in the qmenu
-    
-    method SymbolChanged {value} {
-        if {$inScaleChanged} {
-            return
-        }
-
-        $scale set [$options(-type) value $value]
-    }
-
-
     #-------------------------------------------------------------------
     # Public Methods
 
@@ -307,7 +329,7 @@ snit::widget ::formlib::rangefield {
     # Returns the current value.
 
     method get {} {
-        return [$scale get]
+        return $current
     }
 
     # set value
@@ -317,14 +339,25 @@ snit::widget ::formlib::rangefield {
     # Sets the widget's value to the new value.
 
     method set {value} {
-        if {$value eq ""} {
-            # The scale can't display ""
-            set value $options(-resetvalue)
+        # FIRST, if nothing's changed, do nothing.
+        if {$value eq $current} {
+            return
         }
 
-        if {$value != [$scale get]} {
-            $scale set $value
+        # NEXT, update the scale and qmenu to reflect the new value.
+        $self SetScale $value
+        $self SetQmenu $value
+
+        # NEXT, save the new value as the current value.
+        # If it's non-empty, allow the scale to format it.
+        if {$value ne ""} {
+            set current [$scale get]
+        } else {
+            set current ""
         }
+
+        # NEXT, notify the client.
+        callwith $options(-changecmd) $current
     }
 }
 
