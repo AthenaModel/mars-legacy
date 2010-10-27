@@ -13,9 +13,9 @@
 #-----------------------------------------------------------------------
 # Package Dependencies
 
-package require snit    2.2
+package require snit    2.3
 package require textutil::expander
-package require sqlite3 3.5
+package require sqlite3 3.6
 package require comm
 
 #-----------------------------------------------------------------------
