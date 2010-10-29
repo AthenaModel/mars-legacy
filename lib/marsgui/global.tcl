@@ -40,11 +40,19 @@ bind Text <Control-v> ""
 #
 # Use pixel sizing; it's more general across machines.
 
-font create codefont       -family {Luxi Mono}   -size -12 -weight normal
-font create codefontitalic -family {Luxi Mono}   -size -12 -weight normal \
+# Luxi Mono looks nice on RHEL 5; but if it isn't available,
+# make sure we get a fixed font.
+set baseMono {Luxi Mono}
+
+if {![dict get [font metrics [list $baseMono -12]] -fixed]} {
+    set baseMono Courier
+}
+
+font create codefont       -family $baseMono -size -12 -weight normal
+font create codefontitalic -family $baseMono -size -12 -weight normal \
                            -slant italic
-font create codefontbold   -family {Luxi Mono}   -size -12 -weight bold
-font create tinyfont       -family {Luxi Sans}   -size  -9 -weight normal
+font create codefontbold   -family $baseMono -size -12 -weight bold
+font create tinyfont       -family $baseMono -size  -9 -weight normal
 
 font create messagefont    -family Helvetica -size -12
 font create messagefontb   -family Helvetica -size -12 -weight bold
