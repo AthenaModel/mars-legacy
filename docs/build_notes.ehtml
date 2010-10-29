@@ -10,6 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.37, 29 October 2010</h3>
+This build contains a bug fix and small enhancement to the rangefield(n)
+widget. It also contains updates to marsgui(n) in support of the upgrade
+to ActiveTcl EE 2010 Q3. The three packages included are:<p>
+
+<ul>
+  <li> Bug 2638: rangefield(n): error in "get" argument list
+  <li> Bug 2644: rangefield(n): Support blank values
+  <li> Bug 2646: marsgui(n): Upgrade to ActiveTcl EE 2010 Q3
+</ul>
+
 <h3>Build 1.36, 25 October 2010</h3>
 
 This build adds a new version of GRAM, gram2(n), with a new internal
