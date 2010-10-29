@@ -160,9 +160,10 @@ ttk::style map Menubox.TCombobox -foreground {}
 # Tabless.TNotebook: A style for tabless ttk::notebook widgets
 ttk::style layout Tabless.TNotebook.Tab null
 
-# TEntry: Set background for readonly ttk::entry widgets
+# TEntry: Set background for readonly and disabled ttk::entry widgets
 ttk::style map TEntry \
-    -fieldbackground [list readonly $::marsgui::defaultBackground]
+    -fieldbackground [list readonly $::marsgui::defaultBackground \
+                          disabled $::marsgui::defaultBackground]
 
 #-----------------------------------------------------------------------
 # Option Database Settings
