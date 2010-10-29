@@ -77,5 +77,6 @@ source [file join $::marsgui::library stripchart.tcl     ]
 source [file join $::marsgui::library pwin.tcl           ]
 source [file join $::marsgui::library pwinman.tcl        ]
 source [file join $::marsgui::library cmsheet.tcl        ]
+source [file join $::marsgui::library guitypes.tcl       ]
 
 

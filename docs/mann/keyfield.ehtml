@@ -35,6 +35,8 @@ This module defines the following commands.<p>
 Creates a new <<iref keyfield>> widget named <i>pathName</i>, and
 returns <i>pathName</i>.  The widget supports the following options:<p>
 
+<<deflist options>>
+
 <<defopt {-changecmd <i>command</i>}>>
 
 From <<xref field(i)>>.  Specifies a <i>command</i> to be called
@@ -86,6 +88,9 @@ width of each pulldown.<p>
 Specifies a list of label strings, one for each key column.  If a
 column's label string is not the empty string, then it will appear to
 the left of the key's pulldown.<p>
+
+<</deflist options>>
+
 
 <</deflist commands>>
 

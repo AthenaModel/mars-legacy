@@ -28,6 +28,8 @@ This module defines the following commands.<p>
 Creates a new <<iref rangefield>> widget named <i>pathName</i>, and
 returns <i>pathName</i>.  The widget supports the following options:<p>
 
+<<deflist options>>
+
 <<defopt {-changecmd <i>command</i>}>>
 
 From <<xref field(i)>>.  Specifies a <i>command</i> to be called
@@ -79,6 +81,8 @@ appear in a pulldown at the right end of the field.  The user can
 select a particular symbol and get the matching value.  If the user
 sets the value using the slider, the pulldown will show the symbol
 that most closely matches the selected value.<p>
+
+<</deflist options>>
 
 <</deflist commands>>
 

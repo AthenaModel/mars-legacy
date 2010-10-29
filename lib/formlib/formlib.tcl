@@ -33,6 +33,7 @@ namespace eval ::formlib:: {
     namespace import ::marsutil::*
 }
 
+source [file join $::formlib::library colorfield.tcl   ]
 source [file join $::formlib::library dispfield.tcl    ]
 source [file join $::formlib::library enumfield.tcl    ]
 source [file join $::formlib::library keyfield.tcl     ]

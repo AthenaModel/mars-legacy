@@ -27,6 +27,8 @@ This module defines the following commands.<p>
 Creates a new <<iref enumfield>> widget named <i>pathName</i>, and
 returns <i>pathName</i>.  The widget supports the following options:<p>
 
+<<deflist options>>
+
 <<defopt {-changecmd <i>command</i>}>>
 
 From <<xref field(i)>>.  Specifies a <i>command</i> to be called
@@ -93,6 +95,8 @@ list of application value/displayed value pairs.<p>
 
 Specifies the approximate width of the widget in characters of the
 current font.<p>
+
+<</deflist options>>
 
 <</deflist commands>>
 
