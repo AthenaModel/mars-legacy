@@ -10,6 +10,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.38, 2 November 2010</h3>
+
+This build contains one change: colorfield(n), a new formlib(n)
+widget.<p>
+
+<ul>
+  <li> Bug 2654: formlib(n): colorfield(n) 
+</ul>
+
 <h3>Build 1.37, 29 October 2010</h3>
 This build contains a bug fix and small enhancement to the rangefield(n)
 widget. It also contains updates to marsgui(n) in support of the upgrade
