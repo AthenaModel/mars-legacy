@@ -291,6 +291,17 @@ snit::type ::simlib::gram {
     #                 starting at 0. The expression (time minus timelast) gives
     #                 us the length of the most recent time step.
     #
+    #   scid        - Satisfaction curve_id cache: dict g -> c -> curve_id
+    #
+    #   frel.gf     - FRC/FRC relationship dictionary: g -> f -> rel.
+    #                 The order of the subscripts is reversed so that it
+    #                 is easy to retrieve the relationships of all 
+    #                 force groups f with force group g.
+    #
+    #   sstag       - Satisfaction spread tag
+    #
+    #   ssvalue - Satisfaction spread value
+    #
     #-----------------------------------------------------------------------
     
     variable db -array { }
@@ -306,6 +317,10 @@ snit::type ::simlib::gram {
         loadstate        ""
         time             {}
         timelast         {}
+        scid             {}
+        frel.gf          {}
+        sstag            {}
+        ssvalue          {}
     }
 
     # Variable: info
@@ -315,8 +330,9 @@ snit::type ::simlib::gram {
     #   changed - 1 if the contents of <db> has changed, and 0 otherwise.
     
     variable info -array {
-        changed          0
+        changed  0
     }
+
 
     #-------------------------------------------------------------------
     # Group: Constructor
@@ -458,8 +474,8 @@ snit::type ::simlib::gram {
         set db(time)     [$clock now]
         set db(timelast) $db(time)
 
-        # NEXT, compute the influence table.
-        $self ComputeSatInfluence
+        # NEXT, compute the civ group proximity
+        $self ComputeGroupProximity
 
         # NEXT, Initialize the curves.  This includes deleting all history.
         $self CurvesInit
@@ -477,6 +493,9 @@ snit::type ::simlib::gram {
             UPDATE gram_g      SET sat0  = sat;
             UPDATE gram_frc_ng SET coop0 = coop;
         }
+
+        # NEXT, save initial group history.
+        $self SaveGroupHistory
 
         # NEXT, set the changed flag
         set info(changed) 1
@@ -538,6 +557,7 @@ snit::type ::simlib::gram {
             DELETE FROM gram_effects;
             DELETE FROM gram_contribs;
             DELETE FROM gram_deltas;
+            DELETE FROM gram_hist_g;
             DELETE FROM gram_n;
             DELETE FROM gram_g;
             DELETE FROM gram_c;
@@ -560,17 +580,23 @@ snit::type ::simlib::gram {
         return $db(initialized)
     }
     
-    # Method: ComputeSatInfluence
+    # Method: ComputeGroupProximity
     #
-    # Computes all satisfaction influence entries and places them
-    # in <gram_fg>.  This is done at initialization time; hence, it is 
-    # assumed that none of the influence inputs can vary after time 0.
+    # Computes the proximity and effects delay between all pairs
+    # of civilian groups, and places them in gram_fg.  Specify a
+    # specific group to recompute proximity just for that group.
+    #
+    # Syntax:
+    #    ComputeGroupProximity _?g?_
+    #
+    #    g    - An optional group name.
 
-    method ComputeSatInfluence {} {
+    method ComputeGroupProximity {{g ""}} {
         # FIRST, get the conversion from days to ticks
         set daysToTicks [$clock fromDays 1.0]
 
-        foreach {f g prox delay} [$rdb eval {
+        # NEXT, get the query string.
+        set query {
             SELECT gram_fg.f                            AS f,
                    gram_fg.g                            AS g,
                    gram_mn.proximity                    AS prox,
@@ -579,7 +605,13 @@ snit::type ::simlib::gram {
             JOIN gram_g AS F ON (F.g = gram_fg.f)
             JOIN gram_g AS G ON (G.g = gram_fg.g)
             JOIN gram_mn ON (gram_mn.m = F.n AND gram_mn.n = G.n)
-        }] {
+        }
+
+        if {$g ne ""} {
+            append query {WHERE gram_fg.f = $g OR gram_fg.g = $g}
+        }
+
+        foreach {f g prox delay} [$rdb eval $query] {
             # FIRST, if f *is* g, this is a direct effect, and the
             # proximity is -1.
             if {$f eq $g} {
@@ -651,6 +683,24 @@ snit::type ::simlib::gram {
         # and create the validation enums.
         $self SanityCheck
         $self CreateValidators
+
+        # NEXT, cache the satisfaction and cooperation curve ID 
+        # dictionaries.  (These are updated on civgroup split.)
+        set db(scid) [dict create]
+
+        $rdb eval {
+            SELECT g,c,curve_id FROM gram_gc
+        } {
+            dict set db(scid) $g $c $curve_id
+        }
+
+        # NEXT, cache the FRC/FRC relationships in a dictionary.
+        $rdb eval {
+            SELECT f,g,rel FROM gram_frc_fg
+        } {
+            dict set db(frel.gf) $g $f $rel
+        }
+        
     }
     
     # Method: SanityCheck
@@ -807,8 +857,8 @@ snit::type ::simlib::gram {
         # FIRST, load the civ group definitions.
         foreach {g n population} $args {
             $rdb eval {
-                INSERT INTO gram_g(g,n,population)
-                VALUES($g,$n,$population);
+                INSERT INTO gram_g(g,n,ancestor,population)
+                VALUES($g,$n,$g,$population);
             }
         }
 
@@ -1411,6 +1461,24 @@ snit::type ::simlib::gram {
         set db(time) [$clock now]
         set info(changed) 1
 
+        # NEXT, "kill" any dead groups
+        foreach g [$rdb eval {
+            SELECT g 
+            FROM gram_g
+            WHERE population = 0 
+            AND   alive = 1
+        }] {
+            # Mark the group dead.
+            $rdb eval {
+                UPDATE gram_g 
+                SET alive = 0
+                WHERE g = $g;
+            }
+
+            # NEXT, terminate all active effects on this group.
+            $self TerminateGroupEffects $g
+        }
+
         # NEXT, Compute the contribution to each of the curves for
         # this time step.
         $self UpdateCurves
@@ -1419,7 +1487,31 @@ snit::type ::simlib::gram {
         $self ComputeSatRollups
         $self ComputeCoopRollups
 
+        # NEXT, Save the group population history
+        $self SaveGroupHistory
+
         return
+    }
+
+    # Method: SaveGroupHistory
+    #
+    # Saves the neighborhood, population, and alive flag for each
+    # civilian group.
+
+    method SaveGroupHistory {} {
+        # FIRST, skip the history data, if that's what we want to do
+        set pname gram.saveHistory
+
+        if {![$parm get $pname]} {
+            return
+        }
+
+        # NEXT, save the data.
+        $rdb eval {
+            INSERT INTO gram_hist_g
+            SELECT $db(time), g, n, alive, population
+            FROM gram_g;
+        }
     }
 
 
@@ -1450,11 +1542,13 @@ snit::type ::simlib::gram {
     # Method: ComputeSatN
     #
     # Computes the overall civilian mood for each nbhood at time t.
+    # The mood is 0.0 if the population of the neighborhood is 0.0.
     
     method ComputeSatN {} {
         $rdb eval {
-            SELECT n,
-                   total(num)/total(denom) AS sat
+            SELECT n            AS n,
+                   total(num)   AS num,
+                   total(denom) AS denom
             FROM (
                 SELECT gram_sat.n                          AS n, 
                        gram_sat.sat*saliency*population    AS num,
@@ -1462,6 +1556,12 @@ snit::type ::simlib::gram {
                 FROM gram_sat JOIN gram_g USING (g_id))
             GROUP BY n
         } {
+            if {$denom == 0.0} {
+                let sat 0.0
+            } else {
+                let sat {$num/$denom}
+            }
+
             $rdb eval {
                 UPDATE gram_n
                 SET sat = $sat
@@ -1513,7 +1613,8 @@ snit::type ::simlib::gram {
 
     # Method: ComputeCoopRollups
     #
-    # Computes coop.ng.  
+    # Computes coop.ng; if neighborhood n has zero population, 
+    # the result is 0.0.
 
     method ComputeCoopRollups {} {
         # FIRST, compute coop.ng
@@ -1528,11 +1629,392 @@ snit::type ::simlib::gram {
                         AND gram_coop.f = gram_g.g
             GROUP BY gram_coop.n, gram_coop.g
         } {
+            if {$denom == 0} {
+                let coop 0.0
+            } else {
+                let coop {$num/$denom}
+            }
+
             $rdb eval {
                 UPDATE gram_frc_ng
-                SET coop = $num/$denom
+                SET coop = $coop
                 WHERE n=$n AND g=$g
             }
+        }
+    }
+
+    #-------------------------------------------------------------------
+    # Group: Dynamic CIV Group API
+    #
+    # In this version of GRAM, civilian groups become considerably more
+    # dynamic.  Existing groups can be moved, new groups can be split
+    # out of old groups, and so forth.
+
+    # Method: civgroup names
+    #
+    # Returns a list of civ groups.  If _n_ is given,
+    # only groups from the specified neighborhood are returned.
+    #
+    # Syntax:
+    #   civgroup names _?n?_
+    #
+    #   n - A neighborhood
+
+    method "civgroup names" {{n ""}} {
+        if {$n eq ""} {
+            return [$rdb eval {
+                SELECT g FROM gram_g
+            }]
+        } else {
+            return [$rdb eval {
+                SELECT g FROM gram_g WHERE n=$n
+            }]
+        }
+    }
+
+    # Method: civgroup alive
+    #
+    # Returns a list of civ groups that are alive.  If _n_ is given,
+    # only groups from the specified neighborhood are returned.
+    #
+    # Syntax:
+    #   civgroup alive _?n?_
+    #
+    #   n - A neighborhood
+
+    method "civgroup alive" {{n ""}} {
+        if {$n eq ""} {
+            return [$rdb eval {
+                SELECT g FROM gram_g WHERE alive=1
+            }]
+        } else {
+            return [$rdb eval {
+                SELECT g FROM gram_g WHERE alive=1 AND n=$n
+            }]
+        }
+    }
+
+    # Method: civgroup dead
+    #
+    # Returns a list of dead civ groups.  If _n_ is given,
+    # only groups from the specified neighborhood are returned.
+    #
+    # Syntax:
+    #   civgroup dead _?n?_
+    #
+    #   n - A neighborhood
+
+    method "civgroup dead" {{n ""}} {
+        if {$n eq ""} {
+            return [$rdb eval {
+                SELECT g FROM gram_g WHERE alive=0
+            }]
+        } else {
+            return [$rdb eval {
+                SELECT g FROM gram_g WHERE alive=0 AND n=$n
+            }]
+        }
+    }
+
+    # Method: civgroup get
+    #
+    # Returns a dictionary of the group's data (the gram_g fields).
+    # If a particular field is named, returns that field's value.
+    #
+    # Syntax:
+    #    group get _g ?field?_
+    #
+    #    g      - A group name
+    #    field  - A column name in the gram_g table
+   
+    method "civgroup get" {g {field ""}} {
+        $rdb eval {
+            SELECT * FROM gram_g WHERE g=$g
+        } row {
+            unset row(*)
+
+            if {$field eq ""} {
+                return [array get row]
+            }
+
+            if {[info exists row($field)]} {
+                return $row($field)
+            }
+
+            error "unknown group field, \"$field\""
+        }
+
+        return ""
+    }
+
+    # Method: civgroup move
+    #
+    # Moves a civilian group to a different neighborhood.  Recomputes
+    # group proximities; terminates all pending attitude effects.
+    # It's up to the application to apply any relevant drivers.
+    #
+    # Syntax:
+    #    civgroup move _g n_
+    #
+    #    g     The group to move
+    #    n     The neighborhood to move it to.
+
+    method "civgroup move" {g n} {
+        $self Log normal "civgroup move g=$g n=$n"
+
+        # FIRST, validate the inputs.
+        $cgroups validate $g
+        $nbhoods validate $n
+
+        # NEXT, reset the group's neighborhood.
+        $rdb eval {
+            UPDATE gram_g
+            SET    n = $n
+            WHERE  g = $g
+        }
+
+        # NEXT, terminate all active effects on this group.
+        $self TerminateGroupEffects $g
+
+        # NEXT, recompute the group's proximity
+        $self ComputeGroupProximity $g
+
+        # NEXT, clear the satisfaction spread cache; it might
+        # be invalid.
+        set db(sstag) ""
+
+        return
+    }
+    
+
+    # Method: TerminateGroupEffects
+    #
+    # Deletes all gram_effects entries related to the given group.
+    #
+    # Syntax:
+    #    TerminateGroupEffects _g_
+    #
+    #    g  - A CIV group
+
+    method TerminateGroupEffects {g} {
+        foreach id [$rdb eval {
+            SELECT id FROM gram_sat_effects WHERE g=$g
+            UNION
+            SELECT id FROM gram_coop_effects WHERE f=$g
+        }] {
+            $rdb eval {
+                DELETE FROM gram_effects
+                WHERE id = $id
+            }
+        }
+    }
+    
+    # Method: civgroup split
+    #
+    # Creates a new civilian group as a clone of an existing group,
+    # putting it into a specific neighborhood and giving it some
+    # portion of the original group's personnel.  The new group
+    # will have the same attitudes and relationships as the parent
+    # group.xs
+    #
+    # Syntax:
+    #    civgroup split _parent g n population_
+    #
+    #    parent        The parent group
+    #    g             The group to create
+    #    n             Group g's initial neighborhood of residence
+    #    population    Population to transfer from parent to g.
+
+    method "civgroup split" {parent g n population} {
+        $self Log normal "civgroup split parent=$parent g=$g n=$n population=$population"
+
+        # FIRST, validate the inputs.
+        $cgroups validate $parent
+        array set pdata [$self civgroup get $parent]
+
+        require {$g ni [$cgroups cget -values]} "group already exists: \"$g\""
+
+        $nbhoods validate $n
+        ipopulation validate $population
+
+        require {$pdata(population) >= $population} \
+            "parent group has insufficient population ($pdata(population) < $population)"
+
+        # NEXT, create the new group's gram_g record.
+        $rdb eval {
+            INSERT INTO gram_g(g, n, population, parent, ancestor,
+                               total_saliency, sat0, sat)
+            VALUES($g, $n, $population, $parent, $pdata(ancestor),
+                   $pdata(total_saliency), $pdata(sat0), $pdata(sat))
+        }
+
+        # NEXT, remove the population from the parent group.
+        $rdb eval {
+            UPDATE gram_g
+            SET population = population - $population
+            WHERE g=$parent
+        }
+
+        # NEXT, get the new group's g_id
+        set g_id [$rdb last_insert_rowid]
+
+        # NEXT, copy the parent's satisfactions.
+        foreach {c sat sat0 saliency delta slope} [$rdb eval {
+            SELECT c, sat, sat0, saliency, delta, slope
+            FROM gram_sat
+            WHERE g=$parent
+            ORDER BY c
+        }] {
+            $rdb eval {
+                -- Note: curve_id is set automatically
+                INSERT INTO gram_curves(curve_type, val0, val, delta, slope)
+                VALUES('SAT', $sat0, $sat, $delta, $slope);
+
+                -- Note: gc_id is set automatically
+                INSERT INTO 
+                gram_gc(g_id, curve_id, g, c, saliency)
+                VALUES($g_id, last_insert_rowid(), $g, $c, $saliency);
+            }
+        }
+
+
+        # NEXT, copy the parent's cooperations.
+        foreach {frc coop coop0 delta slope} [$rdb eval {
+            SELECT g, coop, coop0, delta, slope
+            FROM gram_coop
+            WHERE f=$parent
+            ORDER BY g
+        }] {
+            $rdb eval {
+                -- Note: curve_id is set automatically.
+                INSERT INTO gram_curves(curve_type, val0, val, delta, slope)
+                VALUES('COOP', $coop0, $coop, $delta, $slope);
+
+                INSERT INTO gram_coop_fg(curve_id,f,g)
+                VALUES(last_insert_rowid(), $g, $frc)
+            }
+        }
+
+        # NEXT, cache the new curve IDs.
+        $rdb eval {
+            SELECT c,curve_id FROM gram_gc
+            WHERE g=$g
+        } {
+            dict set db(scid) $g $c $curve_id
+        }
+
+        # NEXT, copy the parent's relationships.
+        $rdb eval {
+            INSERT INTO gram_fg(f,g,rel)
+            SELECT f AS f, $g AS g, rel
+            FROM gram_fg WHERE g=$parent
+            UNION
+            SELECT $g AS f, g AS g, rel
+            FROM gram_fg WHERE f=$parent
+            UNION
+            SELECT $g AS f, $g AS g, rel
+            FROM gram_fg WHERE f=$parent AND g=$parent
+        }
+
+        # NEXT, compute g's proximity
+        $self ComputeGroupProximity $g
+
+        # NEXT, re-create the validators, so that the new
+        # group is present in $cgroups.
+        $self CreateValidators
+
+        return
+    }
+
+    # Method: civgroup transfer
+    #
+    # Transfers population from one civ group to another, and updates
+    # the second group's attitudes according to the mixture of old and
+    # new population.
+    #
+    # Syntax:
+    #    civgroup transfer _driver e f population_
+    #
+    #    driver        The driver of the change
+    #    e             The source group
+    #    f             The destination group
+    #    population    Population to transfer from e to f
+
+    method "civgroup transfer" {driver e f population} {
+        $self Log normal "civgroup transfer driver=$driver e=$e f=$f population=$population"
+
+        # FIRST, validate the inputs.
+        $self driver validate $driver "Cannot transfer population"
+        $cgroups validate $e
+        $cgroups validate $f
+
+        array set edata [$self civgroup get $e]
+        array set fdata [$self civgroup get $f]
+
+        require {$edata(ancestor) eq $fdata(ancestor)} \
+            "Groups $e and $f have different ancestors."
+
+        ipopulation validate $population
+
+        require {$edata(population) >= $population} \
+            "group \"$e\"has insufficient population ($edata(population) < $population)"
+
+        # NEXT, update the population values for each group.
+        $rdb eval {
+            -- e loses population.
+            UPDATE gram_g 
+            SET   population = population - $population
+            WHERE g=$e;
+
+            UPDATE gram_g 
+            SET   population = population + $population
+            WHERE g=$f;
+
+            UPDATE gram_g
+            SET    alive = 1
+            WHERE  g=$f AND population > 0;
+        }
+
+        # NEXT, update the satisfactions
+        set epop $edata(population)
+        set fpop $fdata(population)
+
+        foreach {esat fsat c} [$rdb eval {
+            SELECT ESAT.sat AS esat,
+                   FSAT.sat AS fsat,
+                   FSAT.c   AS c
+            FROM gram_sat AS ESAT
+            JOIN gram_sat AS FSAT USING (c)
+            WHERE ESAT.g = $e
+            AND   FSAT.g = $f
+        }] {
+            if {$epop == 0 && $fpop == 0} {
+                let sat 0.0
+            } else {
+                let sat {($epop*$esat + $fpop*$fsat)/($epop + $fpop)}
+            }
+
+            $self sat set $driver $f $c $sat
+        }
+
+        # NEXT, update the cooperations
+
+        foreach {ecoop fcoop g} [$rdb eval {
+            SELECT ECOOP.coop AS ecoop,
+                   FCOOP.coop AS fcoop,
+                   FCOOP.g    AS g
+            FROM gram_coop AS ECOOP
+            JOIN gram_coop AS FCOOP USING (g)
+            WHERE ECOOP.f = $e
+            AND   FCOOP.f = $f
+        }] {
+            if {$epop == 0 && $fpop == 0} {
+                let coop 0.0
+            } else {
+                let coop {($epop*$ecoop + $fpop*$fcoop)/($epop + $fpop)}
+            }
+
+            $self coop set $driver $f $g $coop
         }
     }
     
@@ -1577,6 +2059,8 @@ snit::type ::simlib::gram {
         # g
         if {$g ne "*"} {
             $cgroups validate $g
+            require {$g in [$self civgroup alive]} "Group is dead: \"$g\""
+
             lappend conds "g = \$g "
         }
 
@@ -1597,7 +2081,7 @@ snit::type ::simlib::gram {
 
         # NEXT, do the query.
         if {[llength $conds] > 0} {
-            set where "WHERE [join $conds { AND }]"
+            set where "AND [join $conds { AND }]"
         } else {
             set where ""
         }
@@ -1605,6 +2089,8 @@ snit::type ::simlib::gram {
         foreach curve_id [$rdb eval "
             SELECT curve_id
             FROM gram_gc
+            JOIN gram_g USING (g)
+            WHERE gram_g.alive
             $where
         "] {
             $self AdjustCurve $driver $curve_id $mag
@@ -1650,6 +2136,8 @@ snit::type ::simlib::gram {
         # g
         if {$g ne "*"} {
             $cgroups validate $g
+            require {$g in [$self civgroup alive]} "Group is dead: \"$g\""
+
             append where "AND g = \$g "
         }
 
@@ -1667,7 +2155,8 @@ snit::type ::simlib::gram {
         foreach {curve_id mag} [$rdb eval "
             SELECT curve_id, \$sat - sat AS mag
             FROM gram_sat
-            WHERE mag != 0.0
+            WHERE alive
+            AND   mag != 0.0
             $where
         "] {
             $self AdjustCurve $driver $curve_id $mag
@@ -1716,6 +2205,8 @@ snit::type ::simlib::gram {
     #                         to 0
     #   -athresh threshold  - Ascending threshold, defaults to 100.0.
     #   -dthresh threshold  - Descending threshold, defaults to -100.0
+    #   -allowdead          - If given, f can be a dead group; indirect
+    #                         effects will be created normally.
 
     method "sat level" {driver ts g c limit days args} {
         $self Log detail "sat level driver=$driver ts=$ts g=$g c=$c lim=$limit days=$days $args"
@@ -1740,20 +2231,24 @@ snit::type ::simlib::gram {
         # NEXT, validate the options
         $self ParseInputOptions sat opts $args
 
+        # NEXT, make sure g is a living group
+        if {!$opts(-allowdead)} {
+            require {$g in [$self civgroup alive]} \
+                "Group is dead: \"$g\""
+        }
+
         # NEXT, normalize the input data.
 
-        set input(driver)   $driver
-        set input(input)    [$self DriverGetInput $driver]
-        set input(dg)       $g
-        set input(c)        $c
-        set input(ts)       $ts
-        set input(days)     [qduration value $days]
-        set input(llimit)   [qmag      value $limit]
-        set input(s)        $opts(-s)
-        set input(p)        $opts(-p)
-        set input(q)        $opts(-q)
-        set input(athresh)  $opts(-athresh)
-        set input(dthresh)  $opts(-dthresh)
+        set input(driver)    $driver
+        set input(input)     [$self DriverGetInput $driver]
+        set input(dg)        $g
+        set input(c)         $c
+        set input(direct_id) [dict get $db(scid) $g $c]
+        set input(ts)        $ts
+        set input(days)      [qduration value $days]
+        set input(llimit)    [qmag      value $limit]
+        set input(athresh)   $opts(-athresh)
+        set input(dthresh)   $opts(-dthresh)
 
         # If no cause is given, use the driver.
         # this ensures that truly independent effects are treated as such.
@@ -1769,25 +2264,86 @@ snit::type ::simlib::gram {
             return $input(input)
         }
 
-        # NEXT, schedule the effects in every influenced neighborhood
+        # NEXT, compute the spread
+        set spread [$self SatSpread $input(dg) $opts(-s) $opts(-p) $opts(-q)]
+
+        # NEXT, schedule the effects in the spread.
         set epsilon [$parm get gram.epsilon]
 
-        set plimit [$self GetProxLimit $input(s) $input(p) $input(q)]
+        dict for {g list} $spread {
+            lassign $list factor effect(delay) effect(prox)
 
-        # NEXT, schedule the effects in every influenced neighborhood
-        # within the proximity limit.
-        $rdb eval {
-            SELECT * FROM gram_sat_influence
-            WHERE dg     = $input(dg)
-            AND   c      = $input(c)
-            AND   prox   < $plimit
-        } effect {
+            set effect(llimit) [expr {$input(llimit)*$factor}]
+            set effect(curve_id) [dict get $db(scid) $g $c]
+            
             $self ScheduleLevel input effect $epsilon
         }
 
         return $input(input)
     }
 
+    # Method: SatSpread 
+    #
+    # Computes and returns a satisfaction spread, caching the spread
+    # for later use.
+    #
+    # The spread is a dictionary: group -> [list factor delay prox].
+    #
+    # Syntax:
+    #    SatSpread _dg s p q_
+    #
+    #    g          - The directly affected group
+    #    s          - The -s "here factor"
+    #    p          - The -p "near factor"
+    #    q          - The -q "far factor".
+    
+    method SatSpread {g s p q} {
+        # FIRST, if this spread is cached, return the cached value.
+        if {$db(sstag) eq "$g,$s,$p,$q"} {
+            return $db(ssvalue)
+        }
+
+        # FIRST, get the proximity limit
+        set plimit [$self GetProxLimit $s $p $q]
+        
+        # NEXT, create the empty dictionary
+        set spread [dict create]
+
+        $rdb eval {
+            SELECT f, rel, delay, prox
+            FROM gram_fg
+            JOIN gram_g ON (gram_g.g = gram_fg.f)
+            WHERE gram_fg.g = $g
+            AND   prox < $plimit
+            AND   gram_g.alive
+        } {
+            # FIRST, apply the here, near, and far factors.
+            if {$prox == 2} {
+                # Far
+                set factor [expr {$q * $rel}]
+            } elseif {$prox == 1} {
+                # Near
+                set factor [expr {$p * $rel}]
+            } elseif {$prox == 0} {
+                # Here
+                set factor [expr {$s * $rel}]
+            } else {
+                set factor $rel
+            }
+
+            # NEXT, save the data for this group.
+            if {$factor != 0.0} {
+                dict set spread $f [list $factor $delay $prox]
+            }
+        }
+
+        # NEXT, cache this spread
+        set db(sstag) $g,$s,$p,$q
+        set db(ssvalue) $spread
+
+        # NEXT, return the spread
+        return $spread
+    }
 
     # Method: sat slope
     #
@@ -1821,6 +2377,8 @@ snit::type ::simlib::gram {
     #                         to 0
     #   -athresh threshold  - Ascending threshold, defaults to 100.0.
     #   -dthresh threshold  - Descending threshold, defaults to -100.0
+    #   -allowdead          - If given, f can be a dead group; indirect
+    #                         effects will be created normally.
 
     method "sat slope" {driver ts g c slope args} {
         $self Log detail \
@@ -1845,18 +2403,22 @@ snit::type ::simlib::gram {
         # NEXT, validate the options
         $self ParseInputOptions sat opts $args
 
+        # NEXT, make sure g is a living group
+        if {!$opts(-allowdead)} {
+            require {$g in [$self civgroup alive]} \
+                "Group is dead: \"$g\""
+        }
+
         # NEXT, normalize the input data
-        set input(driver)   $driver
-        set input(input)    [$self DriverGetInput $driver]
-        set input(dg)       $g
-        set input(c)        $c
-        set input(slope)    [qmag value $slope]
-        set input(ts)       $ts
-        set input(s)        $opts(-s)
-        set input(p)        $opts(-p)
-        set input(q)        $opts(-q)
-        set input(athresh)  $opts(-athresh)
-        set input(dthresh)  $opts(-dthresh)
+        set input(driver)    $driver
+        set input(input)     [$self DriverGetInput $driver]
+        set input(dg)        $g
+        set input(c)         $c
+        set input(direct_id) [dict get $db(scid) $g $c]
+        set input(slope)     [qmag value $slope]
+        set input(ts)        $ts
+        set input(athresh)   $opts(-athresh)
+        set input(dthresh)   $opts(-dthresh)
 
         # NEXT, if the slope is less than epsilon, make it
         # zero.
@@ -1898,7 +2460,7 @@ snit::type ::simlib::gram {
         }
 
         # NEXT, get the de facto proximity limit.
-        set plimit [$self GetProxLimit $input(s) $input(p) $input(q)]
+        set plimit [$self GetProxLimit $opts(-s) $opts(-p) $opts(-q)]
 
         # NEXT, terminate existing slope chains which are outside
         # the de facto proximity limit.
@@ -1917,15 +2479,16 @@ snit::type ::simlib::gram {
             $self TerminateSlope input row
         }
 
-        # NEXT, schedule the effects in every influenced neighborhood
-        # within the proximity limit.
-        $rdb eval {
-            SELECT * FROM gram_sat_influence
-            WHERE dg        = $input(dg)
-            AND   c         = $input(c)
-            AND   prox      < $plimit
-        } chain {
-            $self ScheduleSlope input chain $epsilon
+        # NEXT, compute the spread
+        set spread [$self SatSpread $input(dg) $opts(-s) $opts(-p) $opts(-q)]
+
+        dict for {g list} $spread {
+            lassign $list factor effect(delay) effect(prox)
+
+            set effect(slope) [expr {$input(slope)*$factor}]
+            set effect(curve_id) [dict get $db(scid) $g $c]
+            
+            $self ScheduleSlope input effect $epsilon
         }
 
         return $input(input)
@@ -1951,11 +2514,12 @@ snit::type ::simlib::gram {
         # FIRST, set up the defaults.
         array set opts { 
             -cause   ""
-            -s          1.0
-            -p          0.0
-            -q          0.0
-            -athresh  100.0
-            -dthresh -100.0
+            -s            1.0
+            -p            0.0
+            -q            0.0
+            -athresh    100.0
+            -dthresh   -100.0
+            -allowdead      0
         }
         
         if {$ctype eq "coop"} {
@@ -1963,14 +2527,17 @@ snit::type ::simlib::gram {
         }
 
         # NEXT, get the values.
-        foreach {opt val} $optsList {
+        while {[llength $optsList] > 0} {
+            set opt [lshift optsList]
+
             switch -exact -- $opt {
                 -cause {
-                    set opts($opt) $val
+                    set opts($opt) [lshift optsList]
                 }
                 -s -
                 -p -
                 -q {
+                    set val [lshift optsList]
                     rfraction validate $val
                         
                     set opts($opt) $val
@@ -1978,11 +2545,16 @@ snit::type ::simlib::gram {
                 
                 -athresh -
                 -dthresh {
+                    set val [lshift optsList]
                     if {$ctype eq "sat"} {
                         set opts($opt) [qsat validate $val]
                     } else {
                         set opts($opt) [qcooperation validate $val]
                     }
+                }
+
+                -allowdead {
+                    set opts($opt) 1
                 }
 
                 default {
@@ -2179,6 +2751,7 @@ snit::type ::simlib::gram {
         # f
         if {$f ne "*"} {
             $cgroups validate $f
+            require {$f in [$self civgroup alive]} "Group is dead: \"$f\""
             lappend where "f = \$f "
         }
 
@@ -2202,7 +2775,7 @@ snit::type ::simlib::gram {
         # adjustment to the history.
 
         if {[llength $where] > 0} {
-            set where "WHERE [join $where { AND }]"
+            set where "AND [join $where { AND }]"
         } else {
             set where ""
         }
@@ -2210,6 +2783,7 @@ snit::type ::simlib::gram {
         foreach curve_id [$rdb eval "
             SELECT curve_id
             FROM gram_coop
+            WHERE alive
             $where
         "] {
             $self AdjustCurve $driver $curve_id $mag
@@ -2253,6 +2827,7 @@ snit::type ::simlib::gram {
         # f
         if {$f ne "*"} {
             $cgroups validate $f
+            require {$f in [$self civgroup alive]} "Group is dead: \"$f\""
             append where "AND f = \$f "
         }
 
@@ -2272,7 +2847,8 @@ snit::type ::simlib::gram {
         foreach {curve_id mag} [$rdb eval "
             SELECT curve_id, \$coop - coop AS mag
             FROM gram_coop
-            WHERE mag != 0.0
+            WHERE alive
+            AND   mag != 0.0
             $where
         "] {
             $self AdjustCurve $driver $curve_id $mag
@@ -2318,6 +2894,8 @@ snit::type ::simlib::gram {
     #                         to 0
     #   -athresh threshold  - Ascending threshold, defaults to 100.0.
     #   -dthresh threshold  - Descending threshold, defaults to 0.0
+    #   -allowdead          - If given, f can be a dead group; indirect
+    #                         effects will be created normally.
 
     method "coop level" {driver ts f g limit days args} {
         $self Log detail "coop level driver=$driver ts=$ts f=$f g=$g lim=$limit days=$days $args"
@@ -2342,20 +2920,25 @@ snit::type ::simlib::gram {
         # NEXT, validate the options
         $self ParseInputOptions coop opts $args
 
-        # NEXT, normalize the input data.
+        # NEXT, make sure f is a living group
+        if {!$opts(-allowdead)} {
+            require {$f in [$self civgroup alive]} \
+                "Group is dead: \"$f\""
+        }
 
-        set input(driver)   $driver
-        set input(input)    [$self DriverGetInput $driver]
-        set input(df)       $f
-        set input(dg)       $g
-        set input(ts)       $ts
-        set input(days)     [qduration value $days]
-        set input(llimit)   [qmag      value $limit]
-        set input(s)        $opts(-s)
-        set input(p)        $opts(-p)
-        set input(q)        $opts(-q)
-        set input(athresh)  $opts(-athresh)
-        set input(dthresh)  $opts(-dthresh)
+        # NEXT, normalize the input data.
+        set input(driver)    $driver
+        set input(input)     [$self DriverGetInput $driver]
+        set input(df)        $f
+        set input(dg)        $g
+        set input(ts)        $ts
+        set input(days)      [qduration value $days]
+        set input(llimit)    [qmag      value $limit]
+        set input(s)         $opts(-s)
+        set input(p)         $opts(-p)
+        set input(q)         $opts(-q)
+        set input(athresh)   $opts(-athresh)
+        set input(dthresh)   $opts(-dthresh)
 
         # If no cause is given, use the driver.
         # this ensures that truly independent effects are treated as such.
@@ -2379,29 +2962,6 @@ snit::type ::simlib::gram {
         # NEXT, schedule the effects in every influenced neighborhood
         # within the proximity limit.
 
-        if 0 {
-            set direct_id [$rdb onecolumn {
-                SELECT fg_id FROM gram_coop_fg
-                WHERE f = $input(df) AND g = $input(dg)
-            }]
-
-            $rdb eval {
-                SELECT gram_coop.curve_id   AS curve_id,
-                       $direct_id           AS direct_id,
-                       CASE WHEN gram_coop.g = $input(dg)
-                            THEN -1 ELSE 0 END AS prox,
-                       gram_frc_fg.rel      AS factor,
-                       0                    AS delay
-                FROM gram_coop
-                JOIN gram_frc_fg
-                WHERE gram_frc_fg.g = $input(dg)
-                AND   gram_coop.g = gram_frc_fg.f
-                AND   gram_coop.f = $input(df)
-            } effect {
-                $self ScheduleLevel input effect $epsilon
-            }
-        }
-
         # Get the cooperation relationship limit
         set CRL [$parm get gram.coopRelationshipLimit]
 
@@ -2413,6 +2973,28 @@ snit::type ::simlib::gram {
             AND   prox   <  $plimit
             AND   civrel >= $CRL
         } effect {
+            set input(direct_id) $effect(direct_id)
+
+            # FIRST, apply the here, near, and far factors.
+            if {$effect(prox) == 2} {
+                # Far
+                set factor [expr {$opts(-q) * $effect(factor)}]
+            } elseif {$effect(prox) == 1} {
+                # Near
+                set factor [expr {$opts(-p) * $effect(factor)}]
+            } elseif {$effect(prox) == 0} {
+                # Here
+                set factor [expr {$opts(-s) * $effect(factor)}]
+            } else {
+                set factor $effect(factor)
+            }
+
+            set effect(llimit) [expr {$factor * $input(llimit)}]
+
+            if {$effect(llimit) == 0} {
+                continue
+            }
+
             $self ScheduleLevel input effect $epsilon
         }
 
@@ -2452,6 +3034,8 @@ snit::type ::simlib::gram {
     #                         to 0
     #   -athresh threshold  - Ascending threshold, defaults to 100.0.
     #   -dthresh threshold  - Descending threshold, defaults to 0.0
+    #   -allowdead          - If given, f can be a dead group; indirect
+    #                         effects will be created normally.
 
     method "coop slope" {driver ts f g slope args} {
         $self Log detail \
@@ -2476,19 +3060,24 @@ snit::type ::simlib::gram {
         # NEXT, validate the options
         $self ParseInputOptions coop opts $args
 
-        # NEXT, normalize the input data
+        # NEXT, make sure f is a living group
+        if {!$opts(-allowdead)} {
+            require {$f in [$self civgroup alive]} \
+                "Group is dead: \"$f\""
+        }
 
-        set input(driver)   $driver
-        set input(input)    [$self DriverGetInput $driver]
-        set input(df)       $f
-        set input(dg)       $g
-        set input(slope)    [qmag value $slope]
-        set input(ts)       $ts
-        set input(s)        $opts(-s)
-        set input(p)        $opts(-p)
-        set input(q)        $opts(-q)
-        set input(athresh)  $opts(-athresh)
-        set input(dthresh)  $opts(-dthresh)
+        # NEXT, normalize the input data
+        set input(driver)    $driver
+        set input(input)     [$self DriverGetInput $driver]
+        set input(df)        $f
+        set input(dg)        $g
+        set input(slope)     [qmag value $slope]
+        set input(ts)        $ts
+        set input(s)         $opts(-s)
+        set input(p)         $opts(-p)
+        set input(q)         $opts(-q)
+        set input(athresh)   $opts(-athresh)
+        set input(dthresh)   $opts(-dthresh)
 
         # NEXT, if the slope is less than epsilon, make it
         # zero.
@@ -2563,6 +3152,24 @@ snit::type ::simlib::gram {
             AND   prox   <  $plimit
             AND   civrel >= $CRL
         } effect {
+            set input(direct_id) $effect(direct_id)
+
+            # FIRST, apply the here, near, and far factors.
+            if {$effect(prox) == 2} {
+                # Far
+                set factor [expr {$opts(-q) * $effect(factor)}]
+            } elseif {$effect(prox) == 1} {
+                # Near
+                set factor [expr {$opts(-p) * $effect(factor)}]
+            } elseif {$effect(prox) == 0} {
+                # Here
+                set factor [expr {$opts(-s) * $effect(factor)}]
+            } else {
+                set factor $effect(factor)
+            }
+
+            set effect(slope) [expr {$factor * $input(slope)}]
+
             $self ScheduleSlope input effect $epsilon
         }
 
@@ -2726,6 +3333,7 @@ snit::type ::simlib::gram {
             DELETE FROM gram_effects;
             DELETE FROM gram_contribs;
             DELETE FROM gram_deltas;
+            DELETE FROM gram_hist_g;
             DELETE FROM gram_driver;
 
             UPDATE gram_curves 
@@ -2856,70 +3464,48 @@ snit::type ::simlib::gram {
     #
     # The _inputArray_ should contain the following values.
     #
-    #   driver  - Driver ID
-    #   input   - Input number, for this driver
-    #   cause   - "Cause" of this input
-    #   ts      - Start time, in ticks
-    #   days    - Realization time, in days
-    #   llimit  - "level limit", the direct effect magnitude
-    #   s       - Here effects multiplier
-    #   p       - Near effects multiplier
-    #   q       - Far effects multiplier
-    #   athresh - Ascending threshold
-    #   dthresh - Descending threshold
+    #   driver    - Driver ID
+    #   direct_id - ID of entity receiving the direct effect (the table
+    #               depends on the curve type, satisfaction or cooperation).
+    #   input     - Input number, for this driver
+    #   cause     - "Cause" of this input
+    #   ts        - Start time, in ticks
+    #   days      - Realization time, in days
+    #   llimit    - "level limit", the direct effect magnitude
+    #   athresh   - Ascending threshold
+    #   dthresh   - Descending threshold
     #
     # The _effectArray_ should contain the following values.
     #
     #   curve_id  - ID of affected curve in <gram_curves>.
-    #   direct_id - ID of entity receiving the direct effect (the table
-    #               depends on the curve type, satisfaction or cooperation).
     #   prox      - Proximity, -1 (direct), 0 (here), 1 (near), or 2 (far)
-    #   factor    - Influence multiplier
+    #   llimit    - Effect magnitude
     #   delay     - Effects delay, in ticks
 
     method ScheduleLevel {inputArray effectArray epsilon} {
         upvar 1 $inputArray input
         upvar 1 $effectArray effect
 
-        # FIRST, determine the real llimit
-        if {$effect(prox) == 2} {
-            # Far
-            let mult {$input(q) * $effect(factor)}
-        } elseif {$effect(prox) == 1} {
-            # Near
-            let mult {$input(p) * $effect(factor)}
-        } elseif {$effect(prox) == 0} {
-            # Here
-            let mult {$input(s) * $effect(factor)}
-        } else {
-            set mult $effect(factor)
-        }
-        
-        let llimit {$mult * $input(llimit)}
-
-        if {$llimit == 0.0} {
-            # SKIP!
-            return
-        }
+        set llimit $effect(llimit)
 
         # NEXT, compute the start time, taking the effects 
         # delay into account.
 
-        let ts {$input(ts) + $effect(delay)}
+        set ts [expr {$input(ts) + $effect(delay)}]
 
         # NEXT, Compute te and tau
         if {abs($llimit) <= $epsilon} {
             set te $ts
             set tau 0.0
         } else {
-            let te {int($ts + [$clock fromDays $input(days)])}
+            set te [expr {int($ts + [$clock fromDays $input(days)])}]
 
             # NEXT, compute tau, which determines the shape of the
             # exponential curve.
-            let tau {
+            set tau [expr {
                 $input(days)/
                     (- log($epsilon/abs($llimit)))
-            }
+            }]
         }
 
         # NEXT, insert the data into gram_effects
@@ -2942,7 +3528,7 @@ snit::type ::simlib::gram {
             )
             VALUES(
                 $effect(curve_id),
-                $effect(direct_id),
+                $input(direct_id),
                 $input(driver),
                 $input(input), 
                 'L',
@@ -2961,6 +3547,8 @@ snit::type ::simlib::gram {
         return
     }
 
+    
+
     # Method: ScheduleSlope
     #
     # Schedules or updates a single slope effect, given a dizzying set
@@ -2978,22 +3566,19 @@ snit::type ::simlib::gram {
     #
     # The _inputArray_ should contain the following values.
     #
-    #   driver  - Driver ID
-    #   input   - Input number, for this driver
-    #   cause   - "Cause" of this input
-    #   ts      - Start time, in ticks
-    #   slope   - Slope, in nominal points/day
-    #   s       - Here effects multiplier
-    #   p       - Near effects multiplier
-    #   q       - Far effects multiplier
-    #   athresh - Ascending threshold
-    #   dthresh - Descending threshold
+    #   driver    - Driver ID
+    #   direct_id - ID of entity receiving the direct effect (depends on
+    #               curve type).
+    #   input     - Input number, for this driver
+    #   cause     - "Cause" of this input
+    #   ts        - Start time, in ticks
+    #   slope     - Slope, in nominal points/day
+    #   athresh   - Ascending threshold
+    #   dthresh   - Descending threshold
     #
     # The _effectArray_ should contain the following values.
     #
     #   curve_id  - ID of affected curve in gram_curves.
-    #   direct_id - ID of entity receiving the direct effect (depends on
-    #               curve type).
     #   prox      - Proximity, -1 (direct), 0 (here), 1 (near), or 2 (far)
     #   factor    - Influence multiplier
     #   delay     - Effects delay, in ticks
@@ -3003,20 +3588,7 @@ snit::type ::simlib::gram {
         upvar 1 $effectArray effect
 
         # FIRST, determine the real slope.
-        if {$effect(prox) == 2} {
-            # Far
-            let mult {$input(q) * $effect(factor)}
-        } elseif {$effect(prox) == 1} {
-            # Near
-            let mult {$input(p) * $effect(factor)}
-        } elseif {$effect(prox) == 0} {
-            # Here
-            let mult {$input(s) * $effect(factor)}
-        } else {
-            set mult $effect(factor)
-        }
-        
-        let slope {$mult * $input(slope)}
+        set slope $effect(slope)
 
         # NEXT, if the slope is very small, set it to
         # zero.
@@ -3026,7 +3598,7 @@ snit::type ::simlib::gram {
 
         # NEXT, compute the start time, taking the effects 
         # delay into account.
-        let ts {$input(ts) + $effect(delay)}
+        set ts [expr {$input(ts) + $effect(delay)}]
 
         # NEXT, if the driver already has an entry in gram_effects,
         # we need to update the entry. Get the ID of the chain's entry, if 
@@ -3039,7 +3611,7 @@ snit::type ::simlib::gram {
             WHERE etype='S'
             AND driver=$input(driver)
             AND curve_id=$effect(curve_id)
-            AND direct_id=$effect(direct_id)
+            AND direct_id=$input(direct_id)
             AND cause = $input(cause)
         } old {}
 
@@ -3105,7 +3677,7 @@ snit::type ::simlib::gram {
             VALUES(
                 'S',
                 $effect(curve_id),
-                $effect(direct_id),
+                $input(direct_id),
                 $input(driver),
                 $input(input),
                 $effect(prox),
@@ -3710,27 +4282,6 @@ snit::type ::simlib::gram {
         }]
     }
 
-
-    # Method: nbhoodGroups
-    #
-    # Returns a list of the CIV groups that reside in the _nbhood_.
-    #
-    # Syntax:
-    #   nbhoodGroups _nbhood_
-    #
-    #   nbhood - A neighborhood name
-
-    method nbhoodGroups {nbhood} {
-        $nbhoods validate $nbhood
-
-        $rdb eval {
-            SELECT g
-            FROM gram_g
-            WHERE n = $nbhood
-            ORDER BY g
-        }
-    }
-
     # Method: time
     #
     # Current gram(n) simulation time, in ticks.
@@ -3778,6 +4329,7 @@ snit::type ::simlib::gram {
         # Group
         if {$g ne "*"} {
             $cgroups validate $g
+            require {$g in [$self civgroup alive]} "Group is dead: \"$g\""
         }
 
         # Nbhood
@@ -3798,11 +4350,11 @@ snit::type ::simlib::gram {
                    gc_id,
                    curve_id
             FROM gram_sat
-            JOIN gram_g  USING (g)
-            WHERE 1=1
+            -- JOIN gram_g  USING (g)
+            WHERE alive
             [tif {$n ne "*"} {AND n='$n'}]
             [tif {$g ne "*"} {AND g='$g'}]
-            ORDER BY gc_id
+            ORDER BY n,g,c
         }]
 
         set labels {
@@ -3863,7 +4415,7 @@ snit::type ::simlib::gram {
         } -headercols 4]
     }
 
-    # Method: dump coop.nfg
+    # Method: dump coop.fg
     #
     # Dumps a pretty-printed <gram_coop> table.
     #
@@ -3876,7 +4428,7 @@ snit::type ::simlib::gram {
     #   -frc    g  - Force Group name, or *
     #   -ids       - Includes curve IDs
 
-    method "dump coop.nfg" {args} {
+    method "dump coop.fg" {args} {
         # FIRST, set the defaults
         set conditions [list]
         set n       "*"
@@ -3910,6 +4462,7 @@ snit::type ::simlib::gram {
         # CIV Group
         if {$f ne "*"} {
             $cgroups validate $f
+            require {$f in [$self civgroup alive]} "Group is dead: \"$f\""
         }
 
         # FRC Group
@@ -3928,15 +4481,15 @@ snit::type ::simlib::gram {
                    format('%7.2f', coop0),
                    format('%7.2f', slope)
             [tif {$idflag} {,
-                   nfg_id,
+                   fg_id,
                    curve_id
             }]
             FROM gram_coop
-            WHERE 1=1
+            WHERE alive
             [tif {$n ne "*"} {AND n='$n'}]
             [tif {$f ne "*"} {AND f='$f'}]
             [tif {$g ne "*"} {AND g='$g'}]
-            ORDER BY nfg_id
+            ORDER BY n, f, g
         }]
 
         set labels {
@@ -3945,7 +4498,7 @@ snit::type ::simlib::gram {
         }
 
         if {$idflag} {
-            lappend labels  "NFG ID" "Curve ID"
+            lappend labels  "FG ID" "Curve ID"
         }
 
         set result [$rdb query $query -headercols 2 -labels $labels]
@@ -4555,9 +5108,3 @@ snit::type ::simlib::gram {
         }
     }
 }
-
-
-
-
-
-

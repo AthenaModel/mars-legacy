@@ -156,6 +156,10 @@ snit::type executive {
         $interp smartalias {dump coop slope} 3 3 {n f g} \
             [list ::sim dump coop slope]
 
+        # dump sat.gc
+        $interp smartalias {dump sat.gc} 0 - {?options...?} \
+            [list ::sim dump sat.gc]
+
         # dump sat
         $interp ensemble {dump sat}
 
@@ -187,9 +191,24 @@ snit::type executive {
         $interp smartalias load 1 1 {dbfile} \
             [list ::sim load]
 
+        # loadperf
+        $interp smartalias loadperf 0 - {?options...?} \
+            [list ::sim loadperf]
+
         # log
         $interp smartalias log 1 1 {text} \
             [list ::log normal user]
+
+        # mass
+        $interp ensemble mass
+
+        # mass level
+        $interp smartalias {mass level} 0 - {?options...?} \
+            [list ::sim mass level]
+
+        # mass slope
+        $interp smartalias {mass slope} 0 - {?options...?} \
+            [list ::sim mass slope]
 
         # now
         $interp smartalias now 0 1 {?offset?} \

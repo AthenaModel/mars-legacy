@@ -19,6 +19,11 @@ CREATE TABLE gramdb_c (
     c      TEXT PRIMARY KEY                  -- Symbolic concern name
 );
 
+-- gramdb(5) Table -  Neighborhood definitions
+CREATE TABLE gramdb_n (
+    n              TEXT PRIMARY KEY          -- Symbolic name
+);
+
 -- gramdb(5) Table -  CIV group definitions
 CREATE TABLE gramdb_civ_g (
     g              TEXT PRIMARY KEY,         -- Symbolic group name
@@ -29,11 +34,6 @@ CREATE TABLE gramdb_civ_g (
 -- gramdb(5) Table -  FRC group definitions
 CREATE TABLE gramdb_frc_g (
     g              TEXT PRIMARY KEY          -- Symbolic group name
-);
-
--- gramdb(5) Table -  Neighborhood definitions
-CREATE TABLE gramdb_n (
-    n              TEXT PRIMARY KEY          -- Symbolic name
 );
 
 -- gramdb(5) Table -  Pairs of neighborhoods (m,n)

@@ -411,6 +411,79 @@ times before and after the advance.<p>
 Returns the current simulation time.  Note that simulation time is
 expressed in ticks since T-zero.<p>
 
+<<defitem civgroup {$obj civgroup <i>subcommand</i> ?<i>args...</i>?}>>
+
+This family of subcommands is used to manipulate and query
+civilian groups.<p>
+
+<<deflist civgroup>>
+
+<<defitem "civgroup alive" {$obj civgroup alive ?<i>n</i>?}>>
+
+Returns a list of the names of all living civilian groups, i.e.,
+those with non-zero population.  If <i>n</i> is given, it should be
+the name of a neighborhood; the output will be limited to those
+living groups resident in <i>n</i>.<p>
+
+<<defitem "civgroup dead" {$obj civgroup dead ?<i>n</i>?}>>
+
+Returns a list of the names of all dead civilian groups, i.e.,
+those with zero population.  If <i>n</i> is given, it should be
+the name of a neighborhood; the output will be limited to those
+dead groups resident in <i>n</i>.<p>
+
+<<defitem "civgroup get" {$obj civgroup get <i>g</i> ?<i>field</i>?}>>
+
+Returns a dictionary of CIV group <i>g</i>'s data in the
+<b>gram_g</b> table.  If <i>field</i> is given, returns the
+value of the particular field.<p>
+
+This command is useful when only one group is of interested; but use a
+direct query on <b>gram_g</b> rather than using this command in a loop.<p>
+
+<<defitem "civgroup move" {$obj civgroup move <i>g n</i>}>>
+
+Moves group <i>g</i> to neighborhood <i>n</i>.  All pending level and
+slope effects on <i>g</i> are terminated immediately.  It is up to the
+client simulation to apply any relevant drivers to <i>g</i> in its new
+home.<p>
+
+<<defitem "civgroup names" {$obj civgroup names ?<i>n</i>?}>>
+
+Returns a list of the names of all defined civilian groups, alive or
+dead.  If <i>n</i> is given, it should be the name of a neighborhood;
+the output will be limited to those groups resident in <i>n</i>.<p>
+
+<<defitem "civgroup split" {$obj civgroup split <i>parent g n population</i>}>>
+
+Creates new civilian group <i>g</i> as a child of group
+<i>parent</i>.  Group <i>g</i> will be reside in neighborhood
+<i>n</i>.  The specified <i>population</i> will be transferred from
+<i>parent</i> to <i>g</i>; note that <i>parent</i> must have at
+least <i>population</i> people before the split, but may have
+zero after.<p>
+
+Group <i>g</i> will have the same attitudes and relationships as its
+<i>parent</i>.  It is up to the client simulation to apply any relevant
+drivers to <i>g</i>.<p>
+
+<<defitem "civgroup transfer" {$obj civgroup transfer <i>driver e f population</i>}>>
+
+Transfers <i>population</i> people from civilian group <i>e</i> to
+group <i>f</i>, which must have a common ancestor with <i>e</i>.
+Group <i>e</i> must have at least <i>population</i>
+people prior to the transfer, but may have zero after.<p>
+
+Group <i>f</i>'s attitudes will be adjusted to reflect the attitudes of
+the incoming population, based on the relative proportion of the
+newcomers to the existing population.  The adjustments will be
+attributed to the specified <i>driver</i>.<p>
+
+It is up to the client simulation to apply any other relevant drivers
+to <i>f</i>.<p>
+
+<</deflist civgroup>>
+
 <<defitem driver {$obj driver <i>subcommand</i> ?<i>args...</i>?}>>
 
 This family of subcommands is used to create new driver IDs
@@ -506,11 +579,6 @@ concerns).<p>
 
 Returns civilian group <i>f</i>'s cooperation with force group <i>g</i>.<p>
 
-<<defitem nbhoodGroups {$obj nbhoodGroups <i>nbhood</i>}>>
-
-Returns a list of the names of the CIV groups which reside
-in neighborhood <i>nbhood</i>.<p>
-
 <<defitem sat {$obj sat <i>subcommand</i> ?<i>args..</i>?}>>
 
 The subcommands of the <<iref sat>> command are used to adjust and
@@ -520,8 +588,9 @@ submit inputs for the satisfaction curves.<p>
 
 <<defitem {sat adjust} {$obj sat adjust <i>driver g c mag</i>}>>
 
-Adjusts group <i>g</i>'s satisfaction with concern <i>c</i>
-by <i>mag</i>.  The adjustment is related to
+Adjusts civilian group <i>g</i>'s satisfaction with concern <i>c</i>
+by <i>mag</i>.  Group <i>g</i> must be alive, i.e., have non-zero
+population.  The adjustment is related to
 the specified <i>driver</i>. The <i>g</i> argument is the name of a
 CIV group; <i>c</i> is the name of a concern.  The <i>mag</i> is a
 <<xref simtypes(n) qmag>> value.  The specified satisfaction curve is
@@ -598,12 +667,21 @@ Defaults to -100.0.  Negative direct and indirect
 effects of this input will be ignored if the current value of the affected
 curve is less than or equal to <i>threshold</i>.<p>
 
+<<defopt {-allowdead}>>
+
+Ordinarily, an input given to a dead civilian group (a group with
+zero population) will cause gram2(n) to throw an error.  If this
+option is specified, the input will be accepted and indirect effects
+will be computed normally.  (There will be no direct effect on the
+dead group itself.)
+
 <</deflist sat level options>>
 
 <<defitem {sat set} {$obj sat set <i>driver g c sat</i> ?-undo?}>>
 
-Sets group <i>g</i>'s satisfaction with concern <i>c</i>
-to <i>sat</i>.  The adjustment is related to
+Sets civilian group <i>g</i>'s satisfaction with concern <i>c</i>
+to <i>sat</i>.  Group <i>g</i> must be alive, i.e., have non-zero
+population.  The adjustment is related to
 the specified <i>driver</i>.  The <i>sat</i> is a <<xref simtypes(n) qsat>>
 value.<p>
 
@@ -695,6 +773,14 @@ Defaults to -100.0.  Negative direct and indirect
 effects of this input will be ignored if the current value of the affected
 curve is less than or equal to <i>threshold</i>.<p>
 
+<<defopt {-allowdead}>>
+
+Ordinarily, an input given to a dead civilian group (a group with
+zero population) will cause gram2(n) to throw an error.  If this
+option is specified, the input will be accepted and indirect effects
+will be computed normally.  (There will be no direct effect on the
+dead group itself.)
+
 <</deflist sat slope options>>
 
 <<defitem {sat drivers} {$obj sat drivers ?<i>option value...</i>?}>>
@@ -757,7 +843,8 @@ submit inputs for the cooperation curves.<p>
 <<defitem {coop adjust} {$obj coop adjust <i>driver f g mag</i>}>>
 
 Adjusts CIV group <i>f</i>'s cooperation with FRC group <i>g</i>
-by <i>mag</i>.  The adjustment is related to
+by <i>mag</i>.  Group <i>f</i> must be alive, i.e., have non-zero
+population.  The adjustment is related to
 the specific <i>driver</i>.  The <i>mag</i> is a
 <<xref simtypes(n) qmag>> value.  The specified cooperation curve is
 then clamped to the range 
@@ -834,12 +921,21 @@ Defaults to 0.0.  Negative direct and indirect
 effects of this input will be ignored if the current value of the affected
 curve is less than or equal to <i>threshold</i>.<p>
 
+<<defopt {-allowdead}>>
+
+Ordinarily, an input given to a dead civilian group (a group with
+zero population) will cause gram2(n) to throw an error.  If this
+option is specified, the input will be accepted and indirect effects
+will be computed normally.  (There will be no direct effect on the
+dead group itself.)
+
 <</deflist coop level options>>
 
 <<defitem {coop set} {$obj coop set <i>driver f g coop</i> ?-undo?}>>
 
 Sets CIV group <i>f</i>'s cooperation with FRC group <i>g</i>
-to <i>coop</i>.  The adjustment is related to
+to <i>coop</i>.  Group <i>f</i> must be alive, i.e., have non-zero
+population.  The adjustment is related to
 the specific <i>driver</i>.
 The <i>coop</i> is a <<xref simtypes(n) qcooperation>> value.<p>
 
@@ -927,6 +1023,14 @@ The descending threshold, a real number between 0.0 and 100.0.
 Defaults to 0.0.  Negative direct and indirect
 effects of this input will be ignored if the current value of the affected
 curve is less than or equal to <i>threshold</i>.<p>
+
+<<defopt {-allowdead}>>
+
+Ordinarily, an input given to a dead civilian group (a group with
+zero population) will cause gram2(n) to throw an error.  If this
+option is specified, the input will be accepted and indirect effects
+will be computed normally.  (There will be no direct effect on the
+dead group itself.)
 
 <</deflist coop slope options>>
 

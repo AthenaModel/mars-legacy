@@ -481,6 +481,15 @@ looks for the file in the current working directory, which is the
 location from which mars_gram2(1) was invoked; alternatively, you
 can specify an absolute path.<p>
 
+<<defitem loadperf {loadperf ?<i>options...</i>?}>>
+
+Creates a synthetic scenario for performance testing, and loads
+it into <<xref gram2(n)>>.  See <<xref gramdb2(n)>>
+<<xref gramdb2(n) mkperfdb>> for the options.<p>
+
+The call to <<xref gram2(n)>> <<xref gram2(n) init>> is profiled
+automatically.<p>
+
 <<defitem log {log <i>message</i>}>>
 
 Writes <i>message</i> to the scrolling log, e.g.,<p>
@@ -488,6 +497,56 @@ Writes <i>message</i> to the scrolling log, e.g.,<p>
 <pre>
     100000ZJAN05&gt; log "Hello, World!"
 </pre>
+
+<<defitem mass {mass <i>subcommand</i> ?<i>args..</i>?}>>
+
+This command allows level and slope inputs to be scheduled in mass
+quantities, for the purpose of performance testing.  Each command is
+profiled automatically.  The subcommands are as follows:<p>
+
+<<deflist mass>>
+
+<<defitem "mass level" {mass level ?<i>options...</i>?}>>
+<<defitem "mass slope" {mass slope ?<i>options...</i>?}>>
+
+These commands create a mass of level or slope inputs across the
+playbox.  Satisfaction inputs are scheduled for every neighborhood 
+group and concern; cooperation inputs are scheduled for every
+neighborhood group and force group.  The level effects have a
+magnitude of 10.0 with a duration of 1.0; the slope effects have a
+magnitude of -10.0.  All inputs have a -p and -q of 1.0.  All of the
+inputs scheduled by a single invocation of either command have the
+same driver and cause.<p>
+
+Each command returns the driver ID used for all of the inputs.<p>
+
+The options are as follows:<p>
+
+<<deflist options>>
+
+<<defopt {-zulu <i>zulutime</i>}>>
+<<defopt {-tick <i>ticks</i>}>>
+
+Specifies the start time of the input as a Zulu-time string, or as a time
+in ticks. <b>-zulu</b> takes precedence over <b>-tick</b>; however
+specified, the time must be no later than the current simulation time. If
+neither is given, the input starts immediately.<p>
+
+<<defopt {-type <i>enum</i>}>>
+
+Specifies whether to create <b>sat</b> inputs, <b>coop</b> inputs, or
+<b>both</b>.<p>
+
+<<defopt {-driver <i>driver</i>}>>
+
+By default, each invocation of these commands creates a new driver;
+this option allows an existing driver to be reused.  This is
+particularly useful in performance tests of updates to existing
+slope effects.<p>
+
+<</deflist options>>
+
+<</deflist mass>>
 
 <<defitem now {now ?<i>offset</i>?}>>
 
@@ -761,6 +820,9 @@ Assigns a <i>value</i> to a named <i>variable</i>.<p>
 
 Advances simulation time by the specified number of <i>ticks</i>, if
 given; otherwise, by <b>sim.stepSize</b> ticks, nominally 5.<p>
+
+The call to <<xref gram2(n)>> <<xref gram2(n) advance>> is profiled
+automatically.<p>
 
 <<defitem super {super <i>args...</i>}>>
 

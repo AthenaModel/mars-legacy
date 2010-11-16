@@ -140,6 +140,51 @@ snit::type sim {
         return
     }
 
+    # Type method: loadperf
+    #
+    # Creates a scenario for performance testing, and initializes GRAM.
+    # Sends <Load> and <Reset>.
+    #
+    # Syntax:
+    #   sim loadperf ?_options..._?
+    #
+    #   options - gramdb(n)'s mkperfdb command.
+
+    typemethod loadperf {args} {
+        # FIRST, clean up the old simulation data.
+        sim unload
+        
+        # NEXT, open a new log.
+        log newlog load
+
+        # NEXT, load the dbfile
+        log normal sim "Creating performance scenario: $args"
+        gramdb mkperfdb ::rdb {*}$args
+        set info(dbfile) "perfdb"
+
+        # NEXT, set the simulation clock
+        simclock reset
+        simclock configure \
+            -t0   "100000ZJAN10"            \
+            -tick [parmdb get sim.tickSize]
+
+        # NEXT, create and initialize the GRAM.
+        if {[catch {::sim CreateGram} result]} {
+            # Save the stack trace while we clean up
+            set errInfo $::errorInfo
+            sim unload
+
+            return -code error -errorinfo $errInfo $result
+        }
+
+        set info(dbloaded) 1
+        log normal sim "Loaded performance scenario"
+
+        notifier send ::sim <Reset>
+        notifier send ::sim <Load>
+        return
+    }
+
     # Type method: CreateGram
     #
     # Creates the gram(n) object, and initializes it using the currently
@@ -152,7 +197,7 @@ snit::type sim {
                      -logger       ::log                            \
                      -logcomponent gram                             \
                      -loadcmd      {::simlib::gramdb loader ::rdb}]
-        $ram init
+        profile "gram init" $ram init
     }
     
     # Type method: reset
@@ -212,7 +257,7 @@ snit::type sim {
         }
         
         simclock step $ticks
-        $ram advance
+        profile "gram advance" $ram advance
 
         notifier send ::sim <Time>
         return
@@ -507,9 +552,164 @@ snit::type sim {
 
         return
     }
+
+    # Type Method: mass level
+    #
+    # Creates a mass of level effects across the playbox, for performance
+    # testing.  All civilian groups in all neighborhoods are effected.
+    #
+    # Syntax:
+    #    mass level _?options...?_
+    #
+    # Options:
+    #    See MassInput
+
+    typemethod "mass level" {args} {
+        profile "mass level $args" $type MassInput level {*}$args
+    }
     
+    # Type Method: mass slope
+    #
+    # Creates a mass of slope effects across the playbox, for performance
+    # testing.  All civilian groups in all neighborhoods are effected.
+    #
+    # Syntax:
+    #    mass slope _?options...?_
+    #
+    # Options:
+    #    See MassInput
+
+    typemethod "mass slope" {args} {
+        profile "mass slope $args" $type MassInput slope {*}$args
+    }
+    
+    # Type Method: MassInput
+    #
+    # Implements mass level/slope.
+    #
+    # Syntax:
+    #    MassInput _etype ?options...?_
+    #
+    #    etype  - level | slope
+    #
+    # Options:
+    #    -zulu zulu       - Start time, as a zulu-time
+    #    -tick ticks      - Start time, in ticks
+    #    -type enum       - sat, coop, or both (default)
+    #    -driver driver   - Specifies the driver
+    #
+    # The inputs are created with -p 1.0 and -q 1.0, and all have the
+    # same cause and driver.  Other options have their default values.
+
+    typemethod MassInput {etype args} {
+        set savedArgs $args
+
+        set ts [sim GetStartTime args]
+
+        set ctype "both"
+        set driver ""
+
+        while {[llength $args] > 0} {
+            set opt [lshift args]
+
+            switch -exact -- $opt {
+                -type {
+                    set ctype [lshift args]
+                    
+                    if {$ctype ni {sat coop both}} {
+                        return -code error -errorcode INVALID \
+                 "Invalid $opt \"$ctype\", should be one of: sat, coop, both"
+                    }
+                }
+
+                -driver {
+                    set driver [lshift args]
+                    ram driver validate $driver "Cannot mass $etype"
+                }
+
+                default {
+                    return -code error -errorcode INVALID \
+                        "Unknown option: \"$opt\""
+                }
+            }
+        }
+
+        # Get driver and cause
+        if {$driver eq ""} {
+            set driver [ram driver add \
+                            -dtype MASS  \
+                            -oneliner "mass $etype $savedArgs"]
+        }
+
+        set cause "D$driver"
+
+        # Get magnitudes
+        if {$etype eq "level"} {
+            set mag {10.0 1.0}
+        } else {
+            set mag -10.0
+        }
+
+        # Schedule satisfactions
+        if {$ctype in {sat both}} {
+            rdb eval {
+                SELECT n,g,c
+                FROM gramdb_ng
+                JOIN gramdb_g USING (g)
+                JOIN gramdb_c
+                WHERE gramdb_g.gtype = gramdb_c.gtype
+                AND   gramdb_g.gtype = 'CIV'
+            } {
+                ram sat $etype $driver $ts $n $g $c {*}$mag \
+                    -p 1.0 -q 1.0 -cause $cause
+            }
+        }
+
+        # Schedule cooperations
+        if {$ctype in {coop both}} {
+            rdb eval {
+                SELECT NG.n AS n,
+                       NG.g AS f,
+                       G.g  AS g
+                FROM gramdb_ng AS NG
+                JOIN gramdb_g AS F using (g)
+                JOIN gramdb_g AS G
+                WHERE F.gtype = 'CIV'
+                AND   G.gtype = 'FRC'
+            } {
+                ram coop $etype $driver $ts $n $f $g {*}$mag \
+                    -p 1.0 -q 1.0 -cause $cause
+            }
+        }
+
+        return $driver
+    }
+
     #-------------------------------------------------------------------
     # Group: Utility Routines
+
+    # Proc: profile
+    #
+    # Executes its arguments as a command in the global scope,
+    # logs the execution time, and returns the result.  If
+    # _logText_ is {}, the command is used as the log text.
+    #
+    # Syntax:
+    #    profile _logText command..._
+
+    proc profile {logText args} {
+        set time [lindex [time {
+            set result [{*}$args]  
+        } 1] 0]
+
+        if {$logText eq ""} {
+            set logText $args
+        }
+        
+        log normal sim "profile: $time usec, $logText"
+            
+        return $result
+    }
 
     # Type method: GetDriver
     #

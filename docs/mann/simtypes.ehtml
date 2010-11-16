@@ -140,6 +140,11 @@ simtypes(n) defines the following numeric types.<p>
 
 <<deflist ranges>>
 
+<<defitem ipopulation ipopulation>>
+
+This <b>snit::integer</b> defines the set of valid population numbers,
+integers greater than or equal to zero.<p>
+
 <<defitem rfraction rfraction>>
 
 This <<xref range(n)>> defines the set of valid proper decimal fractions.

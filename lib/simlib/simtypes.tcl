@@ -19,6 +19,7 @@ namespace eval ::simlib:: {
     namespace export   \
         egrouptype     \
         eproximity     \
+        ipopulation    \
         qcooperation   \
         qduration      \
         qmag           \
@@ -155,7 +156,9 @@ namespace eval ::simlib:: {
 ::marsutil::range ::simlib::rmagnitude \
     -min 0.0 -format "%.2f"
 
-
+# Population values
+snit::integer ::simlib::ipopulation \
+    -min 0
 
 
 

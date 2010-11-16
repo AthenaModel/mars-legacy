@@ -319,8 +319,11 @@ CREATE TABLE gram_g (
     --------------------------------------------------------------------
     -- Group Attributes
 
-    n              TEXT,         -- Nbhood in which group resides
-    population     INTEGER,
+    n              TEXT,              -- Nbhood in which group resides
+    population     INTEGER,           -- Population of group
+    alive          INTEGER DEFAULT 1, -- 1 if alive, 0 if dead
+    parent         TEXT DEFAULT '',   -- Name of parent group, if any.
+    ancestor       TEXT DEFAULT '',   -- Name of ultimate parent, if any.
 
     --------------------------------------------------------------------
     -- Cached Values
@@ -538,8 +541,9 @@ SELECT -- This instance
        gram_g.g_id AS g_id,
 
        -- Satisfaction Curve indices, etc.
-       gram_g.n  AS n,
-       gram_g.g  AS g, 
+       gram_g.n     AS n,
+       gram_g.g     AS g, 
+       gram_g.alive AS alive,
        c,
        saliency,
 
@@ -587,7 +591,9 @@ JOIN gram_gc AS direct
      ON direct.g = gram_fg.g
 JOIN gram_gc AS curve 
      ON curve.g = gram_fg.f
-     AND curve.c = direct.c;
+     AND curve.c = direct.c
+JOIN gram_g AS cg ON cg.g = curve.g
+WHERE cg.alive;
 
 -- gram(n) Satisfaction Effects View.
 -- This view joins the gram_effects with gram_gc to give a complete
@@ -675,7 +681,7 @@ FROM gram_deltas
 JOIN gram_gc USING (curve_id)
 JOIN gram_g  USING (g_id);
 
---------------------------------------------------------------------------------
+------------------------------------------------------------------------
 -- Cooperation Model Tables 
 
 -- gram(n) "coop_fg" table.
@@ -713,8 +719,9 @@ SELECT -- Nbhood/group/group ID
 
        -- Cooperation Curve indices, etc.
        gram_coop_fg.curve_id    AS curve_id,
-       F.n                      AS n, 
        gram_coop_fg.f           AS f,
+       F.n                      AS n, 
+       F.alive                  AS alive,
        gram_coop_fg.g           AS g, 
 
        -- Effects Curve index and values
@@ -761,8 +768,10 @@ SELECT -- Influence Details
        curve.curve_id                               AS curve_id
 FROM gram_fg       AS CIV
 JOIN gram_frc_fg   AS FRC
-JOIN gram_coop_fg  AS direct    ON direct.f = CIV.g AND direct.g = FRC.g
-JOIN gram_coop_fg  AS curve     ON curve.f  = CIV.f AND curve.g  = FRC.f;
+JOIN gram_coop_fg  AS direct  ON direct.f = CIV.g AND direct.g = FRC.g
+JOIN gram_coop_fg  AS curve   ON curve.f  = CIV.f AND curve.g  = FRC.f
+JOIN gram_g        AS cg      ON cg.g     = curve.f
+WHERE cg.alive;
 
 -- gram(n) Cooperation Effects View.
 -- This view joins the gram_effects with gram_coop_fg to give a complete
@@ -850,6 +859,19 @@ FROM gram_deltas
 JOIN gram_coop_fg USING (curve_id)
 JOIN gram_g AS F ON (gram_coop_fg.f = F.g);
 
-    
 
+------------------------------------------------------------------------
+-- Other History Tables
+
+-- gram(n) CIV group history table
+
+CREATE TABLE gram_hist_g (
+    time       INTEGER,            -- Time in ticks
+    g          TEXT,               -- Civilian group name
+    n          TEXT,               -- Neighborhood of residence
+    alive      INTEGER,            -- 1 if group was alive, 0 if dead
+    population INTEGER,            -- Population
+
+    PRIMARY KEY (time, g)
+);
 

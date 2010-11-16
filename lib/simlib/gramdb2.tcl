@@ -513,6 +513,196 @@ snit::type ::simlib::gramdb {
 
         return
     }
+
+    # mkperfdb db options...
+    #
+    # db         An sqldocument(n) in which to load the data.
+    #
+    # Options:
+    #
+    #   -nbhoods   num    Number of neighborhoods; defaults to 10
+    #   -civgroups num    Number of civilian groups per nbhood; defaults to 2
+    #   -frcgroups num    Number of force groups; defaults to 4
+    #
+    # Populates a gramdb2 database for performance testing
+    # given the option values.  The database will have these characteristics:
+    #
+    # * -nbhoods neighborhoods.
+    # * -civgroups civilian groups in each neighborhood.
+    # * -frcgroups force groups
+    # * All proximities are NEAR.
+    # * All effects_delays are 0.0.
+    # * All satisfaction levels are 0.0.
+    # * All saliencies are 1.0.
+    # * All cooperation levels are 50.0
+    # * All populations are 1000
+    # * All relationships are 1.0, -0.5, +0.5.
+
+    typemethod mkperfdb {db args} {
+        # FIRST, get the defaults
+        array set opts {
+            -nbhoods   10
+            -civgroups 2
+            -frcgroups 4
+        }
+
+        # NEXT, get the option values.
+        while {[llength $args] > 0} {
+            set opt [lshift args]
+
+            switch -exact -- $opt {
+                -nbhoods   -
+                -civgroups -
+                -frcgroups {
+                    set opts($opt) [lshift args]
+                }
+
+                default {
+                    error "Unknown option: \"$opt\""
+                }
+            }
+        }
+
+        # NEXT, make sure the schema is defined.
+        if {$type ni [$db sections]} {
+            error "schema not defined"
+        }
+
+        # NEXT, clear just the gramdb2 tables.
+        $db eval {
+            DELETE FROM gramdb_c;
+            DELETE FROM gramdb_civ_g;
+            DELETE FROM gramdb_frc_g;
+            DELETE FROM gramdb_n;
+            DELETE FROM gramdb_mn;
+            DELETE FROM gramdb_gc;
+            DELETE FROM gramdb_civ_fg;
+            DELETE FROM gramdb_frc_fg;
+            DELETE FROM gramdb_coop_fg;
+        }
+
+        # NEXT, gramdb_c
+        $db eval {
+            INSERT INTO gramdb_c(c) VALUES('AUT');
+            INSERT INTO gramdb_c(c) VALUES('CUL');
+            INSERT INTO gramdb_c(c) VALUES('QOL');
+            INSERT INTO gramdb_c(c) VALUES('SFT');
+        }
+
+        # NEXT, gramdb_n
+        for {set i 1} {$i <= $opts(-nbhoods)} {incr i} {
+            set n "N$i"
+
+            $db eval {
+                INSERT INTO gramdb_n(n) VALUES($n);
+            }
+        }
+
+        # NEXT, gramdb_civ_g
+        set letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+        $db eval {SELECT n FROM gramdb_n} {
+            for {set i 0} {$i < $opts(-civgroups)} {incr i} {
+                set g "C[string range $n 1 end][string index $letters $i]"
+
+                $db eval {
+                    INSERT INTO gramdb_civ_g(g,n,population)
+                    VALUES($g,$n,1000)
+                }
+            }
+        }
+
+        # NEXT, gramdb_frc_g
+        for {set i 1} {$i <= $opts(-frcgroups)} {incr i} {
+            set g "F$i"
+
+            $db eval {
+                INSERT INTO gramdb_frc_g(g) VALUES($g);
+            }
+        }
+
+        # NEXT, gramdb_mn
+        $db eval {
+            SELECT M.n AS m, N.n AS n
+            FROM gramdb_n AS M JOIN gramdb_n AS N
+        } {
+            if {$m eq $n} {
+                set proximity HERE
+            } else {
+                set proximity NEAR
+            }
+
+            $db eval {
+                INSERT INTO gramdb_mn(m,n,proximity,effects_delay)
+                VALUES($m,$n,$proximity,0.0);
+            }
+        }
+
+        # NEXT, gramdb_gc
+        $db eval {
+            INSERT INTO gramdb_gc(g,c)
+            SELECT g, c FROM gramdb_civ_g JOIN gramdb_c
+        }
+
+        # NEXT, gramdb_civ_fg
+        set rels {0.5 -0.5}
+
+        set i 0
+
+        $db eval {
+            SELECT F.g AS f, G.g AS g
+            FROM gramdb_civ_g AS F JOIN gramdb_civ_g AS g
+        } {
+            if {[string index $f end] eq [string index $g end]} {
+                let rel 1.0
+            } else {
+                let ndx {$i % 2}
+                set rel [lindex $rels $ndx]
+            }
+
+            incr i
+
+            $db eval {
+                INSERT INTO gramdb_civ_fg(f,g,rel)
+                VALUES($f,$g,$rel)
+            }
+        }
+
+        # NEXT, gramdb_frc_fg
+        set rels {0.5 -0.5}
+
+        set i 0
+
+        $db eval {
+            SELECT F.g AS f, G.g AS g
+            FROM gramdb_frc_g AS F JOIN gramdb_frc_g AS g
+        } {
+            if {$f eq $g} {
+                let rel 1.0
+            } else {
+                let ndx {$i % 2}
+                set rel [lindex $rels $ndx]
+            }
+
+            incr i
+
+            $db eval {
+                INSERT INTO gramdb_frc_fg(f,g,rel)
+                VALUES($f,$g,$rel)
+            }
+        }
+
+        # NEXT, gramdb_coop_fg
+        $db eval {
+            SELECT F.g AS f, G.g AS g
+            FROM gramdb_civ_g AS F JOIN gramdb_frc_g AS g
+        } {
+            $db eval {
+                INSERT INTO gramdb_coop_fg(f,g,coop0)
+                VALUES($f,$g,50.0)
+            }
+        }
+    }
   
     # loader db gram
     #

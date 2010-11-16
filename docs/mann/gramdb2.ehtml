@@ -52,6 +52,41 @@ database object when it is no longer needed.<p>
 Identical to <<iref loadfile>>, but parses <<xref gramdb2(5)>> text from
 string <i>text</i> rather than a file.<p>
 
+<<defitem mkperfdb {gramdb mkperfdb <i>db</i> ?<i>options...</i>?}>>
+
+Populates the <<xref gramdb2(5)>> tables in the specified <i>db</i>
+with automatically-generated data for the purpose of measuring
+worst-case performance.  The options determine the size of the
+database:<p>
+
+<<deflist options>>
+<<defopt {-nbhoods <i>num</i>}>>
+The number of neighborhoods in the playbox.
+
+<<defopt {-civgroups <i>num</i>}>>
+The number of civilian groups per neighborhood.
+
+<<defopt {-frcgroups <i>num</i>}>>
+The number of force groups in the playbox.
+
+<</deflist options>>
+
+The generated data will have the following characteristics:<p>
+
+<ul>
+  <li> All neighborhood proximities are HERE or NEAR.
+  <li> All neighborhood effects delays are 0.0.
+  <li> All satisfaction levels are 0.0.
+  <li> All saliencies are 1.0.
+  <li> All cooperation levels are 50.0.
+  <li> All populations are 1000.
+  <li> All CIV group relationships are 1.0, 0.5, or -0.5.
+       Each group will have a 1.0 relationship with itself and
+       with its counterparts in the other neighborhoods, and
+       0.5 or -0.5 with all other groups.
+  <li> All FRC group relationships are 0.5 or -0.5.
+</ul>
+
 <<defitem loader {gramdb loader <i>db gram</i>}>>
 
 Loads the <<xref gramdb2(5)>> data found in the

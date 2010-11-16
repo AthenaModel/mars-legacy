@@ -70,6 +70,42 @@ gram ::mygram \
 where <b>$db</b> is the name of the <<xref sqldocument(n)>> containing the
 data.  Note that calling it in any other way simply won't work.<p>
 
+<<defitem mkperfdb {gramdb mkperfdb <i>db</i> ?<i>options...</i>?}>>
+
+Populates the <<xref gramdb(5)>> tables in the specified <i>db</i>
+with automatically-generated data for the purpose of measuring
+worst-case performance in <<xref gram(n)>>.  The options determine the
+size of the database:<p>
+
+<<deflist options>>
+<<defopt {-nbhoods <i>num</i>}>>
+The number of neighborhoods in the playbox.<p>
+
+<<defopt {-civgroups <i>num</i>}>>
+The number of civilian groups per neighborhood.  The same <i>num</i>
+civilian groups will be present in each neighborhood.<p>
+
+<<defopt {-frcgroups <i>num</i>}>>
+The number of force groups in the playbox.<p>
+
+<</deflist options>>
+
+The generated data will have the following characteristics:<p>
+
+<ul>
+  <li> All neighborhood proximities are HERE or NEAR.
+  <li> All neighborhood effects delays are 0.0.
+  <li> All satisfaction levels are 0.0.
+  <li> All saliencies are 1.0.
+  <li> All cooperation levels are 50.0.
+  <li> All populations are 1000.
+  <li> All CIV group relationships are 1.0, 0.5, or -0.5.  Groups
+       have a 1.0 relationship with themselves, regardless of
+       neighborhood, and 0.5 or -0.5 with everyone else.
+  <li> All FRC group relationships are 0.5 or -0.5.
+</ul>
+
+
 <<defitem sqlsection {gramdb sqlsection <i>subcommand</i>}>>
 
 gramdb(n) is an <<xref sqlsection(i)>>, as it defines
