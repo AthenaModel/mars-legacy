@@ -707,12 +707,33 @@ snit::type ::simlib::gram {
     #
     # Verifies that <LoadData> has loaded everything we need to run.
     #
-    # TBD:
-    #
-    #  * This method is currently a no-op.
+    # This routine simply checks that we've got the right number of
+    # entries in the multi-key tables.  To verify that the key
+    # fields are valid, enable foreign keys when creating the
+    # database handle.
 
     method SanityCheck {} {
-        # TBD: Not yet implemented.
+        set N(n)       [$rdb eval {SELECT count(n) FROM gram_n}]
+        set N(g)       [$rdb eval {SELECT count(g) FROM gram_g}]
+        set N(frc_g)   [$rdb eval {SELECT count(g) FROM gram_frc_g}]
+        set N(c)       [$rdb eval {SELECT count(c) FROM gram_c}]
+        set N(mn)      [$rdb eval {SELECT count(mn_id) FROM gram_mn}]
+        set N(gc)      [$rdb eval {SELECT count(gc_id) FROM gram_gc}]
+        set N(fg)      [$rdb eval {SELECT count(fg_id) FROM gram_fg}]
+        set N(frc_fg)  [$rdb eval {SELECT count(fg_id) FROM gram_frc_fg}]
+        set N(coop_fg) [$rdb eval {SELECT count(fg_id) FROM gram_coop_fg}]
+
+        require {$N(n) > 0}             "too few entries in gram_n"
+        require {$N(g) > 0}             "too few entries in gram_g"
+        require {$N(frc_g) > 0}         "too few entries in gram_frc_g"
+        require {$N(c) > 0}             "too few entries in gram_c"
+        require {$N(mn) == $N(n)*$N(n)} "too few entries in gram_mn"
+        require {$N(gc) == $N(g)*$N(c)} "too few entries in gram_gc"
+        require {$N(fg) == $N(g)*$N(g)} "too few entries in gram_fg"
+        require {$N(frc_fg) == $N(frc_g)*$N(frc_g)} \
+            "too few entries in gram_frc_fg"
+        require {$N(coop_fg) == $N(g)*$N(frc_g)} \
+            "too few entries in gram_coop_fg"
     }
 
     # Method: CreateValidators
@@ -778,23 +799,6 @@ snit::type ::simlib::gram {
             }
         }
 
-        # NEXT, populate gram_mn with defaults: A nbhood is "here" to 
-        # itself and"far" to all others, and effects_delays are all 0.0
-
-        $rdb eval {
-            INSERT INTO gram_mn(
-                m,
-                n,
-                proximity,
-                effects_delay)
-            SELECT M.n,
-                   N.n,
-                   CASE WHEN M.n=N.n THEN 0 ELSE 2 END,
-                   0.0
-            FROM gram_n AS M join gram_n AS N
-            ORDER BY M.n, N.n
-        }
-
         set db(loadstate) "nbhoods"
     }
 
@@ -821,18 +825,9 @@ snit::type ::simlib::gram {
                 ($m ne $n && $proximity != 0)
             }
 
-            set mn_id [$rdb onecolumn {
-                SELECT mn_id FROM gram_mn
-                WHERE m=$m AND n=$n;
-            }]
-
-            require {$mn_id ne ""} "Invalid nbhood pair: $m $n"
-
             $rdb eval {
-                UPDATE gram_mn
-                SET proximity     = $proximity,
-                    effects_delay = $effects_delay
-                WHERE mn_id = $mn_id;
+                INSERT INTO gram_mn(m, n, proximity, effects_delay)
+                VALUES($m, $n, $proximity, $effects_delay)
             }
         }
 
@@ -862,22 +857,6 @@ snit::type ::simlib::gram {
             }
         }
 
-        # NEXT, populate gram_fg.  Default relationships are 0.0,
-        # unless f=g.
-
-        $rdb eval {
-            INSERT INTO gram_fg(
-                f,
-                g,
-                rel)
-            SELECT F.g      AS f,
-                   G.g      AS g,
-                   CASE WHEN F.g=G.g THEN 1.0 ELSE 0.0 END
-            FROM  gram_g AS F
-            JOIN  gram_g AS G
-            ORDER BY F.g, G.g
-        }
-
         set db(loadstate) "civg"
     }
 
@@ -896,17 +875,9 @@ snit::type ::simlib::gram {
         assert {$db(loadstate) eq "civg"}
 
         foreach {f g rel} $args {
-            set fg_id [$rdb onecolumn {
-                SELECT fg_id FROM gram_fg 
-                WHERE f=$f AND g=$g
-            }]
-
-            require {$fg_id ne ""} "Invalid relationship: $f $g"
-
             $rdb eval {
-                UPDATE gram_fg
-                SET rel = $rel
-                WHERE fg_id = $fg_id;
+                INSERT INTO gram_fg(f, g, rel)
+                VALUES($f,$g,$rel)
             }
         }
 
@@ -932,28 +903,6 @@ snit::type ::simlib::gram {
             }
         }
 
-        # NEXT, populate gram_gc.
-        $rdb eval {
-            SELECT g_id, 
-                   n, 
-                   g, 
-                   c
-            FROM gram_g 
-            JOIN gram_c
-            ORDER BY g, c
-        } {
-            $rdb eval {
-                -- Note: curve_id is set automatically
-                INSERT INTO gram_curves(curve_type, val0, val)
-                VALUES('SAT', 0.0, 0.0);
-
-                -- Note: gc_id is set automatically
-                INSERT INTO 
-                gram_gc(g_id, curve_id, g, c, saliency)
-                VALUES($g_id, last_insert_rowid(), $g, $c, 1.0);
-            }
-        }
-
         set db(loadstate) "concerns"
     }
 
@@ -973,24 +922,17 @@ snit::type ::simlib::gram {
     method {load sat} {args} {
         assert {$db(loadstate) eq "concerns"}
 
-        foreach {g c sat0 saliency} $args {
-            set curve_id [$rdb onecolumn {
-                SELECT curve_id 
-                FROM gram_gc
-                WHERE g=$g AND c=$c;
-            }]
+        array set gids [$rdb eval {SELECT g, g_id FROM gram_g}]
 
-            require {$curve_id ne ""} "No such sat curve: $g $c"
+        foreach {g c sat0 saliency} $args {
+            set g_id $gids($g)
 
             $rdb eval {
-                UPDATE gram_curves
-                SET val0 = $sat0,
-                    val  = $sat0
-                WHERE curve_id = $curve_id;
-                
-                UPDATE gram_gc
-                SET saliency = $saliency
-                WHERE curve_id = $curve_id;
+                INSERT INTO gram_curves(curve_type, val0, val)
+                VALUES('SAT', $sat0, $sat0);
+
+                INSERT INTO gram_gc(g_id, curve_id, g, c, saliency)
+                VALUES($g_id, last_insert_rowid(), $g, $c, $saliency);
             }
         }
 
@@ -1032,7 +974,6 @@ snit::type ::simlib::gram {
             }
         }
 
-
         # NEXT, populate gram_frc_ng.
         $rdb eval {
             INSERT INTO gram_frc_ng(
@@ -1041,39 +982,6 @@ snit::type ::simlib::gram {
             SELECT n, g
             FROM gram_n JOIN gram_frc_g
             ORDER BY n, g
-        }
-
-        # NEXT, populate gram_frc_fg.  Default relationships are 0.0,
-        # unless f=g.
-        $rdb eval {
-            INSERT INTO gram_frc_fg(
-                f,
-                g,
-                rel)
-            SELECT F.g      AS f,
-                   G.g      AS g,
-                   CASE WHEN F.g=G.g THEN 1.0 ELSE 0.0 END
-            FROM  gram_frc_g AS F
-            JOIN  gram_frc_g AS G
-            ORDER BY F.g, G.g
-        }
-
-        # NEXT, populate gram_coop_fg.
-        $rdb eval {
-            SELECT gram_g.g  AS f,
-                   G.g       AS g
-            FROM gram_g 
-            JOIN gram_frc_g  AS G
-            ORDER BY f, g
-        } {
-            $rdb eval {
-                -- Note: curve_id is set automatically.
-                INSERT INTO gram_curves(curve_type, val0, val)
-                VALUES('COOP', 50.0, 50.0);
-
-                INSERT INTO gram_coop_fg(curve_id,f,g)
-                VALUES(last_insert_rowid(), $f, $g)
-            }
         }
 
         set db(loadstate) "frcg"
@@ -1094,17 +1002,9 @@ snit::type ::simlib::gram {
         assert {$db(loadstate) eq "frcg"}
 
         foreach {f g rel} $args {
-            set fg_id [$rdb onecolumn {
-                SELECT fg_id FROM gram_frc_fg 
-                WHERE f=$f AND g=$g
-            }]
-
-            require {$fg_id ne ""} "Invalid relationship: $f $g"
-
             $rdb eval {
-                UPDATE gram_frc_fg
-                SET rel = $rel
-                WHERE fg_id = $fg_id;
+                INSERT INTO gram_frc_fg(f, g, rel)
+                VALUES($f,$g,$rel)
             }
         }
 
@@ -1126,19 +1026,13 @@ snit::type ::simlib::gram {
         assert {$db(loadstate) eq "frcrel"}
 
         foreach {f g coop0} $args {
-            set curve_id [$rdb onecolumn {
-                SELECT curve_id 
-                FROM gram_coop_fg
-                WHERE f=$f AND g=$g;
-            }]
-
-            require {$curve_id ne ""} "No such coop curve: $f $g"
-
             $rdb eval {
-                UPDATE gram_curves
-                SET val0 = $coop0,
-                    val  = $coop0
-                WHERE curve_id = $curve_id;
+                -- Note: curve_id is set automatically.
+                INSERT INTO gram_curves(curve_type, val0, val)
+                VALUES('COOP', $coop0, $coop0);
+
+                INSERT INTO gram_coop_fg(curve_id,f,g)
+                VALUES(last_insert_rowid(), $f, $g)
             }
         }
 

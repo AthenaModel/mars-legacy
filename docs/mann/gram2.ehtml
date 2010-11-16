@@ -101,11 +101,13 @@ neighborhood relationship data might look like this:<p>
     }
 </pre>
 
-The database is populated automatically with default neighborhood
-relationships, initial satisfactions, group
-relationships, and initial cooperations; consequently, only
-non-default entities need to be passed to the related <<iref load>>
-commands.<p>
+In previous versions of GRAM, the database was populated automatically
+with default neighborhood relationships, initial satisfactions, group
+relationships, and initial cooperations, and consequently, only
+non-default entities needed to be passed to the related <<iref load>>
+commands.  This capability was never used, and has been removed.  It
+is now necessary for the client to provide the full set of information
+for to each <<iref load>> command.<p>
 
 <<section "CONFIGURATION PARAMETERS">>
 
@@ -314,14 +316,8 @@ The names should be pre-sorted in alphabetical order.<p>
 
 <<defitem "load nbrel" {$obj load nbrel ?<i>m n proximity effects_delay</i>...?}>>
 
-GRAM creates default neighborhood relationships automatically, given
-the set of neighborhoods.  The proximity defaults to <b>HERE</b> where
-neighborhood <i>m</i> equals neighborhood <i>n</i>, and <b>FAR</b>
-otherwise.  All effects delays default to 0.0 days.<p>
-
-This command is used to specifies the set of non-default neighborhood
-relationships.  If all defaults are acceptable, this command must be
-called with no arguments.<p>
+This command is used to specify the set of neighborhood
+relationships.<p>
 
 <<defitem "load civg" {$obj load civg <i>g n population</i> ?<i>g n population</i>...?}>>
 
@@ -331,12 +327,8 @@ should be sorted by name.  There should be at least one group.<p>
 
 <<defitem "load civrel" {$obj load civrel ?<i>f g rel</i>...?}>>
 
-GRAM creates default relationships for every pair of civilian groups in
-every neighborhood: 1.0 when f=g and 0.0 otherwise.<p>
-
-This command is used to specify the set of non-default relationship
-data.  If the defaults are acceptable, this command must be called
-with no arguments.<p>
+This command is used to specify the set of civilian relationship
+data.<p>
 
 <<defitem "load concerns" {$obj load concerns <i>name gtype</i> ?<i>name gtype</i>...?}>>
 
@@ -344,13 +336,8 @@ Specifies the set of satisfaction concerns, sorted by name.<p>
 
 <<defitem "load sat" {$obj load sat ?<i>g c sat0 saliency</i>...?}>>
 
-GRAM creates default satisfaction data for each civilian group
-and concern.  In each
-case the saliency is 1.0 and the initial satisfaction level is 0.0.<p>
-
-This command is used to specify the set of non-default satisfaction
-data.  If the defaults are acceptable, this command must be called
-with no arguments.<p>
+This command is used to specify the set of satisfaction
+data.<p>
 
 <<defitem "load frcg" {$obj load frcg <i>g</i> ?<i>g</i>...?}>>
 
@@ -359,21 +346,13 @@ There should be at least one group.<p>
 
 <<defitem "load frcrel" {$obj load frcrel ?<i>f g rel</i>...?}>>
 
-GRAM creates default relationships for every pair of force groups in
-every neighborhood: 1.0 when f=g and 0.0 otherwise.<p>
-
-This command is used to specify the set of non-default relationship
-data.  If the defaults are acceptable, this command must be called
-with no arguments.<p>
+This command is used to specify the set of force group to force
+group relationship data.<p>
 
 <<defitem "load coop" {$obj load coop ?<i>f g coop0</i>...?}>>
 
-GRAM creates default cooperation data for every CIV group
-with every force group.  All cooperations default to 50.0.<p>
-
-This command is used to specifies the set of non-default initial
-cooperation values.  If the defaults are acceptable, this command must
-be called with no arguments.<p>
+This command is used to specify the set of initial
+cooperation values for each civilian group/force group pair.<p>
 
 <</deflist load>>
 
