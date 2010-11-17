@@ -2826,8 +2826,8 @@ snit::type ::simlib::gram {
             WHERE n = $input(dn)
             AND   g = $input(df);
         } {
-            let input(p) {$opts(-p) * $effects_factor}
-            let input(q) {$opts(-q) * $effects_factor}
+            set input(p) [expr {$opts(-p) * $effects_factor}]
+            set input(q) [expr {$opts(-q) * $effects_factor}]
         }
 
         # If no cause is given, use the driver.
@@ -2945,8 +2945,8 @@ snit::type ::simlib::gram {
             WHERE n = $input(dn)
             AND   g = $input(df);
         } {
-            let input(p) {$opts(-p) * $effects_factor}
-            let input(q) {$opts(-q) * $effects_factor}
+            set input(p) [expr {$opts(-p) * $effects_factor}]
+            set input(q) [expr {$opts(-q) * $effects_factor}]
         }
 
         # NEXT, if the slope is less than epsilon, make it
@@ -3234,7 +3234,7 @@ snit::type ::simlib::gram {
 
         # NEXT, save this to the history.
         if {[parm get gram.saveHistory]} {
-            let realmag {$newVal - $val}
+            set realmag [expr {$newVal - $val}]
 
             $rdb eval {
                 INSERT OR IGNORE INTO
@@ -3340,18 +3340,18 @@ snit::type ::simlib::gram {
         # FIRST, determine the real llimit
         if {$effect(prox) == 2} {
             # Far
-            let mult {$input(q) * $effect(factor)}
+            set mult [expr {$input(q) * $effect(factor)}]
         } elseif {$effect(prox) == 1} {
             # Near
-            let mult {$input(p) * $effect(factor)}
+            set mult [expr {$input(p) * $effect(factor)}]
         } elseif {$effect(prox) == 0} {
             # Here
-            let mult {$input(s) * $effect(factor)}
+            set mult [expr {$input(s) * $effect(factor)}]
         } else {
             set mult $effect(factor)
         }
         
-        let llimit {$mult * $input(llimit)}
+        set llimit [expr {$mult * $input(llimit)}]
 
         if {$llimit == 0.0} {
             # SKIP!
@@ -3361,21 +3361,21 @@ snit::type ::simlib::gram {
         # NEXT, compute the start time, taking the effects 
         # delay into account.
 
-        let ts {$input(ts) + $effect(delay)}
+        set ts [expr {$input(ts) + $effect(delay)}]
 
         # NEXT, Compute te and tau
         if {abs($llimit) <= $epsilon} {
             set te $ts
             set tau 0.0
         } else {
-            let te {int($ts + [$clock fromDays $input(days)])}
+            set te [expr {int($ts + [$clock fromDays $input(days)])}]
 
             # NEXT, compute tau, which determines the shape of the
             # exponential curve.
-            let tau {
+            set tau [expr {
                 $input(days)/
                     (- log($epsilon/abs($llimit)))
-            }
+            }]
         }
 
         # NEXT, insert the data into gram_effects
@@ -3461,18 +3461,18 @@ snit::type ::simlib::gram {
         # FIRST, determine the real slope.
         if {$effect(prox) == 2} {
             # Far
-            let mult {$input(q) * $effect(factor)}
+            set mult [expr {$input(q) * $effect(factor)}]
         } elseif {$effect(prox) == 1} {
             # Near
-            let mult {$input(p) * $effect(factor)}
+            set mult [expr {$input(p) * $effect(factor)}]
         } elseif {$effect(prox) == 0} {
             # Here
-            let mult {$input(s) * $effect(factor)}
+            set mult [expr {$input(s) * $effect(factor)}]
         } else {
             set mult $effect(factor)
         }
         
-        let slope {$mult * $input(slope)}
+        set slope [expr {$mult * $input(slope)}]
 
         # NEXT, if the slope is very small, set it to
         # zero.
@@ -3482,7 +3482,7 @@ snit::type ::simlib::gram {
 
         # NEXT, compute the start time, taking the effects 
         # delay into account.
-        let ts {$input(ts) + $effect(delay)}
+        set ts [expr {$input(ts) + $effect(delay)}]
 
         # NEXT, if the driver already has an entry in gram_effects,
         # we need to update the entry. Get the ID of the chain's entry, if 
@@ -3612,7 +3612,7 @@ snit::type ::simlib::gram {
 
         # FIRST, compute the termination time, taking the effects 
         # delay into account.
-        let ts {$input(ts) + $effect(delay)}
+        set ts [expr {$input(ts) + $effect(delay)}]
 
         # NEXT, check the time constraints, and update te if
         # necessary.
@@ -3715,18 +3715,18 @@ snit::type ::simlib::gram {
                 # nominal contribution to date.
                 assert {$row(tau) != 0.0}
 
-                let deltaDays {double($db(time) - $row(ts))/1440.0}
+                set deltaDays [expr {double($db(time) - $row(ts))/1440.0}]
 
-                let valueNow {
+                set valueNow [expr {
                     $row(llimit) * (1.0 - exp(-$deltaDays/$row(tau)))
-                }
+                }]
             }
 
-            let contrib {$valueNow - $row(nominal)}
+            set contrib [expr {$valueNow - $row(nominal)}]
 
             # NEXT, add the increment to this effect's nominal
             # contribution to date.
-            let row(nominal) {$row(nominal) + $contrib}
+            set row(nominal) [expr {$row(nominal) + $contrib}]
             
             # NEXT, apply thresholds
             if {$contrib > 0 && $row(val) >= $row(athresh)} {
@@ -3801,9 +3801,9 @@ snit::type ::simlib::gram {
                 # NEXT, Get the nominal contribution of this link in the
                 # chain.
                 
-                let nvalue       {$row(slope)*$stepDays}
-                let row(nominal) {$row(nominal) + $nvalue}
-                let ncontrib     {$ncontrib + $nvalue}
+                set nvalue       [expr {$row(slope)*$stepDays}]
+                set row(nominal) [expr {$row(nominal) + $nvalue}]
+                set ncontrib     [expr {$ncontrib + $nvalue}]
 
                 # NEXT, if there's another active link get it.
                 if {$row(te) < $db(time)} {
@@ -3908,12 +3908,14 @@ snit::type ::simlib::gram {
 
             # NEXT, store the positive effects by id and cause
             if {$maxpos > 0.0} {
-                let poscontribs($curve_id,$cause) {$maxpos*$scale/$sumpos}
+                set poscontribs($curve_id,$cause) \
+                    [expr {$maxpos*$scale/$sumpos}]
             }
             
             # NEXT, store the negative effects by id and cause
             if {$minneg < 0.0} {
-                let negcontribs($curve_id,$cause) {$minneg*$scale/$sumneg}
+                set negcontribs($curve_id,$cause) \
+                    [expr {$minneg*$scale/$sumneg}]
             }
         }
 
