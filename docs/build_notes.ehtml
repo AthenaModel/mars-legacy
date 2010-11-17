@@ -10,6 +10,18 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.39, 17 November 2010</h3>
+<b> Happy Birthday To Me</b><p>
+
+This build contains a new moneysort command in marsmisc(n) and some new code
+for dealing with dynamic civilian groups in GRAM2.<p>
+
+<ul>
+  <li> Bug 2670: marsmisc(n): Add moneysort command
+  <li> Bug 2683: gram2(n): Dynamic civilian groups
+  <li> Bug 2687: gram2(n): Data loading and sanity checking
+</ul>
+
 <h3>Build 1.38, 2 November 2010</h3>
 
 This build contains one change: colorfield(n), a new formlib(n)
