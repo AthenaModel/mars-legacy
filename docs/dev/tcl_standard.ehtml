@@ -27,6 +27,10 @@ pre {
 
 <<changelog>>
 
+<<change 11/18/10 Update whd>>
+Removed NaturalDocs commenting conventions.
+<</change>>
+
 <<change 11/10/09 New whd>>
 Updated from the JNEM Tcl coding standard.  Updates include:<p>
 
@@ -67,10 +71,8 @@ The Mars Tcl/Tk Coding Standard is based on the
 This document is the recognized standard for Tcl code within the
 Tcl/Tk community at large.  It was originally developed at Sun
 Microsystems and is now maintained by the Tcl Core Team. It is,
-however, somewhat dated.<p>
-
-The standards described here derive from the <i>Tcl Style Guide</i>
-but do not depend directly on it.<p>
+however, somewhat dated.  Consequently, the standards described here
+derive from the <i>Tcl Style Guide</i> but do not depend directly on it.<p>
 
 Many of the module skeletons in <<xref file>> involve Snit type and
 widget definitions; see also the
@@ -122,7 +124,7 @@ to put it on its own line, outdenting if necessary:<p>
 Long text strings which contain multiple lines of text should be
 spread across multiple lines, possibly using
 <<xref marsutil(n) outdent>> or <<xref template(n) tsubst>> to remove
-preserve indentation.  For example, the following code defines a long
+or preserve indentation.  For example, the following code defines a long
 message, indented with the code; the <<xref marsutil(n) outdent>> command
 removes the unwanted whitespace at the beginning of each line:<p>
 
@@ -236,7 +238,7 @@ label .mylabel \
 
        The options, values, and backslashes should line up as shown.<p>
 
-       Format the command this way even only one or two option are
+       Format the command this way even if only one or two options are
        being set and the options and values would all fit on the first
        line.<p>
 
@@ -263,41 +265,40 @@ them in exceptional circumstances.<p>
 
 <<section form.comments.nd "NaturalDocs">>
 
-As of November, 2009, the commenting standard has been
+In of November, 2009, the commenting standard was
 changed to allow <<link http://www.naturaldocs.org NaturalDocs>>
-to be used to produce HTML documentation
-of application and library internals.  Older comments should be revised
-to the new form in the course of normal maintenance.<p>
-
-Mars customizes NaturalDocs considerably for use with Tcl/Snit and
-Mars coding conventions.<p>
-
-See the NaturalDocs documentation for general details about formatting
-comments with NaturalDocs.  Here are some basics:<p>
+to be used to produce HTML documentation of application and library
+internals.  After a year's experience, the development team
+determined that NaturalDocs should be abandoned.  The
+following features of NaturalDocs-style comments should be removed
+from the code in the course of normal maintenance.<p>
 
 <ul>
-<li> Text can be *bold*.<p>
-
-<li> Text can be _italic_.  Note that by default, the underscore
-     syntax yields underlining; Mars adjusts the CSS to produce
-     italics instead.<p>
+<li> Style markup should be deleted, e.g., *bold* and _italic_.<p>
      
-<li> Comment blocks beginning with a known keyword, followed by a name,
-     are processed by NaturalDocs, e.g.,<p>
+<li> Header comments no longer need begin with a known keyword,
+     e.g., prefer
+
+     <pre>
+     # myproc
+     # ...
+
+     proc myproc ...
+     </pre>
+
+     to
      
      <pre>
      # Proc: myproc
+     # ...
+
+     proc myproc ...
      </pre>
 
-<li> Subtitles can be added within the comment block by including a line
-     that ends with a colon: "Subtitle:".  The subtitle must be preceded
-     by a blank line.<p>
-     
-<li> Paragraphs are separated by blank lines.<p>
-
-<li> Link to other entities using angle brackets, e.g.,<p>
+<li> Entity links in angle brackets should be removed:<p>
 
      <pre>
+     # Remove the angle brackets here:
      # This is a link to &lt;myproc&gt;.
      </pre>
 </ul><p>
@@ -350,7 +351,6 @@ For example,
 #-----------------------------------------------------------------------
 </pre>
 
-
 Additional keywords and documentation can be added as needed; content
 following each keyword should be indented three spaces from the "#" mark.
 The separator lines should be exactly 72 columns wide.  (An editor
@@ -379,24 +379,8 @@ directly after the section title, separated by a blank comment line.<p>
 # what's in it, and so forth.
 </pre>
 
-If the section contains entities to be included in the NaturalDocs
-output, it will usually be desirable to tag the section comment as a
-"Module:", "Object Type:", "Widget:", "Widget Adaptor:", or "Section:".
-For example, a Snit widget would begin with a comment like this:
-
-<pre>
-#-----------------------------------------------------------------------
-# Widget: mywidget
-#
-# Here is a longer description of what this widget is for.
-
-snit::widget mywidget {
-    ...
-}
-</pre>
-
 See the descriptions of the various kinds of code file in
-<<xref file>> for commonly use file sections.<p>
+<<xref file>> for commonly used file sections.<p>
 
 <<section form.comments.typesection "Type and Widget Sections">>
 
@@ -409,13 +393,10 @@ so that the row of hyphens still extends to the 72nd column:<p>
 123456789012345678901234567890123456789012345678901234567890123456789012
 snit::type mytype {
     #-------------------------------------------------------------------
-    # Group: Constructor
+    # Constructor
     ...
 }
 </pre>
-
-The "Group:" tag identifies it as a section header within the current
-type or widget.<p>
 
 The following sections are commonly used, though rarely all in the
 same type or widget definition.<p>
@@ -423,38 +404,37 @@ same type or widget definition.<p>
 <pre>
 snit::type mytype {
     #-------------------------------------------------------------------
-    # Group: Type Components
+    # Type Components
 
     #-------------------------------------------------------------------
-    # Group: Type Variables
+    # Type Variables
 
     #-------------------------------------------------------------------
-    # Group: Type Constructor
+    # Type Constructor
 
     #-------------------------------------------------------------------
-    # Group: Public Type Methods
+    # Public Type Methods
 
     #-------------------------------------------------------------------
-    # Group: Private Type Methods
+    # Private Type Methods
 
     #-------------------------------------------------------------------
-    # Group: Options
+    # Options
 
     #-------------------------------------------------------------------
-    # Group: Instance Variables
+    # Instance Variables
 
     #-------------------------------------------------------------------
-    # Group: Constructor
+    # Constructor
 
     #-------------------------------------------------------------------
-    # Group: Public Methods
+    # Public Methods
 
     #-------------------------------------------------------------------
-    # Group: Private Methods
+    # Private Methods
 
     #-------------------------------------------------------------------
-    # Group: Utility Methods and Procs
-
+    # Utility Methods and Procs
 }
 </pre><p>
 
@@ -468,62 +448,68 @@ directly after the public method.<p>
 In short, think of the code file as a document that's telling a story, and
 use the grouping that best communicates the story.<p>
 
+<<section form.comments.endline "End-line Comments">>
+
+In general, full-line comments are preferred to end-line comments.
+It is allowable, though, to use end-line comments to document a
+sequence of items such as variable declarations:<p>
+
+<pre>
+variable thisVariable    5    ;# This short description
+variable thatVariable    6    ;# That short description
+variable anotherVariable 7    ;# Another short description              
+</pre>
+
+If the items can't be cleanly documented as shown--e.g., if one
+variable name or value is much longer than the
+others--then full-line comments should be used instead.<p>
+
+When end-line commands are used, they should always be written
+as shown, with the semicolon immediately preceding the pound sign,
+"<b>;#</b>".
+
 <<section form.comments.events "Notifier Event Comments">>
 
 If a module sends <<xref notifier(n)>> events, they should be
-documented near the top of the module.  Each event should get
-a distinct comment block, and the blocks should be grouped under
-the heading "Notifier Events":<p>
-
-<pre>
-    #-------------------------------------------------------------------
-    # Group: Notifier Events
-    
-    # Notifier Event: Load
-    #
-    # A new gramdb(5) database has been loaded.  A <Reset> is also sent.
-    
-    # Notifier Event: Reset
-    #
-    # The simulation has changed in some basic way; all dependent modules
-    # should reset themselves.
-</pre>
-
-If the event has arguments, the calling sequence should be documented
-as for <<xref form.comments.procheader procs>> and methods.<p>
+documented in a section comment near the top of the module.<p>
 
 <<section form.comments.components "Component Comments">>
 
-Significant type and instance components should be preceded by a
-comment, like this:<p>
+Type and instance components should be documented using end-line
+comments, unless there is something particularly odd about them; use a
+normal comment in the latter case.<p>
 
 <pre>
 snit:type {
-    # Type Component: tc
-    #
-    # Description of tc
+    ...
 
-    typecomponent tc
+    #-------------------------------------------------------------------
+    # Type Components
 
-    # Component: c
-    #
-    # Description of c
+    typecomponent tc1     ;# The kind of component or the role it plays
+    typecomponent tc2     ;# The kind of component or the role it plays
+    ...
 
-    typecomponent c
+    #-------------------------------------------------------------------
+    # Components
+
+    component c1          ;# The kind of component or the role it plays
+    component c2          ;# The kind of component or the role it plays
+    ...
 }
 </pre>
 
 <<section form.comments.option "Option Comments">>
 
 Options defined in a Snit type or widget definition should be placed
-under an Options group, and preceded by a comment like this:<p>
+in an Options section, and preceded by a comment like this:<p>
 
 <pre>
 snit:type {
     #-------------------------------------------------------------------
-    # Group: Options
+    # Options
     ...
-    # Option: -myoption
+    # -myoption
     #
     # Description of my option
 
@@ -535,20 +521,44 @@ snit:type {
 The description need not include the default value (if any) since it's
 right there.<p>
 
+If the option references a <code>-configuremethod</code> or
+<code>-cgetmethod</code>, the method may be defined following the
+option.  If multiple options reference the same method, it should be
+defined at the end of the Options section.<p>
+
 <<section form.comments.variable "Variable Comments">>
 
-Significant type and instance variables should be preceded by a
-comment, like this:<p>
+As a general rule, scalar type and instance variables should be
+documented with end-line comments unless there is more to be said
+than will fit.  Thus, prefer this:<p>
+
+<pre>
+    #-------------------------------------------------------------------
+    # Type Variables
+
+    typevariable tv1     ;# Something about the variable
+    typevariable tv2     ;# Something about the variable
+    ...
+
+    #-------------------------------------------------------------------
+    # Instance Variables
+
+    variable v1          ;# Something about the variable
+    variable v2          ;# Something about the variable
+</pre>
+
+Particularly significant type and instance variables should be preceded by a
+header comment, like this:<p>
 
 <pre>
 snit:type {
-    # Type Variable: myvar
+    # myvar
     #
     # Description of myvar
 
     typevariable myvar {...}
 
-    # Variable: instvar
+    # instvar
     #
     # Description of instvar
 
@@ -556,39 +566,25 @@ snit:type {
 }
 </pre>
 
-For array variables with a variety of distinct keys, the comment should
-list the distinct keys or kinds of key:<p>
+Array variables with a variety of distinct keys should always be
+documented using a header comment; the comment should
+list the distinct keys or kinds of key, and the kind of values that
+go with them.<p>
 
 <pre>
-    # Type variable: info
+    # info array
     #
     # An array of information about the state of the simulation.  The
     # keys are as follows.
     #
     #   dbloaded - 1 if a gramdb(5) is loaded, and 0 otherwise
-    #   dbfile   - Name of the loaded gramdb(5) file, or "" if none.
+    #   dbfile   - Name of the loaded gramdb(5) file, or ""
+    #              if none.
     
     typevariable info -array {
         dbloaded   0
         dbfile     ""
     }
-</pre>
-
-<<section form.comments.icon "Icon Comments">>
-
-Widgets often use <<xref mkicon(n)>> to define icons
-for use on buttons and toolbars.  These can be documented using
-"Icon:" comments:<p>
-
-<pre>
-    #-------------------------------------------------------------------
-    # Group: Icons
-    
-    # Icon: icon::step
-    #
-    # Represents a figure of a man stepping forward.
-    
-    mkicon ${type}::icon::step { ... }
 </pre>
 
 
@@ -600,33 +596,28 @@ value, along with anything else the developer should know about the
 procedure.  The following template should be used:<p>
 
 <pre>
-# Proc: <i>name</i>
+# procname arg1 arg2
 #
-# <i>Description of the proc, including the return value.
+# arg1 - description of arg1
+# arg2 - description of arg2
+#
+# Description of the proc, including the return value.
 # The first sentence should be a good summary of the purpose of the
-# proc.</i>
-#
-# Syntax:
-#   <i>calling sequence</i>
-#
-#   <i>arg1</i> - <i>description of arg1</i>
-#   <i>arg2</i> - <i>description of arg2</i>
-#     ...
-#
-# <i>If desired, additional descriptive text.</i>
+# proc.
 </pre>
+
+The argument names and descriptions should be separated by a hyphen,
+as shown.  When there are multiple arguments, the hyphens should be
+vertically aligned, one space to the left of the descriptions.<p>
 
 For example,
 
 <pre>
-# Proc: double
+# double x
 #
-# Multiplies _x_ by 2 and returns the result.
+# x - A numeric value
 #
-# Syntax:
-#   double _x_
-#
-#   x - A numeric value
+# Multiplies x by 2 and returns the result.
 
 proc double {x} {
     ...
@@ -634,19 +625,15 @@ proc double {x} {
 </pre>
 
 The calling sequence should indicate optional arguments using question
-marks, as is done in the standard Tcl man pages; and the parameter
-# names should be italicized.<p>
+marks, as is done in the standard Tcl man pages.<p>
 
 <pre>
-# Proc: multiply
+# multiply x ?factor?
 #
-# Multiplies _x_ by the factor and returns the result.
+# x       - A numeric value
+# factor  - A numeric value; defaults to 2
 #
-# Syntax:
-#   multiply _x ?factor?_
-#
-#   x       - A numeric value
-#   factor  - A numeric value; defaults to 2
+# Multiplies x by the factor and returns the result.
 
 proc multiply {x {factor 2}} {
     ...
@@ -658,19 +645,16 @@ the command takes options, the options and their meanings should be
 listed after the normal arguments.<p>
 
 <pre>
-# Proc: modifiy
+# modify x ?options...?
 #
-# Modifies _x_ as indicated by the options, which are processed in the
-# order of appearances.  Returns the modified value.
-#
-# Syntax:
-#   modify _x ?options...?_
-#
-#   x - A numeric value
+# x - A numeric value
 #
 # Options:
 #   -multiplyby factor  - Multiply x by the factor
 #   -add value          - Add the value to x.
+#
+# Modifies x as indicated by the options, which are processed in the
+# order of appearances.  Returns the modified value.
 
 proc modify {x args} {
     ...
@@ -681,21 +665,19 @@ proc modify {x args} {
 
 Constructor header comments are just like procedure headers
 except that, falling as they do within a type or widget definition,
-they are indented four spaces, and are tagged as shown below.
-The calling sequence is omitted, but the parameters can be documented
-as required.
+they are indented four spaces.
 
 <pre>
 snit::type mytype {
     ...
-    # Constructor: constructor
+    # constructor a b
     #
-    # Creates an instance of mytype for inputs _a_ and _b_.
+    # a - A parameter
+    # b - Another parameter
     #
-    #   a - A parameter
-    #   b - Another parameter
+    # Creates an instance of mytype given inputs a and b.
 
-    constructor {a b} {tag} {
+    constructor {a b} {
         ...
     }
 }
@@ -707,7 +689,7 @@ there's no need to call attention to the <i>args</i> parameter.<p>
 If need be, the destructor can be documented in the same way:<p>
 
 <pre>
-    # Constructor: destructor
+    # destructor
     #
     # Cleans up such-and-such.
 
@@ -716,30 +698,21 @@ If need be, the destructor can be documented in the same way:<p>
     }
 </pre>
 
-The odd tagging, "Constructor: constructor" and "Constructor: destructor",
-is required for two reason.  First, NaturalDocs expects that classes might
-have multiple constructors, and second, so that the destructor is grouped
-with the constructor.<p>
-
 <<section form.comments.methodheader "Method Header Comments">>
 
 Method and typemethod header comments are just like procedure headers
 except that, falling as they do within a type or widget definition,
-they are indented four spaces, and are tagged as methods or type methods
-rather than procs.  The type or instance command is
+they are indented four spaces.  The type or instance command is
 omitted from the calling sequence.
 
 <pre>
 snit::type mytype {
     ...
-    # Type Method: register
+    # register tag
     #
-    # Registers _tag_ for use with all instances of this type.
+    # tag - An identifier string.
     #
-    # Syntax:
-    #   register _tag_
-    #
-    #   tag - A identifier string.
+    # Registers tag for use with all instances of this type.
 
     typemethod register {tag} {
         ...
@@ -747,15 +720,12 @@ snit::type mytype {
 
     ...
     
-    # Method: modify
+    # modify x
     #
-    # Modifies _x_ as specified by the object's options, and returns the
+    # x - A numeric value
+    #
+    # Modifies x as specified by the object's options, and returns the
     # modified value.
-    #
-    # Syntax:
-    #   modify _x_
-    #
-    #   x - A numeric value
 
     method modify {x} {
         ...
@@ -766,7 +736,7 @@ snit::type mytype {
 <<section form.comments.body "Procedure/Method Body Comments">>
 
 Procedure, method, and typemethod bodies should be broken into logical
-paragraphs using "FIRST/NEXT" comments.  Each such comment should
+paragraphs using FIRST/NEXT comments.  Each such comment should
 introduce and describe the block of code that follows.<p>
 
 <pre>
@@ -784,38 +754,17 @@ proc UpdateDatabase {args} {
 </pre>
 
 <ul>
-  <li> The block following a "FIRST/NEXT" comment may be as little as
+  <li> The block following a FIRST/NEXT comment may be as little as
        one line of code, but will usually be larger.<p>
 
   <li> Small procedures consisting of only a few lines of code can
-       dispense with "FIRST/NEXT" comments.<p>
+       dispense with FIRST/NEXT comments.<p>
 
   <li> Large loop bodies and then/else clauses should also be broken
-       into paragraphs using "FIRST/NEXT" comments.<p>
+       into paragraphs using FIRST/NEXT comments.<p>
 </ul>
 
-"FIRST/NEXT" comments help the body of code to tell its story.<p>
-
-<<section form.comments.endline "End-line Comments">>
-
-In general, full-line comments are preferred to end-line comments;
-end-line comments cannot be picked up by NaturalDocs.  It is allowable,
-though, to use end-line comments to document a sequence of items
-such as variable declarations:<p>
-
-<pre>
-variable thisVariable    5    ;# This short description
-variable thatVariable    6    ;# That short description
-variable anotherVariable 7    ;# Another short description              
-</pre>
-
-If the items can't be cleanly documented as shown--e.g., if one
-variable name or value is much longer than the
-others--then full-line comments should be used instead.<p>
-
-When end-line commands are used, they should always be written
-as shown, with the semicolon immediately preceding the pound sign,
-"<b>;#</b>".
+FIRST/NEXT comments help the body of code to tell its story.<p>
 
 <<section code "Code Semantics">>
 
@@ -846,11 +795,11 @@ definition within which it is defined.<p>
   <li> Public command names should always begin with a lowercase
        letter, e.g., <<xref marsutil(n) assert>>.<p>
 
-  <li> Where possible with sacrificing clarity, public command names
+  <li> Where possible without sacrificing clarity, public command names
        should be short, and all lowercase with no separators, e.g.,
        <<xref marsutil(n) lmaxlen>>, which is short for "list maximum
        length".  This is an extreme case, but it succeeds because the
-       name is in line with those of the standard list manipulation
+       name is consistent with those of the standard list manipulation
        commands.<p>
 
   <li> When defining a family of commands with related names, e.g.,
@@ -858,7 +807,7 @@ definition within which it is defined.<p>
        command instead, e.g., "mat new", "mat add", "mat mul".<p>
 
   <li> If a code file defines a single ensemble command, the command
-       name should generally match the file name.  (See
+       name should match the file name.  (See
        <<xref file.mod.ensemble>>.)<p>
 </ul>
 
@@ -866,13 +815,14 @@ definition within which it is defined.<p>
 
 As with public commands, public method names begin with a lowercase
 letter.  Because method and typemethod names are always subcommands of
-an ensemble command, they are already ready as the second word of a
+an ensemble command, they are already read as the second word of a
 multiword name.  Consequently they are almost always short, consisting
 of one or two words, all lowercase with no separators.<p>
 
 When defining a family of methods with related names, consider using
-hierarchical method names instead, i.e., unit them in a
-sub-ensemble.<p>
+hierarchical method names instead, i.e., unite them in a
+sub-ensemble.  An example is the Tk text widget's "tag *" command and
+its subcommands.<p>
 
 <<section code.naming.public.variables "Public Variables">>
 
@@ -889,7 +839,7 @@ if {$::mymodule::my == 2} {
 }
 </pre>
 
-However, use of public variables should be kept to a minimum; procedural
+However, use of public variables is discouraged; procedural
 interfaces are preferred.<p>
 
 <<section code.naming.private "Private Names">>
@@ -922,7 +872,8 @@ an initial lowercase letter.<p>
 The previous version of this standard called for private variable
 names to begin with a capital letter, to distinguish them from public
 variable names; but in practice there are extremely few public variable
-names, and all variables are written with an initial lowercase letter.<p>
+names.  Consequently, all variables are written with an initial
+lowercase letter.<p>
 
 <<section code.expressions "Expressions">>
 
@@ -939,17 +890,20 @@ names, and all variables are written with an initial lowercase letter.<p>
        variables.  This degrades performance and can also be source of
        subtle bugs.<p>
 
-  <li> It's often preferable to use the <<xref marsutil(n) let>> command
-       rather than the <b>expr</b> command, especially when doing a
-       sequence of computations.<p>
+  <li> The <<xref marsutil(n) let>> command is more readable than
+       the <b>set/expr</b> idiom, especially when doing a
+       sequence of computations:<p>
 
 <pre>
     let a {$b * $c}
     let x {$a*$a + 2*$y}
 </pre>
 
+  <li> Note that <<xref marsutil(n) let>> is slightly slower than
+  <b>set/expr</b>; prefer <b>set/expr</b> when performance is crucial.<p>
+
   <li> Format expressions too long to fit on one line like blocks of
-       code.<p>
+       code.  Indentation should indicating grouping.<p>
 
 <pre>
     let dist {
@@ -958,7 +912,6 @@ names, and all variables are written with an initial lowercase letter.<p>
                   cos($lat1)*cos($lat2)*$sinHalfDlon*$sinHalfDlon))
     }
 </pre>
-       
        
   <li> The Tcl Style Guide suggests that expressions should not rely
        on operator precedence, but should always be explicitly
@@ -979,8 +932,8 @@ names, and all variables are written with an initial lowercase letter.<p>
 
 <pre>
     if {3*$x + 5 == 7 &&
-        2*$z == 9     &&
-        $y == 9
+        2*$z     == 9 &&
+        $y       == 9
     } {
         ...
     }
@@ -998,7 +951,9 @@ executed in the body of a proc.<p>
 In procs or methods of one or two lines, however, it is
 acceptable to omit the "return" statement, provided that the
 command whose value will be returned is the last comand in the
-body of the proc or method.  Thus, prefer
+body of the proc or method, and that the documented purpose of the
+proc or method is to compute and return a particular value.
+Thus, prefer
 
 <pre>
 proc double {x} {
@@ -1014,7 +969,12 @@ proc double {x} {
 }
 </pre>
        
-This is especially helpful when programming in a more functional style.<p>
+This is especially helpful when programming in a more functional
+style.<p>
+
+Commands that are called primarily for their side-effects should
+always use "return" explicitly if they return a value, regardless of
+length of the command.
 
 <<section code.typeawareness" "Data Type Awareness">>
 
@@ -1029,7 +989,7 @@ supposed to contain an integer, or a floating point number, or a list, or
 a string.  The programmer should try to always be aware of the
 notional type of each variable and use the appropriate operations for
 that type.  Failure to do so can lead to "shimmering", in which Tcl
-is constantly having to convert the value's "internal representation"
+is constantly having to convert the value's internal representation
 from one type to another.  A bad case of shimmering can lead to
 serious performance problems.<p>
 
@@ -1056,7 +1016,7 @@ if {$mylist eq ""} {
 </pre>
 
   <li> Use <b>list</b> and <b>lappend</b> to build lists from
-       arbitrary data, rather than string handling routines.<p>
+       arbitrary data, rather than using string handling routines.<p>
 
        The string representation of a Tcl list is a
        whitespace-delimited list of tokens.  It's perfectly all right
@@ -1097,8 +1057,6 @@ set b [list name $name2]
 
 </ul>
 
-
-
 <<section code.callbacks "Callbacks">>
 
 Tcl/Tk modules frequently define callback commands which are passed
@@ -1115,7 +1073,9 @@ used:<p>
 Tcl's <b>after</b> command, which is used to define timeout and idle
 state callbacks, registers script callbacks.  The callback can be a
 Tcl script of any size, from one command to many; <b>after</b> places
-no restrictions on it.<p>
+no restrictions on it.  (Note: it's usually preferable to
+define a <<xref timeout(n)>> object rather than use a bare
+<b>after</b> handler.)<p>
 
 Tk's <b>bind</b> command, which is used to define bindings for
 keyboard and mouse events, registers script callbacks with symbol
@@ -1129,9 +1089,9 @@ Other Tk callbacks, such as the <b>scrollbar</b> widget's
 to which the scrollbar will <b>lappend</b> one or more additional arguments
 before the command is called.<p>
 
-In Mars, "command prefix" callbacks are preferred. That is, whatever the
-object with which the callback is registered requires or allows, the client
-should register a callback which consists of a single command, usually a
+Whatever the object defining the callback allows, however, the client
+should always register a callback which consists of a single command
+or command prefix.  The command will usually be a
 procedure, method, or typemethod defined just for the purpose, along with
 any leading arguments required by the client.<p>
 
@@ -1149,6 +1109,18 @@ scrollbar .yscroll \
 
 With the exception of Tk widget commands, the callback command should
 almost always be fully qualified.<p>
+
+In a Snit type or widget definition, where the callback procedure is
+defined in the body of the type, use <b>myproc</b> instead of list:<p>
+
+<pre>
+myobject configure \
+    -command [myproc MyCallbackProc arg arg arg...]
+</pre>
+
+The <b>myproc</b> command builds the command as a list in the same way
+that <b>list</b> does, but also fully-qualifies the procedure's name
+automatically.<p>
 
 <<section code.callbacks.events "Event Bindings">>
 
@@ -1192,7 +1164,7 @@ The following doesn't work at all; <b>break</b> is called when the
 callback is defined, not when the button is pressed:<p>
 
 <pre>
-bind .thingy <1> [ButtonPress %x %y; break]
+bind .thingy <1> [list ButtonPress %x %y; break]
 </pre>
 
 <<section code.callbacks.methods "Method Callbacks">>
@@ -1294,12 +1266,6 @@ if {$callback ne ""} {
 This presumes that the callback command is fully-qualified, as it should
 be.<p>
 
-<<section packages "Packages">>
-
-<<section packages.lib "Library Packages">>
-
-<<section packages.app "Application Packages">>
-
 <<section file "File Layout">>
 
 This section contains standard regarding to the placement, contents,
@@ -1362,21 +1328,18 @@ package require marsutil
 namespace import marsutil::*
 
 #-----------------------------------------------------------------------
-# Group: Variables
+# Variables
 
 # Declare and initialize global variables here
 
 #-----------------------------------------------------------------------
-# Group: Main Line Code
+# Main Line Code
 
-# Proc: main
+# main argv
+#
+# argv - The script's command-line arguments
 #
 # This is the script's main routine.
-#
-# Syntax:
-#   main _argv_
-#
-#   argv - The script's command-line arguments
 
 proc main {argv} {
     ...
@@ -1385,7 +1348,7 @@ proc main {argv} {
 # Other main-line routines follow
 
 #-----------------------------------------------------------------------
-# Group: Utility Commands
+# Utility Commands
 
 # small utility commands needed by the main-line code are defined
 # here.
@@ -1400,8 +1363,7 @@ main $argv
 
 In this layout, the script's code is grouped into an application
 ensemble, conventionally called <b>app</b>.  Application ensembles are
-easily created using Snit.  The skeleton is as follows; note the use
-of the "Module:" keyword for Snit types configured as singletons.<p>
+easily created using Snit.  The skeleton is as follows:<p>
 
 <pre>
 #!/bin/sh
@@ -1426,13 +1388,10 @@ exec tclsh8.5 "$0" "$@"
 # Required Packages
 
 package require snit
-package require util
-package require projectlib
-
-namespace import util::* projectlib::*
+...
 
 #-----------------------------------------------------------------------
-# Module: app
+# app
 #
 # Additional description of the type.
 
@@ -1440,21 +1399,18 @@ snit::type app {
     pragma -hasinstances no
 
     #--------------------------------------------------------------------
-    # Group: Type Variables
+    # Type Variables
 
     # Define and initialize any type variables here.
 
     #--------------------------------------------------------------------
-    # Group: Main
+    # Main
 
-    # Type method: main
+    # main argv
+    #
+    # argv - The script's command-line arguments
     #
     # This is the script's main routine.
-    #
-    # Syntax:
-    #   main _argv_
-    #
-    #   argv - The script's command-line arguments
 
     typemethod main {arg} {
         ...
@@ -1463,7 +1419,7 @@ snit::type app {
     # Other main-line routines go here
 
     #-------------------------------------------------------------------
-    # Group: Utility Type Methods
+    # Utility Type Methods
 
     # Utility type methods and/or procs go here
 }
@@ -1493,8 +1449,7 @@ man pages in <code>mars/docs/mann</code>, one man page for the package
 itself and one for each of its submodules (e.g., <<xref marsutil(n)>>,
 <<xref mat(n)>>).  An application is documented for the user
 as a single man page in <code>mars/docs/man1</code>, e.g.,
-<<xref mars_gram(1)>>.  Package internals are documented using
-NaturalDocs.<p>
+<<xref mars_gram(1)>>.<p>
 
 Every package has a package index file (<<xref file.package.index>>),
 a package loader file (<<xref file.package.loader>>), and one or more
@@ -1663,14 +1618,14 @@ namespace eval ::mypackage:: {
 #-----------------------------------------------------------------------
 # Public Commands
 
-# Proc: fred
+# fred
 # ...
 
 proc ::mypackage::fred {} {
     ...
 }
 
-# Proc: george
+# george
 # ...
 
 proc ::mypackage::george {} {
@@ -1702,8 +1657,8 @@ the same name into a single namespace (or the same command twice),
 this practice can yield annoying integration bugs at inconvenient
 times.<p>
 
-Generally speaking, the application module would look the
-same but wouldn't export any names.<p>
+Generally speaking, application modules will look the
+same but won't define a namespace or export any names.<p>
 
 Note that there is no need to define the package (<b>package
 provide</b>) or to load packages needed by this one (<b>package
@@ -1765,7 +1720,7 @@ namespace eval ::mypackage:: {
 #-----------------------------------------------------------------------
 # Public Commands
 
-# Proc: fred
+# fred
 #
 # ....
 
@@ -1773,7 +1728,7 @@ proc ::mypackage::fred {} {
     ...
 }
 
-# Proc: george
+# george
 #
 # ...
 
@@ -1786,7 +1741,7 @@ proc ::mypackage::george {} {
 #-----------------------------------------------------------------------
 # Private Commands
 
-# Proc: ComputeGadgetFrequency
+# ComputeGadgetFrequency
 #
 # ...
 
@@ -1795,9 +1750,8 @@ proc ::mypackage ComputeGadgetFrequency {} {
 }
 </pre>
 
-The file may be divided into sections using the "Section:" tag
-as best makes sense for the content.  Alternatively, it can
-begin with a "Namespace:" tag and use "Group:" for the sections.<p>
+The file may be divided into sections as best makes sense for the
+content.<p>
 
 <<section file.mod.ensemble "Ensemble Modules">>
 
@@ -1874,7 +1828,7 @@ namespace eval ::mypackage:: {
 }
 
 #-----------------------------------------------------------------------
-# Module: mymodule
+# mymodule ensemble
 #
 # Longer overview of mymodule
 
@@ -1886,18 +1840,18 @@ snit::type mymodule {
     # Type Constructor
 
     typeconstructor {
-        namespace import ::mypackage::*  myotherpackage::* 
+        namespace import myotherpackage::* 
     }
 
     #-------------------------------------------------------------------
-    # Group: Type Variables
+    # Type Variables
 
     ...
 
     #-------------------------------------------------------------------
-    # Group: Initialization
+    # Initialization
 
-    # Typemethod: init
+    # init
     #
     # Initializes the module
 
@@ -1906,7 +1860,7 @@ snit::type mymodule {
     }
 
     #-------------------------------------------------------------------
-    # Group: Public Type Methods
+    # Public Type Methods
 
     ...
 }
@@ -1980,50 +1934,48 @@ namespace eval ::mypackage:: {
 }
 
 #-----------------------------------------------------------------------
-# Object Type: myobject
+# myobject type
 
 snit::type myobject {
     #-------------------------------------------------------------------
     # Type Constructor
 
     typeconstructor {
-        namespace import ::mypackage::*  myotherpackage::* 
+        namespace import myotherpackage::* 
     }
 
     #-------------------------------------------------------------------
-    # Group: Components
+    # Components
 
     ...
 
     #-------------------------------------------------------------------
-    # Group: Options
+    # Options
 
     ...
 
     #-------------------------------------------------------------------
-    # Group: Instance Variables
+    # Instance Variables
 
     ...
 
     #-------------------------------------------------------------------
-    # Group: Constructor/Destructor
+    # Constructor/Destructor
 
-    # Constructor: constructor
+    # constructor
     #
     # ...
-    typemethod constructor {args} {
+
+    constructor {args} {
         ....
     }
 
     #-------------------------------------------------------------------
-    # Group: Public Type Methods
+    # Public Type Methods
 
     ...
 }
 </pre>
-
-Widget layouts are similar, but the widget is identifed as a
-"Widget:" or "Widget Adaptor:" rather than as an "Object Type:".<p>
 
 <<section file.mod.manager "Manager/Object Modules">>
 
@@ -2051,7 +2003,7 @@ unlikely that a mispelled subcommand would cause a new window to be
 created.<p>
 
 For non-GUI object types, though, the manager/object pattern should be
-impleme nted using two
+implemented using two
 types: an ensemble, as shown in <<xref file.mod.ensemble>>, followed
 by an object type or widget, as shown in <<xref file.mod.object>>.
 The typical skeleton for this pattern is simply a combination of the 
