@@ -771,12 +771,38 @@ namespace eval ::marsutil::test {
     } -result {1}
 
     #-------------------------------------------------------------------
+    # DICT collation sequence
+
+    test dict-1.1 {Can create columns with DICT collation} -setup {
+        sqldocument db
+        db open :memory:
+    } -body {
+        db eval {
+            CREATE TABLE tab(name TEXT COLLATE DICT);
+        }
+
+        foreach name {N1 N10 N12 N2 N3} {
+            db eval {
+                INSERT INTO tab(name) VALUES($name)
+            }
+        }
+
+        set a [db eval {SELECT name FROM tab}]
+        set b [db eval {SELECT name FROM tab ORDER BY name}]
+        list $a $b
+    } -cleanup {
+        cleanup
+    } -result {{N1 N10 N12 N2 N3} {N1 N2 N3 N10 N12}}
+
+
+
+    #-------------------------------------------------------------------
     # Standard Functions
 
     # TBD: The existence and nominal operation of the standard functions
     # are tested above, in open-2.x.  We should really have a full
     # test for each; however, as all of them are based on functions
-    # test elsewhere, this should be good enough for now.
+    # tested elsewhere, this should be good enough for now.
 
 
 

@@ -220,6 +220,8 @@ snit::type ::marsutil::sqldocument {
     # Opens the database file, creating it if necessary.  Does not
     # change the database in any way; use "clear" to initialize it.
     # If filename is not specified, will reopen the previous file, if any.
+    #
+    # The DICT collation sequence is defined automatically.
     
     method open {{filename ""}} {
         # FIRST, the database must not already be open!
@@ -241,6 +243,9 @@ snit::type ::marsutil::sqldocument {
         set db ${selfns}::db
 
         sqlite3 $db $filename
+
+        # NEXT, define the DICT collating sequence.
+        $db collate DICT [myproc DictCompare]
 
         # NEXT, set the hardware security requirement
         $db eval {
@@ -627,6 +632,22 @@ snit::type ::marsutil::sqldocument {
         }
     }
 
+    # DictCompare a b
+    #
+    # a - A string
+    # b - Another string
+    #
+    # Compares the two strings in dictionary order, returning 1 if a > b
+    # and -1 otherwise.  This proc is used to implement DICT collating order.
+    # Normally a comparison function like this would return 0 if a == b,
+    # but this is not needed in this case.
+
+    proc DictCompare {a b} { 
+        expr {[string equal $a \
+               [lindex [lsort -dictionary [list $a $b]] 0]] ? -1 : 1} 
+    }
+
+
     # NullDatabase args
     #
     # args       Arguments to the db component.  Ignored.
@@ -639,8 +660,3 @@ snit::type ::marsutil::sqldocument {
         return -code error "database is not open"
     }
 }
-
-
-
-
-

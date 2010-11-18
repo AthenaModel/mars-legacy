@@ -139,6 +139,26 @@ Returns the wall-clock time in Unix seconds.<p>
 
 <</deflist sql_functions>>
 
+<<section "COLLATING SEQUENCES">>
+
+This module defines the following additional collation sequences for
+use when defining or querying database tables:<p>
+
+<<deflist collations>>
+
+<<defitem DICT {DICT}>>
+
+The <b>DICT</b> collating sequence causes a column to be sorted in
+dictionary order, as defined by the <<xref tcl:lsort(n)>> command's
+<b>-dictionary</b> option.  This is useful for columns that contain
+an embedded number, as it makes "N10" sort after "N9" rather than
+between "N1" and "N2".<p>
+
+This collating sequence should be used sparingly, as its
+implementation is rather slow.<p>
+
+<</deflist collations>>
+
 <<section COMMANDS>>
 
 This module defines the following command:<p>
