@@ -746,11 +746,9 @@ snit::widget ::marsgui::sqlbrowser {
 
             $tlist insertcolumns end 0 $label
             
-            if {[llength $opts] > 0} {
-                $tlist columnconfigure $cindex \
-                    -sortmode $sortmode        \
-                    {*}$opts
-            }            
+            $tlist columnconfigure $cindex \
+                -sortmode $sortmode        \
+                {*}$opts
         }
     }
     
