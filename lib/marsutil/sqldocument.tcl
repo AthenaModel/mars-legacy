@@ -136,6 +136,17 @@ snit::type ::marsutil::sqldocument {
         -readonly yes       \
         -type snit::boolean
 
+    # -foreignkeys
+    #
+    # If on (the default), any foreign key constraints and actions
+    # defined in the schema will take effect.  If off (the default)
+    # they will not.
+
+    option -foreignkeys \
+        -default  on             \
+        -readonly yes            \
+        -type     snit::boolean
+
     # -clock
     #
     # Specifies a simclock.  If it exists, simclock-related functions
@@ -261,6 +272,22 @@ snit::type ::marsutil::sqldocument {
         if {!$options(-rollback)} {
             $db eval {
                 PRAGMA journal_mode=OFF;
+            }
+        }
+
+        # NEXT, if -foreignkeys is on, turn on foreign keys,
+        # else turn it off.  (Foreign keys are liable to be
+        # on by default in a future version of SQLite3; 
+        # setting the pragma explicitly in both cases means
+        # we don't need to think about it.)
+
+        if {$options(-foreignkeys)} {
+            $db eval {
+                PRAGMA foreign_keys=ON
+            }
+        } else {
+            $db eval {
+                PRAGMA foreign_keys=OFF
             }
         }
 

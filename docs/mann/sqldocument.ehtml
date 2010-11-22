@@ -29,6 +29,10 @@ object; in addition:<p>
        roll back transactions is required, set <code>-rollback</code>
        to "on".<p>
 
+  <li> Checking of foreign key constraints is enabled automatically
+       (<b>PRAGMA foreign_keys=on;</b>).  To disable foreign keys,
+       set <code>-foreignkeys</code> to "off".<p>
+
   <li> Modules which adhere to the <<xref sqlsection(i)>> interface
        can be registered with an instance of <<xref sqldocument(n)>>,
        thus including their schema and function definitions in all
@@ -193,11 +197,6 @@ transactions as it chooses, and <<iref commit>> has no effect.<p>
 <<xref simclock(n)>>.  If this option is given, the <<iref now>> and
 <<iref tozulu>> SQL functions will be defined.<p>
 
-<<defopt {-rollback <i>boolean</i>}>>
-
-If <b>on</b>, transactions can be rolled back instead of committed.
-If <b>off</b>, the default, they cannot.<p>
-
 <<defopt {-commitcmd <i>command</i>}>>
 
 If specified, this command is called after the database is committed but 
@@ -205,6 +204,19 @@ before a new transaction is begun. This is most useful when the
 <b>-autotrans</b> option is <b>on</b> since it gives the ability to perform
 some task while the database is not locked due to an open transaction.
 <p>
+
+<<defopt {-foreignkeys <i>boolean</i>}>>
+
+Explicitly enables or disables foreign key checking, according to the
+value of the <i>boolean</i> flag.  Foreign key checking is
+<b>on</b> by default.  See <b>PRAGMA foreign_keys</b> in the SQLite3
+documentation for more information.<p>
+
+<<defopt {-rollback <i>boolean</i>}>>
+
+If <b>on</b>, transactions can be rolled back instead of committed.
+If <b>off</b>, the default, they cannot.<p>
+
 
 <</deflist options>>
 

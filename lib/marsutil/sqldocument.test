@@ -351,6 +351,25 @@ namespace eval ::marsutil::test {
         cleanup
     } -result {1 2 3 4 5 6}
     
+    #-------------------------------------------------------------------
+    # -foreignkeys
+
+    test foreignkeys-1.1 {foreign keys are on by default} -body {
+        sqldocument db
+        db open :memory:
+        db onecolumn {PRAGMA foreign_keys}
+    } -cleanup {
+        cleanup
+    } -result {1}
+
+    test foreignkeys-1.2 {foreign keys can be disabled} -body {
+        sqldocument db -foreignkeys off
+        db open :memory:
+        db onecolumn {PRAGMA foreign_keys}
+    } -cleanup {
+        cleanup
+    } -result {0}
+
 
     #-------------------------------------------------------------------
     # clear
