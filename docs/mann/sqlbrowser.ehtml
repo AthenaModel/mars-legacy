@@ -112,6 +112,12 @@ displayed in the row's cells, in order from left to right.<p>
 This command can be used to set the color or font of particular rows
 or cells based on the data they contain.<p>
 
+<<defopt {-filterbox <i>flag</i>}>>
+
+If the flag is true (the default) the browser's toolbar will include
+a <<xref filter(n)>> widget for filtering the content.  If false,
+it will not.<p>
+
 <<defopt {-layout <i>spec</i>}>>
 
 By default, sqlbrowser(n) titles each column with the column name from the

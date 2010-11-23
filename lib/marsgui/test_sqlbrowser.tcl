@@ -68,7 +68,8 @@ marsgui::sqlbrowser .browser        \
     -selectioncmd   ::selectioncmd  \
     -displaycmd     ::displaycmd    \
     -titlecolumns   1               \
-    -uid            u
+    -uid            u               \
+    -filterbox      off
 
 pack .browser -fill both -expand yes
 

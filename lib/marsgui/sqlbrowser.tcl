@@ -93,6 +93,15 @@ snit::widget ::marsgui::sqlbrowser {
     
     option -displaycmd \
         -default ""
+
+    # -filterbox boolean
+    #
+    # If "on" (the default) the widget will have a filter(n) in the
+    # toolbar; otherwise, not.
+
+    option -filterbox \
+        -default  on  \
+        -readonly yes
     
     # -layout spec
     #
@@ -382,13 +391,15 @@ snit::widget ::marsgui::sqlbrowser {
         }
         
         # Filter box
-        install filter using filter $toolbar.filter \
-            -width      15                          \
-            -filtertype incremental                 \
-            -ignorecase yes                         \
-            -filtercmd  [mymethod FilterData]
+        if {$options(-filterbox)} {
+            install filter using filter $toolbar.filter \
+                -width      15                          \
+                -filtertype incremental                 \
+                -ignorecase yes                         \
+                -filtercmd  [mymethod FilterData]
         
-        pack $filter -side right -fill y -padx {2 0}
+            pack $filter -side right -fill y -padx {5 0}
+        }
         
         # Client Toolbar
         install cbar using ttk::frame $toolbar.cbr
@@ -409,7 +420,7 @@ snit::widget ::marsgui::sqlbrowser {
                 -values    $labels                         \
                 -command   [mymethod SetView]
 
-            pack $vmenu              -side right -fill y -padx {2 3}
+            pack $vmenu              -side right -fill y -padx {2 0}
             pack $toolbar.viewlabel  -side right -fill y -padx {2 0}
 
             # NEXT, either display the current view, or select the
@@ -631,10 +642,10 @@ snit::widget ::marsgui::sqlbrowser {
             callwith $options(-displaycmd) end $data
             
             # NEXT, determine whether it should be filtered.
-            if {[$filter check $data]} {
-                $tlist rowconfigure end -hide false
-            } else {
+            if {$options(-filterbox) && ![$filter check $data]} {
                 $tlist rowconfigure end -hide true
+            } else {
+                $tlist rowconfigure end -hide false
             }
         }
         
@@ -1063,10 +1074,10 @@ snit::widget ::marsgui::sqlbrowser {
         callwith $options(-displaycmd) $uidmap($uid) $data
         
         # NEXT, determine whether it should be filtered.
-        if {[$filter check $data]} {
-            $tlist rowconfigure $uidmap($uid) -hide false
-        } else {
+        if {$options(-filterbox) && ![$filter check $data]} {
             $tlist rowconfigure $uidmap($uid) -hide true
+        } else {
+            $tlist rowconfigure $uidmap($uid) -hide false
         }
 
         # NEXT, sort the rows, the update may have changed the column we
