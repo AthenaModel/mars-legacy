@@ -143,6 +143,12 @@ set metadata {
         applib   app_sequence
         mode     cmdline
     }
+
+    sql {
+        text     "SQL Workbench"
+        applib   app_sql
+        mode     gui
+    }
 }
 
 #-----------------------------------------------------------------------
