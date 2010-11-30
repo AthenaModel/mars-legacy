@@ -17,13 +17,13 @@ user to view the database schema and enter arbitrary queries,
 including updates and deletes.<p>
 
 When invoked with the name of an SQLite database file,
-mars_sql(1) opens the file and pops up a command-line interface.
+mars_sql(1) opens the file using an
+<<xref sqldocument(n)>> object, and pops up a command-line interface.
 Any SQL statement may be entered
 and executed.  Statements can extend onto multiple lines, and
 must end with a semi-colon.  The dialect of SQL is SQL-92 as
 implemented by <a href="http://sqlite.org/docs.html">SQLite</a>;
-mars_sql(1) adds a number of new SQL functions (see
-<<xref FUNCTIONS>>).<p>
+<<xref sqldocument(n)>> adds a number of new SQL functions.<p>
 
 If the -create option is specified, the named SQLite database file will
 be created.  If -create is used with a filename that already exists,
@@ -43,6 +43,11 @@ column; long values are truncated.  List mode displays each record
 individually, with field labels and values in two parallel columns.
 The default is Multicolumn mode; the mode may be changed from the
 <b>View</b> menu or via the <<iref .mode>> command.<p>
+
+By default, all entered queries are executed.  If "explain" mode is
+enabled from the <b>View</b> menu or the toolbar, SQLite's "EXPLAIN
+QUERY PLAN" statement will be used to retrieve information about the
+tables and indexes used.<p>
 
 <<section MENUS>>
 
@@ -79,6 +84,14 @@ mars_sql(1) provides the following menus:<p>
 
   <dt> <b>List Mode</b>
   <dd> Selects list output mode (<b>.mode list</b>).<p>
+
+  <dt> <b>Execute Mode</b>
+  <dd> Executes SQL queries as usual.<p>
+
+  <dt> <b>Explain Mode</b>
+  <dd> Outputs a description of the tables and indices used by
+       a query without actually executing it.  (This is equivalent to
+       beginning the query with the words "EXPLAIN QUERY PLAN".)<p>
 </dl>
 
 <<section COMMANDS>>
@@ -89,7 +102,7 @@ supports a number of special commands, all of which begin with
 
 <<deflist commands>>
 
-<<defitem ".mode" {.mode ?newMode}>>
+<<defitem ".mode" {.mode ?newMode?}>>
 
 By default, returns the current output mode, <b>mc</b> (multicolumn)
 or <b>list</b>.  If <i>newMode</i> is given, sets the mode accordingly.<p>
@@ -108,32 +121,13 @@ Returns a list of the names of the tables defined in the database.<p>
 
 <</deflist commands>>
 
-<<section FUNCTIONS>>
-
-Mars defines the following special SQL functions:<p>
-
-<<deflist functions>>
-
-<<defitem "format()" {format(<i>fmt,value</i>)}>>
-
-Formats the <i>value</i> using <i>fmt</i> and the Tcl formars:mat(n)
-command.  Note that an error will be thrown if the <i>value</i>
-doesn't have the expected type, e.g., if it's NULL.  You can
-protect against this by using the standard ifnull() function:<p>
-
-<pre>
-    SELECT format('%5d',ifnull(VALUE,0)) FROM mytable;
-</pre>
-
-<</deflist functions>>
-
 <<section AUTHOR>>
 
 Will Duquette<p>
 
 <<section HISTORY>>
 
-Original package.
+Imported from JNEM's jnem_sql(1), and then modified.<p>
 
 <</manpage>>
 

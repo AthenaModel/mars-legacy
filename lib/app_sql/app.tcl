@@ -27,6 +27,7 @@
 # Global Variables
 
 set outputMode mc              ;# Default output mode
+set execMode   execute         ;# Default execution mode
 
 #-----------------------------------------------------------------------
 # app ensemble
@@ -84,19 +85,21 @@ snit::type app {
             exit 1
         }
 
-        if {[catch {sqlite3 ::rdb $filename} result]} {
+        # NEXT, create an sqldocument.
+        sqldocument ::rdb \
+            -autotrans off \
+            -rollback  on
+
+        if {[catch {rdb open $filename} result]} {
             puts "Could not open $filename:\n--> $result"
             exit 1
         }
 
-        # NEXT, add extra SQL functions
-        rdb function format format
-
-        # NEXT, build the GUI
-        wm title . "mars sql: [file tail $filename]"
-
         # NEXT, when the main window is destroyed, exit.
         wm protocol . WM_DELETE_WINDOW [list app exit]
+
+        # NEXT, Build the GUI
+        wm title . "mars sql: [file tail $filename]"
 
         # Row 0: Menu/Toolbar
         frame .toolbar \
@@ -180,28 +183,66 @@ snit::type app {
             -value        "list"       \
             -variable     ::outputMode
 
-        # MC button
-        radiobutton .toolbar.mc         \
-            -offrelief   flat           \
-            -overrelief  raised         \
+        $mnu add separator
+
+        $mnu add radiobutton              \
+            -label        "Execute Mode"  \
+            -underline    1               \
+            -accelerator  "F4"            \
+            -value        "execute"       \
+            -variable     ::execMode
+
+        $mnu add radiobutton              \
+            -label        "Explain Mode"  \
+            -underline    0               \
+            -accelerator  "F5"            \
+            -value        "explain"       \
+            -variable     ::execMode
+
+        #  Exec Mode buttons
+        ttk::radiobutton .toolbar.execute           \
+            -style       Toolbutton                 \
+            -image       ::marsgui::icon::exclaim22 \
+            -value       "execute"                  \
+            -variable    ::execMode
+        bind . <F4> {set ::execMode execute}
+        DynamicHelp::add .toolbar.execute \
+            -text "Execute SQL queries\nas usual"
+
+        ttk::radiobutton .toolbar.explain            \
+            -style       Toolbutton                  \
+            -image       ::marsgui::icon::question22 \
+            -value       "explain"                   \
+            -variable    ::execMode
+        bind . <F5> {set ::execMode explain}
+        DynamicHelp::add .toolbar.explain \
+            -text "Explain the query plan\nfor SQL queries"
+
+        # Output Mode buttons
+        ttk::radiobutton .toolbar.mc    \
+            -style       Toolbutton     \
             -image       ::marsgui::mc_icon \
-            -indicatoron no             \
             -value       "mc"           \
             -variable    ::outputMode
         bind . <F2> {set ::outputMode mc}
+        DynamicHelp::add .toolbar.mc \
+            -text "Display output in\nmultiple columns"
 
-        radiobutton .toolbar.list         \
-            -offrelief   flat             \
-            -overrelief  raised           \
+        ttk::radiobutton .toolbar.list         \
+            -style       Toolbutton     \
             -image       ::marsgui::list_icon \
-            -indicatoron no               \
             -value       "list"           \
             -variable    ::outputMode
         bind . <F3> {set ::outputMode list}
+        DynamicHelp::add .toolbar.list \
+            -text "Display output as\na list of records."
 
         # Pack the toolbar contents
-        pack .toolbar.list -side right
-        pack .toolbar.mc   -side right
+        pack .toolbar.list -side right -pady 2
+        pack .toolbar.mc   -side right -pady 2 -padx {15 0}
+
+        pack .toolbar.explain -side right -pady 2
+        pack .toolbar.execute -side right -pady 2
 
         pack .toolbar.file -side left
         pack .toolbar.edit -side left
@@ -294,11 +335,22 @@ proc completeCmd {input} {
 
 proc evalCmd {input} {
     global outputMode
+    global execMode
 
+    # FIRST, handle Tcl commands.
     if {[string index $input 0] == "."} {
         return [uplevel \#0 [string range $input 1 end]]
+    } elseif {$execMode eq "explain"} {
+        set input "EXPLAIN QUERY PLAN $input"
+        set result [rdb query $input -mode mc -maxcolwidth 0]
+
+        if {$result eq ""} {
+            set result "Nothing to explain."
+        }
+
+        return $result
     } else {
-        return [sqlib query ::rdb $input -mode $outputMode]
+        return [rdb query $input -mode $outputMode]
     }
 }
 
@@ -315,7 +367,7 @@ proc evalCmd {input} {
 # Returns a formatted list of the tables defined in the database.
 
 proc tables {} {
-    join [sqlib tables rdb] \n
+    join [rdb tables] \n
 }
 
 # schema ?table?
@@ -326,7 +378,7 @@ proc tables {} {
 # pattern, or simply all of them.
 
 proc schema {{table *}} {
-    sqlib schema rdb $table
+    rdb schema $table
 }
 
 # mode ?newMode?
