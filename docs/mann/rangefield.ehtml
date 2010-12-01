@@ -37,9 +37,26 @@ whenever the field's value changes, for any reason whatsoever
 (including explicit calls to <<iref set>>.  The new value is appended
 to the <i>command</i> as an argument.<p>
 
+<<defopt {-changemode <i>mode</i>}>>
+
+The <i>mode</i> determines how often the rangefield(n) widget calls
+the <code>-changecmd</code> as the slider is being dragged.  If the
+mode is <b>continuous</b> (the default), then it is called with
+great frequency.  If the mode is <b>onrelease</b>, then it is called
+only when the user releases the mouse button at the end of the
+drag.<p>
+
+The <b>onrelease</b> mode is for use when continuous updates are
+a problem for the application.  Note that holding down an arrow key
+can create the same kind of stream of continual changes.
+Unfortunately, it also creates a stream of &lt;KeyRelease&gt; events,
+which makes it impossible to call the <code>-changecmd</code> only
+when the key is released.  Consequently, the slider cannot be adjusted
+using the keyboard when the mode is <b>onrelease</b>.<p>
+
 <<defopt {-state <i>state</i>}>>
 
-From <<xref field(i)>>.  rangefield(i) widgets have states, just as the
+From <<xref field(i)>>.  rangefield(n) widgets have states, just as the
 normal <code>tk::</code> and <code>ttk::</code> widgets do.  The valid
 states are <b>normal</b> and <b>disabled</b>.<p>
 

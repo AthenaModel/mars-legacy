@@ -47,7 +47,8 @@ proc main {argv} {
 
     form register sat rangefield \
         -type ::simlib::qsat \
-        -showsymbols yes
+        -showsymbols yes \
+        -changemode onrelease
 
     form register coop rangefield \
         -type ::simlib::qcooperation \

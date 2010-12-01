@@ -66,6 +66,30 @@ snit::widget ::formlib::rangefield {
     option -changecmd \
         -default ""
 
+    # -changemode
+    #
+    # Specifies whether the -changecmd is called continuously, or 
+    # only on ButtonRelease.  In the latter case, keystrokes are
+    # disabled.
+    #
+    # If the default is changed to onrelease, the constructor will
+    # need to be updated to disable keystrokes.
+
+    option -changemode \
+        -type            {snit::enum -values {continuous onrelease}} \
+        -default         continuous                                  \
+        -configuremethod ConfigChangeMode
+
+    method ConfigChangeMode {opt val} {
+        set options($opt) $val
+
+        if {$val eq "continuous"} {
+            bind $scale <Key> {}
+        } else {
+            bind $scale <Key> {break}
+        }
+    }
+
     # -type command
     #
     # Command is a snit::double, snit::integer, range(n), or quality(n)
@@ -119,7 +143,7 @@ snit::widget ::formlib::rangefield {
     # Instance Variables
 
     variable current       0    ;# Current value
-    variable inConstructor 1    ;# Don't call -changecmd in constructor.
+    variable displayed     0    ;# Displayed value (sometimes transient)
     variable scaleGuard    ""   ;# ScaleChanged guard value
     variable qmenuGuard    ""   ;# QmenuChanged guard value
 
@@ -142,6 +166,10 @@ snit::widget ::formlib::rangefield {
 
         # NEXT, clicking on the scale should give it the focus.
         bind $scale <1> {focus %W}
+
+        # NEXT, a button release on the scale should cause the
+        # value to be set.
+        bind $scale <ButtonRelease> [mymethod ScaleButtonReleased]
 
         # NEXT, configure the arguments
         $self configure {*}$args
@@ -168,7 +196,7 @@ snit::widget ::formlib::rangefield {
         # NEXT, create the label
         install vlabel using ttk::label $win.vlabel  \
             -width        $vlabelWidth               \
-            -textvariable [myvar current]
+            -textvariable [myvar displayed]
 
         # NEXT, create the reset button if needed
         if {$options(-showreset)} {
@@ -213,9 +241,7 @@ snit::widget ::formlib::rangefield {
         }
 
         # NEXT, initialize the widget
-        $self set ""
-
-        set inConstructor 0
+        $self SetValue constructor ""
     }
 
     #-------------------------------------------------------------------
@@ -288,9 +314,18 @@ snit::widget ::formlib::rangefield {
 
     method ScaleChanged {value} {
         if {$value != $scaleGuard} {
-            $self set $value
+            $self SetValue slide $value
         }
     }
+
+    # ScaleButtonReleased
+    #
+    # The button was released on the scale widget
+
+    method ScaleButtonReleased {} {
+        $self SetValue release [$scale get]
+    }
+
 
     # SetQmenu value
     #
@@ -312,7 +347,7 @@ snit::widget ::formlib::rangefield {
 
     method QmenuChanged {value} {
         if {$value ne $qmenuGuard} {
-            $self set [$options(-type) value $value]
+            $self SetValue qmenu [$options(-type) value $value]
         }
     }
 
@@ -321,8 +356,55 @@ snit::widget ::formlib::rangefield {
     # The Reset button was pressed.
 
     method Reset {} {
-        $self set $options(-resetvalue)
+        $self SetValue reset $options(-resetvalue)
     }
+
+    # SetValue source value
+    #
+    # source - Indicates who set the value:
+    #          constructor|set|slide|release|qmenu|reset
+    # value  - A new value
+    #
+    # Sets the widget's value to the new value.  Calls the
+    # -changecmd if appropriate.
+
+    method SetValue {source value} {
+        # FIRST, if nothing's changed, do nothing
+        if {$value eq $current} {
+            return
+        }
+
+        # NEXT, update the scale and qmenu to reflect the new value.
+        $self SetScale $value
+        $self SetQmenu $value
+
+        # NEXT, update the displayed value.  If it's non-empty, allow 
+        # the scale to format it.
+        if {$value ne ""} {
+            set displayed [$scale get]
+        } else {
+            set displayed ""
+        }
+
+        # NEXT, If this is a slide change and we're not tracking
+        # continuously, just return.
+        if {$source eq "slide" && 
+            $options(-changemode) eq "onrelease"
+        } {
+            return
+        }
+
+        # NEXT, this is now the current value.
+        set current $displayed
+
+        # NEXT, notify the client.
+        if {$source ne "constructor"} {
+            callwith $options(-changecmd) $current
+        }
+
+        return
+    }
+
 
     #-------------------------------------------------------------------
     # Public Methods
@@ -342,27 +424,7 @@ snit::widget ::formlib::rangefield {
     # Sets the widget's value to the new value.
 
     method set {value} {
-        # FIRST, if nothing's changed, do nothing.
-        if {$value eq $current} {
-            return
-        }
-
-        # NEXT, update the scale and qmenu to reflect the new value.
-        $self SetScale $value
-        $self SetQmenu $value
-
-        # NEXT, save the new value as the current value.
-        # If it's non-empty, allow the scale to format it.
-        if {$value ne ""} {
-            set current [$scale get]
-        } else {
-            set current ""
-        }
-
-        # NEXT, notify the client.
-        if {!$inConstructor} {
-            callwith $options(-changecmd) $current
-        }
+        $self SetValue set $value
     }
 }
 
