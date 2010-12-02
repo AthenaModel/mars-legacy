@@ -88,6 +88,8 @@ The <<iref sqlbrowser>> widget may be created with the following options:<p>
 
 These options are delegated to the hull ttk::frame widget.<p>
 
+<<defopt {-editstartcommand <i>command</i>}>>
+<<defopt {-editendcommand <i>command</i>}>>
 <<defopt {-height <i>height</i>}>>
 <<defopt {-width <i>width</i>}>>
 <<defopt {-selectmode <i>mode</i>}>>
@@ -224,11 +226,12 @@ Sets the values of the specified <i>options</i>.<p>
 <<defitem cellcget {<i>win</i> cellcget <i>cellindex option</i>}>>
 <<defitem cellconfigure {<i>win</i> cellconfigure <i>cellindex</i> ?<i>option value...</i>?}>>
 <<defitem columncget {<i>win</i> columncget <i>cindex option</i>}>>
-<<defitem columnconfigure {<i>win</i> columnconfigure <i>cindex</i> ?<i>option value...</i>?}>>
+<<defitem columnconfigure {<i>win</i> columnconfigure <i>cindex</i>
+?<i>option value...</i>?}>>
 <<defitem rowcget {<i>win</i> rowcget <i>rindex option</i>}>>
 <<defitem rowconfigure {<i>win</i> rowconfigure <i>rindex</i> ?<i>option value...</i>?}>>
 
-These methods are delegated to the underlying tablelist(n), and query and
+These methods are delegated to the underlying tablelist(n), and query
 the tablelist(n) row, column and cell options.  See the tablelist(n)
 documentation for details.<p>
 
@@ -250,6 +253,12 @@ Deletes all rows from the browser.<p>
 
 Returns a list of the row indices of the selected rows, or the empty list
 if no rows are selected.  See also <<iref uid curselection>>.<p>
+
+<<defitem editwinpath {<i>win</i> editwinpath}>>
+
+This method is delegated to the underlying tablelist(n), and retrieves
+the name of the editor window in the <code>-editstartcommand</code>
+and <code>-editendcommand</code> callbacks.<p>
 
 <<defitem get {<i>win</i> get <i>first last</i>}>>
 <<defitem get {<i>win</i> get <i>indexList</i>}>>

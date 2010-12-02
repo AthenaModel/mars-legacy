@@ -75,10 +75,12 @@ snit::widget ::marsgui::sqlbrowser {
     delegate option -relief      to hull
     
     # To Tablelist
-    delegate option -height       to tlist
-    delegate option -width        to tlist
-    delegate option -selectmode   to tlist
-    delegate option -titlecolumns to tlist
+    delegate option -height           to tlist
+    delegate option -width            to tlist
+    delegate option -selectmode       to tlist
+    delegate option -titlecolumns     to tlist
+    delegate option -editstartcommand to tlist
+    delegate option -editendcommand   to tlist
     
     # -db db
     #
@@ -860,6 +862,7 @@ snit::widget ::marsgui::sqlbrowser {
     delegate method columnconfigure to tlist
     delegate method columncget      to tlist
     delegate method curselection    to tlist
+    delegate method editwinpath     to tlist
     delegate method get             to tlist
     delegate method rowconfigure    to tlist
     delegate method rowcget         to tlist
