@@ -66,7 +66,7 @@ proc main {argv} {
 
     .form field create s "Satisfaction" sat
     .form field create c "Cooperation"  coop
-    .form field create f "Fraction   "  fraction
+    .form field create f "Fraction"     fraction
     .form field create d "Dummy"        dummy
     .form field create t "Text"         text
 
@@ -76,8 +76,8 @@ proc main {argv} {
         -text "Clear" \
         -command ClearFields
 
-    grid .form  -row 0 -column 0 -sticky ew  -pady 4 -padx 4
-    grid .clear -row 1 -column 0 -sticky ew  -pady 4 -padx 4
+    grid .form      -row 0 -column 0 -sticky ew  -pady 4 -padx 4
+    grid .clear     -row 3 -column 0 -sticky ew  -pady 4 -padx 4
 
     grid columnconfigure . 0 -weight 1
     
@@ -95,6 +95,16 @@ proc ClearFields {} {
     foreach field [.form field names] {
         .form set $field ""
     }
+}
+
+proc Dummy2Sat {} {
+    [.form field win d] configure \
+        -type ::simlib::qsat
+}
+
+proc Dummy2Frac {} {
+    [.form field win d] configure \
+        -type ::fraction
 }
 
 #-------------------------------------------------------------------

@@ -132,8 +132,14 @@ snit::widget ::formlib::rangefield {
     # the range of values on the scale.
 
     option -type \
+        -validatemethod  ValidateType    \
         -configuremethod ConfigLayoutOpt
 
+    method ValidateType {opt val} {
+        if {$options(-type) ne ""} {
+            error "-type can only be set once"
+        }
+    }
 
     # -resetvalue value
     #
@@ -186,7 +192,7 @@ snit::widget ::formlib::rangefield {
         set options($opt) $val
 
         # NEXT, layout the widget (unless we're in the constructor).
-        if {!$inConstructor} {
+        if {!$inConstructor && $options(-type) ne ""} {
             $self LayoutWidget
         }
     }
