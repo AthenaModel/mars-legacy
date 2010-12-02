@@ -21,10 +21,19 @@ namespace eval ::formlib:: {
     namespace export rangefield
 }
 
-#-------------------------------------------------------------------
+#-----------------------------------------------------------------------
 # rangefield
 
 snit::widget ::formlib::rangefield {
+    #-------------------------------------------------------------------
+    # Type Variables
+
+    # The type saves a dummy scale widget that is never displayed;
+    # it's used to determine the label width.
+
+    typevariable dummyScale ""
+
+
     #-------------------------------------------------------------------
     # Components
 
@@ -38,7 +47,8 @@ snit::widget ::formlib::rangefield {
 
     delegate option * to hull
 
-    delegate option -length to scale
+    delegate option -scalelength to scale as -length
+    delegate option -menufont    to qmenu as -font
 
     # -state state
     #
@@ -90,6 +100,31 @@ snit::widget ::formlib::rangefield {
         }
     }
 
+    # -font font
+    #
+    # Sets the vlabel and qmenu -font.
+    
+    option -font \
+        -default         ""         \
+        -configuremethod ConfigFont
+
+    method ConfigFont {opt val} {
+        set options($opt) $val
+
+        $vlabel configure -font $val
+        $qmenu configure -font $val
+    }
+
+    # -labelpos left|right
+    #
+    # Determines the position of the label widget, left or right of
+    # the scale.
+    
+    option -labelpos \
+        -type             {snit::enum -values {left right}} \
+        -default          right                             \
+        -configuremethod  ConfigLayoutOpt
+
     # -type command
     #
     # Command is a snit::double, snit::integer, range(n), or quality(n)
@@ -97,7 +132,8 @@ snit::widget ::formlib::rangefield {
     # the range of values on the scale.
 
     option -type \
-        -readonly yes
+        -configuremethod ConfigLayoutOpt
+
 
     # -resetvalue value
     #
@@ -106,17 +142,18 @@ snit::widget ::formlib::rangefield {
     # determine a reasonable value.
 
     option -resetvalue \
-        -default ""    \
-        -readonly yes
+        -default         ""              \
+        -configuremethod ConfigLayoutOpt
 
     # -resolution value
     #
     # If not "", the value is propagated to the scale.  Otherwise,
     # a heuristic is applied to determine a reasonable resolution.
     
-    option -resolution \
-        -default  ""   \
-        -readonly yes
+    option -resolution                   \
+        -default         ""              \
+        -configuremethod ConfigLayoutOpt
+
 
     # -showreset flag
     #
@@ -124,8 +161,8 @@ snit::widget ::formlib::rangefield {
     # scale to the -resetvalue.
 
     option -showreset \
-        -default no   \
-        -readonly yes
+        -default         no              \
+        -configuremethod ConfigLayoutOpt
 
 
     # -showsymbols flag
@@ -134,16 +171,34 @@ snit::widget ::formlib::rangefield {
     # the -type, which must be a quality(n) object.
 
     option -showsymbols \
-        -default  no    \
-        -readonly yes
+        -default         no              \
+        -configuremethod ConfigLayoutOpt
 
+    # ConfigLayoutOpt opt val
+    #
+    # opt - An option that affects the layout
+    # val - The option's value
+    #
+    # Sets the option, and computes the widget's layout.
+
+    method ConfigLayoutOpt {opt val} {
+        # FIRST, save the option value.
+        set options($opt) $val
+
+        # NEXT, layout the widget (unless we're in the constructor).
+        if {!$inConstructor} {
+            $self LayoutWidget
+        }
+    }
+    
 
 
     #-------------------------------------------------------------------
     # Instance Variables
 
+    variable inConstructor 1    ;# Flag: are we in the constructor?
     variable current       0    ;# Current value
-    variable displayed     0    ;# Displayed value (sometimes transient)
+    variable displayed     ""   ;# Displayed value (sometimes transient)
     variable scaleGuard    ""   ;# ScaleChanged guard value
     variable qmenuGuard    ""   ;# QmenuChanged guard value
 
@@ -164,6 +219,23 @@ snit::widget ::formlib::rangefield {
             -takefocus 1                       \
             -length    150
 
+        # NEXT, create the label
+        install vlabel using ttk::label $win.vlabel  \
+            -textvariable [myvar displayed]
+
+        # NEXT, create the qmenu; we'll grid it if need be.
+        install qmenu as enumfield $win.qmenu    \
+            -displaylong 1                       \
+            -changecmd   [mymethod QmenuChanged]
+
+        # NEXT, create the reset button; we'll grid it if need be.
+        install resetbtn using button $win.reset \
+            -state     $options(-state)          \
+            -font      tinyfont                  \
+            -text      "Reset"                   \
+            -takefocus 0                         \
+            -command   [mymethod Reset]
+
         # NEXT, clicking on the scale should give it the focus.
         bind $scale <1> {focus %W}
 
@@ -173,6 +245,28 @@ snit::widget ::formlib::rangefield {
 
         # NEXT, configure the arguments
         $self configure {*}$args
+
+        # NEXT, layout the widget
+        $self LayoutWidget
+        
+        # NEXT, we're no longer in the constructor; any layout-related
+        # options should take effect immediately.
+        set inConstructor 0
+
+
+        # NEXT, clear the widget
+        $self SetValue layout ""
+    }
+
+    # LayoutWidget
+    #
+    # Lays out the widget, provided that the -type is defined.
+
+    method LayoutWidget {} {
+        # FIRST, there's no point if there's no -type.
+        if {$options(-type) eq ""} {
+            return
+        }
 
         # NEXT, set the scale's bounds and value.
         if {$options(-resetvalue) eq ""} {
@@ -193,55 +287,53 @@ snit::widget ::formlib::rangefield {
         $scale configure \
             -command    [mymethod ScaleChanged]
 
-        # NEXT, create the label
-        install vlabel using ttk::label $win.vlabel  \
-            -width        $vlabelWidth               \
-            -textvariable [myvar displayed]
-
-        # NEXT, create the reset button if needed
-        if {$options(-showreset)} {
-            install resetbtn using button $win.reset \
-                -state     $options(-state)          \
-                -font      tinyfont                  \
-                -text      "Reset"                   \
-                -takefocus 0                         \
-                -command   [mymethod Reset]
-        } else {
-            set resetbtn ""
-        }
+        # NEXT, set the label's width
+        $vlabel configure \
+            -width $vlabelWidth
 
         # NEXT, create qmenu if needed.
         if {$options(-showsymbols)} {
             set width [lmaxlen [$options(-type) longnames]]
 
-            install qmenu as enumfield $win.qmenu     \
-                -enumtype    $options(-type)          \
-                -displaylong 1                        \
-                -changecmd   [mymethod QmenuChanged] \
-                -width       $width
-        } else {
-            set qmenu ""
+            $qmenu configure \
+                -enumtype $options(-type) \
+                -width    $width
         }
 
         # NEXT, lay out the widgets.
+        grid forget {*}[winfo children $win]
+
         set c -1
-        
-        if {$resetbtn ne ""} {
-            grid $resetbtn -row 0 -column [incr c] -sticky w -padx {0 4}
+
+        if {$options(-labelpos) eq "left"} {
+            grid $vlabel -row 0 -column [incr c] -sticky w -padx {0 4}
+
+            grid $scale -row 0 -column [incr c] -sticky ew
+
+            if {$options(-showsymbols)} {
+                grid $qmenu -row 0 -column [incr c] -sticky ew -padx {4 0}
+            }
+
+            grid columnconfigure $win $c -weight 1
+
+        } else {
+            # -labelpos right
+
+            grid $scale -row 0 -column [incr c] -sticky ew -padx {0 4}
+
+            grid $vlabel -row 0 -column [incr c] -sticky w
+
+            if {$options(-showsymbols)} {
+                grid $qmenu -row 0 -column [incr c] -sticky ew -padx {4 0}
+            }
+
+            grid columnconfigure $win $c -weight 1
         }
 
-        grid $scale -row 0 -column [incr c] -sticky ew -padx {0 4}
-
-        grid $vlabel -row 0 -column [incr c] -sticky w
-
-        grid columnconfigure $win $c -weight 1
-
-        if {$qmenu ne ""} {
-            grid $qmenu -row 0 -column [incr c] -sticky ew -padx {4 0}
+        if {$options(-showreset)} {
+            grid $resetbtn -row 0 -column [incr c] -sticky e -padx {4 0}
         }
 
-        # NEXT, initialize the widget
-        $self SetValue constructor ""
     }
 
     #-------------------------------------------------------------------
@@ -284,11 +376,22 @@ snit::widget ::formlib::rangefield {
     # Computes and returns the appropriate width for the value label.
 
     method GetLabelWidth {} {
-        $scale set [$scale cget -from]
-        set a [string length [$scale get]]
+        # FIRST, create the dummyScale if it doesn't exist.
+        if {![winfo exists $dummyScale]} {
+            set dummyScale [scale $win.dummy]
+        }
 
-        $scale set [$scale cget -to]
-        set b [string length [$scale get]]
+        # NEXT, configure the dummyScale
+        $dummyScale configure \
+            -from [$scale cget -from] \
+            -to   [$scale cget -to]
+
+        # NEXT, take the measurements.
+        $dummyScale set [$scale cget -from]
+        set a [string length [$dummyScale get]]
+
+        $dummyScale set [$scale cget -to]
+        set b [string length [$dummyScale get]]
 
         return [expr {max($a,$b)}]
     }
@@ -362,7 +465,7 @@ snit::widget ::formlib::rangefield {
     # SetValue source value
     #
     # source - Indicates who set the value:
-    #          constructor|set|slide|release|qmenu|reset
+    #          layout|set|slide|release|qmenu|reset
     # value  - A new value
     #
     # Sets the widget's value to the new value.  Calls the
@@ -398,7 +501,7 @@ snit::widget ::formlib::rangefield {
         set current $displayed
 
         # NEXT, notify the client.
-        if {$source ne "constructor"} {
+        if {$source ne "layout"} {
             callwith $options(-changecmd) $current
         }
 

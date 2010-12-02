@@ -54,6 +54,22 @@ which makes it impossible to call the <code>-changecmd</code> only
 when the key is released.  Consequently, the slider cannot be adjusted
 using the keyboard when the mode is <b>onrelease</b>.<p>
 
+<<defopt {-font <i>font</i>}>>
+
+Sets the font for the data label and the <<xref menubox(n)>> of
+symbolic quality values (if any).<p>
+
+<<defopt {-labelpos <i>position</i>}>>
+
+Determines whether the label is positioned to the <b>left</b> or the
+<b>right</b> of the slider.  The default is <b>right</b>.<p>
+
+<<defopt {-scalelength <i>pixels</i>}>>
+
+Sets the length of the slider in pixels; the default is 150.  Note
+that if the length is too short, it might not be possible to drag the
+slider to every legal value.<p>
+
 <<defopt {-state <i>state</i>}>>
 
 From <<xref field(i)>>.  rangefield(n) widgets have states, just as the
@@ -87,7 +103,7 @@ resolution automatically.<p>
 
 <<defopt {-showreset <i>flag</i>}>>
 
-If true, the field will include a "Reset" button at the left end.
+If true, the field will include a "Reset" button at the right end.
 Pressing the button will reset the field to its <code>-resetvalue</code>.<p>
 
 <<defopt {-showsymbols <i>flag</i>}>>
