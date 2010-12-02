@@ -84,7 +84,7 @@ snit::type ::marsutil::lazyupdater {
     # unmapped.
 
     method Execute {} {
-        if {$options(-window) ne "" &&
+        if {$options(-window) eq "" ||
             [winfo ismapped $options(-window)]
         } {
             uplevel \#0 $options(-command)
