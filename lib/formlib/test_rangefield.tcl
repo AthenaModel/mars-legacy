@@ -55,9 +55,20 @@ proc main {argv} {
         -showsymbols yes \
         -resetvalue 50
 
+
+    snit::double ::fraction -min 0.0 -max 1.0
+    form register fraction rangefield \
+        -type ::fraction              \
+        -resetvalue 0.0
+
+    form register dummy rangefield
+
+
     .form field create s "Satisfaction" sat
     .form field create c "Cooperation"  coop
-    .form field create t "Text" text
+    .form field create f "Fraction   "  fraction
+    .form field create d "Dummy"        dummy
+    .form field create t "Text"         text
 
     .form layout
 

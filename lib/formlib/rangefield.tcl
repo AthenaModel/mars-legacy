@@ -255,7 +255,9 @@ snit::widget ::formlib::rangefield {
 
 
         # NEXT, clear the widget
-        $self SetValue layout ""
+        if {$options(-type) ne ""} {
+            $self SetValue layout ""
+        }
     }
 
     # LayoutWidget
@@ -383,8 +385,9 @@ snit::widget ::formlib::rangefield {
 
         # NEXT, configure the dummyScale
         $dummyScale configure \
-            -from [$scale cget -from] \
-            -to   [$scale cget -to]
+            -resolution [$scale cget -resolution] \
+            -from       [$scale cget -from] \
+            -to         [$scale cget -to]
 
         # NEXT, take the measurements.
         $dummyScale set [$scale cget -from]
@@ -436,7 +439,7 @@ snit::widget ::formlib::rangefield {
     # ScaleChanged.
 
     method SetQmenu {value} {
-        if {$qmenu ne ""} {
+        if {$options(-showsymbols)} {
             set qmenuGuard [$options(-type) name $value]
             $qmenu set $qmenuGuard
             set inSetQmenu 0
