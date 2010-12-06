@@ -50,7 +50,7 @@ proc ::displaycmd {rindex data} {
 }
 
 proc ::selectioncmd {} {
-    puts "-selectioncmd [.browser curselection]"
+    puts "-selectioncmd [.browser uid curselection]"
 }
 
 marsgui::sqlbrowser .browser        \

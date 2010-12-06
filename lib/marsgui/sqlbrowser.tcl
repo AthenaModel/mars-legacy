@@ -613,7 +613,7 @@ snit::widget ::marsgui::sqlbrowser {
         }
         
         # NEXT, clear the table
-        $self clear
+        $self ClearBrowser
         
         # NEXT, request and insert all rows from the current view
         set rindex -1
@@ -771,7 +771,7 @@ snit::widget ::marsgui::sqlbrowser {
     # SortData
     #
     # Sorts the contents of the tablelist widget by the last requested
-    # sort command, and calls the -selectioncmd.
+    # sort command.
   
     method SortData {} {
         # FIRST, if we've sorted previously, sort again.
@@ -782,10 +782,22 @@ snit::widget ::marsgui::sqlbrowser {
             # NEXT, update the UID map, if any.
             $self UpdateUidMap
         }
+    }
+
+
+    # SortDataAndNotfy
+    #
+    # Sorts the contents of the tablelist widget by the last requested
+    # sort command, and calls the -selectioncmd.
+  
+    method SortDataAndNotify {} {
+        # FIRST, if we've sorted previously, sort again.
+        $self SortData
 
         # NEXT, the selection might have changed.
         callwith $options(-selectioncmd)
     }
+
 
     # UpdateUidMap
     #
@@ -880,15 +892,22 @@ snit::widget ::marsgui::sqlbrowser {
     
     # clear
     #
-    # Delete all rows, and clear the uidmap.
+    # Clear the browser, and call the -selectioncmd.
     
     method clear {} {
-        array unset uidmap
-        $tlist delete 0 end
-        
+        $self ClearBrowser
         callwith $options(-selectioncmd)
     }
     
+    # ClearBrowser
+    #
+    # Delete all rows, and clear the uidmap.
+    
+    method ClearBrowser {} {
+        array unset uidmap
+        $tlist delete 0 end
+    }
+
     # reload
     #
     # Schedules a reload of the content.  Note that the reload will
