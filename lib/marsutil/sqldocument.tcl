@@ -568,6 +568,8 @@ snit::type ::marsutil::sqldocument {
     delegate method mat     to db using {::marsutil::sqlib %m %c} 
     delegate method insert  to db using {::marsutil::sqlib %m %c}
     delegate method replace to db using {::marsutil::sqlib %m %c}
+    delegate method grab    to db using {::marsutil::sqlib %m %c}
+    delegate method ungrab  to db using {::marsutil::sqlib %m %c}
     delegate method *       to db
 
     # dbfile

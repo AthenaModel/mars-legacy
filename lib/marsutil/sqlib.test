@@ -307,7 +307,116 @@ CREATE TABLE third(g,h,i)}
         array get row
     } -result {a {The First} b {The New Second} * {a b c} c {The New Third}}
 
+    #-------------------------------------------------------------------
+    # grab
 
+    test grab-1.1 {grabs nothing if no table is given} -setup {
+        sqlite3 $db :memory:
+    } -body {
+        sqlib grab $db
+    } -result {}
+
+    test grab-1.2 {grabs nothing if table is empty} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE mytable(a,b,c)}
+    } -body {
+        sqlib grab $db mytable {}
+    } -result {}
+
+    test grab-1.3 {grabs nothing if all rows are excluded} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE mytable(a,b,c)}
+        sqlib insert $db mytable {a 1 b 2 c 3}
+    } -body {
+        sqlib grab $db mytable {a=2}
+    } -result {}
+
+    test grab-1.4 {grabs all rows from table} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE mytable(a,b,c)}
+        sqlib insert $db mytable {a 1 b 2 c 3}
+        sqlib insert $db mytable {a 4 b 5 c 6}
+    } -body {
+        sqlib grab $db mytable {}
+    } -result {mytable {1 2 3 4 5 6}}
+
+    test grab-1.5 {grabs particular row from table} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE mytable(a,b,c)}
+        sqlib insert $db mytable {a P b Q c R}
+        sqlib insert $db mytable {a X b Y c Z}
+    } -body {
+        sqlib grab $db mytable {b='Y'}
+    } -result {mytable {X Y Z}}
+
+    test grab-1.6 {grab condition includes variable} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE mytable(a,b,c)}
+        sqlib insert $db mytable {a P b Q c R}
+        sqlib insert $db mytable {a X b Y c Z}
+    } -body {
+        set a P
+        sqlib grab $db mytable {a=$a}
+    } -result {mytable {P Q R}}
+
+    test grab-1.7 {grab from multiple tables} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE tablex(x1,x2,x3)}
+        $db eval {CREATE TABLE tabley(y1,y2,y3)}
+        sqlib insert $db tablex {x1 A x2 B x3 C}
+        sqlib insert $db tablex {x1 D x2 E x3 F}
+        sqlib insert $db tabley {y1 G y2 H y3 I}
+        sqlib insert $db tabley {y1 J y2 K y3 L}
+    } -body {
+        set x1 D
+        set y2 K
+        sqlib grab $db tablex {x1=$x1} tabley {y2=$y2}
+    } -result {tablex {D E F} tabley {J K L}}
+
+    #-------------------------------------------------------------------
+    # ungrab
+
+    test ungrab-1.1 {does nothing if no data} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE tablex(x1,x2,x3)}
+    } -body {
+        sqlib ungrab $db
+        sqlib query $db {SELECT * FROM tablex}
+    } -result {}
+
+    test ungrab-1.2 {inserts into tables} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE tablex(x1 TEXT PRIMARY KEY,x2,x3)}
+    } -body {
+        sqlib ungrab $db tablex {
+            A B C
+            D E F
+        }
+        sqlib query $db {SELECT * FROM tablex}
+    } -result {x1 x2 x3 
+-- -- -- 
+A  B  C  
+D  E  F  
+}
+
+    test ungrab-1.3 {replaces in tables} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE tablex(x1 TEXT PRIMARY KEY,x2,x3)}
+        sqlib ungrab $db tablex {
+            A B C
+            D E F
+        }
+    } -body {
+        sqlib ungrab $db tablex {
+            A P Q
+            D R S
+        }
+        sqlib query $db {SELECT * FROM tablex}
+    } -result {x1 x2 x3 
+-- -- -- 
+A  P  Q  
+D  R  S  
+}
 
     #-------------------------------------------------------------------
     # Cleanup

@@ -595,6 +595,76 @@ snit::type ::marsutil::sqlib {
             }]
         }
     }
+
+    # grab db table condition ?table condition...?
+    #
+    # db        - A database handle
+    # table     - Name of a table in db
+    # condition - A WHERE expression describing rows in the table.
+    #
+    # Grabs a collection of rows from one or more tables in the 
+    # database, and returns them to the user as one value, a 
+    # flat list with structure
+    #
+    #    <table> <values> ...
+    #
+    # where <table> is the table name and <values> is a flat list 
+    # of column values for the columns in table.
+
+    typemethod grab {db args} {
+        # FIRST, prepare to stash the grabbed data
+        set result [list]
+
+        # NEXT, grab rows for each table.
+        foreach {table condition} $args {
+            if {$condition eq ""} {
+                set query "SELECT * FROM $table"
+            } else {
+                set query "SELECT * FROM $table WHERE $condition"
+            }
+            
+            set rows [uplevel 1 [list $db eval $query]]
+
+            if {[llength $rows] > 0} {
+                lappend result $table $rows
+            }
+        }
+
+        return $result
+    }
+
+    # ungrab db table values ?table values...?
+    #
+    # db       - A database handle
+    # table    - Name of a table in the db
+    # values   - A flat list of row values.
+    #
+    # Puts row data into each table using INSERT OR REPLACE.
+    # The "values" must include full rows of data.
+
+    typemethod ungrab {db args} {
+        foreach {table values} $args {
+            # FIRST, query the table_info to get the column names
+            set i 0 
+
+            $db eval "PRAGMA table_info($table)" row {
+                lappend cnames $row(name)
+                lappend loopnames c[incr i]
+            }
+
+            # NEXT, set up the query
+            set query "
+                INSERT OR REPLACE
+                INTO ${table}([join $cnames ,])
+                VALUES(\$[join $loopnames {,$}])
+            "
+
+            # NEXT, loop over the data
+            foreach $loopnames $values {
+                $db eval $query
+            }
+        }
+    }
 }
 
 
