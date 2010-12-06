@@ -418,6 +418,15 @@ A  P  Q
 D  R  S  
 }
 
+    test ungrab-1.4 {multiple tables} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE tablex(x1 TEXT PRIMARY KEY,x2,x3)}
+        $db eval {CREATE TABLE tabley(y1 TEXT PRIMARY KEY,y2,y3)}
+    } -body {
+        sqlib ungrab $db tablex {A B C} tabley {D E F}
+        sqlib grab $db tablex {} tabley {}
+    } -result {tablex {A B C} tabley {D E F}}
+
     #-------------------------------------------------------------------
     # Cleanup
 

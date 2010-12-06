@@ -647,6 +647,8 @@ snit::type ::marsutil::sqlib {
             # FIRST, query the table_info to get the column names
             set i 0 
 
+            set cnames [list]
+            set loopnames [list]
             $db eval "PRAGMA table_info($table)" row {
                 lappend cnames $row(name)
                 lappend loopnames c[incr i]
