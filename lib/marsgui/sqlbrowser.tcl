@@ -317,7 +317,7 @@ snit::widget ::marsgui::sqlbrowser {
         
         # Sorter: timeout controlling re-sorting on uid update.
         install sorter using timeout ${selfns}::sorter     \
-            -command    [mymethod SortData]                \
+            -command    [mymethod SortDataAndNotify]       \
             -interval   1                                  \
             -repetition no
         
