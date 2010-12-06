@@ -50,6 +50,21 @@ snit::widget ::formlib::rangefield {
     delegate option -scalelength to scale as -length
     delegate option -menufont    to qmenu as -font
 
+    # -background color
+    #
+    # Sets the widget's background, which is propagated to the vlabel.
+    # The default is set programmatically.
+
+    option -background \
+        -configuremethod ConfigBackground
+
+    method ConfigBackground {opt val} {
+        set options($opt) $val
+
+        $hull   configure -background $val
+        $vlabel configure -background $val
+    }
+
     # -state state
     #
     # state must be "normal" or "disabled".
@@ -217,6 +232,8 @@ snit::widget ::formlib::rangefield {
         $hull configure                \
             -borderwidth        0      \
             -highlightthickness 0
+
+        set options(-background) [$hull cget -background]
 
         # NEXT, create the scale
         install scale using scale $win.scale   \
