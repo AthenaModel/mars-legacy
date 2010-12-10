@@ -287,6 +287,24 @@ snit::type ::marsutil::sqlib {
         return [join [$db eval $cmd] ";\n\n"]
     }
 
+    # columns db table
+    #
+    # db          - The fully-qualified SQLite database command
+    # table       - A table name in the db
+    #
+    # Returns a list of the table's column names, in order of
+    # definitions, as returned by PRAGMA table_list().
+
+    typemethod columns {db table} {
+        set names [list]
+
+        $db eval "PRAGMA table_info($table)" row {
+            lappend names $row(name)
+        }
+
+        return $names
+    }
+
     # query db sql ?options...?
     #
     # db            The fully-qualified SQLite database command.
@@ -596,7 +614,7 @@ snit::type ::marsutil::sqlib {
         }
     }
 
-    # grab db table condition ?table condition...?
+    # grab db ?-tcl? table condition ?table condition...?
     #
     # db        - A database handle
     # table     - Name of a table in db
@@ -609,18 +627,42 @@ snit::type ::marsutil::sqlib {
     #    <table> <values> ...
     #
     # where <table> is the table name and <values> is a flat list 
-    # of column values for the columns in table.
+    # of column values for the columns in table.  The individual
+    # column values are SQL-quoted appropriately for direct insertion 
+    # into an INSERT statement; this allows grab/ungrab to preserve
+    # NULLs.
+    #
+    # If the -tcl option is included before the first table
+    # name, the values will not be SQL-quoted.
 
     typemethod grab {db args} {
         # FIRST, prepare to stash the grabbed data
         set result [list]
 
+        # NEXT, get the option, if any.
+        if {[lindex $args 0] eq "-tcl"} {
+            lshift args
+            set tclSyntax 1
+        } else {
+            set tclSyntax 0
+        }
+
         # NEXT, grab rows for each table.
         foreach {table condition} $args {
-            if {$condition eq ""} {
-                set query "SELECT * FROM $table"
-            } else {
-                set query "SELECT * FROM $table WHERE $condition"
+            set quotes [list]
+
+            foreach name [sqlib columns $db $table] {
+                if {$tclSyntax} {
+                    lappend quotes $name
+                } else {
+                    lappend quotes "quote($name)"
+                }
+            }
+
+            set query "SELECT [join $quotes ,] FROM $table"
+
+            if {$condition ne ""} {
+                append query " WHERE $condition"
             }
             
             set rows [uplevel 1 [list $db eval $query]]
@@ -633,38 +675,176 @@ snit::type ::marsutil::sqlib {
         return $result
     }
 
-    # ungrab db table values ?table values...?
+    # ungrab db data
     #
     # db       - A database handle
-    # table    - Name of a table in the db
-    # values   - A flat list of row values.
+    # data     - A list {table values ?table values...?} as returned
+    #            by grab.
     #
     # Puts row data into each table using INSERT OR REPLACE.
-    # The "values" must include full rows of data.
+    # Each "values" entry must be a list of column values quoted
+    # appropriately for direct inclusion in an INSERT statement.
+    # The length of the "values" entry must be a multiple of the
+    # the number of columns in the table.
 
-    typemethod ungrab {db args} {
-        foreach {table values} $args {
-            # FIRST, query the table_info to get the column names
-            set i 0 
+    typemethod ungrab {db data} {
+        set sql ""
 
-            set cnames [list]
-            set loopnames [list]
-            $db eval "PRAGMA table_info($table)" row {
-                lappend cnames $row(name)
-                lappend loopnames c[incr i]
-            }
+        foreach {table values} $data {
+            # FIRST, get the number of columns in this table.
+            set len [llength [sqlib columns $db $table]]
+
+            require {$len > 0} "Unknown table: \"$table\""
 
             # NEXT, set up the query
-            set query "
-                INSERT OR REPLACE
-                INTO ${table}([join $cnames ,])
-                VALUES(\$[join $loopnames {,$}])
-            "
+            while {[llength $values] > 0} {
+                set row    [lrange $values 0 $len-1]
+                set values [lrange $values $len end]
 
-            # NEXT, loop over the data
-            foreach $loopnames $values {
-                $db eval $query
+                append sql \
+                    "INSERT OR REPLACE INTO $table VALUES([join $row ,]);\n"
             }
+        }
+
+        # NEXT, evaluate the query.
+        $db eval $sql
+    }
+
+
+    #-------------------------------------------------------------------
+    # grabbing_delete
+    #
+    # The following variables and routines are all related to the
+    # "grabbing_delete" mechanism.
+
+    # grab_data: A transient dictionary of grabbed rows.
+    typevariable grab_data
+
+    # grabbing_delete db table condition
+    #
+    # db         - An sqldocument handle
+    # table      - A table in the db
+    # condition  - A where condition specifying the rows to delete.
+    #
+    # Deletes the records, and returns a grab of the data that was deleted,
+    # including cascading deletes.
+
+    typemethod grabbing_delete {db table condition} {
+        # FIRST, define the sqlib_grab() function on the DB.
+        $db function sqlib_grab ${type}::GrabFunc
+
+        # NEXT, define delete triggers on table and its dependents.
+        set tables [GetDependentTables $db $table]
+        SetDeleteTraces $db $tables
+
+        # NEXT, clear the grab_data
+        set grab_data [dict create]
+
+        # NEXT, delete the data
+        uplevel 1 [list $db eval "DELETE FROM $table WHERE $condition"]
+
+        # NEXT, remove the triggers
+        DropDeleteTraces $db $tables
+
+        # NEXT, return the grabbed data, while clearing the cache.
+        set result $grab_data
+        set grab_data [dict create]
+
+        return $result
+    }
+
+    
+    # GrabFunc table values...
+    #
+    # table   - A table name
+    # values  - A list of column values for a row.
+    #
+    # Stashes the grabbed data in the grab_data dict.
+
+    proc GrabFunc {table args} {
+        dict lappend grab_data $table {*}$args
+        return
+    }
+
+
+    # GetDependentTables db table
+    #
+    # db         - An sqldocument handle
+    # table      - A table in the db
+    #
+    # Returns the names of tables affected by a cascading delete on the 
+    # specified table, *including* the specified table.
+
+    proc GetDependentTables {db table} {
+        # FIRST, for each table in the database, get the foreign key list, 
+        # and record dependencies.
+        foreach tab [sqlib tables $db] {
+            $db eval "PRAGMA foreign_key_list($tab)" row {
+                if {$row(on_delete) eq "CASCADE"} {
+                    lappend dep($row(table)) $tab
+                }
+            }
+        }
+
+        # NEXT, starting with the subject table, get a list of the
+        # distinct tables in the dependency tree.
+        lappend depList $table
+        set result [list]
+
+        while {[llength $depList] > 0} {
+            set next [lshift depList]
+            ladd result $next
+
+            if {![info exists dep($next)]} {
+                continue
+            }
+
+            foreach tab $dep($next) {
+                if {$tab ni $result} {
+                    lappend depList $tab
+                }
+            }
+        }
+
+        # NEXT, return the list of tables.
+        return $result
+    }
+
+    # SetDeleteTraces db tables
+    #
+    # db       - An sqldocument(n)
+    # tables   - A list of tables in the db
+    #
+    # Adds a delete trace trigger on the tables, to grab the
+    # data to be deleted.
+
+    proc SetDeleteTraces {db tables} {
+        foreach table $tables {
+            set names [sqlib columns $db $table]
+
+            $db eval "
+                DROP TRIGGER IF EXISTS sqlib_trace_${table};
+
+                CREATE TEMP TRIGGER sqlib_trace_${table}
+                BEFORE DELETE ON $table BEGIN
+                SELECT sqlib_grab('$table',quote(old.[join $names ),quote(old.]));
+                END;
+            "
+        }
+    }
+
+    # DropDeleteTraces db tables
+    #
+    # db       - An sqldocument(n)
+    # tables   - A list of tables in the db
+    #
+    # Drops the delete trace triggers from the tables.
+
+    proc DropDeleteTraces {db tables} {
+        foreach table $tables {
+            $db eval "
+                DROP TRIGGER IF EXISTS sqlib_trace_${table};
+            "
         }
     }
 }

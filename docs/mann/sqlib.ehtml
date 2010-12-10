@@ -206,6 +206,75 @@ wins on maintainability.<p>
 
 Compare to <<iref sqlib insert>>.<p>
 
+<<defitem "sqlib grab" {sqlib grab <i>db</i> ?-tcl? <i>table condition</i> ?<i>table condition...</i>?}>>
+
+Grabs a collection of rows from one or more tables in the 
+database, and returns them to the user as one value, a 
+flat list with structure {<i>table values table values...</i>} where
+<i>table</i> is a table name and <i>values</i> is a flat list of
+column values for all of the grabbed rows from the table.  By default,
+the individual column values are SQL-quoted for direct interpolation
+into an SQL INSERT statement.  In particular, string values are
+quoted with single quotes and NULL values appear as NULL.  If the
+<code>-tcl</code> option is included, the column values are not
+SQL-quoted.<p>
+
+For example,<p>
+
+<pre>
+    set data [sqlib grab $db table1 {x=5} table2 {y=10}]
+</pre>
+
+will grab all rows from table1 where x = 5, and all rows from
+table2 where y = 10.<p>
+
+The result of calling <<iref sqlib grab>> can be passed to
+<<iref sqlib ungrab>> operator to put the rows
+back in the database (provided that the <code>-tcl</code> option is
+not specified).<p>
+
+<<defitem "sqlib ungrab" {sqlib ungrab <i>db data</i>}>>
+
+Given a <i>data</i> set produced by <<iref sqlib grab>>, puts the
+data back into the database using "INSERT OR REPLACE".  For example,<p>
+
+<pre>
+    set data [sqlib grab $db table1 {x=5} table2 {y=10}]
+    ...
+    sqlib ungrab $db $data
+</pre>
+
+This command is usually used to re-insert deleted rows.  Because
+"INSERT OR REPLACE" is used, however, it can also be used to
+restore modified rows to their original content, <b>provided that</b>
+the primary key columns were not modified.<p>
+
+Note that the schemas of the relevant tables should not be altered
+between grabbing and ungrabbing, or the ungrabbing will have
+unpredictable results.<p>
+
+<<defitem "sqlib grabbing_delete" {sqlib grabbing_delete <i>db table condition</i>}>>
+
+Deletes the rows matching <i>condition</i> from the named <i>table</i>
+in the database with handle <i>db</i>, where <i>condition</i> is a
+boolean SQL expression, possibly including variable references.
+Returns an <<iref sqlib grab>> data set of all of the deleted rows,
+including those from cascading deletes.<p>
+
+The command is intended to capture deleted row data so that cascading
+deletes can be easily undone using <<iref sqlib ungrab>>.  For example,<p>
+
+<pre>
+    # Delete an entry, plus cascading deletes, and save the undo data.
+    set data [sqlib grabbing_delete $db table1 {id=$id}]
+    ...
+    # Undo the deletion, restoring all deleted data.
+    sqlib ungrab $db $data
+</pre>
+
+Note that this command does not support <<iref sqlib grab>>'s
+<code>-tcl</code> option.<p>
+
 <</deflist>>
 
 <<section ENVIRONMENT>>

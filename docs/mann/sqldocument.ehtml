@@ -260,6 +260,55 @@ command has no effect.<p>
 
 Returns the name of the last-opened database file, or "" if none.<p>
 
+<<defitem grab {$db grab ?-tcl? <i>table condition</i> ?<i>table condition...</i>?}>>
+
+Grabs a collection of rows from one or more tables in the 
+database, and returns them to the user as one value, a 
+flat list with structure {<i>table values table values...</i>} where
+<i>table</i> is a table name and <i>values</i> is a flat list of
+column values for all of the grabbed rows from the table.  By default,
+the individual column values are SQL-quoted for direct interpolation
+into an SQL INSERT statement.  In particular, string values are
+quoted with single quotes and NULL values appear as NULL.  If the
+<code>-tcl</code> option is included, the column values are not
+SQL-quoted.<p>
+
+For example,<p>
+
+<pre>
+    set data [$db $grab table1 {x=5} table2 {y=10}]
+</pre>
+
+will grab all rows from table1 where x = 5, and all rows from
+table2 where y = 10.<p>
+
+The result of calling <<iref grab>> can be passed to the
+<<iref ungrab>> command to put the rows
+back in the database (provided that the <code>-tcl</code> option is
+not specified).<p>
+
+<<defitem grabbing_delete {$db grabbing_delete <i>table condition</i>}>>
+
+Deletes the rows matching <i>condition</i> from the named
+<i>table</i>, where <i>condition</i> is a
+boolean SQL expression, possibly including variable references.
+Returns a <<iref grab>> data set of all of the deleted rows,
+including those from cascading deletes.<p>
+
+The command is intended to capture deleted row data so that cascading
+deletes can be easily undone using <<iref ungrab>>.  For example,<p>
+
+<pre>
+    # Delete an entry, plus cascading deletes, and save the undo data.
+    set data [$db grabbing_delete table1 {id=$id}]
+    ...
+    # Undo the deletion, restoring all deleted data.
+    $db ungrab $data
+</pre>
+
+Note that this command does not support <<iref grab>>'s
+<code>-tcl</code> option.<p>
+
 <<defitem insert {$db insert <i>table dict</i>}>>
 
 Inserts the contents of dictionary <i>dict</i> into the database as a
@@ -365,7 +414,28 @@ modules registered with this instance.<p>
 <<defitem tables {$db tables}>>
 
 Returns the names of the tables defined in the current database,
-including temporary tables and tables defined in attached databases.<p>
+including temporary tables and tables defined in attached
+databases.<p>
+
+<<defitem ungrab {$db ungrab <i>data</i>}>>
+
+Given a <i>data</i> set produced by <<iref grab>>, puts the
+data back into the database using "INSERT OR REPLACE".  For example,<p>
+
+<pre>
+    set data [$db grab table1 {x=5} table2 {y=10}]
+    ...
+    $db ungrab $data
+</pre>
+
+This command is usually used to re-insert deleted rows.  Because
+"INSERT OR REPLACE" is used, however, it can also be used to
+restore modified rows to their original content, <b>provided that</b>
+the primary key columns were not modified.<p>
+
+Note that the schemas of the relevant tables should not be altered
+between grabbing and ungrabbing, or the ungrabbing will have
+unpredictable results.<p>
 
 <<defitem unlock {$db unlock <i>tables</i>}>>
 
