@@ -260,6 +260,14 @@ command has no effect.<p>
 
 Returns the name of the last-opened database file, or "" if none.<p>
 
+<<defitem fklist {$db fklist <i>table</i> ?-indirect?}>>
+
+Returns a list of the tables with foreign keys that reference the
+specified <i>table</i>, excluding <i>table</i> itself.  If the
+<code>-indirect</code> option is included, the list also includes the
+tables that depend indirectly on <i>table</i>.  It is an error if
+<i>table</i> is unknown.<p>
+
 <<defitem grab {$db grab ?-tcl? <i>table condition</i> ?<i>table condition...</i>?}>>
 
 Grabs a collection of rows from one or more tables in the 

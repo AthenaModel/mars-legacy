@@ -497,10 +497,11 @@ D  E  F
         $db close
     } -result {Unknown table: "tablex"}
 
-    #-------------------------------------------------------------------
-    # grabbing_delete
 
-    proc gd_setup {} {
+    #-------------------------------------------------------------------
+    # fklist
+
+    proc fk_setup {} {
         variable db
         sqlite3 $db :memory:
 
@@ -518,6 +519,12 @@ D  E  F
                          ON DELETE CASCADE,
                 parent INTEGER REFERENCES second(second_id)
                          ON DELETE CASCADE,
+                name TEXT
+            );
+
+            CREATE TABLE third(
+                third_id INTEGER PRIMARY KEY,
+                second_id REFERENCES second(second_id),
                 name TEXT
             );
 
@@ -539,8 +546,63 @@ D  E  F
         }
     }
 
+    test fklist-1.1 {no such table} -setup {
+        fk_setup
+    } -body {
+        sqlib fklist $db nonesuch
+    } -returnCodes {
+        error
+    } -cleanup {
+        $db close
+    } -result {unknown table: "nonesuch"}
+    
+    test fklist-1.2 {no dependencies} -setup {
+        fk_setup
+    } -body {
+        sqlib fklist $db third
+    } -cleanup {
+        $db close
+    } -result {}
+
+    test fklist-1.3 {only direct dependencies} -setup {
+        fk_setup
+    } -body {
+        sqlib fklist $db second
+    } -cleanup {
+        $db close
+    } -result {third}
+
+    test fklist-1.4 {-indirect with only direct dependencies} -setup {
+        fk_setup
+    } -body {
+        sqlib fklist $db second -indirect
+    } -cleanup {
+        $db close
+    } -result {third}
+
+    test fklist-1.5 {only direct when indirect exist} -setup {
+        fk_setup
+    } -body {
+        sqlib fklist $db first
+    } -cleanup {
+        $db close
+    } -result {second}
+
+    test fklist-1.6 {-indirect when indirect exist} -setup {
+        fk_setup
+    } -body {
+        sqlib fklist $db first -indirect
+    } -cleanup {
+        $db close
+    } -result {second third}
+
+
+
+    #-------------------------------------------------------------------
+    # grabbing_delete
+
     test grabbing_delete-1.1 {delete one row} -setup {
-        gd_setup
+        fk_setup
     } -body {
         sqlib grabbing_delete $db second {second_id=4}
     } -cleanup {
@@ -548,7 +610,7 @@ D  E  F
     } -result {second {4 2 NULL 'W'}}
     
     test grabbing_delete-1.2 {delete rows from multiple tables} -setup {
-        gd_setup
+        fk_setup
     } -body {
         sqlib grabbing_delete $db first {first_id=1}
     } -cleanup {

@@ -275,6 +275,14 @@ deletes can be easily undone using <<iref sqlib ungrab>>.  For example,<p>
 Note that this command does not support <<iref sqlib grab>>'s
 <code>-tcl</code> option.<p>
 
+<<defitem "sqlib fklist" {sqlib fklist <i>db table</i> ?-indirect?}>>
+
+Returns a list of the tables with foreign keys that reference the
+specified <i>table</i>, excluding <i>table</i> itself.  If the
+<code>-indirect</code> option is included, the list also includes the
+tables that depend indirectly on <i>table</i>.  It is an error if
+<i>table</i> is unknown.<p>
+
 <</deflist>>
 
 <<section ENVIRONMENT>>

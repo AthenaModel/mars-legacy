@@ -563,6 +563,7 @@ snit::type ::marsutil::sqldocument {
 
     # Delegated methods
     delegate method columns         to db using {::marsutil::sqlib %m %c}
+    delegate method fklist          to db using {::marsutil::sqlib %m %c}
     delegate method grab            to db using {::marsutil::sqlib %m %c}
     delegate method grabbing_delete to db using {::marsutil::sqlib %m %c}
     delegate method insert          to db using {::marsutil::sqlib %m %c}

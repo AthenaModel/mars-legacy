@@ -710,6 +710,67 @@ snit::type ::marsutil::sqlib {
         $db eval $sql
     }
 
+    # fklist db table ?-indirect?
+    #
+    # db      - A database handle
+    # table   - A table in the database
+    #
+    # Retrieves a list of the tables that have foreign keys that
+    # references the given table.  If the -indirect option is given,
+    # tables that depend on those are included.
+
+    typemethod fklist {db table {opt ""}} {
+        if {$opt ni {"" -indirect}} {
+            error "invalid option: \"$opt\""
+        }
+
+        # FIRST, get the basic dependency data
+        set tables [sqlib tables $db]
+
+        if {$table ni $tables} {
+            error "unknown table: \"$table\""
+        }
+
+        foreach tab $tables {
+            $db eval "PRAGMA foreign_key_list($tab)" row {
+                ladd dep($row(table)) $tab
+            }
+        }
+
+        # NEXT, if there are no dependencies on this table, return
+        # the empty list.
+        if {![info exists dep($table)]} {
+            return [list]
+        }
+
+        # NEXT, if they just want the direct dependencies, return them.
+        if {$opt eq ""} {
+            # The user knows the table depends on itself; if there's
+            # a foreign key, ignore it.
+            ldelete dep($table) $table
+            return $dep($table)
+        }
+
+        # NEXT, if they want the indirect dependencies, compute and return
+        # them.
+        
+        lappend depList $table
+        set result [list]
+
+        while {[llength $depList] > 0} {
+            set next [lshift depList]
+            if {$next ni $result} {
+                lappend result $next
+
+                if {[info exists dep($next)]} {
+                    lappend depList {*}$dep($next)
+                }
+            }
+        }
+
+        # Skip the original table
+        return [lrange $result 1 end]
+    }
 
     #-------------------------------------------------------------------
     # grabbing_delete
@@ -774,6 +835,9 @@ snit::type ::marsutil::sqlib {
     #
     # Returns the names of tables affected by a cascading delete on the 
     # specified table, *including* the specified table.
+    #
+    # TBD: Consider adding an option to fklist to get just the
+    # cascading delete tables.
 
     proc GetDependentTables {db table} {
         # FIRST, for each table in the database, get the foreign key list, 
@@ -793,15 +857,11 @@ snit::type ::marsutil::sqlib {
 
         while {[llength $depList] > 0} {
             set next [lshift depList]
-            ladd result $next
+            if {$next ni $result} {
+                lappend result $next
 
-            if {![info exists dep($next)]} {
-                continue
-            }
-
-            foreach tab $dep($next) {
-                if {$tab ni $result} {
-                    lappend depList $tab
+                if {[info exists dep($next)]} {
+                    lappend depList {*}$dep($next)
                 }
             }
         }
