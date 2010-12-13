@@ -42,14 +42,14 @@ namespace eval ::simlib:: {
 # Load simlib(n) submodules
 
 # Same for both v1.0 and v2.0
-source [file join $::simlib::library simtypes.tcl ]
-source [file join $::simlib::library coverage.tcl ]
-source [file join $::simlib::library rmf.tcl      ]
+source [file join $::simlib::library simtypes.tcl  ]
+source [file join $::simlib::library coverage.tcl  ]
+source [file join $::simlib::library rmf.tcl       ]
+source [file join $::simlib::library mam.tcl       ]
 
 # Different for v2.0
 source [file join $::simlib::library gram2.tcl     ]
 source [file join $::simlib::library gramdb2.tcl   ]
-
 
 
 
