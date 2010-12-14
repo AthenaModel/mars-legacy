@@ -104,25 +104,14 @@ CREATE TABLE mam_affinity (
 ------------------------------------------------------------------------
 -- GUI Views
 
--- mam(n) belief view.  Creates an "id" column to use as the UID in
--- sqlbrowser(n).
-
-CREATE VIEW mam_belief_view AS
-SELECT eid || ' ' || tid AS id,
-       eid,
-       tid,
-       position,
-       tolerance
-FROM mam_belief; 
-
 -- mam(n) affinity comparison view: compares a group's affinities with
 -- other groups with their affinities for it.
 
 CREATE VIEW mam_acompare_view AS
-   SELECT A1.e || ' ' || A1.f         AS id,
-          A1.e                        AS e,
-          A1.f                        AS f,
-          format("%5.2f",A1.affinity) AS aef,
-          format("%5.2f",A2.affinity) AS afe
+   SELECT A1.e || ' ' || A1.f   AS id,
+          A1.e                  AS e,
+          A1.f                  AS f,
+          A1.affinity           AS aef,
+          A2.affinity           AS afe
    FROM mam_affinity AS A1
    JOIN mam_affinity AS A2 ON (A2.e=A1.f AND A2.f=A1.e);
