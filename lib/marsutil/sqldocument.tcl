@@ -339,9 +339,14 @@ snit::type ::marsutil::sqldocument {
         # no big deal.
         catch {$db eval {COMMIT TRANSACTION;}}
 
+        # NEXT, Turn off foreign keys if they are on, as it can
+        # screw up the process of dropping the old tables.
+        $db eval {PRAGMA foreign_keys=0;}
+
         # NEXT, open an exclusive transaction; if there's another
         # application attached to this database file, 
         # we'll get a "database is locked" error.
+
         $db eval {BEGIN EXCLUSIVE TRANSACTION}
 
         # NEXT, clear any old content
@@ -362,6 +367,11 @@ snit::type ::marsutil::sqldocument {
 
         # NEXT, commit the schema changes
         $db eval {COMMIT TRANSACTION;}
+
+        # NEXT, turn foreign keys back on, if they are supposed to be.
+        if {$options(-foreignkeys)} {
+            $db eval {PRAGMA foreign_keys=1}
+        }
 
         # NEXT, if -autotrans then begin an immediate transaction; we want 
         # there to be a transaction open at all times.  We'll commit the 
