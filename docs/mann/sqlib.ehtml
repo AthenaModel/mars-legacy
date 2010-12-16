@@ -253,28 +253,6 @@ Note that the schemas of the relevant tables should not be altered
 between grabbing and ungrabbing, or the ungrabbing will have
 unpredictable results.<p>
 
-<<defitem "sqlib grabbing_delete" {sqlib grabbing_delete <i>db table condition</i>}>>
-
-Deletes the rows matching <i>condition</i> from the named <i>table</i>
-in the database with handle <i>db</i>, where <i>condition</i> is a
-boolean SQL expression, possibly including variable references.
-Returns an <<iref sqlib grab>> data set of all of the deleted rows,
-including those from cascading deletes.<p>
-
-The command is intended to capture deleted row data so that cascading
-deletes can be easily undone using <<iref sqlib ungrab>>.  For example,<p>
-
-<pre>
-    # Delete an entry, plus cascading deletes, and save the undo data.
-    set data [sqlib grabbing_delete $db table1 {id=$id}]
-    ...
-    # Undo the deletion, restoring all deleted data.
-    sqlib ungrab $db $data
-</pre>
-
-Note that this command does not support <<iref sqlib grab>>'s
-<code>-tcl</code> option.<p>
-
 <<defitem "sqlib fklist" {sqlib fklist <i>db table</i> ?-indirect?}>>
 
 Returns a list of the tables with foreign keys that reference the

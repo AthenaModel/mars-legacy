@@ -254,7 +254,7 @@ snit::type ::simlib::mam {
 
     method {entity delete} {eid} {
         # FIRST, delete the entity, grabbing the undo data set.
-        set data [$rdb grabbing_delete mam_entity {eid=$eid}]
+        set data [$rdb delete -grab mam_entity {eid=$eid}]
 
         # NEXT, save the undo script.
         $self SaveUndo [list $rdb ungrab $data]
@@ -383,7 +383,7 @@ snit::type ::simlib::mam {
     method {topic delete} {tid} {
         # FIRST, delete the topic and dependent data, grabbing
         # the undo data.
-        set data [$rdb grabbing_delete mam_topic {tid=$tid}]
+        set data [$rdb delete -grab mam_topic {tid=$tid}]
 
         # NEXT, save the undo script if the delete succeeded.
         $self SaveUndo [list $rdb ungrab $data]

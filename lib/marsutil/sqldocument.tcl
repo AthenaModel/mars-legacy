@@ -103,6 +103,7 @@ snit::type ::marsutil::sqldocument {
         lappend functions nonempty  [myproc NonEmpty]
         lappend functions percent   [list ::marsutil::percent]
         lappend functions wallclock [list ::clock seconds]
+        lappend functions sqldocument_grab [myproc GrabFunc]
 
         return $functions
    }
@@ -638,6 +639,155 @@ snit::type ::marsutil::sqldocument {
 
         return
     }
+
+    #-------------------------------------------------------------------
+    # delete
+    #
+    # The following variables and routines are all related to the
+    # "delete" mechanism.
+
+    # grab_data: A transient dictionary of grabbed rows.
+    typevariable grab_data
+
+    # delete ?-grab? table condition ?table condition...?
+    #
+    # db         - An sqldocument handle
+    # table      - A table in the db
+    # condition  - A where condition specifying the rows to delete.
+    #
+    # Deletes the records; if -grab is given, a grab of the data 
+    # that was deleted, including cascading deletes.
+
+    method delete {args} {
+        # FIRST, get the option, if it's there.
+        if {[lindex $args 0] eq "-grab"} {
+            set grabbing 1
+            lshift args
+        } else {
+            set grabbing 0
+        }
+
+        # NEXT, clear the grab_data
+        set grab_data [dict create]
+
+        # NEXT, delete the data
+        foreach {table condition} $args {
+            if {$grabbing} {
+                # FIRST, define delete triggers on table and its dependents.
+                set tables [$self GetDependentTables $table]
+                $self SetDeleteTraces $tables
+            }
+
+            uplevel 1 [list $db eval "DELETE FROM $table WHERE $condition"]
+
+            if {$grabbing} {
+                $self DropDeleteTraces $tables
+            }
+        }
+
+        # NEXT, return the grabbed data, while clearing the cache.
+        if {$grabbing} {
+            set result $grab_data
+            set grab_data [dict create]
+
+            return $result
+        } else {
+            # Just return
+            return
+        }
+    }
+
+    
+    # GrabFunc table values...
+    #
+    # table   - A table name
+    # values  - A list of column values for a row.
+    #
+    # Stashes the grabbed data in the grab_data dict.
+
+    proc GrabFunc {table args} {
+        dict lappend grab_data $table {*}$args
+        return
+    }
+
+
+    # GetDependentTables table
+    #
+    # table      - A table in the db
+    #
+    # Returns the names of tables affected by a cascading delete on the 
+    # specified table, *including* the specified table.
+    #
+    # TBD: Consider adding an option to fklist to get just the
+    # cascading delete tables.
+
+    method GetDependentTables {table} {
+        # FIRST, for each table in the database, get the foreign key list, 
+        # and record dependencies.
+        foreach tab [$self tables] {
+            $db eval "PRAGMA foreign_key_list($tab)" row {
+                if {$row(on_delete) eq "CASCADE"} {
+                    lappend dep($row(table)) $tab
+                }
+            }
+        }
+
+        # NEXT, starting with the subject table, get a list of the
+        # distinct tables in the dependency tree.
+        lappend depList $table
+        set result [list]
+
+        while {[llength $depList] > 0} {
+            set next [lshift depList]
+            if {$next ni $result} {
+                lappend result $next
+
+                if {[info exists dep($next)]} {
+                    lappend depList {*}$dep($next)
+                }
+            }
+        }
+
+        # NEXT, return the list of tables.
+        return $result
+    }
+
+    # SetDeleteTraces tables
+    #
+    # tables   - A list of tables in the db
+    #
+    # Adds a delete trace trigger on the tables, to grab the
+    # data to be deleted.
+
+    method SetDeleteTraces {tables} {
+        foreach table $tables {
+            set names [$self columns $table]
+
+            $db eval "
+                DROP TRIGGER IF EXISTS sqldocument_trace_${table};
+
+                CREATE TEMP TRIGGER sqldocument_trace_${table}
+                BEFORE DELETE ON $table BEGIN
+                SELECT sqldocument_grab('$table',quote(old.[join $names ),quote(old.]));
+                END;
+            "
+        }
+    }
+
+    # DropDeleteTraces tables
+    #
+    # tables   - A list of tables in the db
+    #
+    # Drops the delete trace triggers from the tables.
+
+    method DropDeleteTraces {tables} {
+        foreach table $tables {
+            $db eval "
+                DROP TRIGGER IF EXISTS sqldocument_trace_${table};
+            "
+        }
+    }
+
 
     #-------------------------------------------------------------------
     # SQL Functions

@@ -260,6 +260,30 @@ command has no effect.<p>
 
 Returns the name of the last-opened database file, or "" if none.<p>
 
+<<defitem delete {$db delete ?-grab? <i>table condition</i> ?<i>table condition</i>...?}>>
+
+Deletes the rows from each <i>table</i> that match the associated
+<i>condition</i>, where <i>condition</i> is a
+boolean SQL expression that may include variable references.
+If the <code>-grab</code> option is included, the call returns
+a <<iref grab>> data set of all of the deleted rows,
+including those from cascading deletes.<p>
+
+With <code>-grab</code>, the command is intended to capture deleted
+row data so that cascading 
+deletes can be easily undone using <<iref ungrab>>.  For example,<p>
+
+<pre>
+    # Delete an entry, plus cascading deletes, and save the undo data.
+    set data [$db delete -grab table1 {id=$id}]
+    ...
+    # Undo the deletion, restoring all deleted data.
+    $db ungrab $data
+</pre>
+
+Note that this command does not support <<iref grab>>'s
+<code>-tcl</code> option.<p>
+
 <<defitem fklist {$db fklist <i>table</i> ?-indirect?}>>
 
 Returns a list of the tables with foreign keys that reference the
@@ -295,27 +319,6 @@ The result of calling <<iref grab>> can be passed to the
 back in the database (provided that the <code>-tcl</code> option is
 not specified).<p>
 
-<<defitem grabbing_delete {$db grabbing_delete <i>table condition</i>}>>
-
-Deletes the rows matching <i>condition</i> from the named
-<i>table</i>, where <i>condition</i> is a
-boolean SQL expression, possibly including variable references.
-Returns a <<iref grab>> data set of all of the deleted rows,
-including those from cascading deletes.<p>
-
-The command is intended to capture deleted row data so that cascading
-deletes can be easily undone using <<iref ungrab>>.  For example,<p>
-
-<pre>
-    # Delete an entry, plus cascading deletes, and save the undo data.
-    set data [$db grabbing_delete table1 {id=$id}]
-    ...
-    # Undo the deletion, restoring all deleted data.
-    $db ungrab $data
-</pre>
-
-Note that this command does not support <<iref grab>>'s
-<code>-tcl</code> option.<p>
 
 <<defitem insert {$db insert <i>table dict</i>}>>
 
