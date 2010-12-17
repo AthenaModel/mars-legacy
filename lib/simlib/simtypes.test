@@ -110,6 +110,67 @@ namespace eval ::simlib::test {
     } -result {0.0 100.0 %5.1f}
 
     #-------------------------------------------------------------------
+    # qposition
+
+    test qposition-1.1 {long names map to short names} -body {
+        list \
+            [qposition name "Passionately For"]     \
+            [qposition name "Strongly For"]         \
+            [qposition name "Weakly For"]           \
+            [qposition name "Ambivalent"]           \
+            [qposition name "Weakly Against"]       \
+            [qposition name "Strongly Against"]     \
+            [qposition name "Passionately Against"] 
+    } -result {L+ M+ S+ A S- M- L-}
+
+    test qposition-1.2 {short names map to values} -body {
+        list \
+            [qposition value "L+"] \
+            [qposition value "M+"] \
+            [qposition value "S+"] \
+            [qposition value "A"]  \
+            [qposition value "S-"] \
+            [qposition value "M-"] \
+            [qposition value "L-"]
+    } -result {0.9 0.6 0.3 0.0 -0.3 -0.6 -0.9}
+
+    test qposition-1.3 {options} -body {
+        list \
+            [qposition cget -min]    \
+            [qposition cget -max]    \
+            [qposition cget -format]
+    } -result {-1.0 1.0 %5.2f}
+
+
+    #-------------------------------------------------------------------
+    # qtolerance
+
+    test qtolerance-1.1 {long names map to short names} -body {
+        list \
+            [qtolerance name "Very Tolerant"]   \
+            [qtolerance name "Tolerant"]        \
+            [qtolerance name "Balanced"]        \
+            [qtolerance name "Intolerant"]      \
+            [qtolerance name "Very Intolerant"] 
+    } -result {VT T B I VI}
+
+    test qtolerance-1.2 {short names map to values} -body {
+        list \
+            [qtolerance value "VT"] \
+            [qtolerance value "T"]  \
+            [qtolerance value "B"]  \
+            [qtolerance value "I"]  \
+            [qtolerance value "VI"] 
+    } -result {0.9 0.7 0.5 0.3 0.1}
+
+    test qtolerance-1.3 {options} -body {
+        list \
+            [qtolerance cget -min]    \
+            [qtolerance cget -max]    \
+            [qtolerance cget -format]
+    } -result {0.0 1.0 %3.1f}
+
+    #-------------------------------------------------------------------
     # qtrend
 
     test qtrend-1.1 {long names map to short names} -body {

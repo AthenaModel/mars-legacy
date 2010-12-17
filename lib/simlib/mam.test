@@ -160,12 +160,12 @@ E1
 
         pprint [rdb query {
             SELECT * FROM mam_affinity
-            ORDER BY e,f
+            ORDER BY f,g
         }]
     } -cleanup {
         cleanup
     } -result {
-e  f  affinity 
+f  g  affinity 
 -- -- -------- 
 E1 E1 0.0      
 E1 E2 0.0      
@@ -238,7 +238,7 @@ E1  T1  0.0      0.5
     } -cleanup {
         cleanup
     } -result {
-e  f  affinity 
+f  g  affinity 
 -- -- -------- 
 E1 E1 0.0      
     }
@@ -304,7 +304,7 @@ E2
     } -cleanup {
         cleanup
     } -result {
-e  f  affinity 
+f  g  affinity 
 -- -- -------- 
 E2 E2 0.0      
     }
@@ -372,17 +372,17 @@ E2  T2  0.0      0.5
         rdb eval {
             UPDATE mam_affinity
             SET affinity = 0.5
-            WHERE e='E1' and f='E2'
+            WHERE f='E1' and g='E2'
         }
 
         mymam entity delete E1
     } -body {
         mymam edit undo
-        pprint [rdb query {SELECT * FROM mam_affinity ORDER BY e,f}]
+        pprint [rdb query {SELECT * FROM mam_affinity ORDER BY f,g}]
     } -cleanup {
         cleanup
     } -result {
-e  f  affinity 
+f  g  affinity 
 -- -- -------- 
 E1 E1 0.0      
 E1 E2 0.5      
@@ -436,12 +436,12 @@ E2 E2 0.0
 
         pprint [rdb query {
             SELECT * FROM mam_affinity
-            ORDER BY e,f
+            ORDER BY f,g
         }]
     } -cleanup {
         cleanup
     } -result {
-e  f  affinity 
+f  g  affinity 
 -- -- -------- 
 E2 E2 0.0      
 E2 E3 0.0      
@@ -517,17 +517,17 @@ E2  T2  0.0      0.5
         rdb eval {
             UPDATE mam_affinity
             SET affinity = 0.5
-            WHERE e='E1' and f='E2'
+            WHERE f='E1' and g='E2'
         }
 
         mymam entity rename E1 E3
     } -body {
         mymam edit undo
-        pprint [rdb query {SELECT * FROM mam_affinity ORDER BY e,f}]
+        pprint [rdb query {SELECT * FROM mam_affinity ORDER BY f,g}]
     } -cleanup {
         cleanup
     } -result {
-e  f  affinity 
+f  g  affinity 
 -- -- -------- 
 E1 E1 0.0      
 E1 E2 0.5      
@@ -1236,6 +1236,161 @@ E1  T1  0.1      0.2
         cleanup
     } -result {0}
     
+    #-------------------------------------------------------------------
+    # compute
+
+    test compute-1.1 {No topics; all affinities are 0} -setup {
+        create
+        mymam entity add E1
+        mymam entity add E2
+    } -body {
+        mymam compute
+        rdb onecolumn {
+            SELECT count(*) FROM mam_affinity WHERE affinity = 0.0
+        }
+    } -cleanup {
+        cleanup
+    } -result {4}
+
+    test compute-1.2 {Default settings; all affinities are 0} -setup {
+        create
+        mymam entity add E1
+        mymam entity add E2
+
+        mymam topic add T1
+    } -body {
+        mymam compute
+        rdb onecolumn {
+            SELECT count(*) FROM mam_affinity WHERE affinity = 0.0
+        }
+    } -cleanup {
+        cleanup
+    } -result {4}
+
+    test compute-1.3 {No relevant topics; all affinities are 0} -setup {
+        create
+        mymam entity add E1
+        mymam entity add E2
+
+        mymam topic add T1 -relevance 0
+    } -body {
+        mymam compute
+        rdb onecolumn {
+            SELECT count(*) FROM mam_affinity WHERE affinity = 0.0
+        }
+    } -cleanup {
+        cleanup
+    } -result {4}
+
+    test compute-2.1 {Case 1: Extreme disagreement} -setup {
+        create
+        mymam entity add E1
+        mymam entity add E2
+
+        mymam topic add T1
+        mymam topic add T2
+
+        # E1 and E2 disagree on a topic for which E1 has tolerance 0
+        mymam belief configure E1 T1 -position 0.1 -tolerance 0.0
+    } -body {
+        mymam compute
+        rdb onecolumn {
+            SELECT format('%.2f',affinity) FROM mam_affinity 
+            WHERE f='E1' and g='E2'
+        }
+    } -cleanup {
+        cleanup
+    } -result {-1.00}
+
+    test compute-2.2 {Case 2: Intolerant agreement, no zeal} -setup {
+        create
+        mymam entity add E1
+        mymam entity add E2
+
+        mymam topic add T1
+        mymam topic add T2
+
+        # E1 and E2 agree on all topics for which E1 has tolerance 0,
+        # but the zeals are 0.0
+        mymam belief configure E1 T1 -tolerance 0.0
+        mymam belief configure E1 T2 -position 0.1
+    } -body {
+        mymam compute
+        rdb onecolumn {
+            SELECT format('%.2f',affinity) FROM mam_affinity 
+            WHERE f='E1' and g='E2'
+        }
+    } -cleanup {
+        cleanup
+    } -result {0.00}
+
+    test compute-2.3 {Case 3: Intolerant agreement, with zeal} -setup {
+        create
+        mymam entity add E1
+        mymam entity add E2
+
+        mymam topic add T1
+        mymam topic add T2
+
+        # E1 and E2 agree on all topics for which E1 has tolerance 0,
+        # and the zeals are positive
+        mymam belief configure E1 T1 -position 0.2 -tolerance 0.0
+        mymam belief configure E2 T1 -position 0.2
+        mymam belief configure E1 T2 -position 0.1
+        mymam belief configure E2 T2 -position -0.1
+    } -body {
+        mymam compute
+        rdb onecolumn {
+            SELECT format('%.2f',affinity) FROM mam_affinity 
+            WHERE f='E1' and g='E2'
+        }
+    } -cleanup {
+        cleanup
+    } -result {0.20}
+
+    test compute-2.4 {Case 4: Perfect ambivalence} -setup {
+        create
+        mymam entity add E1
+        mymam entity add E2
+
+        mymam topic add T1
+        mymam topic add T2
+
+        # E1 is ambivalent on all topics, and has zero tolerance on no
+        # topics.  E2's position doesn't matter.
+        mymam belief configure E2 T1 -position 0.2
+        mymam belief configure E2 T2 -position -0.1
+    } -body {
+        mymam compute
+        rdb onecolumn {
+            SELECT format('%.2f',affinity) FROM mam_affinity 
+            WHERE f='E1' and g='E2'
+        }
+    } -cleanup {
+        cleanup
+    } -result {0.00}
+
+    test compute-2.5 {Case 5: The normal case} -setup {
+        create
+        mymam entity add E1
+        mymam entity add E2
+
+        mymam topic add T1
+        mymam topic add T2
+
+        # E1 has positions on some topics, and has zero tolerance on no
+        # topics.  The normal equation is used.
+        mymam belief configure E1 T1 -position 0.2
+    } -body {
+        mymam compute
+        rdb onecolumn {
+            SELECT format('%.2f',affinity) FROM mam_affinity 
+            WHERE f='E1' and g='E2'
+        }
+    } -cleanup {
+        cleanup
+    } -result {-0.09}
+
 
     #-------------------------------------------------------------------
     # Cleanup

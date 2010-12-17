@@ -64,6 +64,16 @@ magnitude is broken down into these categories:<p>
 
 <<qmag html>>
 
+<<defitem qposition qposition>>
+
+This quality is used to measure an entity's position for or against
+a topic in a <<xref mam(n)>> belief system.  Numerically, the values
+range from <<qposition cget -min>> to <<qposition cget -max>>, are
+formatted as "<<qposition cget -format>>", and have the bins
+shown in the following table:<p>
+
+<<qposition html>>
+
 <<defitem qrel qrel>>
 
 This quality is used to describe the relationship between two
@@ -99,6 +109,17 @@ formatted as "<<qsat cget -format>>".  Symbolically,
 satisfaction is broken down into these categories:<p>
 
 <<qsat html>>
+
+<<defitem qtolerance qtolerance>>
+
+This quality is used to measure an entity's tolerance for disagreement
+with its position for or against a topic in a <<xref mam(n)>> belief
+system. Numerically, the values range from
+<<qtolerance cget -min>> to <<qtolerance cget -max>>, are
+formatted as "<<qtolerance cget -format>>", and have the bins
+shown in the following table:<p>
+
+<<qtolerance html>>
 
 <<defitem qtrend qtrend>>
 

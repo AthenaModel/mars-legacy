@@ -87,18 +87,18 @@ CREATE TABLE mam_undo (
 
 CREATE TABLE mam_affinity (
     -- Foreign Keys
-    e TEXT REFERENCES mam_entity(eid)
-           ON DELETE CASCADE ON UPDATE CASCADE
-           DEFERRABLE INITIALLY DEFERRED,
     f TEXT REFERENCES mam_entity(eid)
            ON DELETE CASCADE ON UPDATE CASCADE
            DEFERRABLE INITIALLY DEFERRED,
+    g TEXT REFERENCES mam_entity(eid)
+           ON DELETE CASCADE ON UPDATE CASCADE
+           DEFERRABLE INITIALLY DEFERRED,
 
-    -- Affinity of e for f.
+    -- Affinity of f for g.
     affinity REAL DEFAULT 0.0
         CHECK (-1.0 <= affinity AND affinity <= 1.0),
 
-    PRIMARY KEY (e, f)
+    PRIMARY KEY (f, g)
 );
 
 ------------------------------------------------------------------------
@@ -108,10 +108,10 @@ CREATE TABLE mam_affinity (
 -- other groups with their affinities for it.
 
 CREATE VIEW mam_acompare_view AS
-   SELECT A1.e || ' ' || A1.f   AS id,
-          A1.e                  AS e,
+   SELECT A1.f || ' ' || A1.f   AS id,
           A1.f                  AS f,
-          A1.affinity           AS aef,
-          A2.affinity           AS afe
+          A1.g                  AS g,
+          A1.affinity           AS afg,
+          A2.affinity           AS agf
    FROM mam_affinity AS A1
-   JOIN mam_affinity AS A2 ON (A2.e=A1.f AND A2.f=A1.e);
+   JOIN mam_affinity AS A2 ON (A2.f=A1.g AND A2.g=A1.f);

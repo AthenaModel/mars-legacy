@@ -215,10 +215,10 @@ snit::type ::simlib::mam {
             INSERT INTO mam_belief(eid,tid)
             SELECT $eid, tid FROM mam_topic;
                 
-            INSERT INTO mam_affinity(e,f)
+            INSERT INTO mam_affinity(f,g)
             SELECT $eid, eid FROM mam_entity;
                 
-            INSERT INTO mam_affinity(e,f)
+            INSERT INTO mam_affinity(f,g)
             SELECT eid, $eid FROM mam_entity WHERE eid != $eid;
         }
 
@@ -544,17 +544,17 @@ snit::type ::simlib::mam {
 
         # NEXT, compute the affinity for each pair of entities.
         $rdb eval {
-            SELECT E.eid AS e,
-                   F.eid AS f
-            FROM mam_entity AS E
-            JOIN mam_entity AS F
+            SELECT F.eid AS f,
+                   G.eid AS g
+            FROM mam_entity AS F
+            JOIN mam_entity AS G
         } {
-            set a [Affinity $P($e) $tau($e) $P($f)]
+            set a [Affinity $P($f) $tau($f) $P($g)]
 
             $rdb eval {
                 UPDATE mam_affinity
                 SET affinity=$a
-                WHERE e=$e AND f=$f
+                WHERE f=$f AND g=$g
             }
         }
     }
@@ -623,16 +623,25 @@ snit::type ::simlib::mam {
         set numZinI [llength $I]
 
         if {$extremeDisagreement} {
+            # Case 1: f and g disagree on a topic for which E1 has
+            # zero tolerance.
             let Afg {-1.0}
         } elseif {$numZinI > 0 && $sumZinI == 0.0} {
+            # Case 2: f and g agree on all topics for which f has 
+            # zero tolerance, but all such zeals are 0.0.
             let Afg {0.0}
         } elseif {$numZinI > 0 && $sumZinI != 0.0} {
+            # Case 3: f and g agree on all topics for which f has 
+            # zero tolerance, with positive zeal.
             let sumZG 0.0
             foreach i $I {
                 let sumZG {$sumZG + $Zf($i)*$G($i)}
             }
             let Afg {$sumZG/$sumZinI}
         } elseif {$numZinI == 0 && $sumZf == 0.0} {
+            # Case 4: There are no topics on which f and g agree
+            # for each f has zero tolerance, and f's zeal is 0.0 for
+            # all topics.
             let Afg {0.0}
         } else {
             set num 0.0

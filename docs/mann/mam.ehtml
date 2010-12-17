@@ -155,12 +155,15 @@ entity <i>eid</i>'s belief about topic <i>tid</i>:<p>
 
 <<defopt {-position <i>number</i>}>>
 
-Specifies the entity's position with respect to the topic, a real number from -1.0 to +1.0.  Defaults to 0.0.<p>
+Specifies the entity's position with respect to the topic, a real
+number from -1.0 to +1.0.  Defaults to 0.0.  The client can use
+<<xref simtypes(n) qposition>> to validate position values.<p>
 
 <<defopt {-tolerance <i>number</i>}>>
 
 Specifies the entity's tolerance for disagreement regarding the topic,
-as a real number from 0.0 to 1.0.  The default is 0.5.<p>
+as a real number from 0.0 to 1.0.  The default is 0.5.  The client can use
+<<xref simtypes(n) qtolerance>> to validate tolerance values.<p>
 
 <</deflist options>>
 

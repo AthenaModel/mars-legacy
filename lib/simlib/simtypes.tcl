@@ -23,9 +23,11 @@ namespace eval ::simlib:: {
         qcooperation   \
         qduration      \
         qmag           \
+        qposition      \
         qrel           \
         qsaliency      \
         qsat           \
+        qtolerance     \
         qtrend         \
         rfraction      \
         rmagnitude
@@ -83,6 +85,17 @@ namespace eval ::simlib:: {
     XXXXL- "XXXX_LARGE_MINUS" -30.0
 } -format {%5.2f}
 
+# Position: a mam(n) entity's position on a topic.
+::marsutil::quality ::simlib::qposition {
+    L+ "Passionately For"      0.8   0.9  1.0
+    M+ "Strongly For"          0.45  0.6  0.8
+    S+ "Weakly For"            0.05  0.3  0.45
+    A  "Ambivalent"           -0.05  0.0  0.05
+    S- "Weakly Against"       -0.45 -0.3 -0.05
+    M- "Strongly Against"     -0.8  -0.6 -0.45
+    L- "Passionately Against" -1.0  -0.9 -0.8
+} -bounds yes -format {%5.2f} -min -1.0 -max 1.0
+
 # Relationship between two groups
 ::marsutil::quality ::simlib::qrel {
     FRIEND  "Friend"      0.3   0.5   1.0
@@ -109,6 +122,14 @@ namespace eval ::simlib:: {
     VD "Very Dissatisfied" -80.0
 } -min -100.0 -max 100.0 -format {%7.2f}
 
+# Position: a mam(n) entity's tolerance for disagreement on a topic.
+::marsutil::quality ::simlib::qtolerance {
+    VT "Very Tolerant"    0.9
+    T  "Tolerant"         0.7
+    B  "Balanced"         0.5
+    I  "Intolerant"       0.3
+    VI "Very Intolerant"  0.1
+} -format {%3.1f} -min 0.0 -max 1.0
 
 # Satisfaction: Long-Term Trend
 ::marsutil::quality ::simlib::qtrend {
