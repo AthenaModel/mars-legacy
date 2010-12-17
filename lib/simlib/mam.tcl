@@ -549,7 +549,6 @@ snit::type ::simlib::mam {
             FROM mam_entity AS E
             JOIN mam_entity AS F
         } {
-            puts "e=$e f=$f"
             set a [Affinity $P($e) $tau($e) $P($f)]
 
             $rdb eval {
@@ -560,95 +559,94 @@ snit::type ::simlib::mam {
         }
     }
 
-    # Affinity peList tauList pfList
+    # Affinity pfList tauList pgList
     #
-    # Computes the affinity of entity e for entity f given their
-    # positions on the same topics and e's intolerance with disagreement.
-    #
-    # peList  - A list of positions for entity e
-    # tauList - A list of tolerances for entity e
     # pfList  - A list of positions for entity f
+    # tauList - A list of tolerances for entity f
+    # pgList  - A list of positions for entity g
+    #
+    # Computes the affinity of entity f for entity g given their
+    # positions on the same topics and f's intolerance with disagreement,
+    # per RGC's memo "Computing Affinity (4)", 16 December 2010.
 
-    proc Affinity {peList tauList pfList} {
-        # FIRST, compute A.fgi, along with summary statistics.
-        set extremeDisagreementFlag 0
-        set extremeAgreementFlag    1
+    proc Affinity {pfList tauList pgList} {
+        # FIRST, loop over the topics and accumulate data.
+        
+        # Sum of Z.fi for all i
+        set sumZf 0.0
 
-        for {set i 0} {$i < [llength $peList]} {incr i} {
+        # List of i's for which tau.fi = 0 but P.fi=P.gi
+        set I [list]
+
+        # Sum of Z.fi for i in I.
+        set sumZinI 0.0
+
+        # If 1, tau.fi = 0 and P.fi != P.gi for some i
+        set extremeDisagreement 0
+
+        for {set i 0} {$i < [llength $pfList]} {incr i} {
             # Get values
-            let Pe [lindex $peList $i]
-            let Pf [lindex $pfList $i]
+            let Pf   [lindex $pfList $i]
+            let Pg   [lindex $pgList $i]
+            let tau  [lindex $tauList $i]
 
-            let Be     [sign $Pe]
-            let Ze($i) {abs($Pe)}
             let Bf     [sign $Pf]
-            let Zf     {abs($Pf)}
-            let tau    [lindex $tauList $i]
-
-            # Do we have extreme disagreement?
-            if {$tau == 0.0 && $Pe != $Pf} {
-                set extremeDisagreementFlag 1
-            }
-
-            # Do we NOT have extreme agreement?
-            if {$tau != 0.0 || $Pe != $Pf} {
-                set extremeAgreementFlag 0
-            }
+            let Zf($i) {abs($Pf)}
+            let sumZf  {$sumZf + $Zf($i)}
+            let Bg     [sign $Pg]
+            let Zg     {abs($Pg)}
 
             # Agreement
-            if {$Be == $Bf} {
-                let G {sqrt($Pe * $Pf)}
+            if {$Bf == $Bg} {
+                let G($i) {sqrt($Pf * $Pg)}
             } else {
-                let G 0.0
+                let G($i) 0.0
             }
 
             # Disagreement
-            let D {abs($Pe - $Pf)/2.0}
+            let D($i) {abs($Pf - $Pg)/2.0}
 
-
-            # Affinity WRT topic i
-            if {$tau    == 0.0  &&
-                $Ze($i) != 0.0  &&
-                $Be     != $Bf
-            } {
-                # Utter disagreement.
-                let A($i) -1
-            } elseif {$tau == 0 && $Be == $Bf} {
-                let A($i) $G
+            # Special cases involving tau.fi
+            if {$tau == 0} {
+                if {$Pf == $Pg} {
+                    lappend I $i
+                    let  sumZinI {$sumZinI + $Zf($i)}
+                } else {
+                    set extremeDisagreement 1
+                }
             } else {
-                # Will $tau necessarily not be zero here?
-                let beta {(1 - $tau)/$tau}
-                let A($i) {($G - $beta*$D)/(1 + $beta*$D)}
+                let beta($i) {(1 - $tau)/$tau}
             }
-            
-
-            puts "i=$i Pe=$Pe Be=$Be Ze=$Ze($i) tauPrime=$tauPrime Pf=$Pf Bf=$Bf Zf=$Zf G=$G D=$D A=$A($i)"
         }
 
-        # NEXT, handle special cases.
+        # NEXT, compute Affinity
+        set numZinI [llength $I]
+
         if {$extremeDisagreement} {
-            return -1
-        } elseif {$extremeAgreement} {
-            return 0.0
-        }
+            let Afg {-1.0}
+        } elseif {$numZinI > 0 && $sumZinI == 0.0} {
+            let Afg {0.0}
+        } elseif {$numZinI > 0 && $sumZinI != 0.0} {
+            let sumZG 0.0
+            foreach i $I {
+                let sumZG {$sumZG + $Zf($i)*$G($i)}
+            }
+            let Afg {$sumZG/$sumZinI}
+        } elseif {$numZinI == 0 && $sumZf == 0.0} {
+            let Afg {0.0}
+        } else {
+            set num 0.0
+            set denom 0.0
 
-        # NEXT, compute the affinity
-        set num 0.0
-        set denom 0.0
-
-        for {set i 0} {$i < [llength $peList]} {incr i} {
-            if {[lindex $tauList $i] == 0.0} {
-                continue
+            for {set i 0} {$i < [llength $pfList]} {incr i} {
+                let num   {$num   + $Zf($i) * ($G($i) - $beta($i)*$D($i))}
+                let denom {$denom + $Zf($i) * (  1    + $beta($i)*$D($i))}
             }
 
-            puts "beta($i) = $beta($i)"
-            let num   {$num   + $beta($i) * $Ze($i) * $A($i)}
-            let denom {$denom + $beta($i) * $Ze($i)}
+            let Afg {$num/$denom}
         }
 
-        let Aef {$num/$denom} 
-        puts "A.ef=$Aef\n"
-        return $Aef
+        return $Afg
     }
 
     # sign x
