@@ -84,6 +84,9 @@ and <code>-max</code> options.  Mars <<xref range(n)>> and
 <b>snit::double</b> objects (provided that both <code>-min</code> and
 <code>-max</code> are set).<p>
 
+Note that the user will not be layed out until <code>-type</code> is
+set; and once <code>-type</code> is set, it cannot be changed.<p>
+
 <<defopt {-resetvalue <i>value</i>}>>
 
 Any <<xref field(i)>> can be set to "" to clear its value.  A
