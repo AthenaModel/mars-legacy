@@ -10,6 +10,40 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+This build has an unusually large number of changes, most of them
+minor improvements to the sqldocument(n) module and the formlib(n)
+editing widgets.  Most of these were driven by the prototyping and
+inclusion of the new Mars Affinity Model (mam(n)); others by efforts
+to improve our use of SQLite.  Changes that would
+break existing code have been avoided.<p>
+
+<h3>Build 1.40, 20 December 2010</h3>
+
+<ul>
+  <li> Bug 2689: gram(n): change all "let" commands to use expr instead
+  <li> Bug 2690: sqldocument(n): DICT collating sequence
+  <li> Bug 2691: sqlbrowser(n): -sortmode dictionary not working
+  <li> Bug 2693: sqldocument(n): -foreignkeys
+  <li> Bug 2695: sqlbrowser(n): -filterbox
+  <li> Bug 2699: mars_sql(1) -- SQL Database Tool
+  <li> Bug 2700: mars_sql(1) -- Explain Mode
+  <li> Bug 2701: rangefield(n): call -changecmd lazily
+  <li> Bug 2702: rangefield(n): enhancements
+  <li> Bug 2703: enumfield(n): -font affects only the menubox entry, not the menubox pulldown.
+  <li> Bug 2704: sqlbrowser(n): Support for cell editing
+  <li> Bug 2705: lazyupdater(n): update never occurs if -win is "".
+  <li> Bug 2709: sqlbrowser(n): -selectioncmd called on reload
+  <li> Bug 2710: rangefield(n): propagate -background
+  <li> Bug 2711: sqldocument(n): grab and ungrab
+  <li> Bug 2717: sqldocument(n): grabbing_delete
+  <li> Bug 2719: sqldocument(n): fklist method
+  <li> Bug 2720: simlib(n): Mars Affinity Model
+  <li> Bug 2724: mam(n): Schema contains format() function
+  <li> Bug 2725: sqldocument(n): "$db clear" fails
+  <li> Bug 2727: sqldocument(n): delete subcommand
+  <li> Bug 2728: mam(n): RGC algorithm of 16 December 2010 
+</ul><p>
+
 <h3>Build 1.39, 17 November 2010</h3>
 <b> Happy Birthday To Me</b><p>
 
