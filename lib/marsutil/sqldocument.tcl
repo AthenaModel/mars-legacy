@@ -576,7 +576,6 @@ snit::type ::marsutil::sqldocument {
     delegate method columns         to db using {::marsutil::sqlib %m %c}
     delegate method fklist          to db using {::marsutil::sqlib %m %c}
     delegate method grab            to db using {::marsutil::sqlib %m %c}
-    delegate method grabbing_delete to db using {::marsutil::sqlib %m %c}
     delegate method insert          to db using {::marsutil::sqlib %m %c}
     delegate method mat             to db using {::marsutil::sqlib %m %c} 
     delegate method query           to db using {::marsutil::sqlib %m %c} 
@@ -646,7 +645,10 @@ snit::type ::marsutil::sqldocument {
     # The following variables and routines are all related to the
     # "delete" mechanism.
 
-    # grab_data: A transient dictionary of grabbed rows.
+    # grab_data: A transient dictionary of grabbed rows.  The keys
+    # are lists {<tableName> INSERT}, so that ungrab will insert
+    # them into the database.
+
     typevariable grab_data
 
     # delete ?-grab? table condition ?table condition...?
@@ -706,7 +708,7 @@ snit::type ::marsutil::sqldocument {
     # Stashes the grabbed data in the grab_data dict.
 
     proc GrabFunc {table args} {
-        dict lappend grab_data $table {*}$args
+        dict lappend grab_data [list $table INSERT] {*}$args
         return
     }
 

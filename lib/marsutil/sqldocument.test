@@ -898,7 +898,7 @@ namespace eval ::marsutil::test {
         db delete -grab second {second_id=4}
     } -cleanup {
         cleanup
-    } -result {second {4 2 NULL 'W'}}
+    } -result {{second INSERT} {4 2 NULL 'W'}}
     
     test delete-2.2 {delete rows from multiple tables, -grab} -setup {
         delete_setup
@@ -906,7 +906,7 @@ namespace eval ::marsutil::test {
         db delete -grab second {second_id=4} fourth {fourth_id=5}
     } -cleanup {
         cleanup
-    } -result {second {4 2 NULL 'W'} fourth {5 'E'}}
+    } -result {{second INSERT} {4 2 NULL 'W'} {fourth INSERT} {5 'E'}}
 
     test delete-2.3 {cascading delete, -grab} -setup {
         delete_setup
@@ -914,7 +914,7 @@ namespace eval ::marsutil::test {
         db delete -grab first {first_id=1}
     } -cleanup {
         cleanup
-    } -result {first {1 'A'} second {1 1 1 'X' 2 2 1 'Y' 3 3 2 'Z'}}
+    } -result {{first INSERT} {1 'A'} {second INSERT} {1 1 1 'X' 2 2 1 'Y' 3 3 2 'Z'}}
 
 
     #-------------------------------------------------------------------

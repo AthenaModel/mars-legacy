@@ -425,12 +425,12 @@ CREATE TABLE third(g,h,i)}
         sqlib query $db {SELECT * FROM tablex}
     } -result {}
 
-    test ungrab-1.2 {inserts into tables} -setup {
+    test ungrab-1.2 {INSERT tag} -setup {
         sqlite3 $db :memory:
         $db eval {CREATE TABLE tablex(x1 TEXT PRIMARY KEY,x2,x3)}
     } -body {
         sqlib ungrab $db {
-            tablex {
+            {tablex INSERT} {
                 'A' 'B' 'C'
                 'D' 'E' 'F'
             }
@@ -446,7 +446,7 @@ D  E  F
         sqlite3 $db :memory:
         $db eval {CREATE TABLE tablex(x1 INTEGER PRIMARY KEY,x2,x3)}
         sqlib ungrab $db {
-            tablex {
+            {tablex INSERT} {
                 1 'B' 'C'
                 2 'E' 'F'
             }
@@ -470,22 +470,44 @@ D  E  F
         $db eval {CREATE TABLE tablex(x1 INTEGER PRIMARY KEY,x2,x3)}
         $db eval {CREATE TABLE tabley(y1 INTEGER PRIMARY KEY,y2,y3)}
     } -body {
-        sqlib ungrab $db [list tablex {1 'B' 'C'} tabley {2 'E' 'F'}]
+        sqlib ungrab $db {
+            {tablex INSERT} {1 'B' 'C'} 
+            {tabley INSERT} {2 'E' 'F'}
+        }
         sqlib grab $db tablex {} tabley {}
     } -cleanup {
         $db close
     } -result {tablex {1 'B' 'C'} tabley {2 'E' 'F'}}
 
-    test ungrab-1.5 {restores NULLs} -setup {
+    test ungrab-1.5 {INSERT restores NULLs} -setup {
         sqlite3 $db :memory:
         $db eval {CREATE TABLE tablex(x1 INTEGER PRIMARY KEY,x2,x3)}
     } -body {
-        sqlib ungrab $db [list tablex {1 'B' NULL 2 NULL 'F'}]
+        sqlib ungrab $db {
+            {tablex INSERT} {1 'B' NULL 2 NULL 'F'}
+        }
         $db nullvalue "*NULL*"
         $db eval {SELECT * FROM tablex ORDER BY x1}
     } -cleanup {
         $db close
     } -result {1 B *NULL* 2 *NULL* F}
+
+    test ungrab-1.6 {UPDATE restores NULLs} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE tablex(x1 INTEGER PRIMARY KEY,x2,x3)}
+        sqlib ungrab $db {
+            {tablex INSERT} {1 'A' 'B' 2 'C' 'D'}
+        }
+    } -body {
+        sqlib ungrab $db {
+            tablex {1 'E' NULL 2 NULL 'F'}
+        }
+
+        $db nullvalue "*NULL*"
+        $db eval {SELECT * FROM tablex ORDER BY x1}
+    } -cleanup {
+        $db close
+    } -result {1 E *NULL* 2 *NULL* F}
 
     test ungrab-1.6 {unknown tables throw an error} -setup {
         sqlite3 $db :memory:

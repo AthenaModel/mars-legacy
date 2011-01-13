@@ -679,35 +679,106 @@ snit::type ::marsutil::sqlib {
     #
     # db       - A database handle
     # data     - A list {table values ?table values...?} as returned
-    #            by grab.
+    #            by grab.  Note that the <table> is a list
+    #            {tableName ?INSERT?}.
     #
-    # Puts row data into each table using INSERT OR REPLACE.
-    # Each "values" entry must be a list of column values quoted
-    # appropriately for direct inclusion in an INSERT statement.
-    # The length of the "values" entry must be a multiple of the
-    # the number of columns in the table.
+    # Puts row data into each table using UPDATE, or INSERT if the
+    # table spec includes the INSERT tag.  The same table may appear
+    # multiple times.  Each "values" entry must be a list of column
+    # values quoted appropriately for direct inclusion in an SQL
+    # statement.  The length of the "values" entry must be a multiple
+    # of the number of columns in the table.
 
     typemethod ungrab {db data} {
         set sql ""
 
         foreach {table values} $data {
-            # FIRST, get the number of columns in this table.
-            set len [llength [sqlib columns $db $table]]
+            # FIRST, parse the table spec.
+            lassign $table tableName tag
+            
+            # NEXT, get the number of columns in this table.
+            set ncols [llength [sqlib columns $db $tableName]]
 
-            require {$len > 0} "Unknown table: \"$table\""
+            require {$ncols > 0} "Unknown table: \"$tableName\""
 
-            # NEXT, set up the query
-            while {[llength $values] > 0} {
-                set row    [lrange $values 0 $len-1]
-                set values [lrange $values $len end]
-
-                append sql \
-                    "INSERT OR REPLACE INTO $table VALUES([join $row ,]);\n"
+            # NEXT, get the SQL statements for this table
+            # and set of values.
+            if {$tag eq "INSERT"} {
+                append sql [InsertGrabValues $tableName $ncols $values]
+            } else {
+                append sql [UpdateGrabValues $db $tableName $values]
             }
         }
 
         # NEXT, evaluate the query.
         $db eval $sql
+    }
+
+    # InsertGrabValues table ncols values
+    #
+    # table  - A table name
+    # ncols  - Number of columns in table
+    # values - A list of column values comprising 1 to N distinct rows.
+    #
+    # Returns SQL code to insert the rows into the table.
+
+    proc InsertGrabValues {table ncols values} {
+        set sql ""
+
+        while {[llength $values] > 0} {
+            set row    [lrange $values 0 $ncols-1]
+            set values [lrange $values $ncols end]
+
+            append sql "INSERT INTO $table VALUES([join $row ,]);\n"
+        }
+
+        return $sql
+    }
+
+    # UpdateGrabValues db table values
+    #
+    # db     - The database
+    # table  - A table name
+    # values - A list of column values comprising 1 to N distinct rows.
+    #
+    # Returns SQL code to update the matching rows in the table.
+
+    proc UpdateGrabValues {db table values} {
+        # FIRST, get the key names and column names.
+        set columns [list]
+
+        $db eval "PRAGMA table_info($table)" data {
+            lappend columns $data(name)
+            set key($data(name)) $data(pk)
+        }
+        
+        set ncols [llength $columns]
+
+        # NEXT, prepare to accumulate the SQL code.
+        set sql ""
+
+        # NEXT, step through the records, building UPDATE statemetns.
+
+        while {[llength $values] > 0} {
+            set row    [lrange $values 0 $ncols-1]
+            set values [lrange $values $ncols end]
+
+            set sets [list]
+            set ands [list]
+
+            foreach col $columns value $row {
+                if {$key($col)} {
+                    lappend ands "$col=$value"
+                } else {
+                    lappend sets "$col=$value"
+                }
+            }
+
+            append sql \
+             "UPDATE $table SET [join $sets ,] WHERE [join $ands { AND }];\n"
+        }
+
+        return $sql
     }
 
     # fklist db table ?-indirect?
