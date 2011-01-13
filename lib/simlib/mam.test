@@ -1131,14 +1131,14 @@ E1  T1  0.5      0.75
         mymam belief configure E1 T1 -position 0.3 -tolerance 0.4
     } -body {
         mymam edit undo
-        pprint [rdb query {SELECT * FROM mam_belief}]
+        pprint [rdb query {SELECT * FROM mam_belief ORDER BY eid,tid}]
     } -cleanup {
         cleanup
     } -result {
 eid tid position tolerance 
 --- --- -------- --------- 
-E1  T2  0.0      0.5       
 E1  T1  0.1      0.2       
+E1  T2  0.0      0.5       
     }
 
     #-------------------------------------------------------------------
