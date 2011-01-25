@@ -284,7 +284,7 @@ snit::type app {
                     return
                 }
                 
-                lappend cmd $file
+                lappend cmd [string trim $file]
             }
         }
 
