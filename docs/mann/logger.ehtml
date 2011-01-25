@@ -270,6 +270,12 @@ disable this feature.<p>
 
 This option is ignored if <code>-logdir</code> is not set.<p>
 
+<<defopt {-maxmsglen <i>num</i>}>>
+
+Specifies the maximum number of characters allowed in a log message.
+If this number is exceeded the message is truncated and the entry
+shown as being too long. The default is 20000.<p>
+
 <<defopt {-simclock <i>cmd</i>}>>
 
 Specifies the name of a <<xref simclock(n)>> object.  If set, the

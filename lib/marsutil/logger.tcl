@@ -189,6 +189,16 @@ snit::type ::marsutil::logger {
 
     option -maxentries -default 5000
 
+    # -maxmsglen num
+    #
+    # num   A positive integer
+    #
+    # Specifies the maximum length that a log message can be before
+    # being truncated.
+    #
+    
+    option -maxmsglen -default 20000
+
     # -simclock cmd
     #
     # cmd    A simclock(n) object command
@@ -398,6 +408,12 @@ snit::type ::marsutil::logger {
                     lappend cmd $newfile
                     uplevel \#0 $cmd
                 }
+            }
+
+            # NEXT, truncate the message if it's too long
+            if {[string length $message] > $options(-maxmsglen)} {
+                set message [string range $message 0 $options(-maxmsglen)]
+                append message "\nentry too long..."
             }
 
             # NEXT, format the entry as a list.
