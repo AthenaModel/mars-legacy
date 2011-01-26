@@ -9,6 +9,18 @@
 Library</h1>
 
 <h2>Build Notes</h2>
+<h3>Build 1.41, 26 January 2011</h3>
+This build contains three bug fixes. The most visible is a new logger(n)
+option that limits the size a message is before being written to disk. The
+option is -maxmsglen and has a default of 20000. The list of packages is as 
+follows:<p>
+<ul>
+  <li> Bug 2755: sqldocument(n): "rdb ungrab" can trigger cascading deletes
+  <li> Bug 2762: logger(n): option to limit the size of a message
+  <li> Bug 2763: mars commit(1): SVN weirdness not being handled 
+</ul>
+
+<h3>Build 1.40, 20 December 2010</h3>
 
 This build has an unusually large number of changes, most of them
 minor improvements to the sqldocument(n) module and the formlib(n)
@@ -16,8 +28,6 @@ editing widgets.  Most of these were driven by the prototyping and
 inclusion of the new Mars Affinity Model (mam(n)); others by efforts
 to improve our use of SQLite.  Changes that would
 break existing code have been avoided.<p>
-
-<h3>Build 1.40, 20 December 2010</h3>
 
 <ul>
   <li> Bug 2689: gram(n): change all "let" commands to use expr instead
