@@ -18,7 +18,7 @@ package require marsutil
    
 package require Tk 8.5
 package require BWidget  1.9
-package require treectrl 2.2.9
+package require treectrl 2.2.10
 package require tablelist 5.1
 package require Plotchart 1.6
 package require Tktable 2.10
