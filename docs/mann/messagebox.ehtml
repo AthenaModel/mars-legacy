@@ -26,7 +26,8 @@ following enhancements:<p>
        again" checkbox.  See <<xref "Ignoring Messages">> for
        more information.<p>
 
-  <li> If desired, the user can enter a text string, in addition to
+  <li> If desired, the user can enter a text string or select an
+       item from a list, in addition to
        just selecting buttons.<p>
 </ul><p>
 
@@ -163,6 +164,47 @@ will be displayed below the entry widget.<p>
 
 <</deflist options>>
 
+<<defitem pick {messagebox pick <i>?options...?</i>}>>
+
+Pops up a message box containing a menu box, given the
+following options.  On "Cancel", returns the empty string; on
+"OK", returns the item selected from the menu box's pulldown.<p>
+
+<<deflist options>>
+
+<<defopt {-oktext <i>text</i>}>>
+
+Specifies the text for the OK button.  Defaults to <b>OK</b>.<p>
+
+<<defopt {-icon <i>icon</i>}>>
+
+Specifies which icon should be included in the message box:
+<b>error</b>, <b>info</b>, <b>question</b>, <b>warning</b>, or
+<b>peabody</b>.  Defaults to <b>question</b><p>
+
+<<defopt {-initvalue <i>text</i>}>>
+
+Specifies an initial value for the menu box.<p>
+
+<<defopt {-message <i>text</i>}>>
+
+The message <i>text</i> to display.  The text will be wrapped
+automatically; newlines are honored.<p>
+
+<<defopt {-parent <i>window</i>}>>
+
+The message box will appear over the specfied window.<p>
+
+<<defopt {-title <i>string</i>}>>
+
+The dialog window will have the specified title <i>string</i>.<p>
+
+<<defopt {-values <i>list</i>}>>
+
+Specifies the list of values for the menu box's pulldown.<p>
+
+<</deflist options>>
+
 <</deflist commands>>
 
 
@@ -177,6 +219,9 @@ general use. The icons are based on the appearance of the
 <<xref tk:messageBox(n) tk_messageBox(n)>> icons.<p>
 
 The <<iref gets>> subcommand was added on 4/19/2010.<p>
+
+The <<iref pick>> subcommand was added on 1/28/2011.<p>
+
 
 <</manpage>>
 
