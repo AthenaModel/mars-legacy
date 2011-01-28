@@ -14,7 +14,7 @@ exec tclsh8.5 "$0" "$@"
 #    Test script for messagebox(n).
 #
 # TBD:
-#    At present, only tests "messagebox gets"
+#    Tests "messagebox gets" and "messagebox pick"
 #
 #-----------------------------------------------------------------------
 
@@ -55,8 +55,22 @@ proc Validate {string} {
     return [string toupper $string]
 }
 
-proc Help {} {
-    puts "Help!"
+
+proc Pick {} {
+    set ::theString [messagebox pick \
+                         -oktext "Go ahead, pick one!" \
+                         -parent . \
+                         -title  "Pick one!" \
+                         -initvalue "That One" \
+                         -message [normalize {
+                             Please select one of the many fine
+                             choices from the list, below, and 
+                             enjoy it.
+                         }] -values {
+                             "This One"
+                             "That One"
+                             "The Other One"
+                         }]
 }
 
 proc main {argv} {
@@ -67,11 +81,16 @@ proc main {argv} {
         -text     "Get String"  \
         -command  GetString
 
+    ttk::button .pick \
+        -text     "Pick Item"  \
+        -command  Pick
+
     ttk::label .lab \
         -width 40 \
         -textvariable theString
 
     pack .gets -side top -fill x
+    pack .pick -side top -fill x
     pack .lab  -side top -fill x
 }
 
