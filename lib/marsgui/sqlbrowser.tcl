@@ -81,6 +81,9 @@ snit::widget ::marsgui::sqlbrowser {
     delegate option -titlecolumns     to tlist
     delegate option -editstartcommand to tlist
     delegate option -editendcommand   to tlist
+    delegate option -stripebackground to tlist
+    delegate option -stripeforeground to tlist
+    delegate option -stripeheight     to tlist
     
     # -db db
     #

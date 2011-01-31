@@ -93,6 +93,9 @@ These options are delegated to the hull ttk::frame widget.<p>
 <<defopt {-height <i>height</i>}>>
 <<defopt {-width <i>width</i>}>>
 <<defopt {-selectmode <i>mode</i>}>>
+<<defopt {-stripebackground <i>color</i>}>>
+<<defopt {-stripeforeground <i>color</i>}>>
+<<defopt {-stripeheight <i>rows</i>}>>
 <<defopt {-titlecolumns <i>number</i>}>>
 
 These options are delegated to the underlying tablelist(n) widget.<p>
