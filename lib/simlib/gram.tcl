@@ -1940,7 +1940,7 @@ snit::type ::simlib::gram {
             require {[$rdb exists {
                 SELECT gc_id FROM gram_gc 
                 WHERE g=$g AND c=$c
-            }]} "g and c must have the same group type, CIV or ORG"
+            }]} "The concern: $c is not valid for the specified group"
         }
 
         # n and g
@@ -2048,7 +2048,7 @@ snit::type ::simlib::gram {
             require {[$rdb exists {
                 SELECT gc_id FROM gram_gc 
                 WHERE g=$g AND c=$c
-            }]} "g and c must have the same group type, CIV or ORG"
+            }]} "The concern: $c is not valid for the specified group"
         }
 
         # n and g
@@ -4088,7 +4088,7 @@ snit::type ::simlib::gram {
             require {[$rdb exists {
                 SELECT gc_id FROM gram_gc 
                 WHERE g=$g AND c=$c
-            }]} "g and c must have the same group type, CIV or ORG"
+            }]} "The concern: $c is not valid for the specified group"
             
             set result 0.0
         }
@@ -4159,7 +4159,7 @@ snit::type ::simlib::gram {
 
         # Only empty if g and c don't match
         if {$result eq ""} {
-            error "g and c must have the same group type, CIV or ORG"
+            error "The concern: $c is not valid for the specified group"
         }
 
         return $result

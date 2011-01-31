@@ -2301,7 +2301,7 @@ time delta n  f    g
         error
     } -cleanup {
         cleanup
-    } -result {g and c must have the same group type, CIV or ORG}
+    } -result {The concern: SVC is not valid for the specified group}
 
     test sat_adjust-1.6 {g=*, c=* not allowed} -setup {
         create
@@ -2648,7 +2648,7 @@ time driver acontrib curve_id n  g    c
         error
     } -cleanup {
         cleanup
-    } -result {g and c must have the same group type, CIV or ORG}
+    } -result {The concern: SVC is not valid for the specified group}
 
     test sat_set-1.6 {g=*, c=* not allowed} -setup {
         create
@@ -7864,7 +7864,7 @@ I 0  7200 N1 SUNN QOL -3.00
         error
     } -cleanup {
         cleanup
-    } -result {g and c must have the same group type, CIV or ORG}
+    } -result {The concern: CAS is not valid for the specified group}
 
     test sat_ngc-2.1 {ngc, group resident} -setup {
         create
@@ -7992,7 +7992,7 @@ I 0  7200 N1 SUNN QOL -3.00
         error
     } -cleanup {
         cleanup
-    } -result {g and c must have the same group type, CIV or ORG}
+    } -result {The concern: CAS is not valid for the specified group}
 
     test sat_gc-2.1 {query} -setup {
         create
