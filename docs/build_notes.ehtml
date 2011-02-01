@@ -9,7 +9,20 @@
 Library</h1>
 
 <h2>Build Notes</h2>
+
+<h3>Build 1.42, 1 February 2011</h3>
+
+This build contains three enhancements to marsgui(n).  The list of
+packages is as follows:<p>
+
+<ul>
+  <li> Bug 2777: messagebox(n) pick: select item from a list
+  <li> Bug 2778: marsicons(n): thumbs up and thumbs down
+  <li> Bug 2797: sqlbrowser(n): -stripe* options 
+</ul>
+  
 <h3>Build 1.41, 26 January 2011</h3>
+
 This build contains three bug fixes. The most visible is a new logger(n)
 option that limits the size a message is before being written to disk. The
 option is -maxmsglen and has a default of 20000. The list of packages is as 
