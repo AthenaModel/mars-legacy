@@ -675,8 +675,8 @@ snit::type ::marsutil::sqldocument {
         # NEXT, delete the data
         foreach {table condition} $args {
             if {$grabbing} {
-                # FIRST, define delete triggers on table and its dependents.
-                set tables [$self GetDependentTables $table]
+                # FIRST, define delete triggers on all tables
+                set tables [$self tables]
                 $self SetDeleteTraces $tables
             }
 
@@ -710,48 +710,6 @@ snit::type ::marsutil::sqldocument {
     proc GrabFunc {table args} {
         dict lappend grab_data [list $table INSERT] {*}$args
         return
-    }
-
-
-    # GetDependentTables table
-    #
-    # table      - A table in the db
-    #
-    # Returns the names of tables affected by a cascading delete on the 
-    # specified table, *including* the specified table.
-    #
-    # TBD: Consider adding an option to fklist to get just the
-    # cascading delete tables.
-
-    method GetDependentTables {table} {
-        # FIRST, for each table in the database, get the foreign key list, 
-        # and record dependencies.
-        foreach tab [$self tables] {
-            $db eval "PRAGMA foreign_key_list($tab)" row {
-                if {$row(on_delete) eq "CASCADE"} {
-                    lappend dep($row(table)) $tab
-                }
-            }
-        }
-
-        # NEXT, starting with the subject table, get a list of the
-        # distinct tables in the dependency tree.
-        lappend depList $table
-        set result [list]
-
-        while {[llength $depList] > 0} {
-            set next [lshift depList]
-            if {$next ni $result} {
-                lappend result $next
-
-                if {[info exists dep($next)]} {
-                    lappend depList {*}$dep($next)
-                }
-            }
-        }
-
-        # NEXT, return the list of tables.
-        return $result
     }
 
     # SetDeleteTraces tables

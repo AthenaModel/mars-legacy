@@ -157,6 +157,18 @@ namespace eval ::marsutil::test {
                 name TEXT
             );
 
+            -- fifth will depend on fourth, but using a trigger
+            -- rather than an FK reference.
+            CREATE TABLE fifth(
+                fifth_id INTEGER PRIMARY KEY,
+                fourth_id INTEGER
+            );
+
+            CREATE TRIGGER fifth_cascades_to_fourth
+            AFTER DELETE ON fifth BEGIN
+                DELETE FROM fourth WHERE fourth_id=old.fourth_id;
+            END;
+
             INSERT INTO first(first_id,name) VALUES(1,'A');
             INSERT INTO first(first_id,name) VALUES(2,'B');
             INSERT INTO first(first_id,name) VALUES(3,'C');
@@ -176,6 +188,9 @@ namespace eval ::marsutil::test {
             INSERT INTO fourth(fourth_id,name) VALUES(4,'D');
             INSERT INTO fourth(fourth_id,name) VALUES(5,'E');
             INSERT INTO fourth(fourth_id,name) VALUES(6,'F');
+
+            INSERT INTO fifth(fifth_id,fourth_id) VALUES(51,4);
+            INSERT INTO fifth(fifth_id,fourth_id) VALUES(52,NULL);
         }
     }
 
@@ -916,6 +931,25 @@ namespace eval ::marsutil::test {
         cleanup
     } -result {{first INSERT} {1 'A'} {second INSERT} {1 1 1 'X' 2 2 1 'Y' 3 3 2 'Z'}}
 
+    test delete-3.1 {grab with triggered-delete} -setup {
+        delete_setup
+    } -body {
+        # Deleting a row from fifth that references a row in fourth
+        # should delete and grab that row as well.
+        db delete -grab fifth {fifth_id=51}
+    } -cleanup {
+        cleanup
+    } -result {{fifth INSERT} {51 4} {fourth INSERT} {4 'D'}}
+
+    test delete-3.2 {grab with triggered-delete, no match} -setup {
+        delete_setup
+    } -body {
+        # Deleting a row from fifth that has NULL in fourth_id
+        # should grab only the row from fifth.
+        db delete -grab fifth {fifth_id=52}
+    } -cleanup {
+        cleanup
+    } -result {{fifth INSERT} {52 NULL}}
 
     #-------------------------------------------------------------------
     # Standard Functions

@@ -263,17 +263,16 @@ Returns the name of the last-opened database file, or "" if none.<p>
 <<defitem delete {$db delete ?-grab? <i>table condition</i> ?<i>table condition</i>...?}>>
 
 Deletes the rows from each <i>table</i> that match the associated
-<i>condition</i>, where <i>condition</i> is a
-boolean SQL expression that may include variable references.
-If the <code>-grab</code> option is included, the call returns
-a <<iref grab>> data set of all of the deleted rows,
-including those from cascading deletes; the table specifications in
-the dataset include the "INSERT" tag, so that <<iref ungrab>>
-will use INSERT rather than UPDATE to insert the rows into the
-database.<p>
+<i>condition</i>, where <i>condition</i> is a boolean SQL expression
+that may include variable references.  If the <code>-grab</code>
+option is included, the call returns a <<iref grab>> data set of all
+of the deleted rows, including those from cascading and triggered
+deletes; the table specifications in the dataset include the "INSERT"
+tag, so that <<iref ungrab>> will use INSERT rather than UPDATE to
+insert the rows into the database.<p>
 
 With <code>-grab</code>, the command is intended to capture deleted
-row data so that cascading 
+row data so that cascading and triggered
 deletes can be easily undone using <<iref ungrab>>.  For example,<p>
 
 <pre>
