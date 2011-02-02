@@ -721,6 +721,11 @@ snit::type ::marsutil::sqldocument {
 
     method SetDeleteTraces {tables} {
         foreach table $tables {
+            # Skip built-in tables
+            if {[string match "sqlite*" $table]} {
+                continue
+            }
+
             set names [$self columns $table]
 
             $db eval "
