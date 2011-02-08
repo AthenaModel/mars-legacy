@@ -65,6 +65,12 @@ The following field types are defined as part of <<xref formlib(n)>>:<p>
 </tr>
 
 <tr valign="baseline">
+<td><b>list</b></td>
+<td><code>::formlib::listfield</code></td>
+<td>n/a</td>
+</tr>
+
+<tr valign="baseline">
 <td><b>newkey</b></td>
 <td><code>::formlib::newkeyfield</code></td>
 <td>n/a</td>

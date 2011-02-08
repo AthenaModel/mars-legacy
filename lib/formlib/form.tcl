@@ -736,6 +736,7 @@ snit::widget ::formlib::form {
 ::formlib::form register disp    ::formlib::dispfield
 ::formlib::form register enum    ::formlib::enumfield
 ::formlib::form register key     ::formlib::keyfield
+::formlib::form register list    ::formlib::listfield
 ::formlib::form register newkey  ::formlib::newkeyfield
 ::formlib::form register range   ::formlib::rangefield
 ::formlib::form register text    ::formlib::textfield
