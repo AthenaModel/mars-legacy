@@ -450,6 +450,14 @@ snit::widget ::formlib::listfield {
             return
         }
 
+        # NEXT, if the -itemdict is empty and the new value is
+        # is not, throw an error.
+        if {[dict size $options(-itemdict)] == 0 &&
+            [llength $values] > 0
+        } {
+            error "Can't set non-empty value, -itemdict is empty"
+        }
+
         # NEXT, clear the current set of included items.
         for {set i 0} {$i < [$left size]} {incr i} {
             $left  rowconfigure $i -hide 0
