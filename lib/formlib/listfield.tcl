@@ -297,27 +297,30 @@ snit::widget ::formlib::listfield {
         $left configure -state normal
         $right configure -state normal
 
-        # NEXT, delete all content from them.
+        # NEXT, delete all content from them, and clear the current
+        # value.
         $left  delete 0 end
         $right delete 0 end
 
         set info(current) [list]
 
-        # NEXT, create a list of items to go in each
-        set items [list]
+        # NEXT, populate the two lists.
+        if {[dict size $options(-itemdict)] > 0} {
+            set items [list]
 
-        dict for {key value} $options(-itemdict) {
-            if {$options(-showkeys)} {
-                lappend items [list "$key: $value"]
-            } else {
-                lappend items [list $value]
+            dict for {key value} $options(-itemdict) {
+                if {$options(-showkeys)} {
+                    lappend items [list "$key: $value"]
+                } else {
+                    lappend items [list $value]
+                }
             }
+
+            $left  insertlist end $items
+            $right insertlist end $items
+            
+            $right togglerowhide 0 end
         }
-
-        $left  insertlist end $items
-        $right insertlist end $items
-
-        $right togglerowhide 0 end
 
         # NEXT, update the state of the widgets
         $self UpdateState
