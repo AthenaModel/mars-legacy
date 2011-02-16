@@ -15,7 +15,13 @@
 # Settings
 
 # Location of Tcl Libraries
-export MARS_TCL_HOME = /usr/local/ActiveTclEE-2010Q2
+ARCH = $(shell arch)
+ifeq ($(ARCH),i686)
+	export MARS_TCL_HOME = /usr/local/ActiveTclEE-2010Q3
+endif
+ifeq ($(ARCH),x86_64)
+	export MARS_TCL_HOME = /usr/local/ActiveTclEE-2010Q4-x86_64
+endif
 
 # TCLLIBPATH for code run during the build process (including tests!)
 export TCLLIBPATH = $(TOP_DIR)/lib

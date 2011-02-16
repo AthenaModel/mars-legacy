@@ -17,7 +17,7 @@ TOP_DIR = ../..
 LIB = $(TOP_DIR)/src/lib
 
 # Compilation Flags
-CFLAGS = -g -O -ansi -Wall 
+CFLAGS = -fPIC -g -O -ansi -Wall 
 
 # Include Directory
 

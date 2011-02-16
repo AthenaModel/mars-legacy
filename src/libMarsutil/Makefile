@@ -55,7 +55,7 @@ $(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) $(LIBPATH) -shared -o $@ $(OBJS) $(LIBS)
 
 %.o:%.c
-	$(CC) -c $(DEFINES) $(CPPFLAGS) $(INCLPATH) $< -o $@
+	$(CC) -c -fPIC $(DEFINES) $(CPPFLAGS) $(INCLPATH) $< -o $@
 
 clean:
 	rm -f *.o $(TARGET) MakeDepends
