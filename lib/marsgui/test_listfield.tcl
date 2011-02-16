@@ -1,10 +1,8 @@
 package require marsutil
 package require marsgui
-package require formlib
 
 namespace import ::marsutil::*
 namespace import ::marsgui::*
-namespace import ::formlib::*
 
 set choices {
     A "Take over Middle Earth."
@@ -35,3 +33,4 @@ listfield .listf \
 pack .listf -fill both
 
 debugger new
+

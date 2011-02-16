@@ -4,7 +4,7 @@
 #   form(n) test script
 #
 # PACKAGE:
-#   formlib(n) -- Mars Forms Library
+#   marsgui(n) -- Mars Forms Library
 #
 # PROJECT:
 #   Mars Simulation Infrastructure Library
@@ -19,11 +19,9 @@
 
 package require marsutil
 package require marsgui
-package require formlib
 
 namespace import marsutil::*
 namespace import marsgui::*
-namespace import formlib::*
 
 #-------------------------------------------------------------------
 # Layouts
@@ -178,6 +176,7 @@ proc CurrentCmd {field} {
 # Invoke the program
 
 main $argv
+
 
 
 

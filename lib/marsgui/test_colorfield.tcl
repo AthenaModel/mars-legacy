@@ -4,7 +4,7 @@
 #   colorfield(n) test script
 #
 # PACKAGE:
-#   formlib(n) -- Mars Forms Library
+#   marsgui(n) -- Mars Forms Library
 #
 # PROJECT:
 #   Mars Simulation Infrastructure Library
@@ -18,14 +18,10 @@
 # Required packages
 
 package require marsutil
-package require simlib
 package require marsgui
-package require formlib
 
 namespace import marsutil::*
-namespace import simlib::*
 namespace import marsgui::*
-namespace import formlib::*
 
 
 #-----------------------------------------------------------------------
@@ -37,7 +33,7 @@ proc main {argv} {
     form .form \
         -changecmd ChangeCmd
 
-    form register color ::formlib::colorfield
+    form register color ::marsgui::colorfield
 
     .form field create a "Color A" color
     .form field create b "Color B" color
@@ -73,6 +69,7 @@ proc ClearFields {} {
 # Invoke the program
 
 main $argv
+
 
 
 

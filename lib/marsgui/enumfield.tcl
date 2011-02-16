@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    formlib(n) package: Enum data entry field
+#    marsgui(n) package: Enum data entry field
 #
 #    An enumfield is a combobox with a (possibly dynamic) set of values.
 #
@@ -15,14 +15,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::formlib:: {
+namespace eval ::marsgui:: {
     namespace export enumfield
 }
 
 #-----------------------------------------------------------------------
 # enumfield
 
-snit::widget ::formlib::enumfield {
+snit::widget ::marsgui::enumfield {
     #-------------------------------------------------------------------
     # Components
 
@@ -240,5 +240,6 @@ snit::widget ::formlib::enumfield {
         $self DetectChange
     }
 }
+
 
 

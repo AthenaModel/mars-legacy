@@ -1,10 +1,10 @@
-<<manpage {formlib(n) form(n)} "Text Data Entry Field">>
+<<manpage {marsgui(n) form(n)} "Text Data Entry Field">>
 
 <<section SYNOPSIS>>
 
 <pre>
-package require formlib 1.0
-namespace import ::formlib::*
+package require marsgui 1.0
+namespace import ::marsgui::*
 </pre>
 
 <<itemlist>>
@@ -17,7 +17,7 @@ data entry forms: collections of labels, text strings, and
 
 The first step in using the form(n) widget is to <<iref form register>> all
 application specific <<xref field(i)>> widget types.  (The
-<<xref field(i)>> widgets provided by <<xref formlib(n)>> are
+<<xref field(i)>> widgets provided by <<xref marsgui(n)>> are
 registered automatically.<p>
 
 Next, the application using the <<iref field create>> method to
@@ -39,7 +39,7 @@ or marked as being invalid.<p>
 
 <<subsection "Standard Field Types">>
 
-The following field types are defined as part of <<xref formlib(n)>>:<p>
+The following field types are defined as part of <<xref marsgui(n)>>:<p>
 
 <table border="1" cellspacing="0" cellpadding="2">
 <tr align="left">
@@ -48,43 +48,43 @@ The following field types are defined as part of <<xref formlib(n)>>:<p>
 
 <tr valign="baseline">
 <td><b>disp</b></td>
-<td><code>::formlib::dispfield</code></td>
+<td><code>::marsgui::dispfield</code></td>
 <td>n/a</td>
 </tr>
 
 <tr valign="baseline">
 <td><b>enum</b></td>
-<td><code>::formlib::enumfield</code></td>
+<td><code>::marsgui::enumfield</code></td>
 <td>n/a</td>
 </tr>
 
 <tr valign="baseline">
 <td><b>key</b></td>
-<td><code>::formlib::keyfield</code></td>
+<td><code>::marsgui::keyfield</code></td>
 <td>n/a</td>
 </tr>
 
 <tr valign="baseline">
 <td><b>list</b></td>
-<td><code>::formlib::listfield</code></td>
+<td><code>::marsgui::listfield</code></td>
 <td>n/a</td>
 </tr>
 
 <tr valign="baseline">
 <td><b>newkey</b></td>
-<td><code>::formlib::newkeyfield</code></td>
+<td><code>::marsgui::newkeyfield</code></td>
 <td>n/a</td>
 </tr>
 
 <tr valign="baseline">
 <td><b>range</b></td>
-<td><code>::formlib::rangefield</code></td>
+<td><code>::marsgui::rangefield</code></td>
 <td>n/a</td>
 </tr>
 
 <tr valign="baseline">
 <td><b>text</b></td>
-<td><code>::formlib::textfield</code></td>
+<td><code>::marsgui::textfield</code></td>
 <td>n/a</td>
 </tr>
 
@@ -223,7 +223,7 @@ Registers a field type with form(n), for use in individual
 forms.  The <i>ftype</i> is a symbolic name for the field type; e.g.,
 the <i>ftype</i> for the <<xref enumfield(n)>> widget is <b>enum</b>.
 The <i>widget</i> is the fully-qualified name of the widget type,
-e.g., <b>::formlib::enumfield</b>.  Any number of widget
+e.g., <b>::marsgui::enumfield</b>.  Any number of widget
 <i>options</i> and values can be specified as well; this allows one
 <i>widget</i> type to provide two or more distinct field types.<p>
 
@@ -360,9 +360,9 @@ contain an entry for every field.<p>
 
 <<section ENVIRONMENT>>
 
-formlib(n) requires Tcl 8.5 or later.
+marsgui(n) requires Tcl 8.5 or later.
 
-To use formlib(n) in a Tcl script, the environment variable
+To use marsgui(n) in a Tcl script, the environment variable
 <code>TCLLIBPATH</code> must include the parent of the package
 directory.
 
@@ -375,6 +375,7 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
 
 
 

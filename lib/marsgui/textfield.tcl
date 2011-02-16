@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    formlib(n) package: Text data entry field
+#    marsgui(n) package: Text data entry field
 #
 #    A textfield is a data entry field containing editable text.
 #    If desired, it can have an -editcmd, which pops up a value editor.
@@ -16,14 +16,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::formlib:: {
+namespace eval ::marsgui:: {
     namespace export textfield
 }
 
 #-------------------------------------------------------------------
 # textfield
 
-snit::widget ::formlib::textfield {
+snit::widget ::marsgui::textfield {
     #-------------------------------------------------------------------
     # Components
 
@@ -218,5 +218,6 @@ snit::widget ::formlib::textfield {
         $self DetectChange
     }
 }
+
 
 

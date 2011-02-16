@@ -1,10 +1,10 @@
-<<manpage {formlib(n) dispfield(n)} "Display Field">>
+<<manpage {marsgui(n) dispfield(n)} "Display Field">>
 
 <<section SYNOPSIS>>
 
 <pre>
-package require formlib 1.0
-namespace import ::formlib::*
+package require marsgui 1.0
+namespace import ::marsgui::*
 </pre>
 
 <<itemlist>>
@@ -78,9 +78,9 @@ Since dispfield(n) is output-only, the <code>-changecmd</code> is
 
 <<section ENVIRONMENT>>
 
-formlib(n) requires Tcl 8.5 or later.
+marsgui(n) requires Tcl 8.5 or later.
 
-To use formlib(n) in a Tcl script, the environment variable
+To use marsgui(n) in a Tcl script, the environment variable
 <code>TCLLIBPATH</code> must include the parent of the package
 directory.
 
@@ -93,6 +93,7 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
 
 
 

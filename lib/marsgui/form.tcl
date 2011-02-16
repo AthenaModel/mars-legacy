@@ -4,7 +4,7 @@
 #   form(n) -- Order Dialog Form
 #
 # PACKAGE:
-#   formlib(n) -- Mars Forms Library
+#   marsgui(n) -- Mars Forms Library
 #
 # PROJECT:
 #   Mars Simulation Infrastructure Library
@@ -14,7 +14,7 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::formlib:: {
+namespace eval ::marsgui:: {
     namespace export form
 }
 
@@ -25,7 +25,7 @@ namespace eval ::formlib:: {
 # use in order dialogs.
 #-----------------------------------------------------------------------
 
-snit::widget ::formlib::form {
+snit::widget ::marsgui::form {
     hulltype ttk::frame
 
     #-------------------------------------------------------------------
@@ -64,7 +64,7 @@ snit::widget ::formlib::form {
     #
     #   ftype   - The field type name, e.g., "enum".
     #   widget  - The actual widget type command, e.g., 
-    #             ::formlib::enumfield
+    #             ::marsgui::enumfield
     #
     #   options - Default options and values to be used when creating
     #             fields of this type.
@@ -732,14 +732,15 @@ snit::widget ::formlib::form {
 #-----------------------------------------------------------------------
 # Register standard field types
 
-::formlib::form register color   ::formlib::colorfield
-::formlib::form register disp    ::formlib::dispfield
-::formlib::form register enum    ::formlib::enumfield
-::formlib::form register key     ::formlib::keyfield
-::formlib::form register list    ::formlib::listfield
-::formlib::form register newkey  ::formlib::newkeyfield
-::formlib::form register range   ::formlib::rangefield
-::formlib::form register text    ::formlib::textfield
+::marsgui::form register color   ::marsgui::colorfield
+::marsgui::form register disp    ::marsgui::dispfield
+::marsgui::form register enum    ::marsgui::enumfield
+::marsgui::form register key     ::marsgui::keyfield
+::marsgui::form register list    ::marsgui::listfield
+::marsgui::form register newkey  ::marsgui::newkeyfield
+::marsgui::form register range   ::marsgui::rangefield
+::marsgui::form register text    ::marsgui::textfield
+
 
 
 

@@ -4,7 +4,7 @@
 #   rangefield(n) test script
 #
 # PACKAGE:
-#   formlib(n) -- Mars Forms Library
+#   marsgui(n) -- Mars Forms Library
 #
 # PROJECT:
 #   Mars Simulation Infrastructure Library
@@ -26,14 +26,12 @@
 package require marsutil
 package require simlib
 package require marsgui
-package require formlib
 
 source rangefield.tcl
 
 namespace import marsutil::*
 namespace import simlib::*
 namespace import marsgui::*
-namespace import formlib::*
 
 
 #-----------------------------------------------------------------------
@@ -111,6 +109,7 @@ proc Dummy2Frac {} {
 # Invoke the program
 
 main $argv
+
 
 
 

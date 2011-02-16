@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    formlib(n) package: Display entry field
+#    marsgui(n) package: Display entry field
 #
 #    A dispfield is a data entry field using to display non-editable text.
 #    If desired, it can have an -editcmd, which pops up a value editor.
@@ -16,14 +16,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::formlib:: {
+namespace eval ::marsgui:: {
     namespace export dispfield
 }
 
 #-------------------------------------------------------------------
 # dispfield
 
-snit::widget ::formlib::dispfield {
+snit::widget ::marsgui::dispfield {
     #-------------------------------------------------------------------
     # Components
 
@@ -107,5 +107,6 @@ snit::widget ::formlib::dispfield {
         $entry configure -state readonly
     }
 }
+
 
 

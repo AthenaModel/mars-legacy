@@ -4,7 +4,7 @@
 #   newkeyfield(n) test script
 #
 # PACKAGE:
-#   formlib(n) -- Mars Forms Library
+#   marsgui(n) -- Mars Forms Library
 #
 # PROJECT:
 #   Mars Simulation Infrastructure Library
@@ -17,11 +17,10 @@
 #-----------------------------------------------------------------------
 # Required packages
 
-package require formlib
+package require marsgui
 
 namespace import marsutil::*
 namespace import marsgui::*
-namespace import formlib::*
 
 #-----------------------------------------------------------------------
 # Main
@@ -60,6 +59,7 @@ proc GotChanges {value} {
 # Invoke the program
 
 main $argv
+
 
 
 

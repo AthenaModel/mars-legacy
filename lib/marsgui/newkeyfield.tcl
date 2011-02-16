@@ -1,10 +1,10 @@
 #-----------------------------------------------------------------------
-# FILE: keyfield.tcl
+# FILE: newkeyfield.tcl
 #
-#   keyfield(n) -- Database key field(i)
+#   newkeyfield(n) -- Prototype database key field(i)
 #
 # PACKAGE:
-#   formlib(n) -- Mars Forms Library
+#   marsgui(n) -- Mars Forms Library
 #
 # PROJECT:
 #   Mars Simulation Infrastructure Library
@@ -14,19 +14,20 @@
 #
 #-----------------------------------------------------------------------
 
-namespace eval ::formlib:: {
-    namespace export keyfield
+namespace eval ::marsgui:: {
+    namespace export newkeyfield
 }
 
 #-----------------------------------------------------------------------
-# Widget: keyfield
+# Widget: newkeyfield
 #
-# This is a widget to enter a (possibly multi-column) key 
-# value for a database table, for use in data entry forms.  It is a 
-# field(i) widget.
+# This is a prototype widget to enter the (possibly multi-column) key 
+# for a new, not-yet-existing entity in a database table, where the 
+# range of valid values exists as a (possibly multi-column) key in
+# another table.  It is a field(i) widget.
 #-----------------------------------------------------------------------
 
-snit::widget ::formlib::keyfield {
+snit::widget ::marsgui::newkeyfield {
     #-------------------------------------------------------------------
     # Group: Options
     #
@@ -72,9 +73,17 @@ snit::widget ::formlib::keyfield {
     option -db \
         -readonly yes
 
+    # Option: -universe
+    #
+    # Names a table or view in <-db>.  All valid combinations of 
+    # the keys exist in this table.
+
+    option -universe \
+        -readonly yes
+
     # Option: -table
     #
-    # Names a table or view in <-db>.
+    # Names a table or view in <-db>; the new key will be for this table.
 
     option -table \
         -readonly yes
@@ -84,14 +93,6 @@ snit::widget ::formlib::keyfield {
     # A list of the names of one or more key columns for <-table> in <-db>.
 
     option -keys \
-        -readonly yes
-
-    # Option: -dispcols
-    #
-    # A list of columns parallel to the -keys columns that contain
-    # the actual strings to display in the pulldowns.
-
-    option -dispcols \
         -readonly yes
 
     # Option: -widths
@@ -123,13 +124,6 @@ snit::widget ::formlib::keyfield {
 
     variable fields -array {}
 
-    # Variable: xltr
-    #
-    # Translation table, from key column names to disp column names,
-    # and back again.
-
-    variable xltr -array {}
-
     #-------------------------------------------------------------------
     # Group: Constructor/Destructor
 
@@ -141,24 +135,7 @@ snit::widget ::formlib::keyfield {
         # FIRST, apply the options
         $self configurelist $args
 
-        # NEXT, verify that we have -table and -keys.
-
-        require {$options(-table) ne ""} "Missing -table value"
-
-        require {[llength $options(-keys)] > 0} "Missing -keys value"
-
-        # NEXT, set up the xltr table.
-        foreach key $options(-keys) dc $options(-dispcols) {
-            if {$dc ne ""} {
-                set xltr($key) $dc
-                set xltr($dc) $key
-            } else {
-                set xltr($key) $key
-            }
-        }
-
-        # NEXT, create a menubox for each key.  k is the key number,
-        # and c is the grid column.
+        # NEXT, create an menubox for each key.
         set k -1
         set c -1
 
@@ -167,8 +144,9 @@ snit::widget ::formlib::keyfield {
             set fields($name) $win.field[incr k]
 
             set width [lindex $options(-widths) $k]
+
             set label [lindex $options(-labels) $k]
-  
+
             if {$k == 0} {
                 set pad 0
             } else {
@@ -210,46 +188,6 @@ snit::widget ::formlib::keyfield {
     #-------------------------------------------------------------------
     # Group: Helper Methods
 
-    # K2D name value
-    #
-    # Converts the value from a key value to a display value.
-
-    method K2D {name value} {
-        # FIRST, get the dispcol name.
-        set dc $xltr($name)
-
-        # NEXT, trivial translation
-        if {$dc eq $name} {
-            return $value
-        }
-
-        # NEXT, query for the value.
-        $options(-db) onecolumn "
-            SELECT DISTINCT $dc FROM $options(-table)
-            WHERE $name = \$value
-        "
-    }
-
-    # D2K name value
-    #
-    # Converts the value from a display value to a key value.
-
-    method D2K {name value} {
-        # FIRST, get the dispcol name.
-        set dc $xltr($name)
-
-        # NEXT, trivial translation
-        if {$dc eq $name} {
-            return $value
-        }
-
-        # NEXT, query for the value.
-        $options(-db) onecolumn "
-            SELECT DISTINCT $name FROM $options(-table)
-            WHERE $dc = \$value
-        "
-    }
-
     # Method: KeyValues
     #
     # Gets the list of enumerated values for the specified key column.
@@ -262,7 +200,8 @@ snit::widget ::formlib::keyfield {
     #   name       - The name of this key column
     
     method KeyValues {name} {
-        # FIRST, build up the list of conditions
+        # FIRST, build up the list of leftward keys that
+        # need to be matched.
         set conditions [list]
 
         foreach kname $options(-keys) {
@@ -272,7 +211,7 @@ snit::widget ::formlib::keyfield {
 
             set key($kname) [$fields($kname) get]
 
-            lappend conditions "$xltr($kname)=\$key($kname)"
+            lappend conditions "$kname=\$key($kname)"
         }
 
         if {[llength $conditions] > 0} {
@@ -281,13 +220,33 @@ snit::widget ::formlib::keyfield {
             set where ""
         }
 
-        # NEXT, get the list of values.
-        set values [$options(-db) eval "
-            SELECT DISTINCT $xltr($name)
+        # NEXT, get the names of this key and those to the right.
+        set ndx [lsearch -exact $options(-keys) $name]
+        set rest [lrange $options(-keys) $ndx end]
+
+        # NEXT, get the universe values.
+        set names [join $rest " || ' ' || "]
+        
+        set index [dict create]
+
+        $options(-db) eval "
+            SELECT $names AS id 
+            FROM $options(-universe)
+            $where
+        " {
+            dict set index {*}$id 1
+        }
+
+        # NEXT, prune the ones that already exist
+        $options(-db) eval "
+            SELECT $names AS id 
             FROM $options(-table)
             $where
-            ORDER BY $name
-        "]
+        " {
+            dict unset index {*}$id
+        }
+
+        set values [lsort [dict keys $index]]
 
         # NEXT, give them to the menubox
         $fields($name) configure -values $values
@@ -357,13 +316,13 @@ snit::widget ::formlib::keyfield {
             set result [list]
 
             foreach name $options(-keys) {
-                lappend result [$self D2K $name [$fields($name) get]]
+                lappend result [$fields($name) get]
             }
 
             return $result
         } else {
             set name [lindex $options(-keys) 0]
-            return [$self D2K $name [$fields($name) get]]
+            return [$fields($name) get]
         }
     }
 
@@ -388,10 +347,10 @@ snit::widget ::formlib::keyfield {
         # FIRST, save the new values into the menuboxes.
         if {[llength $options(-keys)] == 1} {
             set name [lindex $options(-keys) 0]
-            $fields($name) set [$self K2D $name $value]
+            $fields($name) set $value
         } else {
-            foreach name $options(-keys) keyval $value {
-                $fields($name) set [$self K2D $name $keyval]
+            foreach name $options(-keys) key $value {
+                $fields($name) set $key
             }
         }
 
@@ -409,6 +368,7 @@ snit::widget ::formlib::keyfield {
         return $currentValue
     }
 }
+
 
 
 

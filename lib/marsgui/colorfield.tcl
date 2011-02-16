@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    formlib(n) package: Color data entry field
+#    marsgui(n) package: Color data entry field
 #
 #    A colorfield is a data entry field containing:
 #
@@ -28,14 +28,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::formlib:: {
+namespace eval ::marsgui:: {
     namespace export colorfield
 }
 
 #-----------------------------------------------------------------------
 # colorfield
 
-snit::widget ::formlib::colorfield {
+snit::widget ::marsgui::colorfield {
     hulltype ttk::frame
 
     #-------------------------------------------------------------------
@@ -298,5 +298,6 @@ snit::widget ::formlib::colorfield {
         $text set $value
     }
 }
+
 
 

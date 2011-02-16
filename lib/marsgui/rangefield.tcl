@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    formlib(n) package: Range slider field
+#    marsgui(n) package: Range slider field
 #
 #    A rangefield is a data entry field containing a slider, a label
 #    showing the current value, and optionally either a quality pulldown
@@ -17,14 +17,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::formlib:: {
+namespace eval ::marsgui:: {
     namespace export rangefield
 }
 
 #-----------------------------------------------------------------------
 # rangefield
 
-snit::widget ::formlib::rangefield {
+snit::widget ::marsgui::rangefield {
     #-------------------------------------------------------------------
     # Type Variables
 
@@ -556,5 +556,6 @@ snit::widget ::formlib::rangefield {
         $self SetValue set $value
     }
 }
+
 
 

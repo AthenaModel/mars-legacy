@@ -6,7 +6,7 @@
 #    Will Duquette
 #
 # DESCRIPTION:
-#    formlib(n) package: Multiple-list selection data entry field
+#    marsgui(n) package: Multiple-list selection data entry field
 #
 #    A listfield is a data entry field that allows the user to
 #    select multiple items from a list.
@@ -16,14 +16,14 @@
 #-----------------------------------------------------------------------
 # Export public commands
 
-namespace eval ::formlib:: {
+namespace eval ::marsgui:: {
     namespace export listfield
 }
 
 #-------------------------------------------------------------------
 # listfield
 
-snit::widget ::formlib::listfield {
+snit::widget ::marsgui::listfield {
     hulltype ttk::frame
 
     #-------------------------------------------------------------------
@@ -483,6 +483,7 @@ snit::widget ::formlib::listfield {
         $self ValueChanged
     }
 }
+
 
 
 
