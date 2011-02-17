@@ -87,5 +87,5 @@ source [file join $::marsgui::library newkeyfield.tcl    ]
 source [file join $::marsgui::library rangefield.tcl     ]
 source [file join $::marsgui::library textfield.tcl      ]
 source [file join $::marsgui::library form.tcl           ]
-
+source [file join $::marsgui::library mapcanvas.tcl      ]
 
