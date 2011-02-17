@@ -10,6 +10,23 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.43, 17 February 2011</h3>
+
+This build has three significant changes.  First, Mars now supports
+both 32-bit and 64-bit builds.  Second, formlib(n) now includes a
+field for selecting multiple items from a list.  Third, formlib(n) has
+been merged into marsgui(n).  The complete list of changes is as follows:<p>
+
+<ul>
+  <li> Bug 2801: sqldocument(n): delete -grab omits triggered deletes
+  <li> Bug 2806: formlib(n): listfield(n) -- field for selecting multiple values from a list
+  <li> Bug 2807: marsgui(n): Left and right arrow icons
+  <li> Bug 2810: listfield(n): Error when -itemdict is the empty dict
+  <li> Bug 2811: listfield(n): Error when setting a non-empty value and -itemdict is {}
+  <li> Bug 2813: marsgui(n): Merge formlib(n) into marsgui(n)
+  <li> Bug 2816: mars: 64-bit build capability 
+</ul><p>
+  
 <h3>Build 1.42, 1 February 2011</h3>
 
 This build contains three enhancements to marsgui(n).  The list of
