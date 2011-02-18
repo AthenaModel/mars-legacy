@@ -17,11 +17,14 @@ package require snit     2.2
 package require marsutil
    
 package require Tk 8.5
+package require Img
 package require BWidget  1.9
 package require treectrl 2.2.10
 package require tablelist 5.1
 package require Plotchart 1.6
 package require Tktable 2.10
+package require Tkhtml 2.0
+
 
 #-----------------------------------------------------------------------
 # Package Definition
@@ -88,4 +91,6 @@ source [file join $::marsgui::library rangefield.tcl     ]
 source [file join $::marsgui::library textfield.tcl      ]
 source [file join $::marsgui::library form.tcl           ]
 source [file join $::marsgui::library mapcanvas.tcl      ]
-
+source [file join $::marsgui::library htmlviewer.tcl     ]
+source [file join $::marsgui::library helptree.tcl       ]
+source [file join $::marsgui::library helpbrowser.tcl    ]

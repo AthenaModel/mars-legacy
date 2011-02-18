@@ -107,6 +107,18 @@ set metadata {
         applib   "app_gram 2.0"
         mode     gui
     }
+
+    helpbrowser {
+        text     "Help Browser"
+        applib   app_helpbrowser
+        mode     cmdline
+    }
+
+    helptool {
+        text     "Help Compiler"
+        applib   app_helptool
+        mode     cmdline
+    }
     
     icons {
         text     "Icon Browser"
@@ -318,11 +330,11 @@ proc ShowUsage {} {
     puts "The following applications are available:"
     puts ""
 
-    puts "Application      Man Page            Description"
-    puts "---------------  ------------------  ------------------------------------"
+    puts "Application       Man Page             Description"
+    puts "----------------  -------------------  ------------------------------------"
 
     foreach app [dict keys $metadata] {
-        puts [format "mars %-10s  %-18s  %s"      \
+        puts [format "mars %-11s  %-19s  %s"      \
                   $app                            \
                   mars_${app}(1)                  \
                   [dict get $metadata $app text]]
