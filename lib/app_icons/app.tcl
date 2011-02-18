@@ -84,35 +84,67 @@ snit::type app {
             -anchor center \
             -text "Icons in ${ns}::*"
 
-        grid .title -row 0 -column 0 -columnspan 6 -pady 8 -padx 5 -sticky ew
-        
-        # NEXT, layout a grid of icons, six wide
-        set r 1
-        
-        for {set i 0} {$i < $len} {incr i} {
-            set r1 [expr {$r + 1}]
-            set c [expr {$i % 6}]
-            set icon [lindex $icons $i]
-            set name [namespace tail $icon]
-            
-            if {$c == 0} {
-                set padx {5 2}
-            } elseif {$c == 5} {
-                set padx {3 5}
-            } else {
-                set padx {3 2}
-            }
+        # NEXT, create the treectrl
+        treectrl .itree \
+            -width          400                           \
+            -height         400                           \
+            -borderwidth    0                             \
+            -relief         flat                          \
+            -background     $::marsgui::defaultBackground \
+            -usetheme       1                             \
+            -showheader     0                             \
+            -showroot       0                             \
+            -showrootlines  0                             \
+            -itemwidthequal yes                           \
+            -wrap           window                        \
+            -orient         vertical                      \
+            -xscrollcommand [list .xscroll set]
 
-            ttk::button .icon$i -image $icon -style Toolbutton
-            ttk::label  .lab$i  -text  $name
+        ttk::scrollbar .xscroll \
+            -orient  horizontal            \
+            -command [list .itree xview]
             
-            grid .icon$i -row $r  -column $c -padx $padx
-            grid .lab$i  -row $r1 -column $c -padx $padx -pady {0 5}
-            
-            if {$c == 5} {
-                incr r 2
-            }
+        # NEXT, create the elements and styles.
+
+        # Elements
+        .itree element create itemText text  \
+            -font    codefont                \
+            -fill    black
+
+        .itree element create itemIcon image
+
+        # itemStyle: icon and text
+
+        .itree style create itemStyle
+        .itree style elements itemStyle {itemIcon itemText}
+        .itree style layout itemStyle itemIcon
+        .itree style layout itemStyle itemText \
+            -iexpand nse                       \
+            -ipadx   4                         \
+            -ipady   4
+
+        # Column 0
+        .itree column create \
+            -itemstyle itemStyle
+
+        # NEXT, lay out the widgets
+        grid .title -row 0 -column 0 -pady 8 -padx 5 -sticky ew
+        grid .itree -row 1 -column 0 -sticky nsew -padx 5
+        grid .xscroll -row 2 -column 0 -sticky ew -padx 5
+
+        grid rowconfigure    . 1 -weight 1
+        grid columnconfigure . 0 -weight 1
+
+        # NEXT, populate the tree
+        foreach name $icons {
+            set id [.itree item create \
+                        -parent root]
+
+            .itree item text $id 0 [namespace tail $name]
+            .itree item element configure $id 0 itemIcon \
+                -image $name
         }
+        
     }
 }
 
