@@ -28,29 +28,6 @@ snit::widget ::marsgui::sqlbrowser {
     
     typeconstructor {
         namespace import ::marsutil::*
-        
-        mkicon ${type}::icon::reload {
-            .........X......X......
-            .........XX......XX....
-            .........XXX......XX...
-            .......XXXXXX......XX..
-            .....XXXXXXXXX......XX.
-            ....XXXXXXXXXXX.....XX.
-            ..XXXXXXXXXXXX.......XX
-            .XXXXXXXXXXXX........XX
-            .XXXX....XXX.........XX
-            XXXX.....XX...X.....XXX
-            XXX......X...XX....XXXX
-            XX..........XXX...XXXX.
-            XX.........XXXXXXXXXXX.
-            XX........XXXXXXXXXXX..
-            .XX......XXXXXXXXXXX...
-            .XX.......XXXXXXXXX....
-            ..XX.......XXXXXX......
-            ...XX.......XXX........
-            ....XX.......XX........
-            ......X.......X........
-        } { . trans X black }
     }
     
     #-------------------------------------------------------------------
@@ -386,7 +363,7 @@ snit::widget ::marsgui::sqlbrowser {
         if {$options(-reloadbtn)} {
             ttk::button $toolbar.reload        \
                 -style   Toolbutton            \
-                -image   ${type}::icon::reload \
+                -image   ::marsgui::icon::reload \
                 -command [mymethod reload]
             
             pack $toolbar.reload -side right -fill y -padx {2 0}
