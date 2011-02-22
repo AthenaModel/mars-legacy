@@ -94,16 +94,17 @@ snit::type ::marsutil::sqldocument {
     typemethod {sqlsection functions} {} {
         set functions [list]
 
-        lappend functions dicteq    [list ::marsutil::dicteq]
-        lappend functions dictget   [list ::marsutil::sqldocument::dictget]
-        lappend functions dictglob  [list ::marsutil::dictglob]
-        lappend functions error     [list ::error]
-        lappend functions format    [list ::format]
-        lappend functions joinlist  [list ::join]
-        lappend functions nonempty  [myproc NonEmpty]
-        lappend functions percent   [list ::marsutil::percent]
-        lappend functions wallclock [list ::clock seconds]
-        lappend functions sqldocument_grab [myproc GrabFunc]
+        lappend functions dicteq              [list ::marsutil::dicteq]
+        lappend functions dictget             [myproc dictget]
+        lappend functions dictglob            [list ::marsutil::dictglob]
+        lappend functions error               [list ::error]
+        lappend functions format              [list ::format]
+        lappend functions joinlist            [list ::join]
+        lappend functions nonempty            [myproc NonEmpty]
+        lappend functions percent             [list ::marsutil::percent]
+        lappend functions wallclock           [list ::clock seconds]
+        lappend functions sqldocument_grab    [myproc GrabFunc]
+        lappend functions sqldocument_monitor [myproc RowMonitorFunc]
 
         return $functions
    }
@@ -172,19 +173,38 @@ snit::type ::marsutil::sqldocument {
 
     # Array of data variables:
     #
-    # dbIsOpen      Flag: 1 if there is an open database, and 0
-    #               otherwise.
-    # dbFile        Name of the current database file, or ""
-    # registry      List of registered sqlsection module names,
-    #               in order of registration.
+    # dbIsOpen      - Flag: 1 if there is an open database, and 0
+    #                 otherwise.
+    # dbFile        - Name of the current database file, or ""
+    # registry      - List of registered sqlsection module names,
+    #                 in order of registration.
+    # monitorLevel  - Number of nested "monitor *" calls
 
     variable info -array {
-        dbIsOpen 0
-        dbFile   {}
-        registry ::marsutil::sqldocument
+        dbIsOpen       0
+        dbFile         {}
+        registry       ::marsutil::sqldocument
+        monitorLevel   0
+
     }
 
+    # monitors array: monitored tables
+    #
+    # List of keynames by table name.
 
+    variable monitors -array { }
+
+
+    # updates list
+    #
+    # This is a flat list {<table> <operation> <keyval>...} 
+    # produced during a monitor_transaction.
+    #
+    # NOTE: This variable is used transiently during the 
+    # monitor_transaction call..  It's a typevariable
+    # so that it can be accessed by the RowMonitorFunc proc.
+
+    typevariable updates {}
 
     #-------------------------------------------------------------------
     # Constructor
@@ -818,6 +838,175 @@ snit::type ::marsutil::sqldocument {
             return SQLITE_DENY
         }
     }
+
+    #-------------------------------------------------------------------
+    # Table Monitoring
+
+    # monitor add table keynames
+    #
+    # table    - A table name
+    # keynames - A list of the column names used to uniquely identify
+    #            the row.
+    #
+    # Enables monitoring of the specified table.  Updates, inserts or 
+    # deletes performed on the table during a monitor_transaction
+    # will result in a notifier event:
+    #
+    #    notifer send $self <$table> $operation $keyval
+    #
+    # $operation will be either "update" or "delete".
+
+    method {monitor add} {table keynames} {
+        # FIRST, note that monitoring is desired.
+        set monitors($table) $keynames
+    }
+
+    # monitor remove table
+    #
+    # table   - A table name
+    #
+    # Disables monitoring of the specified table.
+
+    method {monitor remove} {table} {
+        # FIRST, note that monitoring is no longer desired.
+        unset -nocomplain monitors($table)
+    }
+
+    # monitor transaction body
+    #
+    # body    - A Tcl script to be implemented as a transaction
+    #
+    # Enables monitoring, evaluates the body, and sends 
+    # relevant notifications.
+
+    method {monitor transaction} {body} {
+        $self MonitorPrepare
+
+        try {
+            uplevel 1 [list $db transaction $body]
+        } finally {
+            $self MonitorNotify
+        }
+    }
+
+    # monitor script body
+    #
+    # body    - A Tcl script
+    #
+    # Enables monitoring, evaluates the body, and sends 
+    # relevant notifications.
+
+    method {monitor script} {body} {
+        $self MonitorPrepare
+
+        try {
+            uplevel 1 $body
+        } finally {
+            $self MonitorNotify
+        }
+    }
+
+    # MonitorPrepare
+    #
+    # Enables monitoring; updates to monitored tables
+    # will be accumulated.
+
+    method MonitorPrepare {} {
+        if {$info(monitorLevel) == 0} {
+            # FIRST, install the monitor traces.
+            foreach table [array names monitors] {
+                $self AddMonitorTrigger $table INSERT
+                $self AddMonitorTrigger $table UPDATE
+                $self AddMonitorTrigger $table DELETE
+            }
+            
+            # NEXT, make sure the updates array is empty
+            set updates [list]
+        }
+
+        incr info(monitorLevel)
+    }
+
+    # MonitorNotify
+    #
+    # Sends notifications for the accumulated updates, and
+    # disables monitoring.
+
+    method MonitorNotify {} {
+        incr info(monitorLevel) -1
+
+        if {$info(monitorLevel) == 0} {
+            # FIRST, send the notifications
+            foreach {table operation keyval} $updates {
+                notifier send $self <$table> $operation $keyval
+            }
+            
+
+            # NEXT, clear the updates array
+            set updates [list]
+
+            # NEXT, remove the monitor traces
+            $self DeleteMonitorTriggers
+        }
+    }
+
+
+    # AddMonitorTrigger table operation
+    #
+    # table       - The table name
+    # operation   - INSERT, UPDATE, or DELETE
+    #
+    #
+    # Adds a monitor trigger to the specified table for the 
+    # specified operation, and returns a DELETE statement for
+    # the trigger.
+
+    method AddMonitorTrigger {table operation} {
+        if {$operation eq "DELETE"} {
+            set optype delete
+            set keyExpr old.[join $monitors($table) " || ' ' || old."]
+        } else {
+            set optype update
+            set keyExpr new.[join $monitors($table) " || ' ' || new."]
+        }
+
+        set trigger sqldocument_monitor_${table}_$operation
+
+        $db eval "
+            DROP TRIGGER IF EXISTS $trigger;
+            CREATE TEMP TRIGGER $trigger
+            AFTER $operation ON $table BEGIN 
+                SELECT sqldocument_monitor('$table','$optype',$keyExpr);
+            END;
+        "
+    }
+
+    # DeleteMonitorTriggers
+    #
+    # Deletes all monitor triggers.
+
+    method DeleteMonitorTriggers {} {
+        foreach table [array names monitors] {
+            $db eval "
+                DROP TRIGGER IF EXISTS sqldocument_monitor_${table}_INSERT;
+                DROP TRIGGER IF EXISTS sqldocument_monitor_${table}_UPDATE;
+                DROP TRIGGER IF EXISTS sqldocument_monitor_${table}_DELETE;
+            "
+        }
+    }
+
+    # RowMonitorFunc table operation keyval
+    #
+    # table     - A table name.
+    # operation - create|update|delete
+    # keyval    - Key value or values that identifies the modified row.
+    #
+    # Notes that the row has been updated.
+
+    proc RowMonitorFunc {table operation keyval} {
+        lappend updates $table $operation $keyval
+    }
+
 
     #-------------------------------------------------------------------
     # SQL Functions

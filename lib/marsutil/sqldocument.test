@@ -227,7 +227,7 @@ namespace eval ::marsutil::test {
 
     test sqlsection_functions-1.1 {Standard functions are defined} -body {
         sqldocument sqlsection functions
-    } -result {dicteq ::marsutil::dicteq dictget ::marsutil::sqldocument::dictget dictglob ::marsutil::dictglob error ::error format ::format joinlist ::join nonempty ::marsutil::sqldocument::NonEmpty percent ::marsutil::percent wallclock {::clock seconds} sqldocument_grab ::marsutil::sqldocument::GrabFunc}
+    } -result {dicteq ::marsutil::dicteq dictget ::marsutil::sqldocument::dictget dictglob ::marsutil::dictglob error ::error format ::format joinlist ::join nonempty ::marsutil::sqldocument::NonEmpty percent ::marsutil::percent wallclock {::clock seconds} sqldocument_grab ::marsutil::sqldocument::GrabFunc sqldocument_monitor ::marsutil::sqldocument::RowMonitorFunc}
 
     #-------------------------------------------------------------------
     # Constructor
@@ -1026,6 +1026,128 @@ plus(a,b,c)
 6           
     }
 
+    #-------------------------------------------------------------------
+    # monitor
+
+    variable UpdatedRows
+
+    proc monitor_setup {} {
+        variable UpdatedRows
+
+        sqldocument db
+        db open :memory:
+
+        db eval {
+            CREATE TABLE mytab(
+               a INTEGER,
+               b INTEGER,
+               c TEXT,
+               PRIMARY KEY (a,b)
+            );
+
+            INSERT INTO mytab(a,b,c) VALUES(1,2,'FOO');
+            INSERT INTO mytab(a,b,c) VALUES(3,4,'BAR');
+        }
+
+        db monitor add mytab {a b}
+
+        set UpdatedRows [list]
+        notifier bind [namespace current]::db <mytab> \
+            ::test [namespace current]::MonitorEvent
+    }
+
+    proc MonitorEvent {op key} {
+        variable UpdatedRows
+        lappend UpdatedRows $op $key
+    }
+
+    test monitor-1.1 {Can monitor inserts in script} -setup {
+        monitor_setup
+    } -body {
+        db monitor script {
+            db eval {INSERT INTO mytab(a,b,c) VALUES(5,6,'BAZ')}
+        }
+        set UpdatedRows
+    } -cleanup {
+        cleanup
+    } -result {update {5 6}}
+
+    test monitor-1.2 {Can monitor updates in script} -setup {
+        monitor_setup
+    } -body {
+        db monitor script {
+            db eval {UPDATE mytab SET c='FROB'}
+        }
+        set UpdatedRows
+    } -cleanup {
+        cleanup
+    } -result {update {1 2} update {3 4}}
+
+    test monitor-1.3 {Can monitor deletes in script} -setup {
+        monitor_setup
+    } -body {
+        db monitor script {
+            db eval {DELETE FROM mytab WHERE a=1}
+        }
+        set UpdatedRows
+    } -cleanup {
+        cleanup
+    } -result {delete {1 2}}
+
+    test monitor-2.1 {Can monitor inserts in transaction} -setup {
+        monitor_setup
+    } -body {
+        db monitor transaction {
+            db eval {INSERT INTO mytab(a,b,c) VALUES(5,6,'BAZ')}
+        }
+        set UpdatedRows
+    } -cleanup {
+        cleanup
+    } -result {update {5 6}}
+
+    test monitor-2.2 {Can monitor updates in transaction} -setup {
+        monitor_setup
+    } -body {
+        db monitor transaction {
+            db eval {UPDATE mytab SET c='FROB'}
+        }
+        set UpdatedRows
+    } -cleanup {
+        cleanup
+    } -result {update {1 2} update {3 4}}
+
+    test monitor-2.3 {Can monitor deletes in transaction} -setup {
+        monitor_setup
+    } -body {
+        db monitor transaction {
+            db eval {DELETE FROM mytab WHERE a=1}
+        }
+        set UpdatedRows
+    } -cleanup {
+        cleanup
+    } -result {delete {1 2}}
+
+    test monitor-3.1 {No monitoring outside of script/transaction} -setup {
+        monitor_setup
+    } -body {
+        db eval {DELETE FROM mytab WHERE a=1}
+        set UpdatedRows
+    } -cleanup {
+        cleanup
+    } -result {}
+
+    test monitor-4.1 {Remove disables monitoring} -setup {
+        monitor_setup
+    } -body {
+        db monitor remove mytab
+
+        db monitor transaction {
+            db eval {DELETE FROM mytab WHERE a=1}
+        }
+        set UpdatedRows
+    } -cleanup {
+        cleanup
+    } -result {}
 
     #-------------------------------------------------------------------
     # Standard Functions
