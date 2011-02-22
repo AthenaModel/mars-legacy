@@ -423,6 +423,16 @@ on maintainability.<p>
 
 Compare to <<iref insert>>.<p>
 
+<<defitem safeeval {<i>obj</i> safeeval <i>args...</i>}>>
+
+This subcommand is just like "eval", but is
+prevented from changing the contents of the database.<p>
+
+<<defitem safequery {<i>obj</i> safequery <i>sql</i>}>>
+
+This subcommand is just like <<iref query>>, but is
+prevented from changing the contents of the database.<p>
+
 <<defitem saveas {$db saveas <i>filename</i>}>>
 
 Saves a copy of the persistent contents of the database to a new

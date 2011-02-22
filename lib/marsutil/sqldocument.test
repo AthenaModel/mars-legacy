@@ -51,8 +51,7 @@ namespace eval ::marsutil::test {
     # Pretty prints the block of text, to make formatting tests easier.
 
     proc bprint {text} {
-        set text [string map [list ( < ) >] $text]
-        return "\n$text\n    "
+        return "\n$text    "
     }
 
     # cleanup
@@ -194,6 +193,18 @@ namespace eval ::marsutil::test {
         }
     }
 
+    proc safe_setup {} {
+        sqldocument db
+        db open :memory:
+        db function plus ::tcl::mathop::+
+
+        db eval {
+            CREATE TABLE mytab(a,b,c);
+
+            INSERT INTO mytab(a,b,c) VALUES(1,2,3);
+        }
+    }
+
 
     #-------------------------------------------------------------------
     # sqlsection schema
@@ -201,7 +212,6 @@ namespace eval ::marsutil::test {
     test sqlsection_schema-1.1 {Base schema is defined} -body {
         bprint [sqldocument sqlsection schema]
     } -result {
-
     }
 
     #-------------------------------------------------------------------
@@ -210,7 +220,6 @@ namespace eval ::marsutil::test {
     test sqlsection_tempschema-1.1 {Base schema is defined} -body {
         bprint [sqldocument sqlsection tempschema]
     } -result {
-
     }
 
     #-------------------------------------------------------------------
@@ -950,6 +959,73 @@ namespace eval ::marsutil::test {
     } -cleanup {
         cleanup
     } -result {{fifth INSERT} {52 NULL}}
+
+    #-------------------------------------------------------------------
+    # safeeval
+
+    test safeeval-1.1 {Can't update in safeeval} -setup {
+        safe_setup
+    } -body {
+        db safeeval { UPDATE mytab SET a=5 }
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {query error: not authorized}
+    
+    test safeeval-1.2 {Can select in safeeval} -setup {
+        safe_setup
+    } -body {
+        db safeeval { SELECT * FROM mytab }
+    } -cleanup {
+        cleanup
+    } -result {1 2 3}
+
+    test safeeval-1.3 {Can use function in safeeval} -setup {
+        safe_setup
+    } -body {
+        db safeeval { SELECT plus(a,b,c) FROM mytab }
+    } -cleanup {
+        cleanup
+    } -result {6}
+
+    #-------------------------------------------------------------------
+    # safequery
+
+    test safequery-1.1 {Can't update in safequery} -setup {
+        safe_setup
+    } -body {
+        db safequery { UPDATE mytab SET a=5 }
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {query error: not authorized}
+    
+    test safequery-1.2 {Can select in safequery} -setup {
+        safe_setup
+    } -body {
+        bprint [db safequery { SELECT * FROM mytab }]
+    } -cleanup {
+        cleanup
+    } -result {
+a b c 
+- - - 
+1 2 3 
+    }
+
+    test safequery-1.3 {Can use function in safequery} -setup {
+        safe_setup
+    } -body {
+        bprint [db safequery { SELECT plus(a,b,c) FROM mytab }]
+    } -cleanup {
+        cleanup
+    } -result {
+plus(a,b,c) 
+----------- 
+6           
+    }
+
 
     #-------------------------------------------------------------------
     # Standard Functions
