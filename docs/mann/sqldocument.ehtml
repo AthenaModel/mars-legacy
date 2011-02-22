@@ -217,6 +217,15 @@ documentation for more information.<p>
 If <b>on</b>, transactions can be rolled back instead of committed.
 If <b>off</b>, the default, they cannot.<p>
 
+<<defopt {-subject <i>name</i>}>>
+
+The sqldocument(n) will send out <<xref notifier(n)>> events when the
+<<iref monitor>> API is used.  By default, the instance name is used
+as the subject of the events.  If this option's value is not empty,
+it is used as the subject instead.  This is useful when
+the sqldocument(n) is wrapped by another object, as is frequently the
+case.  The appropriate subject is then the wrapper rather than the
+sqldocument(n) itself.<p>
 
 <</deflist options>>
 

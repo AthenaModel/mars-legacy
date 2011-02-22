@@ -118,6 +118,13 @@ snit::type ::marsutil::sqldocument {
     #-------------------------------------------------------------------
     # Options
 
+    # -subject
+    #
+    # Sets the subject name for notifier(n) events sent by this
+    # option.  Defaults to $self.
+
+    option -subject
+
     # -rollback
     #
     # If on, sqldocument(n) supports rollbacks.  Default is off.
@@ -936,9 +943,16 @@ snit::type ::marsutil::sqldocument {
         incr info(monitorLevel) -1
 
         if {$info(monitorLevel) == 0} {
-            # FIRST, send the notifications
+            # FIRST, get the subject name
+            if {$options(-subject) eq ""} {
+                set subject $self
+            } else {
+                set subject $options(-subject)
+            }
+
+            # NEXT, send the notifications
             foreach {table operation keyval} $updates {
-                notifier send $self <$table> $operation $keyval
+                notifier send $subject <$table> $operation $keyval
             }
             
 
