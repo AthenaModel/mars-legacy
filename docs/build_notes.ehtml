@@ -10,6 +10,24 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.44, 2 March 2011/</h3>
+
+This build completes the transfer of infrastructure from Athena 3 to
+Mars, including code for displaying maps, many sqldocument(n)
+improvements, the Athena help system, and the Athena order processing
+system.<p>
+
+<ul>
+  <li> Bug 2820: marsutil(n): mapref(n), projection(i)
+  <li> Bug 2821: marsgui(n): mapcanvas(n) map widget
+  <li> Bug 2822: Help System
+  <li> Bug 2825: marsicons(n): Merge icons
+  <li> Bug 2826: mars_icons(1): Allow scrolling
+  <li> Bug 2828: sqldocument(n): safeeval, safequery
+  <li> Bug 2830: sqldocument(n): monitor API
+  <li> Bug 2846: order(n)/orderdialog(n)  
+</ul>
+
 <h3>Build 1.43, 17 February 2011</h3>
 
 This build has three significant changes.  First, Mars now supports
