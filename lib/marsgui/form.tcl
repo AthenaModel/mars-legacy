@@ -737,6 +737,7 @@ snit::widget ::marsgui::form {
 ::marsgui::form register enum    ::marsgui::enumfield
 ::marsgui::form register key     ::marsgui::keyfield
 ::marsgui::form register list    ::marsgui::listfield
+::marsgui::form register multi   ::marsgui::multifield
 ::marsgui::form register newkey  ::marsgui::newkeyfield
 ::marsgui::form register range   ::marsgui::rangefield
 ::marsgui::form register text    ::marsgui::textfield
