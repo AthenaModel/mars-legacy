@@ -407,13 +407,17 @@ snit::widget ::marsgui::orderdialog {
     # my array -- scalars and field data
     #
     # parms             Names of all parms.
+    # context           Names of all context parms
+    # noncontext        Names of all non-context parms
     # table             Name of associated RDB table/view, or ""
     # valid             1 if current values are valid, and 0 otherwise.
 
     variable my -array {
-        parms {}
-        table ""
-        valid 0
+        parms      {}
+        context    {}
+        noncontext {}
+        table      ""
+        valid      0
     }
 
     # ferrors -- Array of field errors by parm name
@@ -582,9 +586,11 @@ snit::widget ::marsgui::orderdialog {
 
     method CreateFields {} {
         # FIRST, save some variables
-        set order     $options(-order)
-        set my(parms) [order parms $order]
-        set my(valid) 0
+        set order          $options(-order)
+        set my(parms)      [order parms $order]
+        set my(context)    [list]
+        set my(noncontext) [list]
+        set my(valid)      0
 
         # NEXT, Create the fields
         foreach parm $my(parms) {
@@ -597,6 +603,14 @@ snit::widget ::marsgui::orderdialog {
             set opts [$self TranslateFieldOptions $ftype $pdict]
 
             $form field create $parm [dict get $pdict -label] $ftype {*}$opts
+
+            # NEXT, save whether it's a context or non-context parm; and
+            # if it's context, disable it so that the user can't edit it.
+            if {[dict get $pdict -context]} {
+                lappend my(context) $parm
+            } else {
+                lappend my(noncontext) $parm
+            }
         }
     }
 
@@ -665,6 +679,20 @@ snit::widget ::marsgui::orderdialog {
     method EnterDialog {parmdict} {
         # FIRST, make the window visible
         raise $win
+
+        # NEXT, verify that all context parameters are included.
+        set missing [list]
+        foreach cparm $my(context) {
+            if {![dict exists $parmdict $cparm]} {
+                lappend missing $cparm
+            }
+        }
+
+        if {[llength $missing] > 0} {
+            set msg "Cannot enter $options(-order) dialog, context parm(s) missing: [join $missing {, }]"
+            $self Close
+            return -code error $msg
+        }
 
         # NEXT, fill in the data
         $self Clear
@@ -783,6 +811,12 @@ snit::widget ::marsgui::orderdialog {
     # triggered by any notifier(n) event.
 
     method RefreshDialog {args} {
+        # Mark -context fields
+        if {[llength $my(context)] > 0} {
+            $form context $my(context)
+        }
+
+        # Refresh all fields
         $self RefreshFields $my(parms)
     }
 
@@ -870,7 +904,7 @@ snit::widget ::marsgui::orderdialog {
         # FIRST, clear the parameter values.  Skip "multi" fields.
         set dict [dict create]
 
-        foreach parm $my(parms) {
+        foreach parm $my(noncontext) {
             if {[$form field ftype $parm] ne "multi"} {
                 dict set dict $parm \
                     [order parm $options(-order) $parm -defval]

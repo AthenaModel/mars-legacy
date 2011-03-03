@@ -701,6 +701,14 @@ The options available for use with any field are as follows:<p>
 
 <<deflist options>>
 
+<<defopt {-context <i>flag</i>}>>
+
+Defaults to no.  If <i>flag</i> is yes, then the parameter is a
+"context" parameter, one that must be provided to the order dialog
+rather than entered by the user.  When <<iref order enter>> is called,
+the parameter dictionary must include values for all context
+parameters, or the command will throw an error.<p>
+
 <<defopt {-defval <i>value</i>}>>
 
 The default value to display in the field when the order dialog is

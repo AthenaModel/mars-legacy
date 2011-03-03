@@ -34,8 +34,30 @@ complicated layouts.<p>
 The fields in the form(n) are referenced by their symbolic names, not
 by their window names; and they are usually managed as a group.  For
 example, the form(n) has a value of its own, a dictionary of the field
-values keyed on the symbolic names, and sets of fields can be disabled
-or marked as being invalid.<p>
+values keyed on the symbolic names, and sets of fields can be marked
+as being contextual, disabled or invalid.<p>
+
+<<subsection "Field Sets">>
+
+Every field in the form can be in any or all of three sets:
+<<iref invalid>>, <<iref disabled>>, and <<iref context>>.  How a
+field is displayed and how it behaves depend on the sets it is in.<p>
+
+A field not in any of the sets behaves normally: the user can edit
+the value.<p>
+
+When a field's value is known to be invalid, the client can move the
+field to the <<iref invalid>> set.  The field is still editable, but
+the field's label turns red to indicate that there's a problem.<p>
+
+A field can be <<iref disabled>> by the application.  A disabled field
+cannot be edited by the user, and its label is grayed out.  The field
+widget's <code>-state</code> is set to <b>disabled</b>.<p>
+
+The application can also mark a field as a <<iref context>> field.
+A context field cannot be edited, but the field's label remains black.
+This set is used for fields that display contextual data for other
+fields in the form: data that is for the user to see but not to edit.<p>
 
 <<subsection "Standard Field Types">>
 
@@ -247,6 +269,37 @@ Deletes all fields from the form(n).<p>
 
 Sets the value of one or more of the object's options.<p>
 
+<<defitem context {<i>pathName</i> context <i>fields...</i>}>>
+
+Tells the form(n) that the named <i>fields</i> should be marked
+as context fields (i.e., <code>-state</code> is <b>disabled</b>, but
+the field label is not grayed out); all others should be marked as
+normal, non-context fields.
+The list of fields can be specified as a single argument, or as
+individual field names on the command line.<p>
+
+If the first element in the list of <i>fields</i> is "<b>+</b>", then
+the named fields are marked in addition to any that were
+previously marked.  If the first element is "<b>-</b>", then the
+named fields will no longer be marked, leaving any other marked
+fields alone.<p>
+
+<<defitem disabled {<i>pathName</i> disabled <i>fields...</i>}>>
+
+Tells the form(n) that the named <i>fields</i> should be disabled
+(i.e., <code>-state</code> is <b>disabled</b>); all others should be
+enabled (i.e., <code>-state</code> is <b>normal</b>).
+The list of fields can be specified as a single argument, or as
+individual field names on the command line.<p>
+
+If the first element in the list of <i>fields</i> is "<b>+</b>", then
+the named fields are disabled in addition to any that were
+previously disabled.  If the first element is "<b>-</b>", then the
+named fields will no longer be disabled, leaving any other disabled
+fields alone.<p>
+
+When a field is disabled, its label appears grayed out.<p>
+
 <<defitem field {<i>pathName</i> field <i>subcommand</i> ?<i>args...</i>?}>>
 
 The subcommands of the <<iref field>> method are used to deal with
@@ -307,22 +360,6 @@ Returns the value currently displayed in the named <i>field</i>.<p>
 Returns the form's current value, a dictionary of symbolic field
 names and field values. The dictionary will contain the fields in the
 order in which they were created.<p>
-
-<<defitem disabled {<i>pathName</i> disabled <i>fields...</i>}>>
-
-Tells the form(n) that the named <i>fields</i> should be disabled
-(i.e., <code>-state</code> is <b>disabled</b>); all others should be
-enabled (i.e., <code>-state</code> is <b>normal</b>).
-The list of fields can be specified as a single argument, or as
-individual field names on the command line.<p>
-
-If the first element in the list of <i>fields</i> is "<b>+</b>", then
-the named fields are disabled in addition to any that were
-previously disabled.  If the first element is "<b>-</b>", then the
-named fields will no longer be disabled, leaving any other disabled
-fields alone.<p>
-
-When a field is disabled, its label appears grayed out.<p>
 
 <<defitem invalid {<i>pathName</i> invalid <i>fields...</i>}>>
 

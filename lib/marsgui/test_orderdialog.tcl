@@ -147,6 +147,18 @@ proc RefreshTestFields {dlg changed fdict} {
     }
 }
 
+order define TEST:CONTEXT {
+    title "Test Context Parms"
+
+    parm name key  "Name (Context)" -table people -keys name -context yes
+    parm x    text "Parm Y"
+    parm y    text "Parm Z"
+} {
+    returnOnError -final
+
+    Echo TEST:CONTEXT name $parms(name) x $parms(x) y $parms(y)
+}
+
 
 #-----------------------------------------------------------------------
 # Main
@@ -218,6 +230,10 @@ proc main {argv} {
     obutton TEST:GENERAL
     obutton TEST:GENERAL x 1 y no z 0.5
     obutton TEST:FIELDS fdisp "Data to Display" fmulti {ART BILL}
+    obutton TEST:CONTEXT
+    obutton TEST:CONTEXT name "BILL"
+
+
     grid [ttk::separator .sep2] -sticky ew -pady 2
 
     # Puck buttons

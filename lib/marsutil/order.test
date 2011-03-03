@@ -577,9 +577,21 @@ Parm "a", invalid option: "nonesuch"}
     } -cleanup {
         cleanup
     } -result {Metadata error for order MY:ORDER:
-Parm "a", invalid boolean "nonesuch", should be one of: 1, 0, true, false, yes, no, on, off}
+Parm "a", option -schedwheninvalid, invalid boolean "nonesuch", should be one of: 1, 0, true, false, yes, no, on, off}
 
     
+    test define-2.6 {parm: invalid -context} -setup {
+        setup
+    } -body {
+        # E.g., the name doesn't have a hyphen.
+        errcatch order define MY:ORDER { 
+            parm a text a -context nonesuch
+        } { }
+    } -cleanup {
+        cleanup
+    } -result {Metadata error for order MY:ORDER:
+Parm "a", option -context, invalid boolean "nonesuch", should be one of: 1, 0, true, false, yes, no, on, off}
+
     #-------------------------------------------------------------------
     # names
 
@@ -895,6 +907,7 @@ Parm "a", invalid boolean "nonesuch", should be one of: 1, 0, true, false, yes, 
     } -result {
         -fieldtype:        <enum>
         -label:            <a>
+        -context:          <0>
         -defval:           <>
         -schedwheninvalid: <0>
         -tags:             <>

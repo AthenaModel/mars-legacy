@@ -637,10 +637,13 @@ snit::type ::marsutil::order {
     #    are retained as is.  The following options are defined by 
     #    order(n)/orderdialog(n):
     # 
-    # -defval value      - Default value
-    # -tags taglist      - "order puck" tags
-    # -schedwheninvalid  - Order can be scheduled even if this field is 
-    #                      invalid.
+    # -context flag           - If yes, the parm is a context parm;
+    #                           its value must be explicitly passed to
+    #                           order enter.  Defaults to no.
+    # -defval value           - Default value
+    # -tags taglist           - "order puck" tags
+    # -schedwheninvalid flag  - If yes, the order can be scheduled even 
+    #                           if this field is invalid.  Defaults to no.
     #
     # order(n) cannot validate field types or field-type-specific
     # options, as not all field types will be registered on 
@@ -669,6 +672,7 @@ snit::type ::marsutil::order {
         set pdict [dict create \
                        -fieldtype        $fieldType \
                        -label            $label     \
+                       -context          0          \
                        -defval           {}         \
                        -schedwheninvalid 0          \
                        -tags             {}         ]
@@ -688,12 +692,13 @@ snit::type ::marsutil::order {
                     dict set pdict $opt [lshift args] 
                 }
 
+                -context          -
                 -schedwheninvalid {
                     if {[catch {
                         dict set pdict $opt \
                             [snit::boolean validate [lshift args]]
                     } result]} {
-                        error "Parm \"$name\", $result"
+                        error "Parm \"$name\", option $opt, $result"
                     }
                 }
 

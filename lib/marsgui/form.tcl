@@ -37,6 +37,7 @@ snit::widget ::marsgui::form {
 
     typevariable colors -array {
         valid    black
+        context  black
         invalid  #CC0000
         disabled gray55
     }
@@ -127,6 +128,7 @@ snit::widget ::marsgui::form {
     # Dict containing the field meta-data.  The indices are as follows:
     #
     #    fields          List of the field names in order of definition.
+    #    context         List of context fields
     #    invalid         List of fields with invalid values.
     #    disabled        List of disabled fields.
     #    current         Name of the field with the focus.
@@ -140,6 +142,7 @@ snit::widget ::marsgui::form {
 
     variable info -array {
         fields   {}
+        context  {}
         invalid  {}
         disabled {}
         current  ""
@@ -337,6 +340,7 @@ snit::widget ::marsgui::form {
         # FIRST, forget the field info
         array unset info
         set info(fields)   {}
+        set info(context)  {}
         set info(invalid)  {}
         set info(disabled) {}
         set info(inSet)    0
@@ -536,6 +540,37 @@ snit::widget ::marsgui::form {
     #-------------------------------------------------------------------
     # Group: Other Public Methods
 
+    # Method: context
+    #
+    # Marks particular fields as context fields.  If called with no arguments,
+    # returns the list of context fields.  Call with an empty list
+    # to mark all fields non-context.  Context fields are disabled
+    # with a normal label.
+    #
+    # Syntax:
+    #    context ?_fields_?
+
+    method context {args} {
+        # FIRST, if there are no arguments return the list of
+        # context fields.
+        if {[llength $args] == 0} {
+            return $info(context)
+        }
+
+        # NEXT, get the list of context fields, and mark them.
+        if {[llength $args] == 1} {
+            set args [lindex $args 0]
+        }
+
+        # NEXT, update the existing list.
+        $self UpdateSet info(context) $args
+
+        # NEXT, Display the field states
+        $self DisplayFieldStates
+
+        return $info(context)
+    }
+
     # Method: invalid
     #
     # Marks particular fields as invalid.  If called with no arguments,
@@ -720,6 +755,9 @@ snit::widget ::marsgui::form {
             } {
                 set state disabled
                 set color disabled
+            } elseif {$f in $info(context)} {
+                set state disabled
+                set color context
             }
 
             $info(label-$f) configure -foreground $colors($color)
