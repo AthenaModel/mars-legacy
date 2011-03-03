@@ -507,7 +507,8 @@ namespace eval ::marsutil::test {
         } {}
     } -cleanup {
         cleanup
-    } -result {Unknown option: -nonesuch}
+    } -result {Metadata error for order MY:ORDER:
+Unknown option: -nonesuch}
 
     
     test define-1.2 {options: invalid -monitor} -setup {
@@ -518,8 +519,8 @@ namespace eval ::marsutil::test {
         } { }
     } -cleanup {
         cleanup
-    } -result {invalid boolean "NONESUCH", should be one of: 1, 0, true, false, yes, no, on, off}
-
+    } -result {Metadata error for order MY:ORDER:
+invalid boolean "NONESUCH", should be one of: 1, 0, true, false, yes, no, on, off}
 
     test define-2.1 {parm: invalid name} -setup {
         setup
@@ -529,7 +530,8 @@ namespace eval ::marsutil::test {
         } { }
     } -cleanup {
         cleanup
-    } -result {Invalid parameter name: "my parm"}
+    } -result {Metadata error for order MY:ORDER:
+Parm "my parm" has an invalid name}
 
     test define-2.2 {parm: invalid field type} -setup {
         setup
@@ -539,7 +541,8 @@ namespace eval ::marsutil::test {
         } { }
     } -cleanup {
         cleanup
-    } -result {Invalid field type: "bad type"}
+    } -result {Metadata error for order MY:ORDER:
+Parm "myparm" has invalid field type: "bad type"}
 
     test define-2.3 {parm: option with no value} -setup {
         setup
@@ -549,7 +552,8 @@ namespace eval ::marsutil::test {
         } { }
     } -cleanup {
         cleanup
-    } -result {Option -nonesuch: no value given}
+    } -result {Metadata error for order MY:ORDER:
+Parm "a", option -nonesuch has no value}
 
     test define-2.4 {parm: invalid option name} -setup {
         setup
@@ -560,7 +564,8 @@ namespace eval ::marsutil::test {
         } { }
     } -cleanup {
         cleanup
-    } -result {Invalid parm option: "nonesuch"}
+    } -result {Metadata error for order MY:ORDER:
+Parm "a", invalid option: "nonesuch"}
 
     test define-2.5 {parm: invalid -schedwheninvalid} -setup {
         setup
@@ -571,7 +576,8 @@ namespace eval ::marsutil::test {
         } { }
     } -cleanup {
         cleanup
-    } -result {invalid boolean "nonesuch", should be one of: 1, 0, true, false, yes, no, on, off}
+    } -result {Metadata error for order MY:ORDER:
+Parm "a", invalid boolean "nonesuch", should be one of: 1, 0, true, false, yes, no, on, off}
 
     
     #-------------------------------------------------------------------

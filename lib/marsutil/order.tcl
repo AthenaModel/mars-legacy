@@ -521,7 +521,11 @@ snit::type ::marsutil::order {
         set deftrans(order) $name
 
         # NEXT, execute the metadata
-        namespace eval ::marsutil::order::define $orders(metadata-$name)
+        if {[catch {
+            namespace eval ::marsutil::order::define $orders(metadata-$name)
+        } result]} {
+            error "Metadata error for order $name:\n$result"
+        }
 
         # NEXT, check constraints
         if {$orders(title-$name) eq ""} {
@@ -650,11 +654,11 @@ snit::type ::marsutil::order {
 
         # NEXT, check the name, field type, and label
         if {[catch {identifier validate $name}]} {
-            error "Invalid parameter name: \"$name\""
+            error "Parm \"$name\" has an invalid name"
         }
 
         if {[catch {identifier validate $fieldType}]} {
-            error "Invalid field type: \"$fieldType\""
+            error "Parm \"$name\" has invalid field type: \"$fieldType\""
         }
 
         if {$label eq ""} {
@@ -675,7 +679,7 @@ snit::type ::marsutil::order {
             set opt [lshift args]
 
             if {[llength $args] == 0} {
-                error "Option $opt: no value given"
+                error "Parm \"$name\", option $opt has no value"
             }
 
             switch -exact -- $opt {
@@ -685,14 +689,19 @@ snit::type ::marsutil::order {
                 }
 
                 -schedwheninvalid {
-                    dict set pdict $opt [snit::boolean validate [lshift args]]
+                    if {[catch {
+                        dict set pdict $opt \
+                            [snit::boolean validate [lshift args]]
+                    } result]} {
+                        error "Parm \"$name\", $result"
+                    }
                 }
 
                 default {
                     if {[string index $opt 0] eq "-"} {
                         dict set pdict $opt [lshift args]
                     } else {
-                        error "Invalid parm option: \"$opt\""
+                        error "Parm \"$name\", invalid option: \"$opt\""
                     }
                 }
             }
