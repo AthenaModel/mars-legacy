@@ -87,13 +87,13 @@ namespace eval ::simlib:: {
 
 # Position: a mam(n) entity's position on a topic.
 ::marsutil::quality ::simlib::qposition {
-    L+ "Passionately For"      0.8   0.9  1.0
-    M+ "Strongly For"          0.45  0.6  0.8
-    S+ "Weakly For"            0.05  0.3  0.45
+    P+ "Passionately For"      0.8   0.9  1.0
+    S+ "Strongly For"          0.45  0.6  0.8
+    W+ "Weakly For"            0.05  0.3  0.45
     A  "Ambivalent"           -0.05  0.0  0.05
-    S- "Weakly Against"       -0.45 -0.3 -0.05
-    M- "Strongly Against"     -0.8  -0.6 -0.45
-    L- "Passionately Against" -1.0  -0.9 -0.8
+    W- "Weakly Against"       -0.45 -0.3 -0.05
+    S- "Strongly Against"     -0.8  -0.6 -0.45
+    P- "Passionately Against" -1.0  -0.9 -0.8
 } -bounds yes -format {%5.2f} -min -1.0 -max 1.0
 
 # Relationship between two groups
