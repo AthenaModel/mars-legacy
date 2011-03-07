@@ -349,7 +349,7 @@ snit::type ::simlib::mam {
             }
 
             # NEXT, set the option values.
-            $self topic configure $tid {*}$args
+            $self DbConfigure mam_topic [list $tid] $args
         }
 
         $self SaveUndo [list $self MutateTopicDelete $tid]

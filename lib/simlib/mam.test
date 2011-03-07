@@ -627,6 +627,16 @@ tid title relevance
 T1  TBD   1         
     }
 
+    test topic_add-1.6 {For Bug 2856: Only one undo entry} -setup {
+        create
+        mymam topic add T1
+    } -body {
+        rdb eval {SELECT COUNT(rowid) FROM mam_undo}
+    } -cleanup {
+        cleanup
+    } -result {1}
+
+
     # Options are handled by [topic configure], and option error messages
     # will be tested there
 
