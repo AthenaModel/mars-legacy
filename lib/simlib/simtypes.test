@@ -121,17 +121,17 @@ namespace eval ::simlib::test {
             [qposition name "Weakly Against"]       \
             [qposition name "Strongly Against"]     \
             [qposition name "Passionately Against"] 
-    } -result {L+ M+ S+ A S- M- L-}
+    } -result {P+ S+ W+ A W- S- P-}
 
     test qposition-1.2 {short names map to values} -body {
         list \
-            [qposition value "L+"] \
-            [qposition value "M+"] \
+            [qposition value "P+"] \
             [qposition value "S+"] \
+            [qposition value "W+"] \
             [qposition value "A"]  \
+            [qposition value "W-"] \
             [qposition value "S-"] \
-            [qposition value "M-"] \
-            [qposition value "L-"]
+            [qposition value "P-"]
     } -result {0.9 0.6 0.3 0.0 -0.3 -0.6 -0.9}
 
     test qposition-1.3 {options} -body {
