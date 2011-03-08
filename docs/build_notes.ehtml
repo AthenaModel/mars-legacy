@@ -10,6 +10,20 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.45, 8 March 2011</h3>
+
+This build includes a number of bug fixes, and one new bit of
+functionality, the ability to define "context" parameters in order(n)
+orders.<p>
+
+<ul>
+  <li> Bug 2849: order(n): order metadata errors are obscure
+  <li> Bug 2850: newkeyfield(n): Second key column doesn't populate
+  <li> Bug 2852: order(n)/orderdialog(n): -context parameters
+  <li> Bug 2856: mam(n): Single commands require multiple undo's.
+  <li> Bug 2857: simtypes(n): Symbolic constants for qposition 
+</ul><p>
+
 <h3>Build 1.44, 2 March 2011/</h3>
 
 This build completes the transfer of infrastructure from Athena 3 to
