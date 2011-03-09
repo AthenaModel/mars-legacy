@@ -1043,13 +1043,19 @@ snit::widget ::marsgui::sqlbrowser {
 
         require {$options(-uid) ne ""} "-uid is undefined"
 
-        # FIRST, get the row from the view
-        set gotNothing 1
-        
-        $db eval "
+        # FIRST, get the row from the view, taking -where into account.
+        set query "
             SELECT * from $options(-view)
             WHERE $options(-uid) == \$uid
-        " row {
+        "
+
+        if {$options(-where) ne ""} {
+            append query "AND ($options(-where))"
+        }
+        
+        set gotNothing 1
+        
+        $db eval $query row {
             set gotNothing 0
         }
 
