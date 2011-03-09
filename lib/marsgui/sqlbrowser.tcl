@@ -859,6 +859,7 @@ snit::widget ::marsgui::sqlbrowser {
     delegate method rowconfigure    to tlist
     delegate method rowcget         to tlist
     delegate method selection       to tlist
+    delegate method windowpath      to tlist
     
     # toolbar
     #

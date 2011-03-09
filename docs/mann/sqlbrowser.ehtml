@@ -397,6 +397,12 @@ Sets the font of the row with the given <i>uid</i>.<p>
 
 <</deflist uid>>
 
+<<defitem windowpath {<i>win</i> windowpath <i>cellindex</i> }>>
+
+This method is delegated to the underlying tablelist(n), and retrieves
+the name of the window embedded via the cell <code>-window</code>
+option, or "" if none.<p>
+
 <</deflist instance>>
 
 <<section ENVIRONMENT>>
