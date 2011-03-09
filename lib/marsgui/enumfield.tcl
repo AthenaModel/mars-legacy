@@ -218,14 +218,16 @@ snit::widget ::marsgui::enumfield {
         }
     }
 
-    # set value
+    # set value ?-silent?
     #
     # value    A new value
     #
     # Sets the combobox value, first retrieving valid values.  If 
     # the new value isn't one of the valid values, it's ignored.
+    #
+    # If -silent is included, the -changecmd isn't called.
 
-    method set {value} {
+    method set {value {opt ""}} {
         # FIRST, retrieve valid values if need be
         $self GetValues
 
@@ -237,7 +239,11 @@ snit::widget ::marsgui::enumfield {
         }
 
         # NEXT, detect changes
-        $self DetectChange
+        if {$opt eq "-silent"} {
+            set oldValue $value
+        } else {
+            $self DetectChange
+        }
     }
 }
 
