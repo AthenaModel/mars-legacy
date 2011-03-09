@@ -420,8 +420,8 @@ snit::widget ::marsgui::sqlbrowser {
         # NEXT, layout the major components
         grid $toolbar     -row 0 -column 0 -columnspan 2 -sticky ew -pady 2
         grid $tlist       -row 1 -column 0 -sticky nsew
-        grid $win.yscroll -row 1 -column 1 -sticky ns
-        grid $win.xscroll -row 2 -column 0 -sticky ew
+        grid $win.yscroll -row 1 -column 1 -sticky ns -pady {1 0}
+        grid $win.xscroll -row 2 -column 0 -sticky ew -padx {1 0}
 
         grid columnconfigure $win 0 -weight 1
         grid rowconfigure    $win 1 -weight 1
