@@ -10,6 +10,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.46, 10 March 2011</h3>
+
+This build contains four minor bug fixes/enhancements made while
+implementing Athena's Beliefs browser.<p>
+
+<ul>
+  <li> Bug 2860: sqlbrowser(n): Expose "windowpath" method
+  <li> Bug 2861: enumfield(n): set -silent
+  <li> Bug 2862: sqlbrowser(n): -where ignored on "uid update"
+  <li> Bug 2863: sqlbrowser(n): Pad scrollbars by 1 pixel 
+</ul><p>
+
+
 <h3>Build 1.45, 8 March 2011</h3>
 
 This build includes a number of bug fixes, and one new bit of
