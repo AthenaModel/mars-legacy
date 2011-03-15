@@ -26,6 +26,16 @@ simtypes(n) defines the following <<xref quality(n)>> types.<p>
 
 <<deflist>>
 
+<<defitem qaffinity qaffinity>>
+
+This quality is used to measure the degree of affinity or relationship
+between two population groups.  Numerically, the values are
+formatted as "<<qaffinity cget -format>>", and have the bounds
+shown in the following table:<p>
+
+<<qaffinity html>>
+
+
 <<defitem qcooperation qcooperation>>
 
 This quality is used to measure the level of cooperation between two

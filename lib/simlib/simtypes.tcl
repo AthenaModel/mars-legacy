@@ -20,6 +20,7 @@ namespace eval ::simlib:: {
         egrouptype     \
         eproximity     \
         ipopulation    \
+        qaffinity      \
         qcooperation   \
         qduration      \
         qmag           \
@@ -38,6 +39,15 @@ namespace eval ::simlib:: {
 #
 # Qualities relate English-language ratings, like "Very Good" to numeric
 # values.  All quality names begin with "q".
+
+# Affinity
+::marsutil::quality ::simlib::qaffinity {
+    SUP  "Supports"               0.7  0.8  1.0  
+    LIKE "Likes"                  0.2  0.4  0.7
+    IND  "Is Indifferent To"     -0.2  0.0  0.2
+    DIS  "Dislikes"              -0.7 -0.4 -0.2
+    OP   "Opposes"               -1.0 -0.8 -0.7
+} -min -1.0 -max 1.0 -format {%4.1f} -bounds yes
 
 # Cooperation
 ::marsutil::quality ::simlib::qcooperation {
