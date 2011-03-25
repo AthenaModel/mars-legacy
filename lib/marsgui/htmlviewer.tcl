@@ -35,7 +35,7 @@ snit::widgetadaptor ::marsgui::htmlviewer {
     typeconstructor {
         #-------------------------------------------------------------------
         # FIRST, the missing bindings from the tkhtml page at the Tcler's
-        # Wiki, http://wiki.tcl.tk/2336
+        # Wiki, http://wiki.tcl.tk/2336, with my changes.
 
         #
         # Change cursor to hand if over hyperlink
@@ -101,11 +101,23 @@ snit::widgetadaptor ::marsgui::htmlviewer {
         #
         bind HtmlClip <1> {
             set parent [winfo parent %W]
+            focus $parent ;# WHD - so that key-scrolling works
             set url [$parent href %x %y]
             if {[string length $url]} {
-                eval [$parent cget -hyperlinkcommand] $url
+                {*}[$parent cget -hyperlinkcommand] $url
             }
         }
+
+        # Key-scrolling bindings
+        bind Html <Prior>  {%W yview scroll -1 pages}
+        bind Html <Next>   {%W yview scroll  1 pages}
+        bind Html <Home>   {%W yview moveto 0.0}
+        bind Html <End>    {%W yview moveto 1.0}
+        bind Html <Up>     {%W yview scroll -1 units}
+        bind Html <Down>   {%W yview scroll  1 units}
+        bind Html <Left>   {%W xview scroll -1 units}
+        bind Html <Right>  {%W xview scroll  1 units}
+        
     }
 
     #-------------------------------------------------------------------
@@ -132,17 +144,18 @@ snit::widgetadaptor ::marsgui::htmlviewer {
 
     constructor {args} {
         # FIRST, create the hull
-        installhull [html $win                    \
-                         -background     white    \
-                         -foreground     black    \
-                         -unvisitedcolor \#1C1CF0 \
-                         -visitedcolor   \#561B8B \
-                         -borderwidth    0        \
-                         -relief         flat     \
-                         -tablerelief    flat     \
-                         -width          5i       \
-                         -height         4i       \
-                         -fontcommand    [mymethod FontCommand]]
+        installhull [html $win                        \
+                         -highlightthickness 1        \
+                         -background         white    \
+                         -foreground         black    \
+                         -unvisitedcolor     \#1C1CF0 \
+                         -visitedcolor       \#561B8B \
+                         -borderwidth        0        \
+                         -relief             flat     \
+                         -tablerelief        flat     \
+                         -width              5i       \
+                         -height             4i       \
+                         -fontcommand        [mymethod FontCommand]]
 
         $self configurelist $args
     }
