@@ -44,7 +44,21 @@ This module defines the following command:<p>
 <<defitem htmlviewer {htmlviewer <i>pathName ?options...?</i>}>>
 
 Creates a new <<iref htmlviewer>> widget named <i>pathName</i>.  The
-options are as described in the Tkhtml 2.0 man page.<p>
+options are as described in the Tkhtml 2.0 man page, with the addition
+of the following:<p>
+
+<<deflist options>>
+
+<<defopt {-mouseovercommand <i>command</i>}>>
+
+The <i>command</i> is called with two additional arguments when the
+mouse is over something of interest in the displayed page: the type of
+the thing the mouse is over, and a text string.<p>
+
+At present, the only type supported is <b>href</b>, meaning that the
+mouse is over a link; the text string in this case is the link's URL.<p>
+
+<</deflist options>>
 
 <</deflist commands>>
 
@@ -66,14 +80,20 @@ previous content.<p>
 <<section "BINDINGS">>
 
 The <<xref htmlviewer(n)>> widget defines the following bindings;
-most of these were copied from the <a
+some of these were copied from the <a
 href="http://wiki.tcl.tk/2336">Tkhtml page at the Tcler's Wiki</a>:
 
 <ul>
   <li> The mouse cursor changes to a hand when it is over links.
-  <li> The mouse wheel is supported.
+  <li> The <code>-mouseovercmd</code> is called when the mouse goes
+       over a link.
   <li> Clicking on a link invokes the widget's
        <code>-hyperlinkcommand</code>.
+  <li> The mouse wheel is supported.
+  <li> The user can click and drag to select text, and &lt;&lt;Copy&gt;&gt; to
+       copy it.
+  <li> The arrow, PageUp, PageDown, Home, and End keys can be used to
+       scroll the current page.
 </ul>
 
 <<section ENVIRONMENT>>

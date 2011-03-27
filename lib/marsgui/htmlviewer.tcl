@@ -34,24 +34,25 @@ snit::widgetadaptor ::marsgui::htmlviewer {
 
     typeconstructor {
         #-------------------------------------------------------------------
-        # FIRST, the missing bindings from the tkhtml page at the Tcler's
-        # Wiki, http://wiki.tcl.tk/2336, with my changes.
+        # FIRST, these bindings are based on those from the tkhtml page at 
+        # the Tcler's Wiki, http://wiki.tcl.tk/2336, with my changes.
 
-        #
-        # Change cursor to hand if over hyperlink
-        # Copied from hv.tcl
-        #
+        bind HtmlClip <1>               {[winfo parent %W] Button1 %x %y}
+        bind HtmlClip <ButtonRelease-1> {[winfo parent %W] Release1}
+        bind HtmlClip <Motion>          {[winfo parent %W] MouseMotion %x %y}
 
-        bind HtmlClip <Motion> {
-            set parent [winfo parent %W]
-            set url [$parent href %x %y]
-            if {[string length $url] > 0} {
-                $parent configure -cursor hand2
-            } else {
-                $parent configure -cursor {}
-            }
+        # Key-scrolling bindings
+        bind Html <Prior>  {%W yview scroll -1 pages}
+        bind Html <Next>   {%W yview scroll  1 pages}
+        bind Html <Home>   {%W yview moveto 0.0}
+        bind Html <End>    {%W yview moveto 1.0}
+        bind Html <Up>     {%W yview scroll -1 units}
+        bind Html <Down>   {%W yview scroll  1 units}
+        bind Html <Left>   {%W xview scroll -1 units}
+        bind Html <Right>  {%W xview scroll  1 units}
 
-        }
+        # Copy bindings
+        bind Html <<Copy>> {%W CopySelection}
 
         #
         # Mouse Wheel bindings
@@ -95,29 +96,6 @@ snit::widgetadaptor ::marsgui::htmlviewer {
             }
 
         }
-
-        #
-        # Invoke widget hyperlink command on the hyperlink
-        #
-        bind HtmlClip <1> {
-            set parent [winfo parent %W]
-            focus $parent ;# WHD - so that key-scrolling works
-            set url [$parent href %x %y]
-            if {[string length $url]} {
-                {*}[$parent cget -hyperlinkcommand] $url
-            }
-        }
-
-        # Key-scrolling bindings
-        bind Html <Prior>  {%W yview scroll -1 pages}
-        bind Html <Next>   {%W yview scroll  1 pages}
-        bind Html <Home>   {%W yview moveto 0.0}
-        bind Html <End>    {%W yview moveto 1.0}
-        bind Html <Up>     {%W yview scroll -1 units}
-        bind Html <Down>   {%W yview scroll  1 units}
-        bind Html <Left>   {%W xview scroll -1 units}
-        bind Html <Right>  {%W xview scroll  1 units}
-        
     }
 
     #-------------------------------------------------------------------
@@ -138,6 +116,32 @@ snit::widgetadaptor ::marsgui::htmlviewer {
 
     delegate option * to hull
     delegate method * to hull
+
+    #-------------------------------------------------------------------
+    # Options
+
+    # -mouseovercommand
+    #
+    # Called when the mouse goes over something interesting.  The
+    # command is passed two arguments: a type and a string.  The
+    # valid types are as follows:
+    #
+    #    href - A link
+
+    option -mouseovercommand
+
+    #-------------------------------------------------------------------
+    # Instance Variables
+
+    # Transient Data Array
+    #
+    # mark - Mark for sweeping out a selection
+    # over - What we're over
+
+    variable trans -array {
+        mark {}
+        over {}
+    }
 
     #-------------------------------------------------------------------
     # Constructor
@@ -182,8 +186,75 @@ snit::widgetadaptor ::marsgui::htmlviewer {
         return $fontspec
     }
 
+    # CopySelection
+    #
+    # Copies the selection to the clipboard.
+
+    method CopySelection {} {
+        clipboard clear
+        clipboard append [selection get]
+    }
+
+    # Button1 x y
+    #
+    # Called when Button 1 is pressed.
+
+    method Button1 {x y} {
+        focus $win 
+
+        set trans(mark) $x,$y
+
+        set url [$hull href $x $y]
+
+        if {$url ne ""} {
+            {*}[$hull cget -hyperlinkcommand] $url
+        }
+    }
+
+    # Release1
+    #
+    # Called when Button 1 is released.
+
+    method Release1 {} {
+        set trans(mark) ""
+    }
+
+    # MouseMotion x y
+    #
+    # x,y   The mouse coordinates
+    #
+    # Handles mouse overs.
+
+    method MouseMotion {x y} {
+        # Sweep out the selection
+        if {$trans(mark) ne ""} {
+            $hull selection set @$trans(mark) @$x,$y
+        }
+
+        # Are we over a URL?
+        set url [$hull href $x $y]
+
+        # If it's the same as last time, we're done.
+        if {$url eq $trans(over)} {
+            return
+        }
+
+        set trans(over) $url
+
+        # Set cursor if we're over
+        if {$url ne ""} {
+            $hull configure -cursor hand2
+            callwith $options(-mouseovercommand) href [lindex $url 0]
+        } else {
+            $hull configure -cursor {}
+        }
+
+    }
+
+
     #-------------------------------------------------------------------
     # Public Methods
+
 
     # set html
     # 
