@@ -10,6 +10,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.47, 28 March 2011</h3>
+
+This build contains minor enhancements and symbol changes.<p>
+
+<ul>
+  <li> Bug 2871: simtypes(n): qaffinity type
+  <li> Bug 2886: htmlviewer(n): Mouse selection, -mouseovercommand
+</ul><p>
+
 <h3>Build 1.46, 10 March 2011</h3>
 
 This build contains four minor bug fixes/enhancements made while
