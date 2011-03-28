@@ -203,6 +203,7 @@ snit::widgetadaptor ::marsgui::htmlviewer {
         focus $win 
 
         set trans(mark) $x,$y
+        $hull selection clear
 
         set url [$hull href $x $y]
 
