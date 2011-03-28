@@ -954,6 +954,10 @@ snit::type ::marsutil::sqldocument {
             foreach {table operation keyval} $updates {
                 notifier send $subject <$table> $operation $keyval
             }
+
+            if {[llength $updates] > 0} {
+                notifier send $subject <Monitor>
+            }
             
 
             # NEXT, clear the updates array

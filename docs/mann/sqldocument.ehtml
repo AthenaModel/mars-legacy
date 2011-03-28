@@ -426,7 +426,7 @@ relationship for group G1's relationship with G2 is modified, the
 following event will be sent:<p>
 
 <pre>
-    notifier send $db <rel_fg> update {G1 G2}
+    notifier send $db &lt;rel_fg&gt; update {G1 G2}
 </pre>
 
 Note the the operation is <b>update</b> even when a new record is
@@ -436,6 +436,13 @@ precise about whether a change is an addition or an update.  (SQLite3
 can distinguish clearly between an INSERT statement and an UPDATE
 statement; but an INSERT OR REPLACE can do either an insert or
 an update, and there's no easy way to tell which.)<p>
+
+In addition, if at least one <b>update</b> or <b>delete</b> event has
+been sent, the database will also send one final event:<p>
+
+<pre>
+    notifier send $db &lt;Monitor&gt;
+</pre>
 
 Calls to <<iref monitor script>> and <<iref monitor transaction>>
 can be nested.<p>

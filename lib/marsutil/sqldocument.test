@@ -1054,6 +1054,9 @@ plus(a,b,c)
         set UpdatedRows [list]
         notifier bind [namespace current]::db <mytab> \
             ::test [namespace current]::MonitorEvent
+
+        notifier bind [namespace current]::db <Monitor> \
+            ::test [list [namespace current]::MonitorEvent <Monitor> ""]
     }
 
     proc MonitorEvent {op key} {
@@ -1070,7 +1073,7 @@ plus(a,b,c)
         set UpdatedRows
     } -cleanup {
         cleanup
-    } -result {update {5 6}}
+    } -result {update {5 6} <Monitor> {}}
 
     test monitor-1.2 {Can monitor updates in script} -setup {
         monitor_setup
@@ -1081,7 +1084,7 @@ plus(a,b,c)
         set UpdatedRows
     } -cleanup {
         cleanup
-    } -result {update {1 2} update {3 4}}
+    } -result {update {1 2} update {3 4} <Monitor> {}}
 
     test monitor-1.3 {Can monitor deletes in script} -setup {
         monitor_setup
@@ -1092,7 +1095,7 @@ plus(a,b,c)
         set UpdatedRows
     } -cleanup {
         cleanup
-    } -result {delete {1 2}}
+    } -result {delete {1 2} <Monitor> {}}
 
     test monitor-2.1 {Can monitor inserts in transaction} -setup {
         monitor_setup
@@ -1103,7 +1106,7 @@ plus(a,b,c)
         set UpdatedRows
     } -cleanup {
         cleanup
-    } -result {update {5 6}}
+    } -result {update {5 6} <Monitor> {}}
 
     test monitor-2.2 {Can monitor updates in transaction} -setup {
         monitor_setup
@@ -1114,7 +1117,7 @@ plus(a,b,c)
         set UpdatedRows
     } -cleanup {
         cleanup
-    } -result {update {1 2} update {3 4}}
+    } -result {update {1 2} update {3 4} <Monitor> {}}
 
     test monitor-2.3 {Can monitor deletes in transaction} -setup {
         monitor_setup
@@ -1125,7 +1128,7 @@ plus(a,b,c)
         set UpdatedRows
     } -cleanup {
         cleanup
-    } -result {delete {1 2}}
+    } -result {delete {1 2} <Monitor> {}}
 
     test monitor-3.1 {No monitoring outside of script/transaction} -setup {
         monitor_setup
