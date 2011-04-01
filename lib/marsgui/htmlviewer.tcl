@@ -202,13 +202,18 @@ snit::widgetadaptor ::marsgui::htmlviewer {
     method Button1 {x y} {
         focus $win 
 
-        set trans(mark) $x,$y
         $hull selection clear
 
         set url [$hull href $x $y]
 
         if {$url ne ""} {
             {*}[$hull cget -hyperlinkcommand] $url
+        }
+
+        # If the -hyperlinkcommand didn't make us lose the focus,
+        # begin sweeping out a selection.
+        if {[focus] eq $win} {
+            set trans(mark) $x,$y
         }
     }
 
