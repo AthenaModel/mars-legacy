@@ -38,6 +38,8 @@ snit::widgetadaptor ::marsgui::htmlviewer {
         # the Tcler's Wiki, http://wiki.tcl.tk/2336, with my changes.
 
         bind HtmlClip <1>               {[winfo parent %W] Button1 %x %y}
+        bind HtmlClip <Control-1>       {[winfo parent %W] NoOp}
+        bind HtmlClip <Shift-1>         {[winfo parent %W] NoOp}
         bind HtmlClip <ButtonRelease-1> {[winfo parent %W] Release1}
         bind HtmlClip <Motion>          {[winfo parent %W] MouseMotion %x %y}
 
@@ -215,6 +217,15 @@ snit::widgetadaptor ::marsgui::htmlviewer {
         if {[focus] eq $win} {
             set trans(mark) $x,$y
         }
+    }
+
+    # NoOp
+    #
+    # Event handler for bindings that should do nothing.  For example,
+    # <Control-1> shouldn't trigger the <1> logic.
+
+    method NoOp {} {
+
     }
 
     # Release1
