@@ -1280,6 +1280,7 @@ Simulated Error}
         cleanup
     } -result {
         ::marsutil::test::rdb <test_table> {update 1} {}
+        ::marsutil::test::rdb <Monitor> {} {}
         ::marsutil::order <Accepted> {MY:ORDER {}} {}
     }
 
