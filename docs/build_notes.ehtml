@@ -10,6 +10,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.48, 4 April 2011</h3>
+
+This build contains two minor changes:<p>
+
+<ul>
+  <li> Bug 2888: sqldocument(n): <Monitor> event
+  <li> Bug 2890: htmlviewer(n): Mouse click should clear the selection
+</ul><p>
+
 <h3>Build 1.47, 28 March 2011</h3>
 
 This build contains minor enhancements and symbol changes.<p>
