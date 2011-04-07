@@ -101,8 +101,9 @@ snit::widgetadaptor ::marsgui::htmlviewer {
     }
 
     #-------------------------------------------------------------------
-    # Standard Font Sizes
+    # Look-up tables
 
+    # Standard Font Sizes
     typevariable pixels -array {
         1    -9
         2    -10
@@ -111,6 +112,15 @@ snit::widgetadaptor ::marsgui::htmlviewer {
         5    -18
         6    -20
         7    -22
+    }
+
+    # HTML character entity translations.  Tkhtml2 can display 
+    # Unicode characters (at least on Linux), but doesn't understand
+    # many HTML character entities.  This table contains translations
+    # of the one to the other.
+
+    typevariable entities {
+        &Delta; "\u0394"
     }
 
     #-------------------------------------------------------------------
@@ -278,9 +288,11 @@ snit::widgetadaptor ::marsgui::htmlviewer {
     # html     An HTML-formatted text string
     #
     # Displays the HTML text, replacing any previous contents.
+    # Translates certain HTML character entities into Unicode
+    # equivalents for display.
 
     method set {html} {
         $hull clear
-        $hull parse $html
+        $hull parse [string map $entities $html]
     }
 }

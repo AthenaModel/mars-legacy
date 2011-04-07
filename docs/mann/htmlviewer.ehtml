@@ -35,6 +35,19 @@ of this module is to remedy its obvious short-comings:<p>
        lived with.<p>
 </ul>
 
+<<subsection "Character Entities">>
+
+By default, Tkhtml 2.0 can display only a small subset of the defined
+HTML character entities.  However, it can display Unicode characters
+if the Tk fonts in use define them.  htmlviewer(n) can translate a
+number of additional character entities into their unicode equivalents:<p>
+
+<ul>
+  <li> "<code>&amp;Delta;</code>" = "&Delta;"
+</ul>
+
+More such translations can be added as needed.<p>
+
 <<section COMMANDS>>
 
 This module defines the following command:<p>
