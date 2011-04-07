@@ -17,6 +17,18 @@
 ------------------------------------------------------------------------
 -- Inputs
 
+-- mam(n) Playbox table.  Global parameters used by the model;
+-- there's only one entry, with pid=1.
+
+CREATE TABLE mam_playbox (
+    pid    INTEGER PRIMARY KEY,
+
+    -- Commonality Dial; controls the degree of implicit commonality 
+    -- among the entities in the model.
+    gamma  REAL DEFAULT 1.0
+    CHECK (0.0 <= gamma AND gamma <= 1.0)
+);
+
 -- mam(n) Entities table.  An entity is a collection of people that
 -- can have beliefs about topics.
 --
@@ -24,7 +36,13 @@
 -- expected that every entity will be more fully described by the client.
 
 CREATE TABLE mam_entity (
-    eid       TEXT PRIMARY KEY     -- A brief mnemonic ID for this topic.
+    eid       TEXT PRIMARY KEY,    -- A brief mnemonic ID for this topic.
+
+    -- The extent of the entity's participation in the dominant culture
+    -- in the playbox.  If 1.0, the entity shares all of the implicit
+    -- cultural commonality; if 0.0, none of it.
+    commonality REAL DEFAULT 1.0
+        CHECK (0.0 <= commonality AND commonality <= 1.0)
 );
 
 -- mam(n) Topics table.  A topic is something about which

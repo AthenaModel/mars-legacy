@@ -174,6 +174,11 @@ snit::type ::simlib::mam {
         }
         
         set rdbTracker($rdb) $self
+
+        # NEXT, create the mam_playbox entry
+        $rdb eval {
+            INSERT INTO mam_playbox(pid) VALUES(1);
+        }
     }
     
     # destructor
@@ -189,6 +194,42 @@ snit::type ::simlib::mam {
     }
 
     #-------------------------------------------------------------------
+    # Playbox Data Methods
+
+    # playbox cget option
+    #
+    # option  - The name of a playbox option.  See [playbox configure].
+    #
+    # Retrieves the value of a playbox option.
+
+    method {playbox cget} {option} {
+        $self DbCget mam_playbox 1 $option
+    }
+    
+    # playbox configure ?options...?
+    #
+    # options  - A list of option names and values.
+    #
+    # Sets playbox option values.
+
+    method {playbox configure} {args} {
+        # FIRST, get the undo script.  Don't save it yet, as there
+        # might be an error in the arguments.
+        set script [list $rdb ungrab [$rdb grab mam_playbox {pid=1}]]
+
+        # NEXT, make the change.
+        $self DbConfigure mam_playbox 1 $args
+
+        # NEXT, save the undo script
+        $self SaveUndo $script
+
+        return
+    }
+
+
+
+
+    #-------------------------------------------------------------------
     # Entity Methods
 
     # entity names
@@ -199,27 +240,36 @@ snit::type ::simlib::mam {
         $rdb eval {SELECT eid FROM mam_entity ORDER BY eid}
     }
 
-    # entity add eid
+    # entity add eid ?options...?
     #
     # eid - The new entity ID.
     #
     # Adds a new entity to the entities table.  In addition:
     #
     # - Adds the dependent records to the belief and affinity tables.
+    # - Sets the entity's values.
 
-    method {entity add} {eid} {
-        # FIRST, add the entity records.
-        $rdb eval {
-            INSERT INTO mam_entity(eid) VALUES($eid);
+    method {entity add} {eid args} {
+        # FIRST, use a transaction, so that if there's an error
+        # in an option or option value, there will be no change
+        # to the database.
+        $rdb transaction {
+            # FIRST, add the entity record
+            $rdb eval {
+                INSERT INTO mam_entity(eid) VALUES($eid);
                 
-            INSERT INTO mam_belief(eid,tid)
-            SELECT $eid, tid FROM mam_topic;
+                INSERT INTO mam_belief(eid,tid)
+                SELECT $eid, tid FROM mam_topic;
                 
-            INSERT INTO mam_affinity(f,g)
-            SELECT $eid, eid FROM mam_entity;
+                INSERT INTO mam_affinity(f,g)
+                SELECT $eid, eid FROM mam_entity;
                 
-            INSERT INTO mam_affinity(f,g)
-            SELECT eid, $eid FROM mam_entity WHERE eid != $eid;
+                INSERT INTO mam_affinity(f,g)
+                SELECT eid, $eid FROM mam_entity WHERE eid != $eid;
+            }
+
+            # NEXT, set the option values.
+            $self DbConfigure mam_entity [list $eid] $args
         }
 
         $self SaveUndo [list $self MutateEntityDelete $eid]
@@ -258,6 +308,38 @@ snit::type ::simlib::mam {
 
         # NEXT, save the undo script.
         $self SaveUndo [list $rdb ungrab $data]
+
+        return
+    }
+
+    # entity cget eid option
+    #
+    # eid     - The entity ID
+    # option  - The name of a entity option.  See [entity add].
+    #
+    # Retrieves the value of a entity's option.
+
+    method {entity cget} {eid option} {
+        $self DbCget mam_entity [list $eid] $option
+    }
+    
+    # entity configure eid ?options...?
+    #
+    # eid      - The entity ID
+    # options  - A list of option names and values.
+    #
+    # Sets entity option values.
+
+    method {entity configure} {eid args} {
+        # FIRST, get the undo script.  Don't save it yet, as there
+        # might be an error in the arguments.
+        set script [list $rdb ungrab [$rdb grab mam_entity {eid=$eid}]]
+
+        # NEXT, make the change.
+        $self DbConfigure mam_entity [list $eid] $args
+
+        # NEXT, save the undo script
+        $self SaveUndo $script
 
         return
     }
@@ -765,6 +847,7 @@ snit::type ::simlib::mam {
     method ClearTables {} {
         $rdb eval {
             -- The dependent records are deleted automatically
+            DELETE FROM mam_playbox;
             DELETE FROM mam_entity;
             DELETE FROM mam_topic;
             DELETE FROM mam_undo;
@@ -788,13 +871,21 @@ snit::type ::simlib::mam {
     # $table-where     - Where clause
 
     typevariable tableInfo -array {
-        mam_topic-keys     tid
-        mam_topic-options  {-title -relevance}
-        mam_topic-where    {tid=$key(tid)}
+        mam_playbox-keys    {pid}
+        mam_playbox-options {-gamma}
+        mam_playbox-where   {WHERE pid=$key(pid)}
+
+        mam_entity-keys     eid
+        mam_entity-options  {-commonality}
+        mam_entity-where    {WHERE eid=$key(eid)}
+
+        mam_topic-keys      tid
+        mam_topic-options   {-title -relevance}
+        mam_topic-where     {WHERE tid=$key(tid)}
 
         mam_belief-keys     {eid tid}
         mam_belief-options  {-position -tolerance}
-        mam_belief-where    {eid=$key(eid) AND tid=$key(tid)}
+        mam_belief-where    {WHERE eid=$key(eid) AND tid=$key(tid)}
     }
 
     # DbCget table keyVals option
@@ -821,7 +912,7 @@ snit::type ::simlib::mam {
         # NEXT, get the value
         $rdb eval "
             SELECT $colname FROM $table 
-            WHERE $tableInfo($table-where)
+            $tableInfo($table-where)
         " row {
             return $row($colname)
         }
@@ -863,7 +954,7 @@ snit::type ::simlib::mam {
                         $rdb eval "
                             UPDATE $table
                             SET $colname = \$value
-                            WHERE $tableInfo($table-where)
+                            $tableInfo($table-where)
                         "
                     } result]} {
                         error "Invalid $table $opt: $result"

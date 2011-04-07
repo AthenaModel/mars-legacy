@@ -40,19 +40,19 @@ Other modules may query any of the tables as needed, but
 should not alter them. Some relevant semantics:<p>
 
 <ul>
-  <li> Entities, topics, and beliefs are stored in the
-       <b>mam_entity</b>, <b>mam_topic</b>, and <b>mam_belief</b>
-       tables.<p>
+  <li> Playbox data, entities, topics, and beliefs are stored in the
+       <b>mam_playbox</b>, <b>mam_entity</b>, <b>mam_topic</b>, and
+       <b>mam_belief</b> tables.<p>
 
-  <li> The subscripts <i>e</i> and <i>f</i> are used for referring to
-  individual entities, especially when referring to them in pairs.<p>
+  <li> The subscripts <i>f</i> and <i>g</i> are used for referring to
+       individual entities, especially when referring to them in pairs.<p>
 
   <li> Affinities are stored in the <b>mam_affinity</b> table when the
        <i>compute</i> method is called.  Clients are expected to
        retrieve affinities directly from this table.<p>
 
-  <li> The <b>mam_acompare_view</b> is useful for comparing entity E's
-       affinity for other entities with their affinities for entity E.<p>
+  <li> The <b>mam_acompare_view</b> is useful for comparing entity F's
+       affinity for other entities with their affinities for entity F.<p>
 </ul><p>
 
 mam(n) registers the following schema definitions with
@@ -216,10 +216,30 @@ This subcommand is used to create and modify entities.<p>
 
 <<deflist entity>>
 
-<<defitem "entity add" {$obj entity add <i>eid</i>}>>
+<<defitem "entity add" {$obj entity add <i>eid option value...</i>}>>
 
 <b>Undoable.</b>  Creates a new entity with ID <i>eid</i>, along with
-all relevant <<iref belief>> and affinity records.<p>
+all relevant <<iref belief>> and affinity records.  See
+<<iref entity configure>> for the available options.<p>
+
+<<defitem "entity cget" {$obj entity cget <i>eid option</i>}>>
+
+Returns the value of the specified entity option.<p>
+
+<<defitem "entity configure" {$obj entity configure <i>eid option value...</i>}>>
+<b>Undoable.</b> Sets the value of one or more entity options:<p>
+
+<<deflist options>>
+
+<<defopt {-commonality <i>value</i>}>>
+
+Specifies the extent of the entity's participation in the dominant
+culture in the playbox.  If 1.0, the entity shares all of the implicit
+cultural commonality; if 0.0, none of it.  Defaults to 1.0.  Note that
+the effect of this option depends on the playbox <code>-gamma</code>
+value; see <<iref playbox configure>>.<p>
+
+<</deflist options>>
 
 <<defitem "entity delete" {$obj entity delete <i>eid</i>}>>
 
@@ -236,6 +256,37 @@ Returns a list of the entity IDs in the model.<p>
 ID <i>new</i>.<p>
 
 <</deflist entity>>
+
+<<defitem playbox {$obj playbox <i>subcommand</i> ?<i>args...</i>?}>>
+
+This subcommand is used to create and modify playbox-wide settings.<p>
+
+<<deflist playbox>>
+
+<<defitem "playbox cget" {$obj playbox cget <i>option</i>}>>
+
+Returns the value of the specified playbox option.<p>
+
+<<defitem "playbox configure" {$obj playbox configure <i>option value...</i>}>>
+
+<b>Undoable.</b> Sets the value of one or more playbox options:<p>
+
+<<deflist options>>
+
+<<defopt {-gamma <i>value</i>}>>
+
+This is the "commonality" dial; it controls the degree of implicit
+commonality among the entities in the playbox, that is, the number of
+implicit topics about which there is general (and passionate)
+agreement in the playbox.  If <code>-gamma</code>
+is 0, there is no implicit commonality; only explicit topics are
+considered.  If <code>-gamma</code> is 1.0 there are as many implicit
+topics as explicit topics; if 0.5, half as many; if 2.0, twice as
+many.  The <i>value</i> can range from 0.0 to 100.0, and defaults to 1.0.<p>
+
+<</deflist options>>
+
+<</deflist playbox>>
 
 <<defitem topic {$obj topic <i>subcommand</i> ?<i>args...</i>?}>>
 
