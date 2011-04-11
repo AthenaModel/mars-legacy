@@ -1649,6 +1649,9 @@ E1  T2  0.0      0.5
         # E1 has positions on some topics, and has zero tolerance on no
         # topics.  The normal equation is used.
         mymam belief configure E1 T1 -position 0.2
+
+        # Assume no commonality.
+        mymam playbox configure -gamma 0.0
     } -body {
         mymam compute
         rdb onecolumn {

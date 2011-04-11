@@ -600,7 +600,25 @@ snit::type ::simlib::mam {
     # newest RGC method.
 
     method compute {} {
-        # FIRST, Get each entity's signs, strengths, and tolerances.
+        # FIRST, retrieve gamma and compute the commonality of the
+        # playbox, eta.playbox.
+        set gamma [$rdb onecolumn {SELECT gamma FROM mam_playbox}]
+
+        set nTopics [$rdb onecolumn {
+            SELECT count(tid) FROM mam_topic
+        }]
+
+        let etaPlaybox {$gamma*$nTopics}
+
+        # NEXT, get each entity's participation in the commonality
+        # of the playbox, theta:
+
+        array set theta [$rdb eval {
+            SELECT eid, commonality FROM mam_entity
+        }]
+        
+
+        # NEXT, Get each entity's signs, strengths, and tolerances.
         set count 0
         $rdb eval {
             SELECT eid, position, tolerance
@@ -631,7 +649,9 @@ snit::type ::simlib::mam {
             FROM mam_entity AS F
             JOIN mam_entity AS G
         } {
-            set a [Affinity $P($f) $tau($f) $P($g)]
+            let eta {$etaPlaybox * min($theta($f),$theta($g))}
+
+            set a [Affinity $eta $P($f) $tau($f) $P($g)]
 
             $rdb eval {
                 UPDATE mam_affinity
@@ -641,8 +661,9 @@ snit::type ::simlib::mam {
         }
     }
 
-    # Affinity pfList tauList pgList
+    # Affinity $eta pfList tauList pgList
     #
+    # eta     - A measure of the commonality between the entities
     # pfList  - A list of positions for entity f
     # tauList - A list of tolerances for entity f
     # pgList  - A list of positions for entity g
@@ -651,7 +672,7 @@ snit::type ::simlib::mam {
     # positions on the same topics and f's intolerance with disagreement,
     # per RGC's memo "Computing Affinity (4)", 16 December 2010.
 
-    proc Affinity {pfList tauList pgList} {
+    proc Affinity {eta pfList tauList pgList} {
         # FIRST, loop over the topics and accumulate data.
         
         # Sum of Z.fi for all i
@@ -726,12 +747,14 @@ snit::type ::simlib::mam {
             # all topics.
             let Afg {0.0}
         } else {
-            set num 0.0
-            set denom 0.0
+            set num   $eta
+            set denom $eta
 
             for {set i 0} {$i < [llength $pfList]} {incr i} {
-                let num   {$num   + $Zf($i) * ($G($i) - $beta($i)*$D($i))}
-                let denom {$denom + $Zf($i) * (  1    + $beta($i)*$D($i))}
+                let factor {max($Zf($i),$D($i))}
+
+                let num   {$num   + $factor * ($G($i) - $beta($i)*$D($i))}
+                let denom {$denom + $factor * (  1    + $beta($i)*$D($i))}
             }
 
             let Afg {$num/$denom}

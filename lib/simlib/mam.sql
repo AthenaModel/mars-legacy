@@ -26,7 +26,8 @@ CREATE TABLE mam_playbox (
     -- Commonality Dial; controls the degree of implicit commonality 
     -- among the entities in the model.
     gamma  REAL DEFAULT 1.0
-    CHECK (0.0 <= gamma AND gamma <= 1.0)
+        CHECK (gamma = CAST (gamma AS real))
+        CHECK (0.0 <= gamma)
 );
 
 -- mam(n) Entities table.  An entity is a collection of people that
@@ -42,6 +43,7 @@ CREATE TABLE mam_entity (
     -- in the playbox.  If 1.0, the entity shares all of the implicit
     -- cultural commonality; if 0.0, none of it.
     commonality REAL DEFAULT 1.0
+        CHECK (commonality = CAST (commonality AS real))
         CHECK (0.0 <= commonality AND commonality <= 1.0)
 );
 
@@ -75,12 +77,14 @@ CREATE TABLE mam_belief (
     -- The entity's position on this topic, i.e., the extent to which
     -- this topic moves the entity to action.  -1.0 to 1.0
     position  REAL DEFAULT 0.0
+        CHECK (position = CAST (position AS real))
         CHECK (-1.0 <= position AND position <= 1.0),
 
     -- The entity's tolerance for disagreement on this topic.
     -- 0.5 is balanced, neither particularly tolerant nor particularly
     -- intolerant.
     tolerance REAL DEFAULT 0.5
+        CHECK (tolerance = CAST (tolerance AS real))
         CHECK (0.0 <= tolerance AND tolerance <= 1.0),
 
     PRIMARY KEY (eid, tid)
