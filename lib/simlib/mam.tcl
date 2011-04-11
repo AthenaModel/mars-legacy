@@ -865,12 +865,14 @@ snit::type ::simlib::mam {
 
     # ClearTables
     #
-    # Deletes all data from the mam.sql tables for this instance
+    # Deletes all data from the mam.sql tables for this instance.
+    # mam_playbox is retained; we should always have one record
+    # in that table.
 
     method ClearTables {} {
         $rdb eval {
             -- The dependent records are deleted automatically
-            DELETE FROM mam_playbox;
+            UPDATE mam_playbox SET gamma=1.0;
             DELETE FROM mam_entity;
             DELETE FROM mam_topic;
             DELETE FROM mam_undo;
