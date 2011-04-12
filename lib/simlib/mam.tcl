@@ -189,7 +189,8 @@ snit::type ::simlib::mam {
     destructor {
         catch {
             unset -nocomplain rdbTracker($rdb)
-            $self ClearTables
+            $self ClearTables destroy
+            
         }
     }
 
@@ -860,22 +861,33 @@ snit::type ::simlib::mam {
 
     method clear {} {
         # FIRST, Clear the RDB
-        $self ClearTables
+        $self ClearTables clear
     }
 
-    # ClearTables
+    # ClearTables mode
+    #
+    # mode - clear|destroy
     #
     # Deletes all data from the mam.sql tables for this instance.
-    # mam_playbox is retained; we should always have one record
-    # in that table.
+    # If mode is "clear", then mam_playbox is retained but reset; we should 
+    # always have one record in that table.
 
-    method ClearTables {} {
+    method ClearTables {mode} {
         $rdb eval {
             -- The dependent records are deleted automatically
-            UPDATE mam_playbox SET gamma=1.0;
             DELETE FROM mam_entity;
             DELETE FROM mam_topic;
             DELETE FROM mam_undo;
+        }
+
+        if {$mode eq "clear"} {
+            $rdb eval {
+                UPDATE mam_playbox SET gamma=1.0;
+            }
+        } else {
+            $rdb eval {
+                DELETE FROM mam_playbox;
+            }
         }
     }
 

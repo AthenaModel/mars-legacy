@@ -1474,11 +1474,13 @@ E1  T2  0.0      0.5
         mymam clear
 
         # NEXT, verify that none of the MAM tables have entries
-        # for the object.
+        # for the object (except mam_playbox)
         set badTables {}
 
         foreach table [rdb tables] {
-            if {![string match "mam_*" $table]} {
+            if {![string match "mam_*" $table] ||
+                $table eq "mam_playbox"
+            } {
                 continue
             }
 
