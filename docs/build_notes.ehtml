@@ -10,6 +10,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.49, 12 April 2011</h3>
+This build contains some more htmlviewer(n) changes and a mam(n) change:
+
+<ul>
+  <li> Bug 2905: htmlviewer(n): no-op <Control-1>, <Shift-1> handlers
+  <li> Bug 2914: htmlviewer(n): Character Entity Translation
+  <li> Bug 2916: mam(n): entity -commonality, playbox -gamma 
+</ul><p>
+
 <h3>Build 1.48, 4 April 2011</h3>
 
 This build contains two minor changes:<p>
