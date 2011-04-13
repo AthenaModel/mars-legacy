@@ -443,6 +443,7 @@ snit::widget ::marsgui::rangefield {
 
     method ScaleChanged {value} {
         if {$value != $scaleGuard} {
+            puts "ScaleChanged: $value"
             $self SetValue slide $value
         }
     }
@@ -452,6 +453,7 @@ snit::widget ::marsgui::rangefield {
     # The button was released on the scale widget
 
     method ScaleButtonReleased {} {
+        puts "ScaleButtonReleased: [$scale get]"
         $self SetValue release [$scale get]
     }
 
@@ -500,6 +502,16 @@ snit::widget ::marsgui::rangefield {
     method SetValue {source value} {
         # FIRST, if nothing's changed, do nothing
         if {$value eq $current} {
+            # FIRST, if -changemode is onrelease, we may need to
+            # update the displayed value.
+            if {$options(-changemode) eq "onrelease"} {
+                if {$value ne ""} {
+                    set displayed [$scale get]
+                } else {
+                    set displayed ""
+                }
+            }
+
             return
         }
 

@@ -80,7 +80,7 @@ proc main {argv} {
     grid columnconfigure . 0 -weight 1
     
 
-    bind . <Control-F12> {debugger new}
+    bind all <Control-F12> {debugger new}
 }
 
 proc ChangeCmd {fields} {
