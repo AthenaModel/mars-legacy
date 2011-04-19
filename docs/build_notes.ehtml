@@ -10,12 +10,23 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
-<h3>Build 1.49, 12 April 2011</h3>
-This build contains some more htmlviewer(n) changes a mam(n) change and bug
-fix for some test failures:
+<h3>Build 1.50, 19 April 2011</h3>
+
+This build contains a minor fix in rangefield(n), and integration with
+ATEE 2011Q1.<p>
 
 <ul>
-  <li> Bug 2905: htmlviewer(n): no-op <Control-1>, <Shift-1> handlers
+  <li> Bug 2921: rangefield(n): -changemode onrelease bug 
+  <li> Bug 2924: Integrate with ATEE 2011Q1 
+</ul><p>
+
+<h3>Build 1.49, 12 April 2011</h3>
+
+This build contains some more htmlviewer(n) changes, a mam(n) change, and bug
+fixes for some test failures:<p>
+
+<ul>
+  <li> Bug 2905: htmlviewer(n): no-op &lt;Control-1&gt;, &lt;Shift-1&gt; handlers
   <li> Bug 2914: htmlviewer(n): Character Entity Translation
   <li> Bug 2916: mam(n): entity -commonality, playbox -gamma 
   <li> Bug 2922: mam(n): Test failure 
