@@ -1505,6 +1505,16 @@ E1  T2  0.0      0.5
     } -cleanup {
         cleanup
     } -result {0}
+
+    test clear-1.3 {Clear will populate mam_playbox if need be.} -setup {
+        create
+    } -body {
+        rdb eval { DELETE FROM mam_playbox; }
+        mymam clear
+        rdb eval {SELECT * FROM mam_playbox }
+    } -cleanup {
+        cleanup
+    } -result {1 1.0}
     
     #-------------------------------------------------------------------
     # compute

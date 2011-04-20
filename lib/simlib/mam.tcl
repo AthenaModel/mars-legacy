@@ -882,7 +882,9 @@ snit::type ::simlib::mam {
 
         if {$mode eq "clear"} {
             $rdb eval {
-                UPDATE mam_playbox SET gamma=1.0;
+                INSERT OR REPLACE INTO 
+                mam_playbox(pid,gamma) 
+                VALUES(1,1.0)
             }
         } else {
             $rdb eval {
