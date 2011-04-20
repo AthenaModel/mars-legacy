@@ -607,6 +607,7 @@ snit::type ::simlib::mam {
 
         set nTopics [$rdb onecolumn {
             SELECT count(tid) FROM mam_topic
+            WHERE relevance = 1
         }]
 
         let etaPlaybox {$gamma*$nTopics}
