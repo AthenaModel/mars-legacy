@@ -10,6 +10,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.51, 20 April 2011</h3>
+
+This build fixes two significant bugs in mam(n).<p>
+
+<ul>
+  <li> Bug 2938: bgerror: Unknown mam_playbox key: "1"
+  <li> Bug 2939: rangefield(n): debugging puts
+  <li> Bug 2940: Irrelevant Topics Are Relevant 
+</ul><p>
+
 <h3>Build 1.50, 19 April 2011</h3>
 
 This build contains a minor fix in rangefield(n), and integration with
