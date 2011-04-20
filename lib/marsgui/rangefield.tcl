@@ -443,7 +443,6 @@ snit::widget ::marsgui::rangefield {
 
     method ScaleChanged {value} {
         if {$value != $scaleGuard} {
-            puts "ScaleChanged: $value"
             $self SetValue slide $value
         }
     }
@@ -453,7 +452,6 @@ snit::widget ::marsgui::rangefield {
     # The button was released on the scale widget
 
     method ScaleButtonReleased {} {
-        puts "ScaleButtonReleased: [$scale get]"
         $self SetValue release [$scale get]
     }
 
