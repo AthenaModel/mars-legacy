@@ -21,7 +21,7 @@
 #      to another.  Conversions to and from canvas coordinates take
 #      the zoom factor into account.
 #
-#    * Map units: mx,my coordinates extending to the right and down from
+#    * Map units: lat,lon coordinates extending to the right and down from
 #      the upper-left corner of the map image.  Map units are
 #      independent of zoom factor.  Map units are determined as
 #      follows:
@@ -71,11 +71,11 @@ snit::type ::marsutil::mapsimple {
         -type {snit::integer -min 1}  \
         -default 1000
 
-    # Min/max latitude and longitude
-    option -minx -type snit::double -default 0.0
-    option -maxx -type snit::double -default 3.0
-    option -miny -type snit::double -default 0.0
-    option -maxy -type snit::double -default 3.0
+    # Min/max latitude and longitude defaults
+    option -minlon -type snit::double -default 0.0
+    option -maxlon -type snit::double -default 3.0
+    option -minlat -type snit::double -default 3.0
+    option -maxlat -type snit::double -default 0.0
 
     #-------------------------------------------------------------------
     # Instance Variables
@@ -98,8 +98,10 @@ snit::type ::marsutil::mapsimple {
     # Methods
 
     method init {} {
-        set dmx [expr {($options(-maxx)-$options(-minx))/$options(-width)}]
-        set dmy [expr {($options(-maxy)-$options(-miny))/$options(-height)}]
+        # FIRST, compute deltas given the map image size and the map
+        # corner coordinates of the map image
+        set dmx [expr {($options(-maxlon)-$options(-minlon))/$options(-width)}]
+        set dmy [expr {($options(-maxlat)-$options(-minlat))/$options(-height)}]
     }
 
     # box
@@ -124,24 +126,34 @@ snit::type ::marsutil::mapsimple {
     # cx,cy    Position in canvas units
     #
     # Returns the position in map units
+    # Note: Canvas units increase downward, map units (lat) decrease
+    # downward, hence the use of max lat and a minus sign
 
     method c2m {zoom cx cy} {
         set fac [expr {$zoom/100.0}]
-        list [expr {$cx/$fac*$dmx}] [expr {$cy/$fac*$dmy}]
+        list [expr {$options(-maxlat)-$cy/$fac*$dmy}] \
+             [expr {$options(-minlon)+$cx/$fac*$dmx}]
     }
 
     # m2c zoom mx my....
     #
-    # zoom     Zoom factor
-    # mx,my    One or points in map units
+    # zoom       Zoom factor
+    # lat,lon    One or points in map units
     #
     # Returns the points in canvas units
+    # Note: canvas units increase downward, map units (lat) decrease
+    # downward, hence the use of max lat 
 
     method m2c {zoom args} {
         set out [list]
         set fac [expr {$zoom/100.0}]
-        foreach {mx my} $args {
-            lappend out [expr {int($mx*$fac/$dmx)}] [expr {int($my*$fac/$dmy)}]
+        foreach {lat lon} $args {
+            # FIRST, compute normalized lat and long referenced to the
+            # upper left corner of the map image
+            set nmy [expr {$options(-maxlat) - $lat}]
+            set nmx [expr {$lon - $options(-minlon)}]
+            lappend out [expr {int($nmx*$fac/$dmx)}] \
+                        [expr {int($nmy*$fac/$dmy)}]
         }
 
         return $out
@@ -153,11 +165,13 @@ snit::type ::marsutil::mapsimple {
     # cx,cy    Position in canvas units
     #
     # Returns the position as a map reference
+    # Note: canvas units increase downward, map unit (lat) decrease
+    # downward, hence the use of max lat
 
     method c2ref {zoom cx cy} {
         set fac [expr {$zoom/100.0}]
-        set lat [expr {$cx/$fac*$dmx}] 
-        set lon [expr {$cy/$fac*$dmy}]
+        set lon [expr {$options(-minlon)+$cx/$fac*$dmx}] 
+        set lat [expr {$options(-maxlat)-$cy/$fac*$dmy}]
         return [latlong tomgrs [list $lat $lon]]
     }
 
@@ -167,14 +181,16 @@ snit::type ::marsutil::mapsimple {
     # ref      A map reference
     #
     # Returns a list {cx cy} in canvas units
+    # Note: canvas units increase downward, map unit (lat) decrease
+    # downward, hence the use of max lat
 
     method ref2c {zoom args} {
         set fac [expr {$zoom/100.0}]
 
         foreach ref $args {
             lassign [latlong frommgrs $ref] lat lon
-            set cx [expr {int($lat*$fac/$dmy)}]
-            set cy [expr {int($lon*$fac/$dmx)}]
+            set cy [expr {int(($options(-maxlat)-$lat)*$fac/$dmy)}]
+            set cx [expr {int(($lon-$options(-minlon))*$fac/$dmx)}]
             lappend result $cx $cy
         }
 
@@ -183,15 +199,15 @@ snit::type ::marsutil::mapsimple {
 
     # m2ref mx my....
     #
-    # mx,my    Position in map units
+    # lat,lon    Position in map units
     #
     # Returns the position(s) as mapref strings
 
     method m2ref {args} {
         set result [list]
 
-        foreach {mx my} $args {
-            lappend result [latlong tomgrs [list $mx $my]]
+        foreach {lat lon} $args {
+            lappend result [latlong tomgrs [list $lat $lon]]
         }
         
         return $result
@@ -201,7 +217,7 @@ snit::type ::marsutil::mapsimple {
     #
     # ref   A map reference string
     #
-    # Returns a list {mx my...} in map units
+    # Returns a list {lat lon...} 
 
     method ref2m {args} {
         set result ""
