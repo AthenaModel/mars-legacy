@@ -10,6 +10,13 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.52, 3 May 2011</h3>
+Only one change in this build, the addition of an echo proc to marsmisc(n):
+
+<ul>
+    <li> Bug 2947: marsmisc(n): Add an echo proc
+</ul><p>
+
 <h3>Build 1.51, 20 April 2011</h3>
 
 This build fixes two significant bugs in mam(n).<p>
