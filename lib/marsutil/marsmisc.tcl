@@ -28,6 +28,7 @@ namespace eval ::marsutil:: {
         dictglob        \
         discrete        \
         distance        \
+        echo            \
         fstringmap      \
         getcode         \
         gettimeofday    \
@@ -50,7 +51,7 @@ namespace eval ::marsutil:: {
         moneysort       \
         normalize       \
         optval          \
-	outdent         \
+        outdent         \
         percent         \
         pickfrom        \
         poisson         \
@@ -853,6 +854,17 @@ proc ::marsutil::normalize {text} {
     regsub -all { +} $text " " text
     
     return $text
+}
+
+# echo  args
+# 
+# args  Some arguments to be sent to stdout
+#
+# Takes the supplied args and calls puts with them as the
+# argument
+
+proc ::marsutil::echo {args} {
+    puts $args
 }
 
 #-------------------------------------------------------------------
