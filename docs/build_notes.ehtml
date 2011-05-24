@@ -10,6 +10,14 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.53, 24 May 2011</h3>
+This build introduces a new field(i) type, the zcurvefield(n), for inclusion
+in order dialogs.
+
+<ul>
+    <li> Bug 2954: zcurvefield(n): new field(i) type
+</ul><p>
+
 <h3>Build 1.52, 3 May 2011</h3>
 Only one change in this build, the addition of an echo proc to marsmisc(n):
 
