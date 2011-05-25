@@ -32,7 +32,13 @@ LIBPATH  = \
 INCLPATH = \
 	-I$(TCL_INC_DIR) 
 
-LIBS = $(TOP_DIR)/src/lib/libgeotiff.a $(TOP_DIR)/src/lib/libtiff.a
+ARCH = $(shell arch)
+ifeq ($(ARCH),i686)
+	LIBS = $(TOP_DIR)/src/lib/libgeotiff_i686.a $(TOP_DIR)/src/lib/libtiff_i686.a
+endif
+ifeq ($(ARCH),x86_64)
+	LIBS = $(TOP_DIR)/src/lib/libgeotiff.a $(TOP_DIR)/src/lib/libtiff.a
+endif
 
 # Compilation Flags
 CFLAGS = -fPIC -g -O -Wall
