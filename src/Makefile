@@ -27,7 +27,7 @@ include $(TOP_DIR)/MakeDefs
 SRCLIBDIR = $(TOP_DIR)/src/lib
 
 # Subdirectories to build
-SUBS = libGeotrans libGeostars libMarsutil
+SUBS = libGeotrans libGeostars libMarsutil libGeoTiff
 
 .PHONY: all
 
