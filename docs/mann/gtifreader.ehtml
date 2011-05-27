@@ -24,13 +24,20 @@ interface.<p>
 
 <<deflist commands>>
 
-<<defitem gtifreader {gtifreader <i>name filename</i>}>>
+<<defitem gtifreader {gtifreader <i>name</i>}>>
 
 Creates a new <<iref gtifreader>> object called <i>name</i> and 
 attempts to read the GeoTIFF image called <i>filename</i>.
 The object is represented as a new Tcl command; if <i>name</i> isn't
 qualified with a namespace, it will be created within the global
-namespace.<p>
+namespace. An attempt to create a <code><b>gtifreader</code></b>
+without the C++ Tcl binding loaded will result in an appropriate 
+error being generated.<p>
+
+<<defitem read {$gtr read <i>filename</i>}>>
+
+Opens and attempts to read <i>filename</i> as a GeoTIFF image. If it is 
+not a GeoTIFF an appropriate TCL_ERROR is returned.<p>
 
 <<defitem getGeoKeyInfo \
     {$gtr getGeoKeyInfo <i>geokeyidx</i>}>>

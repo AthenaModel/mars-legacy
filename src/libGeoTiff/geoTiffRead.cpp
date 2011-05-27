@@ -27,6 +27,9 @@ static int  geoTiffReader_instanceCmd  (ClientData, Tcl_Interp*,
                                         int, Tcl_Obj* CONST argv[]);
 
 
+static int geoTiffReader_read (ClientData, Tcl_Interp*, int,
+                               Tcl_Obj* CONST argv[]);
+
 static int geoTiffReader_getGeoKeyCmd (ClientData, Tcl_Interp*, int,
                                Tcl_Obj* CONST argv[]);
 
@@ -38,9 +41,10 @@ static int geoTiffReader_getGeoFieldCmd (ClientData, Tcl_Interp*, int,
 
 
 static SubcommandVector geoTiffReaderSubTable [] = {
+    {"read",      geoTiffReader_read},
     {"getGeoKey",     geoTiffReader_getGeoKeyCmd},
     {"getGeoKeyInfo", geoTiffReader_getGeoKeyInfoCmd},
-    {"getGeoField",  geoTiffReader_getGeoFieldCmd},
+    {"getGeoField",   geoTiffReader_getGeoFieldCmd},
     {NULL, NULL}
 };
 
@@ -62,7 +66,7 @@ static SubcommandVector geoTiffReaderSubTable [] = {
 int
 Geotiff_Init(Tcl_Interp *interp)
 {
-    Tcl_CreateObjCommand(interp, "::gtifreader",
+    Tcl_CreateObjCommand(interp, "::marsgui::gtifreader",
                          geoTiffRead_readerCmd, NULL, NULL);
 
     if (Tcl_PkgProvide(interp, "GeoTiff", "1.0") != TCL_OK)
@@ -99,34 +103,17 @@ static int
 geoTiffRead_readerCmd (ClientData cd, Tcl_Interp *interp,
                     int objc, Tcl_Obj* CONST objv[])
 {
-    if (objc != 3) 
+    if (objc != 2) 
     {
-        Tcl_WrongNumArgs(interp, 1, objv, "name filename");
+        Tcl_WrongNumArgs(interp, 1, objv, "name");
         return TCL_ERROR;
     }
 
     char* name  = Tcl_GetStringFromObj(objv[1], NULL);
-    char* fname = Tcl_GetStringFromObj(objv[2], NULL);
 
     GeoTiffInfo* gti = new GeoTiffInfo();
     gti->tiff = NULL;
     gti->gtif = NULL;
-
-    if ((gti->tiff = XTIFFOpen(fname, "r")) == NULL)
-    {
-        Tcl_SetResult(interp, "file is not a TIFF", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    gti->gtif = GTIFNew(gti->tiff);
-
-    if (!gti->gtif) 
-    {
-        Tcl_SetResult(interp, "file is not a GeoTIFF", TCL_STATIC);
-        XTIFFClose(gti->tiff);
-        gti->tiff = NULL;
-        return TCL_ERROR;
-    }
 
     Tcl_CreateObjCommand(interp, name, geoTiffReader_instanceCmd, gti,
                          geoTiffReader_delete);
@@ -200,7 +187,55 @@ geoTiffReader_instanceCmd(ClientData cd, Tcl_Interp* interp,
     return (*geoTiffReaderSubTable[index].proc)(cd, interp, objc, objv);
 }
 
-/***********************************************************************
+ /***********************************************************************
+ *
+ * FUNCTION:
+ *	geoTiffReader_read()
+ *
+ * INPUTS:
+ *  A filename.
+ *
+ * RETURNS:
+ *  Nothing
+ *
+ * DESCRIPTION:
+ *  This function opens a file and attempts to read it as a GeoTIFF. If
+ *  an error is encountered it is returned.
+ */
+
+static int
+geoTiffReader_read(ClientData cd, Tcl_Interp* interp,
+                   int objc, Tcl_Obj* CONST objv[])
+{
+    if (objc < 3) 
+    {
+        Tcl_WrongNumArgs(interp, 1, objv, "filename");
+        return TCL_ERROR;
+    }
+
+    char* fname = Tcl_GetStringFromObj(objv[2], NULL);
+
+    GeoTiffInfo* gti = (GeoTiffInfo*)cd;
+
+    if ((gti->tiff = XTIFFOpen(fname, "r")) == NULL)
+    {
+        Tcl_SetResult(interp, "file is not a TIFF", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    gti->gtif = GTIFNew(gti->tiff);
+
+    if (!gti->gtif) 
+    {
+        Tcl_SetResult(interp, "file is not a GeoTIFF", TCL_STATIC);
+        XTIFFClose(gti->tiff);
+        gti->tiff = NULL;
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+}
+ /***********************************************************************
  *
  * FUNCTION:
  *	geoTiffReader_getGeoKeyInfoCmd()
