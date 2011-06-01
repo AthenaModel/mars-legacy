@@ -147,12 +147,13 @@ namespace eval ::simlib::test {
 
     test qtolerance-1.1 {long names map to short names} -body {
         list \
-            [qtolerance name "Very Tolerant"]   \
-            [qtolerance name "Tolerant"]        \
-            [qtolerance name "Balanced"]        \
-            [qtolerance name "Intolerant"]      \
-            [qtolerance name "Very Intolerant"] 
-    } -result {VT T B I VI}
+            [qtolerance name "Very Tolerant"]        \
+            [qtolerance name "Tolerant"]             \
+            [qtolerance name "Balanced"]             \
+            [qtolerance name "Intolerant"]           \
+            [qtolerance name "Very Intolerant"]      \
+            [qtolerance name "Extremely Intolerant"] 
+    } -result {VT T B I VI EI}
 
     test qtolerance-1.2 {short names map to values} -body {
         list \
@@ -160,8 +161,9 @@ namespace eval ::simlib::test {
             [qtolerance value "T"]  \
             [qtolerance value "B"]  \
             [qtolerance value "I"]  \
-            [qtolerance value "VI"] 
-    } -result {0.9 0.7 0.5 0.3 0.1}
+            [qtolerance value "VI"] \
+            [qtolerance value "EI"] 
+    } -result {0.9 0.7 0.5 0.35 0.25 0.15}
 
     test qtolerance-1.3 {options} -body {
         list \

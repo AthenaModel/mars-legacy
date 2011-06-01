@@ -134,11 +134,12 @@ namespace eval ::simlib:: {
 
 # Position: a mam(n) entity's tolerance for disagreement on a topic.
 ::marsutil::quality ::simlib::qtolerance {
-    VT "Very Tolerant"    0.9
-    T  "Tolerant"         0.7
-    B  "Balanced"         0.5
-    I  "Intolerant"       0.3
-    VI "Very Intolerant"  0.1
+    VT "Very Tolerant"        0.9
+    T  "Tolerant"             0.7
+    B  "Balanced"             0.5
+    I  "Intolerant"           0.35
+    VI "Very Intolerant"      0.25
+    EI "Extremely Intolerant" 0.15
 } -format {%3.1f} -min 0.0 -max 1.0
 
 # Satisfaction: Long-Term Trend
