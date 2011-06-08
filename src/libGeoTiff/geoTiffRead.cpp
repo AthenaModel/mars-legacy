@@ -366,7 +366,7 @@ geoTiffReader_getGeoFieldCmd (ClientData cd, Tcl_Interp *interp, int objc,
                                Tcl_Obj* CONST objv[])
 {
     double *d_list = NULL;
-    int     d_list_count;
+    uint16  d_list_count;
     ttag_t  field;
 
     GeoTiffInfo* gti = (GeoTiffInfo*)cd;
