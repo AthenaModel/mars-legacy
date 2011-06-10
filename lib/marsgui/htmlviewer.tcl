@@ -222,9 +222,10 @@ snit::widgetadaptor ::marsgui::htmlviewer {
             {*}[$hull cget -hyperlinkcommand] $url
         }
 
-        # If the -hyperlinkcommand didn't make us lose the focus,
+        # If this window is still mapped, and the 
+        # -hyperlinkcommand didn't make us lose the focus,
         # begin sweeping out a selection.
-        if {[focus] eq $win} {
+        if {[winfo ismapped $win] && [focus] eq $win} {
             set trans(mark) $x,$y
         }
     }
