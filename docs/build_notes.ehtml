@@ -10,6 +10,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.55, 13 June 2011</h3>
+
+This build fixes a minor bug in htmlviewer(n), and a crash in
+gtifreader(n).<p>
+
+<ul>
+  <li> Bug 3027: gtifreader(n): Tcl binding uses wrong data type
+  <li> Bug 3033: htmlviewer(n): Erroneous selection drag 
+</ul><p>
+
 <h3>Build 1.54, 1 June 2011</h3>
 
 This build adds the GeoTIFF library, and some small changes to the
