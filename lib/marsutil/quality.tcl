@@ -359,7 +359,14 @@ snit::type ::marsutil::quality {
     # and returns the index of the closest match.  If -bounds yes,
     # then returns the index of the first range which contains the
     # value.
+    #
+    # The value is rounded according to the -format before the comparison.
+
     method Value2index {value} {
+        # FIRST, round the value.
+        set value [format $options(-format) $value]
+
+        # NEXT, convert it to an index.
         set len [llength $values]
 
         if {$options(-bounds)} {

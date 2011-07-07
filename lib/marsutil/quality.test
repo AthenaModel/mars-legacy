@@ -77,6 +77,15 @@ namespace eval ::marsutil::test {
             N  "Neutral"   0.5
             B  "Bad"       0.3
         } -min 0.0 -max 1.0
+
+        quality rounding {
+            VG "Very Good" 0.9
+            G  "Good"      0.7
+            N  "Neutral"   0.5
+            B  "Bad"       0.3
+            VB "Very Bad"  0.1
+        } -format %.1f
+
     }
 
     proc cleanup {} {
@@ -85,6 +94,7 @@ namespace eval ::marsutil::test {
         nomax    destroy
         nomin    destroy
         minmax   destroy
+        rounding destroy
     }
 
     #-------------------------------------------------------------------
@@ -263,6 +273,21 @@ namespace eval ::marsutil::test {
         cleanup
     } -result {VB VG}
 
+    test quality_name-1.5 {round to format on index/name} -setup {
+        setup
+    } -body {
+        # 0.8 is the cutoff between G and VG; anything that rounds
+        # to 0.8 or higher should be VG.
+        list \
+            [rounding name 0.7]  \
+            [rounding name 0.8]  \
+            [rounding name 0.81] \
+            [rounding name 0.79]
+    } -cleanup {
+        cleanup
+    } -result {G VG VG VG}
+
+
     #-------------------------------------------------------------------
     # longname
 
@@ -311,6 +336,21 @@ namespace eval ::marsutil::test {
     } -cleanup {
         cleanup
     } -result {{Very Bad} {Very Good}}
+
+    test quality_longname-1.5 {round to format on index/name} -setup {
+        setup
+    } -body {
+        # 0.8 is the cutoff between G and VG; anything that rounds
+        # to 0.8 or higher should be VG.
+        list \
+            [rounding longname 0.7]  \
+            [rounding longname 0.8]  \
+            [rounding longname 0.81] \
+            [rounding longname 0.79]
+    } -cleanup {
+        cleanup
+    } -result {Good {Very Good} {Very Good} {Very Good}}
+
 
     #-------------------------------------------------------------------
     # format
@@ -511,6 +551,20 @@ namespace eval ::marsutil::test {
     } -cleanup {
         cleanup
     } -result {4 0}
+
+    test quality_index-1.7 {round to format on index/name} -setup {
+        setup
+    } -body {
+        # 0.8 is the cutoff between G and VG; anything that rounds
+        # to 0.8 or higher should be VG.
+        list \
+            [rounding index 0.7]  \
+            [rounding index 0.8]  \
+            [rounding index 0.81] \
+            [rounding index 0.79]
+    } -cleanup {
+        cleanup
+    } -result {1 0 0 0}
 
     #-------------------------------------------------------------------
     # size

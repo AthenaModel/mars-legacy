@@ -29,7 +29,16 @@ definition.  The <<iref quality>> object can relate arbitrary
 numeric values back to specific categories.<p>
 
 The boundaries between two categories can be implicit (midway between
-the numeric values associated with the categories) or explicit.
+the numeric values associated with the categories) or explicit.<p>
+
+<<subsection "Rounding">>
+
+Several commands (<<iref name>>, <<iref longname>>, <<iref index>>)
+can convert a numeric value to a symbolic value.  These commands all
+round the numeric value using the given <code>-format</code> string
+before doing the look-up; this guarantees that numeric values that
+display the same when <<iref format>>ted always map to the same
+categories.<p>
 
 <<section COMMANDS>>
 
@@ -185,6 +194,9 @@ range, returns the corresponding short category name.  Given any other
 <i>input</i>, returns "".  Name lookups are
 case-insensitive.<p>
 
+Numeric inputs are <<xref "Rounding" rounded>> before the lookup is
+performed.<p>
+
 The form <<iref shortname>> is deprecated.<p>
 
 <<defitem longname {$quality longname <i>input</i>}>>
@@ -194,12 +206,18 @@ rnage, returns the corresponding long category name.
 Given any other <i>input</i>, returns "".  Name lookups are
 case-insensitive.<p>
 
+Numeric inputs are <<xref "Rounding" rounded>> before the lookup is
+performed.<p>
+
 <<defitem index {$quality index <i>input</i>}>>
 
 Given a short name, a long name, or a numeric value within the valid
 range, returns the index of the specific category.
 Given any other <i>input</i>, returns -1.  Name lookups are
 case-insensitive.<p>
+
+Numeric inputs are <<xref "Rounding" rounded>> before the lookup is
+performed.<p>
 
 <<defitem format {$quality format <i>value</i>}>>
 
