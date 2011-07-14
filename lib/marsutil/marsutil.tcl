@@ -33,10 +33,14 @@ namespace eval ::marsutil:: {
 #-------------------------------------------------------------------
 # Load binary extensions, if present.
 
-set binlib [file join $::marsutil::library libMarsutil.so]
+set utillib [file join $::marsutil::library libMarsutil.so]
+set gtiflib [file join $::marsutil::library libGeoTiff.so]
 
-if {[file exists $binlib]} {
-    load $binlib
+if {[file exists $utillib]} {
+    load $utillib
+}
+if {[file exists $gtiflib]} {
+    load $gtiflib
 }
 
 #-----------------------------------------------------------------------
