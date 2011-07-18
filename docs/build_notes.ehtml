@@ -10,6 +10,25 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.57, 18 July 2011</h3>
+
+This build fixes a bug in the listfield(n) type.<p>
+
+<ul>
+  <li> Bug 3063: listfield(n): Invalid set 
+</ul><p>
+
+<h3>Build 1.56, 15 June 2011</h3>
+
+This build changes the quality(n) type slightly, so that all numeric
+quality values that round the same will translate to the same
+symbols.<p>
+
+<ul>
+  <li> Bug 3054 quality(n) name, longname, index should round numeric inputs 
+</ul><p>
+
+
 <h3>Build 1.55, 13 June 2011</h3>
 
 This build fixes a minor bug in htmlviewer(n), and a crash in
