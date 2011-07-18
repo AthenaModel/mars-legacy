@@ -472,7 +472,13 @@ snit::widget ::marsgui::listfield {
         foreach key $values {
             set ndx [lsearch -exact $keys $key]
 
-            lappend items $ndx
+            if {$ndx > -1} {
+                # Ignore items that that aren't in the valid set.
+                # Note: don't throw an error; this is equivalent to
+                # clearing an enumfield when set to something that's
+                # no longer in the enum.
+                lappend items $ndx
+            }
         }
 
         # NEXT, toggle the list items
