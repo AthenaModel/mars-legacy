@@ -353,6 +353,14 @@ seen.<p>
 
 Sets the color of the reference point icon.  Defaults to "black".<p>
 
+<<defopt {-linewidth <i>width</i>}>>
+
+Sets the line width of the neighborhood's polygon in pixels. Defaults to 1.<p>
+
+<<defopt {-polycolor <i>color</i>}>>
+
+Sets the line color of the neighborhood's polygon. Defaults to "black".<p>
+
 <</deflist options>>
 
 <<defitem "nbhood delete" {<i>pathName</i> nbhood delete <i>id</i>}>>

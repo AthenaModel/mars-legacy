@@ -371,6 +371,8 @@ snit::widgetadaptor ::marsgui::mapcanvas {
     # polygon-$id      Polygon as list of map coordinates
     # fill-$id         Polygon fill color
     # pointcolor-$id   Refpoint color
+    # linewidth-$id    Width of polygon line in pixels
+    # polycolor-$id    Polygon color
 
     variable nbhoods -array {
         ids {}
@@ -1525,8 +1527,10 @@ snit::widgetadaptor ::marsgui::mapcanvas {
         }
 
         # NEXT, extract the valid options
-        set fill     [optval args -fill       ""   ]
-        set pointfg  [optval args -pointcolor black]
+        set fill      [optval args -fill       ""   ]
+        set pointfg   [optval args -pointcolor black]
+        set linewidth [optval args -linewidth  1    ]
+        set polycolor [optval args -polycolor  black]
 
         # NEXT, get the ref point
         lassign [$self GetMapPoint args] rx ry
@@ -1543,6 +1547,8 @@ snit::widgetadaptor ::marsgui::mapcanvas {
         set     nbhoods(polygon-$id)    $mpoly
         set     nbhoods(fill-$id)       $fill
         set     nbhoods(pointcolor-$id) $pointfg
+        set     nbhoods(linewidth-$id)  $linewidth
+        set     nbhoods(polycolor-$id)  $polycolor
 
         # NEXT, draw it
         $self NbhoodDraw $id
@@ -1570,6 +1576,8 @@ snit::widgetadaptor ::marsgui::mapcanvas {
         unset nbhoods(polygon-$id)
         unset nbhoods(fill-$id)
         unset nbhoods(pointcolor-$id)
+        unset nbhoods(polycolor-$id)
+        unset nbhoods(linewidth-$id)
 
         return
     }
@@ -1604,6 +1612,14 @@ snit::widgetadaptor ::marsgui::mapcanvas {
 
                     set nbhoods(pointcolor-$id) $val
                 }
+                -polycolor {
+                    $hull itemconfigure $id.poly -outline $val
+                    set nbhoods(polycolor-$id) $val
+                }
+                -linewidth {
+                    $hull itemconfigure $id.poly -width $val
+                    set nbhoods(linewidth-$id) $val
+                }
                 default {
                     error "Unrecognized option \"$opt\""
                 }
@@ -1622,6 +1638,8 @@ snit::widgetadaptor ::marsgui::mapcanvas {
         switch -exact -- $option {
             -fill       { return $nbhoods(fill-$id)            }
             -pointcolor { return $nbhoods(pointcolor-$id)      }
+            -polycolor  { return $nbhoods(polycolor-$id)       }
+            -linewidth  { return $nbhoods(linewidth-$id)       }
             default     { error "Unrecognized option \"$opt\"" }
         }
     }
@@ -1712,7 +1730,8 @@ snit::widgetadaptor ::marsgui::mapcanvas {
 
         # NEXT, Draw it
         $hull create polygon $cpoly                        \
-            -outline black                                 \
+            -outline $nbhoods(polycolor-$id)               \
+            -width   $nbhoods(linewidth-$id)               \
             -fill    $nbhoods(fill-$id)                    \
             -tags    [list $id $id.poly nbhood snaps]
 
