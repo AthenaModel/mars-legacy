@@ -411,7 +411,7 @@ snit::type ::marsutil::tabletext {
     # writeFileHeader filename infile
     #
     # filename     the name of the file being written
-    # infile       the name of the simdb(5) file that was previously read
+    # infile       the name of the db file that was previously read
     #
     # This helper proc outputs a simple file header indicating when the
     # file was written, what the source file was and the name of the output
@@ -423,7 +423,7 @@ snit::type ::marsutil::tabletext {
         #-------------------------------------------------------------------
         # TITLE:
         #     automatically generated simdb: [file tail $filename]
-        #     this file was generated from simdb: [file tail $infile]
+        #     this file was generated from db: [file tail $infile]
         #     generated on [clock format [clock seconds] -format $timeformat]
         #"
         return [outdent "$header\n"]
