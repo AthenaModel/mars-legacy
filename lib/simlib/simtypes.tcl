@@ -23,12 +23,12 @@ namespace eval ::simlib:: {
         qaffinity      \
         qcooperation   \
         qduration      \
+        qemphasis      \
         qmag           \
         qposition      \
         qrel           \
         qsaliency      \
         qsat           \
-        qtolerance     \
         qtrend         \
         rfraction      \
         rmagnitude
@@ -132,14 +132,15 @@ namespace eval ::simlib:: {
     VD "Very Dissatisfied" -80.0
 } -min -100.0 -max 100.0 -format {%7.2f}
 
-# Position: a mam(n) entity's tolerance for disagreement on a topic.
-::marsutil::quality ::simlib::qtolerance {
-    VT "Very Tolerant"        0.9
-    T  "Tolerant"             0.7
-    B  "Balanced"             0.5
-    I  "Intolerant"           0.35
-    VI "Very Intolerant"      0.25
-    EI "Extremely Intolerant" 0.15
+# Emphasis: a mam(n) entity's emphasis on agreement or disagreement
+# with respect to a topic.
+::marsutil::quality ::simlib::qemphasis {
+    ASTRONG  "Agreement--Strong"     0.9
+    AWEAK    "Agreement"             0.7
+    NEITHER  "Neither"               0.5
+    DWEAK    "Disagreement"          0.35
+    DSTRONG  "Disagreement--Strong"  0.25
+    DEXTREME "Disagreement--Extreme" 0.15
 } -format {%3.1f} -min 0.0 -max 1.0
 
 # Satisfaction: Long-Term Trend

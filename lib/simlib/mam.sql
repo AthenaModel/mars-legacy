@@ -80,12 +80,11 @@ CREATE TABLE mam_belief (
         CHECK (position = CAST (position AS real))
         CHECK (-1.0 <= position AND position <= 1.0),
 
-    -- The entity's tolerance for disagreement on this topic.
-    -- 0.5 is balanced, neither particularly tolerant nor particularly
-    -- intolerant.
-    tolerance REAL DEFAULT 0.5
-        CHECK (tolerance = CAST (tolerance AS real))
-        CHECK (0.0 <= tolerance AND tolerance <= 1.0),
+    -- The entity's emphasis on agreement or disagreement for this topic.
+    -- 0.5 emphasizes neither; see qemphasis(n).
+    emphasis REAL DEFAULT 0.5
+        CHECK (emphasis = CAST (emphasis AS real))
+        CHECK (0.0 <= emphasis AND emphasis <= 1.0),
 
     PRIMARY KEY (eid, tid)
 );

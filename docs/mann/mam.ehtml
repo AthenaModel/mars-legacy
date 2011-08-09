@@ -20,7 +20,7 @@ namespace import ::simlib::*
 (MAM), which computed the affinity between political entities based on
 their belief systems.  A belief system is a collection of beliefs;
 a belief is a position for against a particular topic, along with
-a tolerance for disagreement with that position.<p>
+an emphasis on agreement or disagreement with that position.<p>
 
 The application may define any number of topics and any number of
 entities, and record the belief systems of each entity.  Then,
@@ -159,11 +159,15 @@ Specifies the entity's position with respect to the topic, a real
 number from -1.0 to +1.0.  Defaults to 0.0.  The client can use
 <<xref simtypes(n) qposition>> to validate position values.<p>
 
-<<defopt {-tolerance <i>number</i>}>>
+<<defopt {-emphasis <i>number</i>}>>
 
-Specifies the entity's tolerance for disagreement regarding the topic,
-as a real number from 0.0 to 1.0.  The default is 0.5.  The client can use
-<<xref simtypes(n) qtolerance>> to validate tolerance values.<p>
+Specifies the entity's emphasis on agreement or disagreement with
+respect to this topic, where 0.0 represents a complete emphasis on
+disagreement and 1.0 represents a complete emphasis on agreement.
+The default is 0.5.  Note that the endpoints result in pathological
+results; clients will usually want to pick from the
+<<xref simtypes(n) qemphasis>> symbols.  Note that
+<<xref simtypes(n) qemphasis>> can be used to validate emphasis values.<p>
 
 <</deflist options>>
 

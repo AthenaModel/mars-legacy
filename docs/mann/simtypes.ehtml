@@ -59,6 +59,20 @@ durations are broken down into these categories:<p>
 
 <<qduration html>>
 
+<<defitem qemphasis qemphasis>>
+
+This quality is used to measure an entity's emphasis on agreement or
+disagreement with respect to a particular topic in a <<xref mam(n)>> belief
+system. Numerically, the values range from
+<<qemphasis cget -min>> to <<qemphasis cget -max>>, are
+formatted as "<<qemphasis cget -format>>", and have the bins
+shown in the following table:<p>
+
+<<qemphasis html>><p>
+
+For this variable, it is more usual to enter data using the symbolic
+values than to enter specific numbers.<p>
+
 <<defitem qmag qmag>>
 
 This quality is used to describe the magnitude of <<xref gram(n)>>
@@ -119,17 +133,6 @@ formatted as "<<qsat cget -format>>".  Symbolically,
 satisfaction is broken down into these categories:<p>
 
 <<qsat html>>
-
-<<defitem qtolerance qtolerance>>
-
-This quality is used to measure an entity's tolerance for disagreement
-with its position for or against a topic in a <<xref mam(n)>> belief
-system. Numerically, the values range from
-<<qtolerance cget -min>> to <<qtolerance cget -max>>, are
-formatted as "<<qtolerance cget -format>>", and have the bins
-shown in the following table:<p>
-
-<<qtolerance html>>
 
 <<defitem qtrend qtrend>>
 

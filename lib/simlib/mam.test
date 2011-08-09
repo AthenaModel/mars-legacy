@@ -290,12 +290,12 @@ E3 E3 0.0
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.0      0.5       
-E1  T2  0.0      0.5       
-E2  T1  0.0      0.5       
-E2  T2  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.0      0.5      
+E1  T2  0.0      0.5      
+E2  T1  0.0      0.5      
+E2  T2  0.0      0.5      
     }
 
     test entity_add-1.5 {Can set options} -setup {
@@ -368,9 +368,9 @@ E1  1.0
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.0      0.5      
     }
 
     test entity_add-2.3 {undo of entity add removes affinities} -setup {
@@ -469,10 +469,10 @@ E2 E2 0.0
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E2  T1  0.0      0.5       
-E2  T2  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E2  T1  0.0      0.5      
+E2  T2  0.0      0.5      
     }
 
     test entity_delete-2.1 {undo of delete restores entity} -setup {
@@ -494,8 +494,8 @@ E2  T2  0.0      0.5
         mymam entity add E1
         mymam entity add E2
 
-        mymam belief configure E1 T1 -position 0.1 -tolerance 0.2
-        mymam belief configure E1 T2 -position 0.3 -tolerance 0.4
+        mymam belief configure E1 T1 -position 0.1 -emphasis 0.2
+        mymam belief configure E1 T2 -position 0.3 -emphasis 0.4
         mymam entity delete E1
     } -body {
         mymam edit undo
@@ -503,12 +503,12 @@ E2  T2  0.0      0.5
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.1      0.2       
-E1  T2  0.3      0.4       
-E2  T1  0.0      0.5       
-E2  T2  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.1      0.2      
+E1  T2  0.3      0.4      
+E2  T1  0.0      0.5      
+E2  T2  0.0      0.5      
     }
 
     test entity_delete-2.3 {undo of delete restores affinities} -setup {
@@ -723,12 +723,12 @@ E3 E3 0.0
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E2  T1  0.0      0.5       
-E2  T2  0.0      0.5       
-E3  T1  0.0      0.5       
-E3  T2  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E2  T1  0.0      0.5      
+E2  T2  0.0      0.5      
+E3  T1  0.0      0.5      
+E3  T2  0.0      0.5      
     }
 
     test entity_rename-3.1 {undo of rename restores entity} -setup {
@@ -750,8 +750,8 @@ E3  T2  0.0      0.5
         mymam entity add E1
         mymam entity add E2
 
-        mymam belief configure E1 T1 -position 0.1 -tolerance 0.2
-        mymam belief configure E1 T2 -position 0.3 -tolerance 0.4
+        mymam belief configure E1 T1 -position 0.1 -emphasis 0.2
+        mymam belief configure E1 T2 -position 0.3 -emphasis 0.4
         mymam entity rename E1 E3
     } -body {
         mymam edit undo
@@ -759,12 +759,12 @@ E3  T2  0.0      0.5
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.1      0.2       
-E1  T2  0.3      0.4       
-E2  T1  0.0      0.5       
-E2  T2  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.1      0.2      
+E1  T2  0.3      0.4      
+E2  T1  0.0      0.5      
+E2  T2  0.0      0.5      
     }
 
     test entity_rename-2.3 {undo of rename restores affinities} -setup {
@@ -840,12 +840,12 @@ T1  TBD   1
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.0      0.5       
-E1  T2  0.0      0.5       
-E2  T1  0.0      0.5       
-E2  T2  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.0      0.5      
+E1  T2  0.0      0.5      
+E2  T1  0.0      0.5      
+E2  T2  0.0      0.5      
     }
 
     test topic_add-1.4 {Can set options} -setup {
@@ -920,9 +920,9 @@ T1  TBD   1
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.0      0.5      
     }
 
     #-------------------------------------------------------------------
@@ -987,10 +987,10 @@ T2  TBD   1
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T2  0.0      0.5       
-E2  T2  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T2  0.0      0.5      
+E2  T2  0.0      0.5      
     }
 
     test topic_delete-2.1 {undo of delete restores topic} -setup {
@@ -1017,8 +1017,8 @@ T2  Topic 2 0
         mymam entity add E1
         mymam entity add E2
 
-        mymam belief configure E1 T1 -position 0.1 -tolerance 0.2
-        mymam belief configure E2 T1 -position 0.3 -tolerance 0.4
+        mymam belief configure E1 T1 -position 0.1 -emphasis 0.2
+        mymam belief configure E2 T1 -position 0.3 -emphasis 0.4
         mymam topic delete T1
     } -body {
         mymam edit undo
@@ -1026,12 +1026,12 @@ T2  Topic 2 0
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.1      0.2       
-E1  T2  0.0      0.5       
-E2  T1  0.3      0.4       
-E2  T2  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.1      0.2      
+E1  T2  0.0      0.5      
+E2  T1  0.3      0.4      
+E2  T2  0.0      0.5      
     }
 
 
@@ -1226,12 +1226,12 @@ T1  No Title 1
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T2  0.0      0.5       
-E1  T3  0.0      0.5       
-E2  T2  0.0      0.5       
-E2  T3  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T2  0.0      0.5      
+E1  T3  0.0      0.5      
+E2  T2  0.0      0.5      
+E2  T3  0.0      0.5      
     }
 
     test topic_rename-3.1 {undo of rename restores topic} -setup {
@@ -1253,8 +1253,8 @@ E2  T3  0.0      0.5
         mymam entity add E1
         mymam entity add E2
 
-        mymam belief configure E1 T1 -position 0.1 -tolerance 0.2
-        mymam belief configure E1 T2 -position 0.3 -tolerance 0.4
+        mymam belief configure E1 T1 -position 0.1 -emphasis 0.2
+        mymam belief configure E1 T2 -position 0.3 -emphasis 0.4
         mymam topic rename T1 T3
     } -body {
         mymam edit undo
@@ -1262,12 +1262,12 @@ E2  T3  0.0      0.5
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.1      0.2       
-E1  T2  0.3      0.4       
-E2  T1  0.0      0.5       
-E2  T2  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.1      0.2      
+E1  T2  0.3      0.4      
+E2  T1  0.0      0.5      
+E2  T2  0.0      0.5      
     }
 
     #-------------------------------------------------------------------
@@ -1333,43 +1333,43 @@ E2  T2  0.0      0.5
         cleanup
     } -result {Invalid mam_belief -position: constraint failed}
 
-    test belief_configure-1.6 {Invalid -tolerance: non-numeric} -setup {
+    test belief_configure-1.6 {Invalid -emphasis: non-numeric} -setup {
         create
         mymam entity add E1
         mymam topic  add T1
     } -body {
-        mymam belief configure E1 T1 -tolerance NONESUCH
+        mymam belief configure E1 T1 -emphasis NONESUCH
     } -returnCodes {
         error
     } -cleanup {
         cleanup
-    } -result {Invalid mam_belief -tolerance: constraint failed}
+    } -result {Invalid mam_belief -emphasis: constraint failed}
 
-    test belief_configure-1.7 {Invalid -tolerance: out-of-range} -setup {
+    test belief_configure-1.7 {Invalid -emphasis: out-of-range} -setup {
         create
         mymam entity add E1
         mymam topic  add T1
     } -body {
-        mymam belief configure E1 T1 -tolerance -0.1
+        mymam belief configure E1 T1 -emphasis -0.1
     } -returnCodes {
         error
     } -cleanup {
         cleanup
-    } -result {Invalid mam_belief -tolerance: constraint failed}
+    } -result {Invalid mam_belief -emphasis: constraint failed}
 
     test belief_configure-1.8 {No partial changes on error} -setup {
         create
         mymam entity add E1
         mymam topic  add T1
     } -body {
-        catch {mymam belief configure E1 T1 -position 1.0 -tolerance -0.1}
+        catch {mymam belief configure E1 T1 -position 1.0 -emphasis -0.1}
         pprint [rdb query {SELECT * FROM mam_belief}]
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.0      0.5      
     }
 
     test belief_configure-2.1 {options update RDB} -setup {
@@ -1379,14 +1379,14 @@ E1  T1  0.0      0.5
     } -body {
         mymam belief configure E1 T1 \
             -position  0.5           \
-            -tolerance 0.75
+            -emphasis 0.75
         pprint [rdb query {SELECT * FROM mam_belief}]
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.5      0.75      
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.5      0.75     
     }
 
     test belief_configure-3.1 {undo undoes changes} -setup {
@@ -1395,18 +1395,18 @@ E1  T1  0.5      0.75
         mymam topic add T1
         mymam topic add T2
 
-        mymam belief configure E1 T1 -position 0.1 -tolerance 0.2
-        mymam belief configure E1 T1 -position 0.3 -tolerance 0.4
+        mymam belief configure E1 T1 -position 0.1 -emphasis 0.2
+        mymam belief configure E1 T1 -position 0.3 -emphasis 0.4
     } -body {
         mymam edit undo
         pprint [rdb query {SELECT * FROM mam_belief ORDER BY eid,tid}]
     } -cleanup {
         cleanup
     } -result {
-eid tid position tolerance 
---- --- -------- --------- 
-E1  T1  0.1      0.2       
-E1  T2  0.0      0.5       
+eid tid position emphasis 
+--- --- -------- -------- 
+E1  T1  0.1      0.2      
+E1  T2  0.0      0.5      
     }
 
     #-------------------------------------------------------------------
@@ -1455,9 +1455,9 @@ E1  T2  0.0      0.5
     } -body {
         mymam belief configure E1 T1 \
             -position  0.5           \
-            -tolerance 0.75
+            -emphasis 0.75
         list [mymam belief cget E1 T1 -position]    \
-            [mymam belief cget E1 T1 -tolerance]
+            [mymam belief cget E1 T1 -emphasis]
     } -cleanup {
         cleanup
     } -result {0.5 0.75}
@@ -1570,8 +1570,8 @@ E1  T2  0.0      0.5
         mymam topic add T1
         mymam topic add T2
 
-        # E1 and E2 disagree on a topic for which E1 has tolerance 0
-        mymam belief configure E1 T1 -position 0.1 -tolerance 0.0
+        # E1 and E2 disagree on a topic for which E1 has emphasis 0
+        mymam belief configure E1 T1 -position 0.1 -emphasis 0.0
     } -body {
         mymam compute
         rdb onecolumn {
@@ -1590,9 +1590,9 @@ E1  T2  0.0      0.5
         mymam topic add T1
         mymam topic add T2
 
-        # E1 and E2 agree on all topics for which E1 has tolerance 0,
+        # E1 and E2 agree on all topics for which E1 has emphasis 0,
         # but the zeals are 0.0
-        mymam belief configure E1 T1 -tolerance 0.0
+        mymam belief configure E1 T1 -emphasis 0.0
         mymam belief configure E1 T2 -position 0.1
     } -body {
         mymam compute
@@ -1612,9 +1612,9 @@ E1  T2  0.0      0.5
         mymam topic add T1
         mymam topic add T2
 
-        # E1 and E2 agree on all topics for which E1 has tolerance 0,
+        # E1 and E2 agree on all topics for which E1 has emphasis 0,
         # and the zeals are positive
-        mymam belief configure E1 T1 -position 0.2 -tolerance 0.0
+        mymam belief configure E1 T1 -position 0.2 -emphasis 0.0
         mymam belief configure E2 T1 -position 0.2
         mymam belief configure E1 T2 -position 0.1
         mymam belief configure E2 T2 -position -0.1
@@ -1636,7 +1636,7 @@ E1  T2  0.0      0.5
         mymam topic add T1
         mymam topic add T2
 
-        # E1 is ambivalent on all topics, and has zero tolerance on no
+        # E1 is ambivalent on all topics, and has zero emphasis on no
         # topics.  E2's position doesn't matter.
         mymam belief configure E2 T1 -position 0.2
         mymam belief configure E2 T2 -position -0.1
@@ -1658,7 +1658,7 @@ E1  T2  0.0      0.5
         mymam topic add T1
         mymam topic add T2
 
-        # E1 has positions on some topics, and has zero tolerance on no
+        # E1 has positions on some topics, and has zero emphasis on no
         # topics.  The normal equation is used.
         mymam belief configure E1 T1 -position 0.2
 

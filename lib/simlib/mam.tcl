@@ -620,10 +620,10 @@ snit::type ::simlib::mam {
         }]
         
 
-        # NEXT, Get each entity's signs, strengths, and tolerances.
+        # NEXT, Get each entity's signs, strengths, and emphases
         set count 0
         $rdb eval {
-            SELECT eid, position, tolerance
+            SELECT eid, position, emphasis
             FROM mam_belief
             JOIN mam_topic USING (tid)
             WHERE mam_topic.relevance = 1
@@ -632,7 +632,7 @@ snit::type ::simlib::mam {
             incr count
 
             lappend P($eid)   $position
-            lappend tau($eid) $tolerance
+            lappend tau($eid) $emphasis
         }
 
         # NEXT, if there's no data just set all affinities to zero.
@@ -667,12 +667,12 @@ snit::type ::simlib::mam {
     #
     # eta     - A measure of the commonality between the entities
     # pfList  - A list of positions for entity f
-    # tauList - A list of tolerances for entity f
+    # tauList - A list of emphases for entity f
     # pgList  - A list of positions for entity g
     #
     # Computes the affinity of entity f for entity g given their
-    # positions on the same topics and f's intolerance with disagreement,
-    # per RGC's memo "Computing Affinity (4)", 16 December 2010.
+    # positions on the same topics and f's emphasis on agreement/disagreement,
+    # per the series of Affinity memos.
 
     proc Affinity {eta pfList tauList pgList} {
         # FIRST, loop over the topics and accumulate data.
@@ -729,15 +729,15 @@ snit::type ::simlib::mam {
 
         if {$extremeDisagreement} {
             # Case 1: f and g disagree on a topic for which E1 has
-            # zero tolerance.
+            # zero emphasis.
             let Afg {-1.0}
         } elseif {$numZinI > 0 && $sumZinI == 0.0} {
             # Case 2: f and g agree on all topics for which f has 
-            # zero tolerance, but all such zeals are 0.0.
+            # zero emphasis, but all such zeals are 0.0.
             let Afg {0.0}
         } elseif {$numZinI > 0 && $sumZinI != 0.0} {
             # Case 3: f and g agree on all topics for which f has 
-            # zero tolerance, with positive zeal.
+            # zero emphasis, with positive zeal.
             let sumZG 0.0
             foreach i $I {
                 let sumZG {$sumZG + $Zf($i)*$G($i)}
@@ -745,7 +745,7 @@ snit::type ::simlib::mam {
             let Afg {$sumZG/$sumZinI}
         } elseif {$numZinI == 0 && $sumZf == 0.0} {
             # Case 4: There are no topics on which f and g agree
-            # for each f has zero tolerance, and f's zeal is 0.0 for
+            # for each f has zero emphasis, and f's zeal is 0.0 for
             # all topics.
             let Afg {0.0}
         } else {
@@ -924,7 +924,7 @@ snit::type ::simlib::mam {
         mam_topic-where     {WHERE tid=$key(tid)}
 
         mam_belief-keys     {eid tid}
-        mam_belief-options  {-position -tolerance}
+        mam_belief-options  {-position -emphasis}
         mam_belief-where    {WHERE eid=$key(eid) AND tid=$key(tid)}
     }
 
