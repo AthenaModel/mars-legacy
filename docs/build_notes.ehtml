@@ -10,6 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.58, 15 August 2011</h3>
+This build has a couple bug fixes and an extension of the mapcanvas(n)
+API. The mapcanvas can now have its neighborhood polygon color and linewidth
+specified via options.
+
+<ul>
+  <li> Bug 3068: listfield(n): call set when -itemdict is empty
+  <li> Bug 3092: mapcanvas(n): add two options
+  <li> Bug 3100: mam(n): Emphasis rather than Tolerance 
+</ul><p>
+
 <h3>Build 1.57, 18 July 2011</h3>
 
 This build fixes a bug in the listfield(n) type.<p>
