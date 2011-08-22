@@ -10,6 +10,14 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.59, 22 August 2011</h3>
+This build simply has the MakeDefs file at the top of the tree point to the
+latest 64-bit distribution of ActiveTcl EE. 
+
+<ul>
+    <li> Bug 3118: Upgrade to latest ActiveTcl EE distribution
+</ul><p>
+
 <h3>Build 1.58, 15 August 2011</h3>
 This build has a couple bug fixes and an extension of the mapcanvas(n)
 API. The mapcanvas can now have its neighborhood polygon color and linewidth
