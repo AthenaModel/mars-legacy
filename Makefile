@@ -124,7 +124,7 @@ tag: check_env check_ver
 	@ echo "*****************************************************"
 	@ echo ""
 	svn copy -m"Tagging Mars $(MARS_VERSION)" \
-		. https://oak/svn/mars/tags/$(BUILD_TAG)
+		. https://oak.jpl.nasa.gov/svn/mars/tags/$(BUILD_TAG)
 
 check_ver:
 	@ if test ! -n "$(MARS_VERSION)" ; then \
