@@ -433,7 +433,14 @@ snit::widget ::marsgui::rangefield {
         }
 
         set scaleGuard $value
-        $scale set $value
+
+        if {$options(-state) ne "disabled"} {
+            $scale set $value
+        } else {
+            $scale configure -state normal
+            $scale set $value
+            $scale configure -state $options(-state)
+        }
     }
 
 
