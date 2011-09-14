@@ -32,6 +32,14 @@ set theString ""
 
 snit::stringtype nonempty -minlen 1
 
+proc ShowMessage {} {
+    set ::theString [messagebox popup \
+                         -buttons {cancel "Cancel" ok "OK"} \
+                         -title   "messagebox popup" \
+                         -message "For score and seven years ago..."]
+
+}
+
 proc GetString {} {
     set ::theString [messagebox gets \
                          -oktext "Go for it!" \
@@ -77,6 +85,10 @@ proc main {argv} {
     # FIRST, pop up a debugger
     debugger new
 
+    ttk::button .show \
+        -text     "Show Message" \
+        -command  ShowMessage
+
     ttk::button .gets \
         -text     "Get String"  \
         -command  GetString
@@ -89,6 +101,7 @@ proc main {argv} {
         -width 40 \
         -textvariable theString
 
+    pack .show -side top -fill x
     pack .gets -side top -fill x
     pack .pick -side top -fill x
     pack .lab  -side top -fill x

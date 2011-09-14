@@ -244,6 +244,8 @@ snit::type ::marsgui::messagebox {
     #
     # -buttons dict          Dictionary {symbol labeltext ...} of buttons
     # -default symbol        Symbolic name of the default button
+    # -onclose symbol        Button "pressed" if dialog is closed using the
+    #                        window manager's close button.
     # -icon image            error, info, question, warning, peabody
     # -ignoretag tag         Tag for ignoring this dialog
     # -ignoredefault symbol  Button "pressed" if dialog is ignored.
@@ -292,9 +294,9 @@ snit::type ::marsgui::messagebox {
             wm resizable $dialog 0 0
 
             # NEXT, it can't be closed
-            wm protocol $dialog WM_DELETE_WINDOW {
-                # Do nothing
-            }
+            wm protocol $dialog WM_DELETE_WINDOW \
+                [mytypemethod PopupClose]
+
 
             # NEXT, it must be on top
             wm attributes $dialog -topmost 1
@@ -414,6 +416,7 @@ snit::type ::marsgui::messagebox {
             -buttons       {ok OK}
             -ignoredefault {}
             -default       {}
+            -onclose       {}
             -icon          info
             -ignoretag     {}
             -message       {}
@@ -428,6 +431,7 @@ snit::type ::marsgui::messagebox {
             switch -exact -- $opt {
                 -buttons       -
                 -default       -
+                -onclose       -
                 -icon          -
                 -ignoretag     -
                 -ignoredefault -
@@ -487,6 +491,18 @@ snit::type ::marsgui::messagebox {
 
     typemethod Choose {symbol} {
         set choice $symbol
+    }
+
+    # OnClose
+    #
+    # Chooses the -onclose symbol (if any) when the dialog is closed.
+
+    typemethod PopupClose {} {
+        if {$opts(-onclose) ne ""} {
+            $type Choose $opts(-onclose)
+        } else {
+            $type Choose [lindex $opts(-buttons) 0]
+        }
     }
 
     # reset ?tag?
@@ -550,9 +566,8 @@ snit::type ::marsgui::messagebox {
             wm resizable $getsdlg 0 0
 
             # NEXT, it can't be closed
-            wm protocol $getsdlg WM_DELETE_WINDOW {
-                # Do nothing
-            }
+            wm protocol $getsdlg WM_DELETE_WINDOW \
+                [mytypemethod GetsCancel]
 
             # NEXT, it must be on top
             wm attributes $getsdlg -topmost 1
@@ -790,9 +805,8 @@ snit::type ::marsgui::messagebox {
             wm resizable $pickdlg 0 0
 
             # NEXT, it can't be closed
-            wm protocol $pickdlg WM_DELETE_WINDOW {
-                # Do nothing
-            }
+            wm protocol $pickdlg WM_DELETE_WINDOW \
+                [mytypemethod PickCancel]
 
             # NEXT, it must be on top
             wm attributes $pickdlg -topmost 1
