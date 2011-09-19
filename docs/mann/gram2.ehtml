@@ -125,7 +125,8 @@ magnitudes are "small".<p>
 
 When scheduling level effects, effects with a <i>limit</i>
 less than or equal to <b>gram.epsilon</b> are
-treated as step changes; the entire value is added to satisfaction
+treated as step changes taking one tick; the entire value is added to
+satisfaction 
 the first time the effect is processed.  Larger effects are scheduled
 so that the remaining contribution at the scheduled end time is
 exactly <b>gram.epsilon</b>.<p>
@@ -595,7 +596,8 @@ CIV <i>g</i> and concern <i>c</i>.<p>
 The input has a maximum satisfaction change of <i>limit</i>
 (a <<xref simtypes(n) qmag>> value), and a
 realization time of <i>days</i>
-(a <<xref simtypes(n) qduration>> value).<p>
+(a <<xref simtypes(n) qduration>> value).  If <i>days</i> is less than
+one tick, it will be treated as thought it were one tick.<p>
 
 The input is decomposed into its direct effect on group <i>g</i>
 and its indirect effects on the other civilian groups.<p>
@@ -848,7 +850,8 @@ CIV group <i>f</i> and FRC group <i>g</i>.<p>
 The input has a maximum cooperation change of <i>limit</i>
 (a <<xref simtypes(n) qmag>> value), and a
 realization time of <i>days</i>
-(a <<xref simtypes(n) qduration>> value).<p>
+(a <<xref simtypes(n) qduration>> value).  If <i>days</i> is less than
+one tick, it will be treated as thought it were one tick.<p>
 
 The input is decomposed into its direct effect on <i>f</i>'s
 cooperation with group <i>g</i>, and its indirect effects on

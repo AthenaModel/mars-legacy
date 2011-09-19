@@ -3389,10 +3389,14 @@ snit::type ::simlib::gram {
 
         # NEXT, Compute te and tau
         if {abs($llimit) <= $epsilon} {
-            set te $ts
+            set te [expr {$ts + 1}]
             set tau 0.0
         } else {
             set te [expr {int($ts + [$clock fromDays $input(days)])}]
+
+            if {$te == $ts} {
+                set te [expr {$ts + 1}]
+            }
 
             # NEXT, compute tau, which determines the shape of the
             # exponential curve.

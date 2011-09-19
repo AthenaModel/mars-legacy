@@ -2509,7 +2509,7 @@ I 0  144 N2 SUNN2 QOL -1.50
     } -result {
     }
 
-    test sat_level-2.4 {epsilon events are immediate} -setup {
+    test sat_level-2.4 {epsilon events take one day} -setup {
         create
     } -body {
         jr sat level 1 0 KURD2 QOL 0.05 0.1
@@ -2521,9 +2521,9 @@ I 0  144 N2 SUNN2 QOL -1.50
     } -result {
 d ts te n  g     c   llimit 
 - -- -- -- ----- --- ------ 
-D 0  0  N2 KURD2 QOL 0.05   
-I 0  0  N2 SHIA2 QOL 0.03   
-I 0  0  N2 SUNN2 QOL -0.03  
+D 0  1  N2 KURD2 QOL 0.05   
+I 0  1  N2 SHIA2 QOL 0.03   
+I 0  1  N2 SUNN2 QOL -0.03  
     }
 
     test sat_level-2.5 {zero magnitude indirect effects are ignored.} -setup {
@@ -2650,6 +2650,25 @@ I 0  144 N1 KURD1 QOL 3.00
 D 0  144 N1 SHIA1 QOL 5.00   
 I 0  144 N1 SUNN1 QOL -1.50  
     }
+
+    test sat_level-2.12 {Inputs with tiny days take one tick} -setup {
+        create
+    } -body {
+        jr sat level 1 0 KURD2 QOL 50 0.0001
+        
+        # Note that ts=te for all effects.
+        dumpLevels
+    } -cleanup {
+        cleanup 
+    } -result {
+d ts te n  g     c   llimit 
+- -- -- -- ----- --- ------ 
+D 0  1  N2 KURD2 QOL 50.00  
+I 0  1  N2 SHIA2 QOL 30.00  
+I 0  1  N2 SUNN2 QOL -30.00 
+    }
+
+
 
 
     test sat_level-2.12 {Delayed indirect effects} -setup {
@@ -5028,7 +5047,7 @@ I 0  144 N2 KURD2 OPFOR -4.00
     } -result {
     }
 
-    test coop_level-2.4 {epsilon events are immediate} -setup {
+    test coop_level-2.4 {epsilon events take one tick} -setup {
         create
     } -body {
         jr coop level 1 0 KURD2 BRIT 0.05 0.1
@@ -5040,9 +5059,9 @@ I 0  144 N2 KURD2 OPFOR -4.00
     } -result {
 d ts te n  f     g     llimit 
 - -- -- -- ----- ----- ------ 
-I 0  0  N2 KURD2 BLUE  0.04   
-D 0  0  N2 KURD2 BRIT  0.05   
-I 0  0  N2 KURD2 OPFOR -0.04  
+I 0  1  N2 KURD2 BLUE  0.04   
+D 0  1  N2 KURD2 BRIT  0.05   
+I 0  1  N2 KURD2 OPFOR -0.04  
     }
 
     test coop_level-2.5 {zero magnitude indirect effects are ignored.} -setup {
@@ -5203,6 +5222,23 @@ I 0    144  N1 SHIA1 OPFOR -8.00
 I 1440 1584 N2 SHIA2 BLUE  0.80   
 I 1440 1584 N2 SHIA2 BRIT  1.00   
 I 1440 1584 N2 SHIA2 OPFOR -0.80  
+    }
+
+    test coop_level-2.12 {inputs with tiny days take one tick} -setup {
+        create
+    } -body {
+        jr coop level 1 0 KURD2 BRIT 50.0 0.0001
+        
+        # Note that ts=te for all effects.
+        dumpCoopLevels
+    } -cleanup {
+        cleanup 
+    } -result {
+d ts te n  f     g     llimit 
+- -- -- -- ----- ----- ------ 
+I 0  1  N2 KURD2 BLUE  40.00  
+D 0  1  N2 KURD2 BRIT  50.00  
+I 0  1  N2 KURD2 OPFOR -40.00 
     }
 
     test coop_level-3.1 {level increases during interval} -setup {
