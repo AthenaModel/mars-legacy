@@ -99,6 +99,12 @@ asked to ignore this message.  Defaults to the value of <b>-default</b>.<p>
 The message <i>text</i> to display.  The text will be wrapped
 automatically; newlines are honored.<p>
 
+<<defopt {-onclose <i>symbol</i>}>>
+
+Specifies the symbolic constant associated with the window manager's
+"close" button.  Defaults to the symbolic constant of the first button
+in <b>-buttons</b>.<p>
+
 <<defopt {-parent <i>window</i>}>>
 
 The message box will appear over the specfied window.<p>
@@ -119,7 +125,8 @@ is given, clears all ignore flags.<p>
 Pops up a message box containing a text entry widget, given the
 following options.  On "Cancel", returns the empty string; on
 "OK", validates and returns the entered text, trimmed of leading
-and trailing whitespace.<p> 
+and trailing whitespace.  Pressing the window manager's close button
+is the same as pressing "Cancel".<p> 
 
 <<deflist options>>
 
@@ -168,7 +175,9 @@ will be displayed below the entry widget.<p>
 
 Pops up a message box containing a menu box, given the
 following options.  On "Cancel", returns the empty string; on
-"OK", returns the item selected from the menu box's pulldown.<p>
+"OK", returns the item selected from the menu box's pulldown.
+Pressing the window manager's close button is the same as pressing
+"Cancel".<p>
 
 <<deflist options>>
 
