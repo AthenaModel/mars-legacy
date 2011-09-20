@@ -59,6 +59,19 @@
 <<preface changelog "Change Log">>
 
 <<changelog>>
+<<change 9/20/2011 Update will>>
+<ul>
+  <li> Standardized on "https://oak.jpl.nasa.gov/svn" as the
+       repository name.  The name "https://oak/svn" is rejected by
+       some clients.
+  <li> Added a procedure for using <<xref mars_commit(1)>> to commit
+       bug fixes.
+  <li> Added information about how Subversion is integrated with Bugzilla,
+       for future reference.
+  <li> Miscellaneous corrections, e.g., Minerva is now Athena.
+</ul>
+<</change>>
+
 <<change 10/15/2008 New will>> Initial draft. <</change>>
 <</changelog>>
 
@@ -67,7 +80,7 @@
 <<section overview "Overview">>
 
 Mars is an infrastructure library for simulation development.  Its
-primary clients are the JNEM and Minerva projects.  Mars uses
+primary clients are the JNEM and Athena projects.  Mars uses
 Subversion for version control, and Bugzilla for package tracking;
 this document explains how this works in practice.<p>
 
@@ -125,7 +138,7 @@ The project directory tree is as follows:<p>
   <li> By convention, Tcl man pages are placed in section (n) of the
        Unix manual.
   <li> The structure of Tcl package directories is described in the
-       <i>Mars Tcl Coding Standard</i> (TBD: Not yet written.)
+       <i>Mars Tcl Coding Standard</i>.
 </ul>
 
 <<section overview.docs "Development Documentation">>
@@ -146,13 +159,6 @@ Other documents may be written in HTML or in MS Word; note that Word
 documents should be saved in both Word and PDF formats. HTML documents
 will usually use the <<xref mars_doc(5)>> extended HTML format.<p>
 
-Memos will be saved on the JNEM web page:<p>
-
-<pre>    <<link http://eis.jpl.nasa.gov/jaws>></pre>
-
-Because memos are date-stamped, they need not be version-controlled in
-the repository.<p>
-
 Other documents, such as this CM plan, will be stored in the
 repository in the <code>mars/docs/dev</code> directory.<p>
 
@@ -160,7 +166,7 @@ repository in the <code>mars/docs/dev</code> directory.<p>
 
 <i>Bugzilla</i>, <<link http://www.bugzilla.org>><p>
 
-<i>Subversion</i>, <<link http://subversion.tigris.org>><p>
+<i>Subversion</i>, <<link http://subversion.apache.org>><p>
 
 <i>Pragmatic Version Control: Using Subversion</i>, by Mike Mason,
 Pragmatic Bookshelf, 2006.<p>
@@ -169,7 +175,7 @@ Pragmatic Bookshelf, 2006.<p>
 
 <<section vc "Version Control">>
 
-JNEM uses Subversion more or less as described in <i>Pragmatic Version
+Mars uses Subversion more or less as described in <i>Pragmatic Version
 Control using Subversion</i>.<p>
 
 <<section vc.repository "The Subversion Repository">>
@@ -178,18 +184,15 @@ The Mars Subversion repository URL is<p>
 
 <pre>    https://oak.jpl.nasa.gov/svn</pre>
 
-For developers at JPL, this may be abbreviated <code>https://oak/svn</code>.<p>
-
 In the remainder of this document, the string <i>repository</i> will
-mean the repository's base URL in either of the above forms.<p>
+mean the repository's base URL in the above form.<p>
 
 
-The repository contains multiple projects; the project URLs for Mars
-and JNEM are<p>
+The repository contains multiple projects; the project URL for Mars
+is<p>
 
 <pre>
      <i>repository</i>/mars/
-     <i>repository</i>/jnem/
 </pre>
 
 The project has the following internal structure:<p>
@@ -511,7 +514,6 @@ Bug reports should include enough specific information to allow the
 bug to be reproduced.  When the bug is fixed, the comment should
 include the precise test needed to verify the fix.<p>
 
-
 <<section proc "Procedures">>
 
 We expect that Mars development will generally take place in a Mars
@@ -607,6 +609,16 @@ location.
 <</step/>>
 n/a
 <</step>>
+
+<<step>>
+Add the version to Bugzilla.
+location.
+<</step/>>
+On the Bugzilla toolbar, click "Administration".  On the resulting
+page click "Products", then "Mars 1.0", then "Edit Versions".  Add a
+version "B<i>y</i>", e.g., when building Mars 1.3, add a version "B3".
+<</step>>
+
 
 <</procedure>>
 
@@ -747,7 +759,50 @@ The previous two steps can be combined into a single command, if desired.
 
 <</procedure>>
 
-Read the header of <code>~/mars/Makefile</code> for other possibilities.<p>
+Read the header of <code>~/mars/Makefile</code> for other
+possibilities.<p>
+
+<<section proc.commit "Committing Bugs">>
+
+Note: ideally, a single commit should be done for each bug.  If the
+job is large enough that you wish to do multiple commits, create a bug
+fix branch as described in <<xref vc.branches.bugfix>>.<p>
+
+Subversion is integrated with Bugzilla such that when code changes are
+committed to Subversion for a particular bug, the commit message will
+be added to the relevant bug in Bugzilla as a comment.  For this to
+work, the user must commit changes as follows:<p>
+
+<<procedure>>
+<<step>>
+Invoke <<xref mars_commit(1)>> for the bug number.
+<</step/>>
+<pre>$ mars commit 1234</pre>
+<</step>>
+
+<<step>>
+Verify the files to commit.  The tool will list all changed files in
+the current directory and below.  Make sure new files have been added
+to the repository, and that there's nothing that shouldn't be there.
+(The output is the same as for the <code>svn status</code> tool.)
+<</step/>>
+Do nothing if all of the changed files should be committed.
+Otherwise, select each of the files to commit.
+<</step>>
+
+<<step>>
+Enter a detailed change description.
+<</step/>>
+Type the change description into the text box.
+<</step>>
+
+<<step>>
+Commit the change.
+<</step/>>
+Press the "Commit" button.
+<</step>>
+
+<</procedure>>
 
 <<section clients "Client Projects">>
 
@@ -924,6 +979,122 @@ pull the desired version of Mars into the release branch.<p>
 
 The <<xref mars_link(1)>> <code>save -ascopy</code> command will do
 this easily.<p>
+
+<<section svnbug "Subversion/Bugzilla Integration">>
+
+Subversion is integrated with Bugzilla so that when changes are committed
+to Subversion for a particular bug using <<xref mars_commit(1)>>, the
+commit message and list of changed files are added to that bug report
+as a comment.<p>
+
+This section explains precisely how the integration is done, so that
+it can more easily be debugged if it stops working--as it often does
+whenever the software on the CM machine is upgraded.<p>
+
+<ul>
+  <li> The user commits bug <i>nnnn</i> using
+       <<xref mars_commit(1)>>.<p>
+
+  <li> <<xref mars_commit(1)>> commits the change, adding the
+       fullowing text to the commit message:<p>
+
+       <pre>Fixed Bug #{<i>nnnn</i>}</pre><p>
+
+  <li> On the repository host, Subversion calls the post-commit hook
+       with the repository path, <code>/home/svn</code>, and the
+       revision number.  The hook is defined by the fullowing script:<p>
+
+       <pre>/home/svn/hooks/post-commit</pre><p>
+
+  <li> The hook script immediately calls a script which sends an
+       e-mail message to Bugzilla:<p>
+
+       <pre>/home/svn/hooks/commit-email.pl</pre><p>
+
+       <ul>
+         <li> <code>commit-email.pl</code> retrieves the commit
+              message for the given revision number.<p>
+
+         <li> The commit is ignored if the commit message does not
+              contain the string "<code>Fixed Bug
+              #{<i>nnnn</i>}</code>".  Otherwise, the e-mail message
+              is formatted and sent.<p>
+
+         <li> Per the Bugzilla e-mail interface (Google "Bugzilla
+              email_in.pl" for the protocul), the message has a
+              subject containing the string "<code>[Bug
+              <i>nnnn</i>]</code>".  The body of the e-mail is the
+              comment to append to the bug report.<p>
+
+         <li> The message is sent <b>from</b>
+              <code>MAILER-DAEMON@oak.jpl.nasa.gov</code>. 
+              We have defined this e-mail address as a
+              Bugzilla user, thus allowing it to submit bug comments by
+              e-mail.<p>
+               
+         <li> The message is sent <b>to</b>
+              <code>bug-submit@oak.jpl.nasa.gov</code>.  "bug-submit" is a 
+              user on oak whose home directory is
+              <code>/home/bug-submit</code>.<p>
+       </ul>
+
+  <li> To troubleshoot <code>commit-email.pl</code>, call it explicitly:<p>
+
+       <pre>sudo /home/svn/hooks/commit-email.pl /home/svn 6898</pre>
+
+       Revision 6898 is a test commit which references bug 3165 in
+       Bugzilla.<p>
+
+  <li> If the message is sent successfully, it will be received by
+       user <code>bug-submit</code> on oak.jpl.nasa.gov.<p>
+
+  <li> In <code>/home/bug-submit</code> there is a
+       <code>.procmailrc</code> file that tells procmail(1) how to handle
+       all e-mail received by this user.  It passes all such messages 
+       to a Bugzilla script:<p>
+
+       <pre>/home/bugzilla/email_in.pl</pre><p>
+
+       All messages that come through, along with any error messages,
+       are logged to this file:<p>
+
+       <pre>/home/bug-submit/procmail_log</pre><p>
+
+  <li> The <code>email_in.pl</code> script is supposed to add the
+       comment to the named bug.<p>
+
+  <li> To troubleshoot problems with <code>email_in.pl</code>, first
+       look in <code>procmail_log</code> and make sure the messages
+       are arriving.  If they are not, debug
+       <code>commit_email.pl</code>.<p>
+
+  <li> If the messages are arriving, debug <code>email_in.pl</code>
+       from the command line.<p>
+
+       <ul>
+         <li> Create a file called <code>email.txt</code> with the
+              fullowing content:<p>
+
+              <pre>
+              From: William.H.Duquette@jpl.nasa.gov
+              Subject: [Bug 3165] Change Comment
+
+              Test comment
+              </pre><p>
+
+              Replace the "From:" address with your own e-mail
+              address; note that the address must be a valid Bugzilla
+              user, able to update bug reports.<p>
+
+         <li> Run <code>email_in.pl</code> as fullows:<p>
+
+              <pre>sudo /home/bugzilla/email_in.pl -vvv <email.txt</pre><p>
+
+              Address any errors returned by the script; then verify
+              that the comments are showing up in Bugzilla for
+              bug 3165.<p>
+       </ul>
+</ul>
 
 <hr>
 <address><a href="http://eis.jpl.nasa.gov/~will/">Will Duquette</a> / <a href="mailto:William.H.Duquette@jpl.nasa.gov">
