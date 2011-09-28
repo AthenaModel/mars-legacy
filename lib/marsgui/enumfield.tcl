@@ -32,7 +32,9 @@ snit::widget ::marsgui::enumfield {
     #-------------------------------------------------------------------
     # Options
 
-    delegate option * to combo
+    delegate option -background  to hull
+    delegate option -borderwidth to hull
+    delegate option *            to combo
 
     # -state state
     #

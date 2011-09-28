@@ -33,7 +33,9 @@ snit::widget ::marsgui::textfield {
     #-------------------------------------------------------------------
     # Options
 
-    delegate option * to entry
+    delegate option -background  to hull
+    delegate option -borderwidth to hull
+    delegate option *               to entry
 
     # -state state
     #

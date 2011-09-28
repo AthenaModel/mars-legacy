@@ -29,6 +29,16 @@ returns <i>pathName</i>.  The widget supports the following options:<p>
 
 <<deflist options>>
 
+<<defopt {-background <i>color</i>}>>
+
+Sets the color of the underlying hull frame, which is invisible unless
+the <code>-borderwidth</code> is non-zero.<p>
+
+<<defopt {-borderwidth <i>width</i>}>>
+
+Sets the width of the widget border in pixels (or other screen
+dimensions).  Defaults to 0.<p>
+
 <<defopt {-changecmd <i>command</i>}>>
 
 From <<xref field(i)>>.  Specifies a <i>command</i> to be called
