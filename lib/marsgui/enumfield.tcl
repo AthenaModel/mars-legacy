@@ -24,6 +24,18 @@ namespace eval ::marsgui:: {
 
 snit::widget ::marsgui::enumfield {
     #-------------------------------------------------------------------
+    # Type Constructor
+
+    typeconstructor {
+        # Global widget bindings
+
+        # Focussing on the widget should focus on the combobox.
+        bind Enumfield <FocusIn> {focus %W.combo}
+    }
+
+
+
+    #-------------------------------------------------------------------
     # Components
 
     component combo   ;# The combobox
