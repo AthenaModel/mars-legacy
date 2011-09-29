@@ -222,6 +222,9 @@ snit::type ::marsgui::messagebox {
 
     typevariable pickdlg .messageboxpick
 
+    # listdlg -- Name of the listselect dialog widget
+    typevariable listdlg .messageboxlist
+
     # opts -- Array of option settings.  See popup for values
 
     typevariable opts -array {}
@@ -962,6 +965,213 @@ snit::type ::marsgui::messagebox {
         set choice [$pickdlg.top.menubox get]
     }
 
+    #-------------------------------------------------------------------
+    # listselect
+
+    # listselect option value....
+    #
+    # -oktext text           Text for the OK button.
+    # -icon image            error, info, question, warning, peabody
+    # -message string        Message to display.  Will be wrapped.
+    # -parent window         The message box appears over the parent window
+    # -title string          Title of the message box
+    # -initvalue string      Initial value for the listfield
+    # -itemdict              Dict of keys and values from which the
+    #                        user can select.
+    # -showkeys flag         If 0, shows -itemdict values only; if 1,
+    #                        shows "key: value"
+    # -stripe flag           Should even rows be striped?
+    # -listrows rows         Height of the include/omit lists, in rows.
+    # -listwidth chars       Width of the include/omit lists, in characters.
+    #
+    # Pops up the "list select" message box.  The buttons will appear at 
+    # the bottom, left to right, packed to the right.  The OK button will
+    # have the specified text; it defaults to "OK".  The
+    # -icon will be displayed; defaults to "question".  The -message will be 
+    # wrapped into the message space; the listfield widget will be below
+    # the -message. The dialog will be application modal,
+    # and centered over the specified -parent window.  It will have the
+    # specified -title string.  If -initvalue is non-empty, its value
+    # will be placed in the listfield; the listfield will select
+    # from the -values.
+    #
+    # The command will wait until the user presses a button.  On 
+    # "cancel", it will return "".  On OK, it will return the 
+    # item selected in the menubox.
+
+    typemethod listselect {args} {
+        # FIRST, get the option values
+        $type ParseListOptions $args
+
+        # NEXT, create the dialog if it doesn't already exist.
+        if {![winfo exists $listdlg]} {
+            # FIRST, create it
+            toplevel $listdlg         \
+                -borderwidth        4 \
+                -highlightthickness 0
+
+            # NEXT, withdraw it; we don't want to see it yet
+            wm withdraw $listdlg
+
+            # NEXT, the user can't resize it
+            wm resizable $listdlg 0 0
+
+            # NEXT, it can't be closed
+            wm protocol $listdlg WM_DELETE_WINDOW \
+                [mytypemethod ListCancel]
+
+            # NEXT, it must be on top
+            wm attributes $listdlg -topmost 1
+
+            # NEXT, create and grid the standard widgets
+            
+            # Row 1: Icon and message
+            ttk::frame $listdlg.top
+
+            ttk::label $listdlg.top.icon \
+                -image  ${type}::icon::question \
+                -anchor nw
+
+            ttk::label $listdlg.top.message \
+                -textvariable [mytypevar opts(-message)] \
+                -wraplength   3i                         \
+                -anchor       nw                         \
+                -justify      left
+
+            # Row 2: Entry Widget
+            listfield $listdlg.top.listfield \
+                -height   $opts(-listrows) \
+                -width    $opts(-listwidth) \
+                -itemdict $opts(-itemdict) \
+                -showkeys $opts(-showkeys) \
+                -stripe   $opts(-stripe)
+                
+
+            grid $listdlg.top.icon \
+                -row 0 -column 0 -padx 8 -pady 4 -sticky nw 
+
+            grid $listdlg.top.message \
+                -row 0 -column 1 -padx 8 -pady 4 -sticky new
+            
+            grid $listdlg.top.listfield \
+                -row 1 -column 1 -padx 8 -pady 4 -stick ew
+
+            # Button box
+            ttk::frame $listdlg.button
+
+            # Create the buttons
+            ttk::button $listdlg.button.cancel     \
+                -text    "Cancel"                  \
+                -command [mytypemethod ListCancel]
+
+            ttk::button $listdlg.button.ok     \
+                -text    $opts(-oktext)        \
+                -command [mytypemethod ListOK]
+            
+            pack $listdlg.button.ok     -side right -padx 4
+            pack $listdlg.button.cancel -side right -padx 4
+
+            # Pack the top-level components.
+            pack $listdlg.top    -side top    -fill x
+            pack $listdlg.button -side bottom -fill x
+        }
+
+        # NEXT, configure the dialog according to the options
+        
+        # Set the title
+        wm title $listdlg $opts(-title)
+
+        # Set the icon
+        if {$opts(-icon) eq "peabody"} {
+            set icon ::marsgui::icon::peabody32
+        } else {
+            set icon ${type}::icon::$opts(-icon)
+        }
+
+        $listdlg.top.icon configure -image $icon
+
+        # Make it transient over the -parent
+        wm transient $listdlg $opts(-parent)
+
+        # NEXT, set the listfield value
+        $listdlg.top.listfield set $opts(-initvalue)
+
+        # NEXT, raise the dialog and set the focus
+        wm deiconify $listdlg
+        wm attributes $listdlg -topmost
+        raise $listdlg
+        focus $listdlg.top.listfield
+
+        # NEXT, do the grab, and wait until they return.
+        set choice {}
+
+        grab set $listdlg
+        vwait [mytypevar choice]
+        grab release $listdlg
+        wm withdraw $listdlg
+
+        return $choice
+    }
+
+    # ParseListOptions arglist
+    #
+    # arglist     List of popup args
+    #
+    # Parses the options into the opts array
+
+    typemethod ParseListOptions {arglist} {
+        # FIRST, set the option defaults
+        array set opts {
+            -oktext        "OK"
+            -icon          question
+            -message       {}
+            -parent        {}
+            -title         {}
+            -initvalue     {}
+            -itemdict      {}
+            -showkeys      0
+            -stripe        0
+            -listrows      12
+            -listwidth     30
+        }
+
+        # NEXT, get the option values
+        while {[llength $arglist] > 0} {
+            set opt [::marsutil::lshift arglist]
+
+            if {![info exists opts($opt)]} {
+                error "Unknown option: \"$opt\""
+            }
+
+            set opts($opt) [::marsutil::lshift arglist]
+        }
+
+        # NEXT, validate -icon
+        if {$opts(-icon) ni $iconnames && $opts(-icon) ne "peabody"} {
+            error "-icon: should be one of [join $iconnames {, }]"
+        }
+
+        # NEXT, validate -parent
+        if {$opts(-parent) ne ""} {
+            snit::window validate $opts(-parent)
+        }
+    }
+
+    # ListCancel
+    #
+    # Returns the empty string.
+
+    typemethod ListCancel {} {
+        set choice ""
+    }
+
+    # ListOK
+    #
+    # Returns the selected string.
+    
+    typemethod ListOK {} {
+        set choice [$listdlg.top.listfield get]
+    }
 }
 
 
