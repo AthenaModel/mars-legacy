@@ -1034,7 +1034,7 @@ snit::type ::marsgui::messagebox {
 
             ttk::label $listdlg.top.message \
                 -textvariable [mytypevar opts(-message)] \
-                -wraplength   3i                         \
+                -wraplength   5i                         \
                 -anchor       nw                         \
                 -justify      left
 
