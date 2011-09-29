@@ -1039,13 +1039,7 @@ snit::type ::marsgui::messagebox {
                 -justify      left
 
             # Row 2: Entry Widget
-            listfield $listdlg.top.listfield \
-                -height   $opts(-listrows) \
-                -width    $opts(-listwidth) \
-                -itemdict $opts(-itemdict) \
-                -showkeys $opts(-showkeys) \
-                -stripe   $opts(-stripe)
-                
+            listfield $listdlg.top.listfield                
 
             grid $listdlg.top.icon \
                 -row 0 -column 0 -padx 8 -pady 4 -sticky nw 
@@ -1093,7 +1087,14 @@ snit::type ::marsgui::messagebox {
         # Make it transient over the -parent
         wm transient $listdlg $opts(-parent)
 
-        # NEXT, set the listfield value
+        # NEXT, configure the listfield and set its value
+        $listdlg.top.listfield configure \
+            -height   $opts(-listrows)   \
+            -width    $opts(-listwidth)  \
+            -itemdict $opts(-itemdict)   \
+            -showkeys $opts(-showkeys)   \
+            -stripe   $opts(-stripe)
+
         $listdlg.top.listfield set $opts(-initvalue)
 
         # NEXT, raise the dialog and set the focus
