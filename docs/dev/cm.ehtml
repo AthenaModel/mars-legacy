@@ -59,6 +59,10 @@
 <<preface changelog "Change Log">>
 
 <<changelog>>
+<<change 10/3/2011 Update will>>
+Added a section on target software platforms.
+<</change>>
+
 <<change 9/20/2011 Update will>>
 <ul>
   <li> Standardized on "https://oak.jpl.nasa.gov/svn" as the
@@ -166,12 +170,23 @@ repository in the <code>mars/docs/dev</code> directory.<p>
 
 <i>Bugzilla</i>, <<link http://www.bugzilla.org>><p>
 
+<i>MinGW</i>, <<link http://www.mingw.org>><p>
+
 <i>Subversion</i>, <<link http://subversion.apache.org>><p>
 
 <i>Pragmatic Version Control: Using Subversion</i>, by Mike Mason,
 Pragmatic Bookshelf, 2006.<p>
 
+<<section platform "Target Platforms">>
 
+Mars can be built for the following platforms: 32-bit Linux, 64-bit
+Linux, and 32-bit Windows.  On Linux, the native development tools are
+used.  On Windows, the <i>MinGW</i> tool chain is used; see
+<<link http://www.mingw.org>>.<p>
+
+The pure-Tcl code in Mars can also be used on OS X, and in particular
+the documentation can be built there.  Only the Mars binary Tcl
+extensions are unavailable.<p>
 
 <<section vc "Version Control">>
 

@@ -14,13 +14,22 @@
 #---------------------------------------------------------------------
 # Settings
 
-# Location of Tcl Libraries
-ARCH = $(shell arch)
-ifeq ($(ARCH),i686)
-	export MARS_TCL_HOME = /usr/local/ActiveTclEE-2011Q1
-endif
-ifeq ($(ARCH),x86_64)
-	export MARS_TCL_HOME = /usr/local/ActiveTclEE-2011Q3-x86_64
+# FIRST, get the platform
+
+UNAME := $(shell uname -sp)
+
+ifeq "$(UNAME)" "Linux i686"
+    PLATFORM = linux32
+    export MARS_TCL_HOME = /usr/local/ActiveTclEE-2011Q1
+else ifeq "$(UNAME)" "Linux x86_64"
+    PLATFORM = linux64
+    export MARS_TCL_HOME = /usr/local/ActiveTclEE-2011Q3-x86_64
+else ifeq "$(UNAME)" "MINGW_NT-6.1 unknown"
+    PLATFORM = win32
+    export MARS_TCL_HOME = C:/ATEE/2011Q3
+else
+    PLATFORM = unknown
+    export MARS_TCL_HOME = unknown
 endif
 
 # TCLLIBPATH for code run during the build process (including tests!)
