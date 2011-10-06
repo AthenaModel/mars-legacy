@@ -33,11 +33,7 @@ namespace eval ::marsutil:: {
 #-------------------------------------------------------------------
 # Load binary extensions, if present.
 
-set binlib [file join $::marsutil::library libMarsutil.so]
-
-if {[file exists $binlib]} {
-    load $binlib
-}
+catch {package require Marsbin}
 
 #-----------------------------------------------------------------------
 # Submodules

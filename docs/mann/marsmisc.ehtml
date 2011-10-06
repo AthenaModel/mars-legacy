@@ -248,11 +248,12 @@ where 0 &le; n &lt; <i>N</i>, where <i>N</i> is the length of
 <<iref getnetif>> returns a list of the host's network interface names
 and IP addresses in dotted-decimal format.  This list can be treated
 as a dict with the network interface names acting as the keys.
-<<iref getnetif>> is part of the <<xref marsutil(n)>> binary
-extension; it is available only when that extension is available.
 Will return TCL_ERROR if the network configuration information can't
 be determined.<p>
 
+<b><<iref getnetif>> is part of the <<xref marsutil(n)>> binary
+extension; it is available only when that extension is available, and
+then only on Linux.</b><p>
 
 <<defitem hexdump {hexdump <i>value</i>}>>
 

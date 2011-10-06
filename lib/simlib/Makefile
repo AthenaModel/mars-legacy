@@ -9,7 +9,7 @@
 # Configuration variables
 
 TOP_DIR=../..
-TCLSH=tclsh8.5
+TCLSH=tclsh
 
 include $(TOP_DIR)/MakeDefs
 
