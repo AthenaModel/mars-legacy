@@ -14,10 +14,19 @@
 
 TOP_DIR = ../..
 
+include $(TOP_DIR)/MakeDefs
+
 LIB = $(TOP_DIR)/src/lib
 
 # Compilation Flags
-CFLAGS = -fPIC -g -O -Wall
+
+ifeq ($(MARS_OS),win)
+    OS_FLAGS =
+else 
+    OS_FLAGS = -fPIC
+endif
+
+CFLAGS = $(OS_FLAGS) -g -O -Wall
 
 # Include Directory
 

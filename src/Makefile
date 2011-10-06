@@ -27,19 +27,39 @@ include $(TOP_DIR)/MakeDefs
 SRCLIBDIR = $(TOP_DIR)/src/lib
 
 # Subdirectories to build
-SUBS = libGeotrans libGeostars libMarsutil libGeoTiff
+#
+# libGeoTiff isn't yet supported on Windows.
+
+LINUXSUBS   = libGeotrans libGeostars libGeoTiff
+WINSUBS     = libGeotrans libGeostars
+OTHERCLEANS = clean-Marsbin
+
+ifeq ($(MARS_OS),linux)
+    SUBS = $(LINUXSUBS)
+else ifeq ($(MARS_OS),win)
+    SUBS = $(WINSUBS)
+else 
+    SUBS =
+endif
 
 .PHONY: all
 
-all: $(SRCLIBDIR) subs
+all: $(SRCLIBDIR) subs Marsbin
 
 #---------------------------------------------------------------------
 # Target: <subdir> -- Rebuilds individual subdirectories
 
-.PHONY: $(SUBS)
+.PHONY: $(SUBS) Marsbin clean-Marsbin
 
 $(SUBS):
 	cd $@ ; make clean ; make
+
+Marsbin:
+	cd $@ ; ./configure --with-tcl=$(MARS_TCL_HOME)/lib --prefix $(realpath $(TOP_DIR)) --exec-prefix $(realpath $(TOP_DIR))
+	cd $@ ; make clean ; make ; make install
+
+clean-Marsbin:
+	cd Marsbin ; make clean
 
 #---------------------------------------------------------------------
 # Target: lib -- creates the lib directory

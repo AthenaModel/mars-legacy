@@ -14,10 +14,19 @@
 
 TOP_DIR = ../..
 
+include $(TOP_DIR)/MakeDefs
+
 LIB = $(TOP_DIR)/src/lib
 
 # Compilation Flags
-CFLAGS = -fPIC -g -O -ansi -Wall 
+
+ifeq ($(MARS_OS),win)
+    OS_FLAGS = -mnop-fun-dllimport -pipe -fomit-frame-pointer
+else 
+    OS_FLAGS = -fPIC
+endif
+
+CFLAGS = $(OS_FLAGS) -g -O -ansi -Wall 
 
 # Include Directory
 
@@ -29,7 +38,6 @@ TARGETS = $(LIB)/libGeotrans.a
 
 OBJS = \
 	mgrs.o polarst.o tranmerc.o ups.o utm.o
-
 
 all: $(TARGETS)
 

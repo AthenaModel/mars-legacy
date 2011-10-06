@@ -52,7 +52,7 @@ subs: $(subs-BYDIR)
 $(subs-BYDIR): check_env
 	cd $(@:subs-%=%); $(MAKE) all
 
-clean: $(clean-BYDIR)
+clean: $(clean-BYDIR) $(OTHERCLEANS)
 
 $(clean-BYDIR): check_env
 	cd $(@:clean-%=%); $(MAKE) clean

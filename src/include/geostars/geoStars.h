@@ -400,6 +400,11 @@ Here are some common questions:
 #ifndef GEO_H
 #define GEO_H
 
+/* WHD, 10/5/2011 -- By default, this library wants to be built as
+ * a DLL on Windows; but we want a .a file.  Defining GEO_LIB turns off
+ * the DLL magic. */
+#define GEO_LIB
+
 #if defined(GEO_LIB) || !defined(WIN32)
 #define DLL_API                  //!< DLL calling convention
 #define DLL_CALLCONV             //!< DLL calling convention
