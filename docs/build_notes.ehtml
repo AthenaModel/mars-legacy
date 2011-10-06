@@ -10,6 +10,23 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.60, 6 October 2011</h3>
+This build contains some bug fixes to messagebox(n), rangefield(n), gram2(n) and
+enumfield(n). There is also a new section in the Mars CM plan that details
+how Subversion and Bugzilla are integrated into the JNEM/Athena development
+environments. The list of pacakges:<p>
+<ul>
+  <li> Bug 3122: messagebox: list select dialog close button doesn't work
+  <li> Bug 3158: rangefield(n): set fails when -state is disabled
+  <li> Bug 3164: gram2(n): level inputs with "days" less than one tick are ignored
+  <li> Bug 3166: Subversion/Bugzilla Integration Details
+  <li> Bug 3172: enumfield(n): Doesn't take focus correctly on tab
+  <li> Bug 3174: enumfield(n), textfield(n): -borderwidth, -background
+  <li> Bug 3175: messagebox(n) listselect
+  <li> Bug 3182: mars(1): Use "tclsh" rather than "tclsh8.5"
+  <li> Bug 3183: Mars MakeDefs: Platform Definition 
+</ul><p>
+
 <h3>Build 1.59, 22 August 2011</h3>
 This build simply has the MakeDefs file at the top of the tree point to the
 latest 64-bit distribution of ActiveTcl EE. 
