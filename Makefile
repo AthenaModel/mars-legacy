@@ -116,6 +116,7 @@ clean: check_env
 # Tags the version in the current work area.
 
 BUILD_TAG = mars_$(MARS_VERSION)
+TAG_DIR   = https://oak.jpl.nasa.gov/svn/mars/tags/$(BUILD_TAG)
 
 tag: check_env check_ver
 	@ echo ""
@@ -123,8 +124,15 @@ tag: check_env check_ver
 	@ echo "         Tagging: Mars $(MARS_VERSION)"
 	@ echo "*****************************************************"
 	@ echo ""
-	svn copy -m"Tagging Mars $(MARS_VERSION)" \
-		. https://oak/svn/mars/tags/$(BUILD_TAG)
+	svn copy -m"Tagging Mars $(MARS_VERSION)" . $(TAG_DIR)
+	svn switch $(TAG_DIR) .
+	echo $(MARS_VERSION) > $(VERSION_FILE)
+	svn commit -m"Tagging Mars $(MARS_VERSION)" $(VERSION_FILE)
+	@ echo ""
+	@ echo "*****************************************************"
+	@ echo "         Now in $(TAG_DIR)"
+	@ echo "*****************************************************"
+	@ echo ""
 
 check_ver:
 	@ if test ! -n "$(MARS_VERSION)" ; then \

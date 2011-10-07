@@ -44,6 +44,7 @@ namespace eval ::marsutil:: {
         lmove           \
         lsearchi        \
         lshift          \
+        marsver         \
         max             \
         min             \
         moneyfmt        \
@@ -62,10 +63,42 @@ namespace eval ::marsutil:: {
         try             \
         wildToRegexp
 
+    variable version ""
     variable pi      [expr {acos(-1.0)}]
     variable radians [expr {$pi/180.0}]
 
 }
+
+#-------------------------------------------------------------------
+# Mars Version
+
+# marsver
+#
+# Returns the version number of the software, as read from 
+# version.txt.
+
+proc ::marsutil::marsver {} {
+    variable library
+    variable version
+
+    # FIRST, if we've already set version just return it.
+    if {$version ne ""} {
+        return $version
+    }
+
+    # NEXT, set version to a stopgap value
+    set version x.y
+
+    # NEXT, try to read it from version.txt.
+    catch {
+        set file [file join $library version.txt]
+        set text [readfile $file]
+        set version [string trim $text]
+    } 
+
+    return $version
+}
+
 
 #-----------------------------------------------------------------------
 # Control Structures

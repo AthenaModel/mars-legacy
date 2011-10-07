@@ -59,6 +59,16 @@
 <<preface changelog "Change Log">>
 
 <<changelog>>
+<<change 10/7/2011 Update will>>
+<ul>
+  <li> Changed the naming convention for experimental branches; they
+       are named using the year and month, but not the day of the
+       month.
+  <li> Updated the procedure for official builds: the Makefiles now
+       handle the version number differently.
+</ul>
+<</change>>
+
 <<change 10/3/2011 Update will>>
 Added a section on target software platforms.
 <</change>>
@@ -278,10 +288,10 @@ a snapshot of the build, and allows it to be recovered at any time.<p>
 Developers can create branches on which to do experimental coding; the
 results can later be merged with the trunk or abandoned.  Experimental
 branches are created with branch name
-"<code>branches/<i>user</i>/<i>yyyymmdd_name</i></code>",
-where <i>user</i> is the developer's user name, <i>yyyymmdd</i> is the current
-date, and <i>name</i> is some brief name for the experiment.  Experimental
-branches can then be checked out just like the trunk.<p>
+"<code>branches/<i>user</i>/<i>yyyymm_name</i></code>",
+where <i>user</i> is the developer's user name, <i>yyyymm</i> is the current
+year and month, and <i>name</i> is some brief name for the experiment.
+Experimental branches can then be checked out just like the trunk.<p>
 
 <<section vc.branches.bugfix "Bug-fix Branches">>
 
@@ -582,29 +592,24 @@ $ make build
 <</step>>
 
 <<step>>
-Tag the trunk with the build number.
+Tag the trunk with the build number.  <b>This step will switch your
+workspace to the tagged code!</b>
 <</step/>>
-<pre>
-$ cd ~/mars
-$ svn cp . <i>repository</i>/mars/tags/mars_1.3
-</pre>
-
-or<p>
-
 <pre>
 $ cd ~/mars
 $ make MARS_VERSION=1.3 tag
 </pre>
-<</step>>
 
-<<step>>
-Check the tagged version out of the repository as
-<code>~/mars_<i>version</i></code>.
-<</step/>>
+This is equivalent to:<p>
+
 <pre>
-$ cd ~
-$ svn checkout <i>repository</i>/mars/tags/mars_1.3
+$ cd ~/mars
+$ svn cp . <i>repository</i>/mars/tags/mars_1.3
+$ svn switch <i>repository</i>/mars/tags/mars_1.3 .
+$ echo 1.3 > lib/marsutil/version.txt
+$ svn commit lib/marsutil/version.txt
 </pre>
+
 <</step>>
 
 <<step>>
@@ -613,9 +618,15 @@ client that uses it, this "official" build simply verifies that the
 tagged version of Mars is viable.
 <</step/>>
 <pre>
-$ cd ~/mars_1.3
-$ make MARS_VERSION=1.3 build
+$ make build
 </pre>
+<</step>>
+
+<<step>>
+Browse docs/index.html, and verify that the generated HTML documents
+reference the correct Mars version number.
+<</step/>>
+n/a
 <</step>>
 
 <<step>>
@@ -627,13 +638,11 @@ n/a
 
 <<step>>
 Add the version to Bugzilla.
-location.
 <</step/>>
 On the Bugzilla toolbar, click "Administration".  On the resulting
 page click "Products", then "Mars 1.0", then "Edit Versions".  Add a
 version "B<i>y</i>", e.g., when building Mars 1.3, add a version "B3".
 <</step>>
-
 
 <</procedure>>
 

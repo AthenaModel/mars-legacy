@@ -21,8 +21,10 @@ export TCLLIBPATH = $(TOP_DIR)/lib
 
 # Set MARS_VERSION for development if it isn't set.
 export MARS_VERSION_DEFAULT = 1.x
+export VERSION_FILE         = $(TOP_DIR)/lib/marsutil/version.txt
+
 ifndef MARS_VERSION
-    export MARS_VERSION = $(MARS_VERSION_DEFAULT)
+    export MARS_VERSION = $(strip $(shell cat $(VERSION_FILE)))
 endif
 
 # Directories

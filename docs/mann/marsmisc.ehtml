@@ -21,6 +21,11 @@ versions will so indicate.<p>
 
 <<deflist>>
 
+<<defitem marsver {marsver}>>
+
+Returns the Mars version string.  This is "1.x" on the trunk, and the
+tagged version number for tagged builds.<p>
+
 <<defitem assert {assert <i>expression</i>}>>
 
 <<iref assert>> tests an invariant Boolean <i>expression</i>.  If the
