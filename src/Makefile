@@ -59,7 +59,7 @@ Marsbin:
 	cd $@ ; make clean ; make ; make install
 
 clean-Marsbin:
-	cd Marsbin ; make clean
+	cd Marsbin ; if test -f Makefile ; then make clean ; fi
 
 #---------------------------------------------------------------------
 # Target: lib -- creates the lib directory
