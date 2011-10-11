@@ -55,7 +55,7 @@ $(SUBS):
 	cd $@ ; make clean ; make
 
 Marsbin:
-	cd $@ ; ./configure --with-tcl=$(MARS_TCL_HOME)/lib --prefix $(realpath $(TOP_DIR)) --exec-prefix $(realpath $(TOP_DIR))
+	cd $@ ; chmod +x configure ; ./configure --with-tcl=$(MARS_TCL_HOME)/lib --prefix $(realpath $(TOP_DIR)) --exec-prefix $(realpath $(TOP_DIR))
 	cd $@ ; make clean ; make ; make install
 
 clean-Marsbin:
