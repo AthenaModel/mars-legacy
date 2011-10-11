@@ -127,8 +127,11 @@ proc ::tk_textPaste w {
 #-----------------------------------------------------------------------
 # Ttk Theme Settings
 
-# Use the clam theme for ttk widgets.
-ttk::style theme use clam
+# Use the "clam" theme on Linux and OS X; use the default theme on 
+# Windows.
+if {[tk windowingsystem] in {x11 aqua}} {
+    ttk::style theme use clam
+}
 
 # Get the default background and active background colors
 # from the Ttk theme; we'll configure the classic widgets to use it
