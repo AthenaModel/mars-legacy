@@ -10,11 +10,34 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.61, 11 October 2011</h3>
+
+This build contains changes to the build procedure for Mars.  The
+biggest change is to the handling of the Mars binary Tcl extensions.
+All code now builds on both Linux and Windows.  The libMarsutil
+library has been replaced with a new TEA-compliant package called
+Marsbin, which marsutil(n) loads if it's available.<p>
+
+In addition, the handling of the Mars version number has been changed
+to be more robust.  In particular, once Mars has been built and
+tagged, clients will no longer need to specify MARS_VERSION explicitly
+when building against the tagged version; the tagged version will know
+its own version number.<p>
+
+<ul>
+  <li> Bug 3187: Mars: Support for building on Windows
+  <li> Bug 3190: Mars Version Specification
+  <li> Bug 3193: Update Mars to ATEE 2011 Q3 for 32-bit Linux 
+</ul><p>
+
+
 <h3>Build 1.60, 6 October 2011</h3>
-This build contains some bug fixes to messagebox(n), rangefield(n), gram2(n) and
-enumfield(n). There is also a new section in the Mars CM plan that details
-how Subversion and Bugzilla are integrated into the JNEM/Athena development
-environments. The list of pacakges:<p>
+
+This build contains some bug fixes to messagebox(n), rangefield(n),
+gram2(n) and enumfield(n). There is also a new section in the Mars CM
+plan that details how Subversion and Bugzilla are integrated into the
+JNEM/Athena development environments. The list of packages:<p>
+
 <ul>
   <li> Bug 3122: messagebox: list select dialog close button doesn't work
   <li> Bug 3158: rangefield(n): set fails when -state is disabled
