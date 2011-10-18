@@ -23,8 +23,9 @@ package require treectrl 2.2.10
 package require tablelist 5.1
 package require Plotchart 1.6
 package require Tktable 2.10
-package require Tkhtml 2.0
 
+# NOTE: Tkhtml 2.0 is required by htmlviewer(n) when the first instance
+# is created.
 
 #-----------------------------------------------------------------------
 # Package Definition

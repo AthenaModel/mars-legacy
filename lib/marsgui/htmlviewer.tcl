@@ -159,6 +159,9 @@ snit::widgetadaptor ::marsgui::htmlviewer {
     # Constructor
 
     constructor {args} {
+        # FIRST, load Tkhtml 2.0 if need be
+        package require Tkhtml 2.0
+
         # FIRST, create the hull
         installhull [html $win                        \
                          -highlightthickness 1        \
