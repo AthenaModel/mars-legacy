@@ -443,7 +443,7 @@ snit::type ::marsutil::ehtml {
 
     template proc macro::changelog {} {
         |<--
-        <table border width="100%" cellpadding="2" cellspacing="0">
+        <table border="1" width="100%" cellpadding="2" cellspacing="0">
         <tr>
         <th align="left" width="10%">Status</th>
         <th align="left" width="70%">Nature of Change</th>
