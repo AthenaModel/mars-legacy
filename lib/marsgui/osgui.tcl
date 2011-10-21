@@ -46,26 +46,19 @@ snit::type osgui {
         # NEXT, we need special handling on Windows
         if {[tk windowingsystem] eq "win32"} {
             # FIRST, it's a tool window
-            puts "Make $w a toolwindow"
             wm attributes $w -toolwindow 1
 
             # NEXT, Get the parent's position on the screen.
             set px      [winfo rootx $parent]
             set py      [winfo rooty $parent]
 
-            puts "px=$px py=$py"
-
             # NEXT, compute window's position
             set delta 100
             set wx [expr {$px + $delta}]
             set wy [expr {$py + $delta}]
 
-            puts "wx=$wx wy=$wy"
-
             # NEXT, position the window
-            puts "geo was: [wm geometry $w]"
             wm geometry $w +$wx+$wy
-            puts "geo is: [wm geometry $w]"
         }
 
         return
