@@ -50,6 +50,7 @@ if {[file exists $gtiflib]} {
 }
 
 source [file join $::marsgui::library global.tcl         ]
+source [file join $::marsgui::library osgui.tcl          ]
 source [file join $::marsgui::library mkicon.tcl         ]
 source [file join $::marsgui::library marsicons.tcl      ]
 source [file join $::marsgui::library gradient.tcl       ]

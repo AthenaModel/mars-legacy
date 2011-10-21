@@ -547,7 +547,7 @@ snit::widget ::marsgui::orderdialog {
 
         # NEXT, make the window visible, and transient over the
         # current top window.
-        wm transient  $win [$type Parent]
+        osgui mktoolwindow  $win [$type Parent]
         wm attributes $win -topmost 1
         wm deiconify  $win
         raise $win

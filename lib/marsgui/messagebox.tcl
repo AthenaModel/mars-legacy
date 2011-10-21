@@ -388,7 +388,7 @@ snit::type ::marsgui::messagebox {
         }
 
         # Make it transient over the -parent
-        wm transient $dialog $opts(-parent)
+        osgui mktoolwindow $dialog $opts(-parent)
 
         # NEXT, raise the button and set the focus
         wm deiconify $dialog
@@ -651,7 +651,7 @@ snit::type ::marsgui::messagebox {
         $getsdlg.top.icon configure -image $icon
 
         # Make it transient over the -parent
-        wm transient $getsdlg $opts(-parent)
+        osgui mktoolwindow $getsdlg $opts(-parent)
 
         # NEXT, clear the error message and the entered text, and
         # apply the initvalue.
@@ -876,7 +876,7 @@ snit::type ::marsgui::messagebox {
         $pickdlg.top.icon configure -image $icon
 
         # Make it transient over the -parent
-        wm transient $pickdlg $opts(-parent)
+        osgui mktoolwindow $pickdlg $opts(-parent)
 
         # NEXT, set the menubox values and initvalue.
 
@@ -1085,7 +1085,7 @@ snit::type ::marsgui::messagebox {
         $listdlg.top.icon configure -image $icon
 
         # Make it transient over the -parent
-        wm transient $listdlg $opts(-parent)
+        osgui mktoolwindow $listdlg $opts(-parent)
 
         # NEXT, configure the listfield and set its value
         $listdlg.top.listfield configure \
