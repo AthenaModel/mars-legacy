@@ -10,6 +10,23 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.62, 24 October 2011</h3>
+
+This build contains some fixes for gram(n) and gram2(n) test failures and
+some bug fixes. It also introduces the "vista" theme for marsgui(n) so the
+GUIs look nice when running under Windows. marsgui(n) is also changed to load
+Tkhtml 2.0 only when an htmlviewer(n) is created. This allows Athena to use
+Tkthml 3.0 without problem.
+
+<ul>
+  <li> Bug 3188: gram(n), gram2(n): format %7.3f test failures
+  <li> Bug 3194: "make clean" fails in src if Marsbin has never been built.
+  <li> Bug 3196: messagebox(n): transient doesn't place window properly on Windows
+  <li> Bug 3197: marsgui(n): Use "vista" theme on Windows
+  <li> Bug 3198: htmlviewer(n): Load Tkhtml 2.0 lazily
+  <li> Bug 3199: ehtml(n): Use border=1 for changelog table 
+</ul><p>
+
 <h3>Build 1.61, 11 October 2011</h3>
 
 This build contains changes to the build procedure for Mars.  The
