@@ -483,6 +483,8 @@ snit::type ::marsgui::messagebox {
         # NEXT, validate -parent
         if {$opts(-parent) ne ""} {
             snit::window validate $opts(-parent)
+        } else {
+            error "-parent: not specified"
         }
     }
 
@@ -720,9 +722,10 @@ snit::type ::marsgui::messagebox {
             error "-icon: should be one of [join $iconnames {, }]"
         }
 
-        # NEXT, validate -parent
         if {$opts(-parent) ne ""} {
             snit::window validate $opts(-parent)
+        } else {
+            error "-parent: not specified"
         }
     }
 
