@@ -190,7 +190,10 @@ snit::type ::marsutil::gtserver {
 
             # NEXT, broadcast all game truth objects
             foreach class $classinfo(classes) {
-                # FIRST, build the query
+                # FIRST, if this class does not get refreshed, don't
+                if {$classinfo($class-norefresh)} {continue}
+
+                # NEXT, build the query
                 set query  { 
                     SELECT * from $classinfo($class-table) 
                 }
@@ -221,7 +224,10 @@ snit::type ::marsutil::gtserver {
 
             # NEXT, send game truth objects to client
             foreach class $classinfo(classes) {
-                # FIRST, build the query
+                # FIRST, if this class does not get refreshed, don't
+                
+                if {$classinfo($class-norefresh)} {continue}
+                # NEXT, build the query
                 set query  { 
                     SELECT * from $classinfo($class-table) 
                 }
@@ -258,14 +264,37 @@ snit::type ::marsutil::gtserver {
     # table    The name of the table in the database
     # idcolumn The column in the database row that is the key column
     #
+    # Recognized options:
+    #   -norefresh    Means that upon a refresh request these objects
+    #                 do net get refreshed
+    #
     # Registers information about this type of game truth object for
     # use in create, update and delete of objects
     #
 
-    method class {class table idcolumn} {
+    method class {class table idcolumn {args ""}} {
 
-        set classinfo($class-table) $table
-        set classinfo($class-idcol) $idcolumn 
+        # FIRST, assume all gt classes are refreshed
+        set norefresh 0
+
+        # NEXT, parse options.
+        while {[llength $args] > 0} {
+            set opt [lshift args]
+
+            switch -exact -- $opt {
+                -norefresh {
+                    set norefresh 1
+                }
+
+                default {
+                    error "Unknown option \"$opt\""
+                }
+            }
+        }
+
+        set classinfo($class-norefresh) $norefresh
+        set classinfo($class-table)     $table
+        set classinfo($class-idcol)     $idcolumn 
 
         # NEXT, add this class in the classes list if not already there
         if {[lsearch -exact $classinfo(classes) $class] == -1} {

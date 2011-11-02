@@ -166,12 +166,16 @@ consistent and complete.  For example, the simulation can call this
 method at the end of each timestep to indicate that all published
 game truth is consistent with the published simulation time.<p>
 
-<<defitem class {$gtserver class <i>class table idcolumn</i>}>>
+<<defitem class {$gtserver class <i>class table idcolumn ?-norefresh?</i>}>>
 
 Defines a class of simulation object that will be created, updated and perhaps 
 deleted. Each class has a corresponding <i>table</i> in the runtime database.
 This table is the one that has rows created, updated or deleted. The
-<i>idcolumn</i> specifies which column in the table is the key column.<p>
+<i>idcolumn</i> specifies which column in the table is the key column.
+If the <i>-norefresh</i> option is used then this class of simulation object is not
+refreshed on a refresh request. This is useful for objects that are refreshed
+through other means.
+<p>
 
 <<defitem update {$gtserver update <i>class id</i> ?<i>dict</i>?}>>
 
