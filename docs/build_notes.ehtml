@@ -10,6 +10,18 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.63, 3 November 2011</h3>
+
+This build contains a couple bug fixes and a minor change to the gtserver
+API. gtserver now allows a -norefresh option for game truth object classes
+that should not be involved in a game truth refresh.
+
+<ul>
+  <li> Bug 3232: modeditor(n): add argument to -formatcmd
+  <li> Bug 3233: messagebox(n): -parent option cannot be the empty string
+  <li> Bug 3236: gtserver(n): add -norefresh option to object class definition 
+</ul><p>
+
 <h3>Build 1.62, 24 October 2011</h3>
 
 This build contains some fixes for gram(n) and gram2(n) test failures and
