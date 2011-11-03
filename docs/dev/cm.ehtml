@@ -563,9 +563,28 @@ E.g., "1.3".
 <</step>>
 
 <<step>>
-Check the trunk out of the repository.
+Check the trunk out of the repository as <code>~/mars</code>.
 <</step/>>
-<pre>$ svn checkout <i>repository</i>/mars/trunk ~/mars</pre>
+If you have not checked out Mars previously:<p>
+
+<pre>
+$ svn checkout <i>repository</i>/mars/trunk ~/mars
+</pre>
+
+If the <code>~/mars</code> directory already points at the trunk:<p>
+
+<pre>
+$ cd ~/mars
+$ svn update
+</pre>
+
+If the <code>~/mars</code> directory points at some other branch or tag:<p>
+
+<pre>
+$ cd ~/mars
+$ svn switch <i>repository</i>/mars/trunk .
+</pre>
+
 <</step>>
 
 <<step>>
@@ -642,6 +661,16 @@ Add the version to Bugzilla.
 On the Bugzilla toolbar, click "Administration".  On the resulting
 page click "Products", then "Mars 1.0", then "Edit Versions".  Add a
 version "B<i>y</i>", e.g., when building Mars 1.3, add a version "B3".
+<</step>>
+
+<<step>>
+Switch <code>~/mars</code> back to the trunk in preparation for future
+development.
+<</step/>>
+<pre>
+$ cd ~/mars
+$ svn switch <i>repository</i>/mars/trunk .
+</pre>
 <</step>>
 
 <</procedure>>
