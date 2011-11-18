@@ -65,10 +65,16 @@ snit::widget ::marsgui::colorfield {
             return $swatchCache($color)
         }
 
+        # NEXT, On Windows, the image handler rejects named Windows colors like
+        # SystemButtonFace.  Consequently, convert the color into canonical
+        # form.
+        lassign [winfo rgb . $color] r g b
+        set goodc [format "#%04X%04X%04X" $r $g $b]
+
         # NEXT, create a new swatch, and cache it.
         set swatch [image create photo -width $swidth -height $sheight]
     
-        $swatch put $color -to 1 1 $swidth $sheight
+        $swatch put $goodc -to 1 1 $swidth $sheight
         $swatch put gray50 -to 0 0 $swidth 1
         $swatch put gray50 -to 0 1 1 $sheight
         $swatch put gray75 -to 0 [expr {$sheight - 1}] $sheight $sheight
