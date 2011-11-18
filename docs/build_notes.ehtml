@@ -10,6 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.64, 18 November 2011</h3>
+
+This build contains two changes, an update to the official build
+procedure in the Mars CM Plan, and a fix to a colorfield(n) problem
+that manifests only on Microsoft Windows.<p>
+
+<ul>
+  <li> Bug 3241: Mars CM Plan: Official Build Details
+  <li> Bug 3266: colorfield(n): Can't parse "SystemButtonFace"
+</ul><p>
+
 <h3>Build 1.63, 3 November 2011</h3>
 
 This build contains a couple bug fixes and a minor change to the gtserver
