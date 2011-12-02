@@ -86,7 +86,7 @@ snit::type ::simlib::gram {
             gram(n) configuration parameters.
         }
 
-        $parm define gram.epsilon ::simlib::rmagnitude 0.1 {
+        $parm define gram.epsilon ::simlib::rmagnitude 0.01 {
             Level effects expire when the effect remaining is less
             than epsilon.  Slope effects are discarded if the
             slope is less than epsilon.

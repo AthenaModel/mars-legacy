@@ -260,9 +260,12 @@ namespace eval ::simlib::test {
             gramdb load $gramdb $rdb
         }
 
+        # NEXT, set the gram.epsilon to 0.1, to preserve the existing tests.
+        gram parm set gram.epsilon 0.1
+
         # NEXT, get create options
         set drivers [optval args -drivers 4]
-        
+
         gram jr \
             -clock   [namespace current]::myclock        \
             -rdb     $rdb                                \
