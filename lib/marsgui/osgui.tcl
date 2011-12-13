@@ -40,9 +40,6 @@ snit::type osgui {
         set w [winfo toplevel $w]
         set parent [winfo toplevel $parent]
 
-        # NEXT, make the window transient
-        wm transient $w $parent
-
         # NEXT, we need special handling on Windows
         if {[tk windowingsystem] eq "win32"} {
             # FIRST, it's a tool window
@@ -59,6 +56,13 @@ snit::type osgui {
 
             # NEXT, position the window
             wm geometry $w +$wx+$wy
+        } else {
+            # Just make it transient.
+
+            # NOTE: [wm transient] makes sense on Windows as well...but
+            # currently has a bug in it.  See Bug 3274 in the Athena
+            # Bugzilla database.
+            wm transient $w $parent
         }
 
         return
