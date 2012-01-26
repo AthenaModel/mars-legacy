@@ -100,13 +100,22 @@ namespace eval ::marsutil::test {
     #-------------------------------------------------------------------
     # validate
 
-    test quality_validate-1.1 {valid input} -setup {
+    test quality_validate-1.1 {valid numeric input} -setup {
         setup
     } -body {
-        goodness validate VG
+        goodness validate 0.9
     } -cleanup {
         cleanup
-    } -result {VG}
+    } -result {0.9}
+
+    test quality_validate-1.1b {valid symbolic input} -setup {
+        setup
+    } -body {
+        goodness validate G
+    } -cleanup {
+        cleanup
+    } -result {0.7}
+
 
     test quality_validate-1.2 {invalid input} -setup {
         setup

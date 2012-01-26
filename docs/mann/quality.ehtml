@@ -146,7 +146,8 @@ Sets the value of one or more options.<p>
 <<defitem validate {$quality validate <i>input</i>}>>
 
 Validates that <i>input</i> is a valid value for this quality.  If it
-is, it is returned unchanged.  If it is not, an error is thrown with
+is, it is returned in canonical form i.e., as a number.
+If it is not, an error is thrown with
 an <code>-errorcode</code> of <b>INVALID</b>.<p>
 
 <<defitem size {$quality size}>>

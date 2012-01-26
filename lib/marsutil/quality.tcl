@@ -158,7 +158,8 @@ snit::type ::marsutil::quality {
     # validate input
     #
     # Validates that the input is a valid quality value.  If it is, it is
-    # returned unchanged; otherwise an error is thrown.
+    # returned in canonical form, i.e., as a number.  Otherwise, an
+    # appropriate error is thrown.
     
     method validate {input} {
         set ndx  [$self index $input]
@@ -186,7 +187,7 @@ snit::type ::marsutil::quality {
 
         }
 
-        return $input
+        return [$self value $input]
     }
 
 
