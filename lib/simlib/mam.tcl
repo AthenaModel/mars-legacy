@@ -106,7 +106,7 @@ snit::type ::simlib::mam {
 
     #-------------------------------------------------------------------
     # Type Variables
-    
+   
     # rdbTracker array
     #
     # Array, mam(n) instance by RDB. This array tracks which RDBs are
@@ -663,106 +663,113 @@ snit::type ::simlib::mam {
         }
     }
 
-    # Affinity $eta pfList tauList pgList
+    # Affinity $eta pfList eList pgList
     #
     # eta     - A measure of the commonality between the entities
     # pfList  - A list of positions for entity f
-    # tauList - A list of emphases for entity f
+    # eList   - A list of emphases for entity f
     # pgList  - A list of positions for entity g
     #
     # Computes the affinity of entity f for entity g given their
     # positions on the same topics and f's emphasis on agreement/disagreement,
-    # per the series of Affinity memos.
+    # per the Mars Analyst's Guide.
 
-    proc Affinity {eta pfList tauList pgList} {
-        # FIRST, loop over the topics and accumulate data.
-        
-        # Sum of Z.fi for all i
-        set sumZf 0.0
+    proc Affinity {eta pfList eList pgList} {
+        # FIRST, set epsilon.  This could be a parmset parameter, but
+        # there seems little need to adjust it.  Note that all of the 
+        # numbers we're comparing have absolute values less than or 
+        # equal to 1.0.
+        set epsilon 0.001
 
-        # List of i's for which tau.fi = 0 but P.fi=P.gi
-        set I [list]
+        # NEXT, Prepare to accumulate data
+        set J [list]   ;# Topics i s.t. E.fi = 0
+        set K [list]   ;# Topics in J s.t. P.fi != P.gi
+        set L [list]   ;# Topics i s.t. E.fi > 0
 
-        # Sum of Z.fi for i in I.
-        set sumZinI 0.0
+        set sum_L_M     0.0
+        set sum_J_ZG    0.0
+        set sum_L_Num   0.0
+        set sum_L_Denom 0.0
 
-        # If 1, tau.fi = 0 and P.fi != P.gi for some i
-        set extremeDisagreement 0
-
+        # NEXT, loop over the topics and accumulate the data needed to
+        # assess the special cases.
         for {set i 0} {$i < [llength $pfList]} {incr i} {
-            # Get values
-            let Pf   [lindex $pfList $i]
-            let Pg   [lindex $pgList $i]
-            let tau  [lindex $tauList $i]
+            set Efi [lindex $eList $i]
+            set Pfi [lindex $pfList $i]
+            set Pgi [lindex $pgList $i]
 
-            let Bf     [sign $Pf]
-            let Zf($i) {abs($Pf)}
-            let sumZf  {$sumZf + $Zf($i)}
-            let Bg     [sign $Pg]
-            let Zg     {abs($Pg)}
+            set Bfi    [sign $Pfi]
+            let Bgi    [sign $Pgi]
+            let Zfi    {abs($Pfi)}
+            let Zgi    {abs($Pgi)}
 
             # Agreement
-            if {$Bf == $Bg} {
-                let G($i) {sqrt($Pf * $Pg)}
+            if {$Bfi == $Bgi} {
+                let G {sqrt($Pfi * $Pgi)}
             } else {
-                let G($i) 0.0
+                let G 0.0
             }
 
             # Disagreement
-            let D($i) {abs($Pf - $Pg)/2.0}
+            let D {abs($Pfi - $Pgi)/2.0}
+            
+            # Importance
+            let M {max($Zfi,$D)}
 
-            # Special cases involving tau.fi
-            if {$tau == 0} {
-                if {$Pf == $Pg} {
-                    lappend I $i
-                    let  sumZinI {$sumZinI + $Zf($i)}
-                } else {
-                    set extremeDisagreement 1
+            if {abs($Efi) < $epsilon} {
+                lappend J $i
+                let sum_J_ZG {$sum_J_ZG + $Zfi*$G}
+
+                let val {abs($Pfi-$Pgi)}
+
+                if {abs($Pfi - $Pgi) >= $epsilon} {
+                    lappend K $i
                 }
             } else {
-                let beta($i) {(1 - $tau)/$tau}
+                lappend L $i
+
+                let beta {(1 - $Efi)/$Efi}
+
+                let sum_L_M {$sum_L_M + $M}
+
+                let sum_L_Num   {$sum_L_Num   + $M*($G - $beta*$D)}
+                let sum_L_Denom {$sum_L_Denom + $M*(1  + $beta*$D)}
             }
         }
 
-        # NEXT, compute Affinity
-        set numZinI [llength $I]
+        # CASE A
 
-        if {$extremeDisagreement} {
-            # Case 1: f and g disagree on a topic for which E1 has
-            # zero emphasis.
-            let Afg {-1.0}
-        } elseif {$numZinI > 0 && $sumZinI == 0.0} {
-            # Case 2: f and g agree on all topics for which f has 
-            # zero emphasis, but all such zeals are 0.0.
-            let Afg {0.0}
-        } elseif {$numZinI > 0 && $sumZinI != 0.0} {
-            # Case 3: f and g agree on all topics for which f has 
-            # zero emphasis, with positive zeal.
-            let sumZG 0.0
-            foreach i $I {
-                let sumZG {$sumZG + $Zf($i)*$G($i)}
-            }
-            let Afg {$sumZG/$sumZinI}
-        } elseif {$numZinI == 0 && $sumZf == 0.0} {
-            # Case 4: There are no topics on which f and g agree
-            # for each f has zero emphasis, and f's zeal is 0.0 for
-            # all topics.
-            let Afg {0.0}
-        } else {
-            set num   $eta
-            set denom $eta
-
-            for {set i 0} {$i < [llength $pfList]} {incr i} {
-                let factor {max($Zf($i),$D($i))}
-
-                let num   {$num   + $factor * ($G($i) - $beta($i)*$D($i))}
-                let denom {$denom + $factor * (  1    + $beta($i)*$D($i))}
-            }
-
-            let Afg {$num/$denom}
+        if {[llength $J] == 0 && 
+            $eta + $sum_L_M < $epsilon
+        } {
+            return 0.0
         }
 
-        return $Afg
+        # CASE B
+        if {[llength $J] > 0 &&
+            [llength $K] == 0 &&
+            $eta + $sum_J_ZG + $sum_L_M < $epsilon
+        } {
+            return 0.0
+        }
+
+        # CASE C
+        
+        if {[llength $J] > 0 &&
+            [llength $K] > 0
+        } {
+            return -1.0
+        }
+
+        # CASE D/E
+        #
+        # These cases differ only in the $sum_J_ZG term, which is
+        # zero in Case E.
+
+        let Num   {$eta + $sum_J_ZG + $sum_L_Num}
+        let Denom {$eta + $sum_J_ZG + $sum_L_Denom}
+
+        return [expr {$Num/$Denom}]
     }
 
     # sign x

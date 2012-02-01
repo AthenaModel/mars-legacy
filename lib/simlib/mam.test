@@ -1532,7 +1532,7 @@ E1  T2  0.0      0.5
         cleanup
     } -result {4}
 
-    test compute-1.2 {Default settings; all affinities are 0} -setup {
+    test compute-1.2 {Default settings; all affinities are 1.0} -setup {
         create
         mymam entity add E1
         mymam entity add E2
@@ -1540,8 +1540,11 @@ E1  T2  0.0      0.5
         mymam topic add T1
     } -body {
         mymam compute
+
+        # All are 1.0 because the beliefs contribute nothing and 
+        # playbox commonality is 1.0; hence, there is commonality.
         rdb onecolumn {
-            SELECT count(*) FROM mam_affinity WHERE affinity = 0.0
+            SELECT count(*) FROM mam_affinity WHERE affinity = 1.0
         }
     } -cleanup {
         cleanup
@@ -1562,7 +1565,46 @@ E1  T2  0.0      0.5
         cleanup
     } -result {4}
 
-    test compute-2.1 {Case 1: Extreme disagreement} -setup {
+    test compute-2.1 {Case A: No zeal, commonality, or zero-emphasis} -setup {
+        create
+        mymam entity add E1
+        mymam entity add E2
+
+        mymam topic add T1
+        mymam topic add T2
+        
+        mymam playbox configure -gamma 0.0
+    } -body {
+        mymam compute
+        rdb onecolumn {
+            SELECT format('%.2f',affinity) FROM mam_affinity 
+            WHERE f='E1' and g='E2'
+        }
+    } -cleanup {
+        cleanup
+    } -result {0.00}
+
+    test compute-2.2 {Case B: Zero emph., but no zeal or commonality} -setup {
+        create
+        mymam entity add E1
+        mymam entity add E2
+
+        mymam topic add T1
+        mymam topic add T2
+        
+        mymam playbox configure -gamma 0.0
+        mymam belief configure E1 T1 -emphasis 0.0
+    } -body {
+        mymam compute
+        rdb onecolumn {
+            SELECT format('%.2f',affinity) FROM mam_affinity 
+            WHERE f='E1' and g='E2'
+        }
+    } -cleanup {
+        cleanup
+    } -result {0.00}
+
+    test compute-2.3 {Case C: Pathological disagreement} -setup {
         create
         mymam entity add E1
         mymam entity add E2
@@ -1582,29 +1624,7 @@ E1  T2  0.0      0.5
         cleanup
     } -result {-1.00}
 
-    test compute-2.2 {Case 2: Intolerant agreement, no zeal} -setup {
-        create
-        mymam entity add E1
-        mymam entity add E2
-
-        mymam topic add T1
-        mymam topic add T2
-
-        # E1 and E2 agree on all topics for which E1 has emphasis 0,
-        # but the zeals are 0.0
-        mymam belief configure E1 T1 -emphasis 0.0
-        mymam belief configure E1 T2 -position 0.1
-    } -body {
-        mymam compute
-        rdb onecolumn {
-            SELECT format('%.2f',affinity) FROM mam_affinity 
-            WHERE f='E1' and g='E2'
-        }
-    } -cleanup {
-        cleanup
-    } -result {0.00}
-
-    test compute-2.3 {Case 3: Intolerant agreement, with zeal} -setup {
+    test compute-2.4 {Case D: zero-emphasis with positive agreement} -setup {
         create
         mymam entity add E1
         mymam entity add E2
@@ -1618,6 +1638,9 @@ E1  T2  0.0      0.5
         mymam belief configure E2 T1 -position 0.2
         mymam belief configure E1 T2 -position 0.1
         mymam belief configure E2 T2 -position -0.1
+
+        # Assume no commonality.
+        mymam playbox configure -gamma 0.0
     } -body {
         mymam compute
         rdb onecolumn {
@@ -1628,29 +1651,7 @@ E1  T2  0.0      0.5
         cleanup
     } -result {0.20}
 
-    test compute-2.4 {Case 4: Perfect ambivalence} -setup {
-        create
-        mymam entity add E1
-        mymam entity add E2
-
-        mymam topic add T1
-        mymam topic add T2
-
-        # E1 is ambivalent on all topics, and has zero emphasis on no
-        # topics.  E2's position doesn't matter.
-        mymam belief configure E2 T1 -position 0.2
-        mymam belief configure E2 T2 -position -0.1
-    } -body {
-        mymam compute
-        rdb onecolumn {
-            SELECT format('%.2f',affinity) FROM mam_affinity 
-            WHERE f='E1' and g='E2'
-        }
-    } -cleanup {
-        cleanup
-    } -result {0.00}
-
-    test compute-2.5 {Case 5: The normal case} -setup {
+    test compute-2.5 {Case E: The normal case} -setup {
         create
         mymam entity add E1
         mymam entity add E2
