@@ -362,6 +362,8 @@ snit::type ::marsutil::quality {
     # value.
     #
     # The value is rounded according to the -format before the comparison.
+    # This guarantees that numbers that format the same way (and hence
+    # appear in the GUI as the same number) are converted to the same symbol.
 
     method Value2index {value} {
         # FIRST, round the value.

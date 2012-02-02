@@ -165,12 +165,22 @@ namespace eval ::simlib::test {
             [qemphasis value "DEXTREME"] 
     } -result {0.9 0.7 0.5 0.35 0.25 0.15}
 
-    test qemphasis-1.3 {options} -body {
+    test qemphasis-1.3 {values map to short names} -body {
+        list \
+            [qemphasis name 0.9] \
+            [qemphasis name 0.7]  \
+            [qemphasis name 0.5]  \
+            [qemphasis name 0.35]  \
+            [qemphasis name 0.25] \
+            [qemphasis name 0.15] 
+    } -result {ASTRONG AWEAK NEITHER DWEAK DSTRONG DEXTREME}
+
+    test qemphasis-1.4 {options} -body {
         list \
             [qemphasis cget -min]    \
             [qemphasis cget -max]    \
             [qemphasis cget -format]
-    } -result {0.0 1.0 %3.1f}
+    } -result {0.0 1.0 %4.2f}
 
     #-------------------------------------------------------------------
     # qtrend

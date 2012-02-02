@@ -94,6 +94,12 @@ is no maximum.<p>
 A <i>format</i> string used to format numeric values associated
 with this quality.  The default is "%4.2f".<p>
 
+<b>Note:</b> make sure that your format string provides for at least
+as many places after the decimal as the numeric values used in the
+type definition!  Otherwise, numeric value to symbolic value
+conversions may fail.<p>
+
+
 <</deflist quality options>>
 
 For example, the following code defines "goodness" as a numeric value

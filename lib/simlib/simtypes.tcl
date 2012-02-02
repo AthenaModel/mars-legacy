@@ -141,7 +141,7 @@ namespace eval ::simlib:: {
     DWEAK    "Disagreement"          0.35
     DSTRONG  "Disagreement--Strong"  0.25
     DEXTREME "Disagreement--Extreme" 0.15
-} -format {%3.1f} -min 0.0 -max 1.0
+} -format {%4.2f} -min 0.0 -max 1.0
 
 # Satisfaction: Long-Term Trend
 ::marsutil::quality ::simlib::qtrend {

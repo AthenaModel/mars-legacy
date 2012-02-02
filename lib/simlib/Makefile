@@ -20,4 +20,7 @@ test:
 test_mam:
 	$(TCLSH) mam.test
 
+test_simtypes:
+	$(TCLSH) simtypes.test
+
 include $(TOP_DIR)/MakeRules
