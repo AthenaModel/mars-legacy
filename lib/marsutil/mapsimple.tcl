@@ -152,8 +152,8 @@ snit::type ::marsutil::mapsimple {
             # upper left corner of the map image
             set nmy [expr {$options(-maxlat) - $lat}]
             set nmx [expr {$lon - $options(-minlon)}]
-            lappend out [expr {int($nmx*$fac/$dmx)}] \
-                        [expr {int($nmy*$fac/$dmy)}]
+            lappend out [expr {round($nmx*$fac/$dmx)}] \
+                        [expr {round($nmy*$fac/$dmy)}]
         }
 
         return $out
@@ -189,8 +189,8 @@ snit::type ::marsutil::mapsimple {
 
         foreach ref $args {
             lassign [latlong frommgrs $ref] lat lon
-            set cy [expr {int(($options(-maxlat)-$lat)*$fac/$dmy)}]
-            set cx [expr {int(($lon-$options(-minlon))*$fac/$dmx)}]
+            set cy [expr {round(($options(-maxlat)-$lat)*$fac/$dmy)}]
+            set cx [expr {round(($lon-$options(-minlon))*$fac/$dmx)}]
             lappend result $cx $cy
         }
 
