@@ -10,6 +10,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.65, 21 February 2012</h3>
+
+This build contains a number of small fixes, notably to
+<<xref mam(n)>> and the <<xref quality(n)>> data type.  In particular:<p>
+
+<ul>
+  <li> Bug 3156: mam(n): Special Case code
+  <li> Bug 3273: gram2(n): Default gram.epsilon to 0.01
+  <li> Bug 3277: Athena hangs when minimized
+  <li> Bug 3319: Creating Conditions with Symbolic Values Causes Bgerrors
+  <li> Bug 3323: qemphasis(n) converts 0.25 to DWEAK instead of DSTRONG
+</ul><p>
+
 <h3>Build 1.64, 18 November 2011</h3>
 
 This build contains two changes, an update to the official build
