@@ -51,6 +51,10 @@ source [file join $::simlib::library mam.tcl       ]
 source [file join $::simlib::library gram2.tcl     ]
 source [file join $::simlib::library gramdb2.tcl   ]
 
+source [file join $::simlib::library uramdb.tcl    ]
+source [file join $::simlib::library ucurve.tcl    ]
+source [file join $::simlib::library uram.tcl      ]
+
 
 
 
