@@ -11,11 +11,15 @@
 TOP_DIR=../..
 
 TCLSH=tclsh
+FLAGS=
 
 include $(TOP_DIR)/MakeDefs
 
 # Target: test
 test:
-	$(TCLSH) marsutil.test
+	$(TCLSH) marsutil.test $(FLAGS)
+
+test_undostack:
+	$(TCLSH) undostack.test $(FLAGS)
 
 include $(TOP_DIR)/MakeRules

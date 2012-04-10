@@ -161,6 +161,12 @@ set metadata {
         applib   app_sql
         mode     gui
     }
+
+    uram {
+        text     "URAM Workbench"
+        applib   app_uram
+        mode     gui
+    }
 }
 
 #-----------------------------------------------------------------------

@@ -23,4 +23,10 @@ test_mam:
 test_simtypes:
 	$(TCLSH) simtypes.test
 
+test_ucurve:
+	$(TCLSH) ucurve.test
+
+test_uram:
+	$(TCLSH) uram.test $(FLAGS)
+
 include $(TOP_DIR)/MakeRules

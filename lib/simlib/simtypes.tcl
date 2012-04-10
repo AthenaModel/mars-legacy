@@ -31,6 +31,7 @@ namespace eval ::simlib:: {
         qsat           \
         qtrend         \
         rfraction      \
+        rfracpair      \
         rmagnitude
 }
 
@@ -194,6 +195,31 @@ snit::integer ::simlib::ipopulation \
     -min 0
 
 
+# Pair of rfractions, total <= 1.0
+snit::type ::simlib::rfracpair {
+    typemethod validate {pair} {
+        # FIRST, is it a list
+        if {![string is list $pair] ||
+            [llength $pair] != 2
+        } {
+            return -code error -errorcode INVALID \
+ "expected a list of exactly two numbers between 0.0 and 1.0, got \"$pair\""
+        }
 
+        # NEXT, are they fractions?
+        lassign $pair a b
+
+        ::simlib::rfraction validate $a
+        ::simlib::rfraction validate $b
+
+        # NEXT, do they sum to more than 1.0?
+        if {$a + $b > 1.0} {
+            return -code error -errorcode INVALID \
+"expected a pair of fractions whose sum is less than or equal to 1.0, got \"$pair\""
+        }
+
+        return $pair
+    }
+}
 
 

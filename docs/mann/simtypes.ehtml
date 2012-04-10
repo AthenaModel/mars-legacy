@@ -186,6 +186,11 @@ Numerically, <<iref rfraction>> values range from
 <<rfraction cget -min>> to <<rfraction cget -max>> 
 and are formatted as "<<rfraction cget -format>>".<p>
 
+<<defitem rfracpair rfracpair>>
+
+This type defines the set of pairs of <<iref rfraction>>'s, where
+the elements of the pair sum to less than or equal to 1.0.<p>
+
 <<defitem rmagnitude rmagnitude>>
 
 This <<xref range(n)>> defines the set of valid real magnitudes.
