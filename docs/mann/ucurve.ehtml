@@ -37,9 +37,9 @@ The client is responsible for defining the set of curves to be managed:<p>
        concern).<p>
 
   <li> Next, the client may enter adjustments to curve baselines using
-       <<iref adjust>> and deltas to current curve values using
-       <<iref effect>>.  Both adjustments and effects are associated
-       with attitude drivers.<p>
+       <<iref adjust>> and also add <<iref persistent>> and
+       <<iref transient>> effects. Both adjustments and effects are
+       associated with attitude drivers.<p>
 
   <li> Effects are retained until
        time is advanced using the <<iref apply>> command.  ucurve(n)
@@ -368,27 +368,43 @@ no command to be undone.<p>
 
 <</deflist edit>>
 
-<<defitem effect {$obj effect <i>driver_id cause_id curve_id mag</i> ?<i>curve_id mag...</i>?}>>
+<<defitem persistent {$obj persistent <i>driver_id cause_id curve_id mag</i> ?<i>curve_id mag...</i>?}>>
 
-<b>Undoable.</b>  Creates one or more effects related to attitude driver
-<i>driver_id</i> with cause <i>cause_id</i>.  Each effect is specified
-as a curve ID/magnitude pair; the magnitude will ultimately be scaled
-based on the current baseline for the curve.<p>
+<b>Undoable.</b>  Creates one or more persistent effects related to
+attitude driver <i>driver_id</i> with cause <i>cause_id</i>.  Each
+effect is specified as a curve ID/magnitude pair; the magnitude will
+ultimately be scaled based on the curve's baseline.<p>
 
 The created effects will remain pending until the next time
-<<iref apply>> is called.  At that time they will be applied and deleted.<p>
+<<iref apply>> is called.  At that time they will applied,
+and deleted.<p>
 
-Effects are scaled (with causes taken into account) and applied to the
-curve's A value for the current time step.  The extent to which the
-resulting delta will persist depends on the curve type's &alpha; parameter.<p>
-
+Persistent effects are scaled (with causes taken into account)
+relative to the baseline B.t; the resulting delta is then applied
+to the baseline, resulting in a new B.t for the current time step.
+The extent to which the resulting delta will actually persist in
+future time steps depends on the curve type's &beta; parameter.<p>
 
 <<defitem reset {$obj reset}>>
 
 Resets all curves to their initial values and deletes all pending
 adjustments and effects and historical contributions.<p>
 
+<<defitem transient {$obj transient <i>driver_id cause_id curve_id mag</i> ?<i>curve_id mag...</i>?}>>
 
+<b>Undoable.</b>  Creates one or more transient effects related to
+attitude driver <i>driver_id</i> with cause <i>cause_id</i>.  Each
+effect is specified as a curve ID/magnitude pair; the magnitude will
+ultimately be scaled based on the current baseline for the curve.<p>
+
+The created effects will remain pending until the next time
+<<iref apply>> is called.  At that time they will be applied and deleted.<p>
+
+Effects are scaled (with causes taken into account) relative to the
+baseline B.t after all persistent effects have been applied; the
+result delta is applied to the curve's A value for the current time
+step.  The extent to which the resulting delta will persist into
+future time steps depends on the curve type's &alpha; parameter.<p>
 
 <</deflist instance>>
 

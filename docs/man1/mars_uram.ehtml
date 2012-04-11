@@ -163,6 +163,7 @@ subcommands are as follows:<p>
 <<defitem "coop badjust" {coop badjust <i>driver f g delta</i>}>>
 <<defitem "coop bset" {coop bset <i>driver f g value</i>}>>
 <<defitem "coop cset" {coop cset <i>f g value...</i>}>>
+<<defitem "coop persistent" {coop persistent <i>driver cause f g mag</i> ?<i>options...</i>?}>>
 <<defitem "coop transient" {coop transient <i>driver cause f g mag</i> ?<i>options...</i>?}>>
 These subcommands are delegated to <<xref uram(n)>> as is.<p>
 
@@ -219,7 +220,8 @@ subcommands are as follows:<p>
 <<defitem "hrel badjust" {hrel badjust <i>driver f g delta</i>}>>
 <<defitem "hrel bset" {hrel bset <i>driver f g value</i>}>>
 <<defitem "hrel cset" {hrel cset <i>f g value...</i>}>>
-<<defitem "hrel transient" {hrel transient <i>driver cause f g mag</i> ?<i>options...</i>?}>>
+<<defitem "hrel persisent" {hrel persistent <i>driver cause f g mag</i>}>>
+<<defitem "hrel transient" {hrel transient <i>driver cause f g mag</i>}>>
 These subcommands are delegated to <<xref uram(n)>> as is.<p>
 
 <<defitem "hrel mass" {hrel mass ?<i>driver</i>?}>>
@@ -229,8 +231,6 @@ inputs are associated with the specified <i>driver</i>; if no driver
 is specified, one is generated automatically.<p>
 
 <</deflist hrel>>
-
-
 
 <<defitem load {load <i>filename</i>}>>
 
@@ -362,6 +362,7 @@ subcommands are as follows:<p>
 <<defitem "sat badjust" {sat badjust <i>driver g c delta</i>}>>
 <<defitem "sat bset" {sat bset <i>driver g c value</i>}>>
 <<defitem "sat cset" {sat cset <i>g c value...</i>}>>
+<<defitem "sat persistent" {sat persistent <i>driver cause g c mag</i> ?<i>options...</i>?}>>
 <<defitem "sat transient" {sat transient <i>driver cause g c mag</i> ?<i>options...</i>?}>>
 These subcommands are delegated to <<xref uram(n)>> as is.<p>
 
@@ -421,7 +422,8 @@ subcommands are as follows:<p>
 <<defitem "vrel badjust" {vrel badjust <i>driver g a delta</i>}>>
 <<defitem "vrel bset" {vrel bset <i>driver g a value</i>}>>
 <<defitem "vrel cset" {vrel cset <i>g a value...</i>}>>
-<<defitem "vrel transient" {vrel transient <i>driver cause g a mag</i> ?<i>options...</i>?}>>
+<<defitem "vrel persistent" {vrel persistent <i>driver cause g a mag</i>}>>
+<<defitem "vrel transient" {vrel transient <i>driver cause g a mag</i>}>>
 These subcommands are delegated to <<xref uram(n)>> as is.<p>
 
 <<defitem "vrel mass" {vrel mass ?<i>driver</i>?}>>

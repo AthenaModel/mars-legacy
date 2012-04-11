@@ -255,6 +255,7 @@ SELECT ATT.fg_id                           AS fg_id,
        EFF.driver_id                       AS driver_id,
        EFF.cause_id                        AS cause_id,
        coalesce(CAUSE.cause, EFF.cause_id) AS cause,
+       EFF.pflag                           AS pflag,
        EFF.mag                             AS mag
 FROM uram_hrel             AS ATT
 JOIN ucurve_effects_t      AS EFF USING (curve_id)
@@ -334,6 +335,7 @@ SELECT ATT.ga_id                           AS ga_id,
        EFF.driver_id                       AS driver_id,
        EFF.cause_id                        AS cause_id,
        coalesce(CAUSE.cause, EFF.cause_id) AS cause,
+       EFF.pflag                           AS pflag,
        EFF.mag                             AS mag
 FROM uram_vrel             AS ATT
 JOIN ucurve_effects_t      AS EFF USING (curve_id)
@@ -418,6 +420,7 @@ SELECT ATT.gc_id                           AS gc_id,
        EFF.driver_id                       AS driver_id,
        EFF.cause_id                        AS cause_id,
        coalesce(CAUSE.cause, EFF.cause_id) AS cause,
+       EFF.pflag                           AS pflag,
        EFF.mag                             AS mag
 FROM uram_sat              AS ATT
 JOIN ucurve_effects_t      AS EFF USING (curve_id)
@@ -500,6 +503,7 @@ SELECT ATT.fg_id                           AS fg_id,
        EFF.driver_id                       AS driver_id,
        EFF.cause_id                        AS cause_id,
        coalesce(CAUSE.cause, EFF.cause_id) AS cause,
+       EFF.pflag                           AS pflag,
        EFF.mag                             AS mag
 FROM uram_coop             AS ATT
 JOIN ucurve_effects_t      AS EFF USING (curve_id)

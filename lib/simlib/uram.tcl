@@ -1182,6 +1182,30 @@ snit::type ::simlib::uram {
     #-------------------------------------------------------------------
     # HREL attitude methods
 
+    # hrel persistent driver cause f g mag
+    #
+    # driver   - An integer driver ID
+    # cause    - A cause name, or ""
+    # f        - A group
+    # g        - Another group
+    # mag      - A qmag(n) value
+    #
+    # UNDOABLE. Creates a persistent HREL attitude input with given 
+    # driver and cause, affecting the horizontal relationship between 
+    # f and g with magnitude mag.
+    #
+    # At present, there is no spread algorithm for HREL inputs; the
+    # only effect is the direct effect.
+
+    method {hrel persistent} {driver cause f g mag} {
+        $self Log detail "hrel persistent driver=$driver cause=$cause f=$f g=$g mag=$mag"
+        set cause_id [$self GetCauseID $cause $driver]
+        set curve_id [$self GetHrelID $f $g]
+        set mag      [qmag validate $mag]
+
+        $cm persistent $driver $cause_id $curve_id $mag
+    }
+
     # hrel transient driver cause f g mag
     #
     # driver   - An integer driver ID
@@ -1203,7 +1227,7 @@ snit::type ::simlib::uram {
         set curve_id [$self GetHrelID $f $g]
         set mag      [qmag validate $mag]
 
-        $cm effect $driver $cause_id $curve_id $mag
+        $cm transient $driver $cause_id $curve_id $mag
     }
 
     # hrel badjust driver f g delta
@@ -1305,6 +1329,30 @@ snit::type ::simlib::uram {
     #-------------------------------------------------------------------
     # VREL attitude methods
 
+    # vrel persistent driver cause g a mag
+    #
+    # driver   - An integer driver ID
+    # cause    - A cause name, or ""
+    # g        - A group
+    # a        - An actor
+    # mag      - A qmag(n) value
+    #
+    # UNDOABLE. Creates a persistent VREL attitude input with given 
+    # driver and cause, affecting the vertical relationship between 
+    # g and a with magnitude mag.
+    #
+    # At present, there is no spread algorithm for VREL inputs; the
+    # only effect is the direct effect.
+
+    method {vrel persistent} {driver cause g a mag} {
+        $self Log detail "vrel persistent driver=$driver cause=$cause g=$g a=$a mag=$mag"
+        set cause_id [$self GetCauseID $cause $driver]
+        set curve_id [$self GetVrelID $g $a]
+        set mag      [qmag validate $mag]
+
+        $cm persistent $driver $cause_id $curve_id $mag
+    }
+
     # vrel transient driver cause g a mag
     #
     # driver   - An integer driver ID
@@ -1326,7 +1374,7 @@ snit::type ::simlib::uram {
         set curve_id [$self GetVrelID $g $a]
         set mag      [qmag validate $mag]
 
-        $cm effect $driver $cause_id $curve_id $mag
+        $cm transient $driver $cause_id $curve_id $mag
     }
 
     # vrel badjust driver g a delta
@@ -1428,6 +1476,51 @@ snit::type ::simlib::uram {
     #-------------------------------------------------------------------
     # SAT attitude methods
 
+    # sat persistent driver cause g c mag ?options...?
+    #
+    # driver   - An integer driver ID
+    # cause    - A cause name, or ""
+    # g        - A civilian group
+    # c        - A concern
+    # mag      - A qmag(n) value
+    #
+    # Options:
+    #
+    #   -s factor    - "here" indirect effects multiplier, defaults to 1.0
+    #   -p factor    - "near" indirect effects multiplier, defaults to 0
+    #   -q factor    - "far" indirect effects multiplier, defaults to 0
+    #
+    # UNDOABLE. Creates a persistent SAT attitude input with given 
+    # driver and cause, affecting the satisfaction of g with c
+    # with magnitude mag.  The input causes a direct effect and
+    # possibly also indirect effects depending on the values of -s,
+    # -p, and -q.
+
+    method {sat persistent} {driver cause g c mag args} {
+        $self Log detail "sat persistent driver=$driver cause=$cause g=$g c=$c mag=$mag {*}$args"
+        # FIRST, validate the normal inputs and retrieve IDs.
+        set cause_id [$self GetCauseID $cause $driver]
+        set curve_id [$self GetSatID $g $c]
+        set g_id     [$self GetGroupID $g]
+        set c_id     [$self GetConcernID $c]
+        set mag      [qmag validate $mag]
+
+        # NEXT, if the mag is 0.0, ignore it.
+        if {$mag == 0.0} {
+            return
+        }
+
+        # NEXT, parse the options
+        $self ParseInputOptions opts $args
+
+        # NEXT, schedule the inputs
+        $cm persistent $driver $cause_id \
+            {*}[$self SatSpreadEffects $g_id $c_id $mag \
+                    $opts(-s) $opts(-p) $opts(-q)]
+
+        return
+    }
+
     # sat transient driver cause g c mag ?options...?
     #
     # driver   - An integer driver ID
@@ -1453,6 +1546,7 @@ snit::type ::simlib::uram {
         # FIRST, validate the normal inputs and retrieve IDs.
         set cause_id [$self GetCauseID $cause $driver]
         set curve_id [$self GetSatID $g $c]
+        set g_id     [$self GetGroupID $g]
         set c_id     [$self GetConcernID $c]
         set mag      [qmag validate $mag]
 
@@ -1464,42 +1558,58 @@ snit::type ::simlib::uram {
         # NEXT, parse the options
         $self ParseInputOptions opts $args
 
-        # NEXT, compute the spread
-        set spread [$self SatSpread $g $opts(-s) $opts(-p) $opts(-q)]
-
-        # NEXT, build the list of curves and magnitudes.
-        set cmags [list]
-
-        foreach {g_id factor} $spread {
-            lappend cmags [dict get $db(scid) $g_id $c_id] [expr {$factor*$mag}]
-        }
-
-        $cm effect $driver $cause_id {*}$cmags
+        # NEXT, schedule the inputs
+        $cm transient $driver $cause_id \
+            {*}[$self SatSpreadEffects $g_id $c_id $mag \
+                    $opts(-s) $opts(-p) $opts(-q)]
 
         return
     }
 
-    # SatSpread g s p q
+    # SatSpreadEffects g_id c_id mag s p q
     #
-    # g   - The directly affected group
-    # s   - The -s "here factor"
-    # p   - The -p "near factor"
-    # q   - The -q "far factor".
+    # g_id   - The directly affected group
+    # c_id   - The concern
+    # mag    - The input magnitude
+    # s      - The -s "here factor"
+    # p      - The -p "near factor"
+    # q      - The -q "far factor".
+    #
+    # Computes the satisfaction spread for the input, and from that
+    # computes a list of curve_id's and magnitudes, suitable to be
+    # given to ucurve(n).
+
+    method SatSpreadEffects {g_id c_id mag s p q} {
+        set cmlist [list]
+
+        foreach {ig_id factor} [$self SatSpread $g_id $s $p $q] {
+            lappend cmlist \
+                [dict get $db(scid) $ig_id $c_id] \
+                [expr {$factor*$mag}]
+        }
+
+        return $cmlist
+    }
+    
+
+    # SatSpread g_id s p q
+    #
+    # g_id   - The directly affected group
+    # s      - The -s "here factor"
+    # p      - The -p "near factor"
+    # q      - The -q "far factor".
     #
     # Computes and returns a satisfaction spread, a dictionary
     # {g_id -> factor}.  The spread is cached for later use during
     # the same timestep.
     
-    method SatSpread {g s p q} {
+    method SatSpread {g_id s p q} {
         # FIRST, if this spread is cached, return the cached value.
-        set tag "$g,$s,$p,$q"
+        set tag "$g_id,$s,$p,$q"
 
         if {[dict exists $db(ssCache) $tag]} {
             return [dict get $db(ssCache) $tag]
         }
-
-        # NEXT, get the group ID
-        set g_id [$self GetGroupID $g]
 
         # NEXT, get the proximity limit
         set plimit [$self GetProxLimit $s $p $q]
@@ -1667,6 +1777,53 @@ snit::type ::simlib::uram {
     #-------------------------------------------------------------------
     # COOP attitude methods
 
+    # coop persistent driver cause f g mag ?options...?
+    #
+    # driver   - An integer driver ID
+    # cause    - A cause name, or ""
+    # f        - A civilian group
+    # g        - A force group
+    # mag      - A qmag(n) value
+    #
+    # Options:
+    #
+    #   -s factor    - "here" indirect effects multiplier, defaults to 1.0
+    #   -p factor    - "near" indirect effects multiplier, defaults to 0
+    #   -q factor    - "far" indirect effects multiplier, defaults to 0
+    #
+    # UNDOABLE. Creates a persistent COOP attitude input with given 
+    # driver and cause, affecting the cooperation of f with g
+    # with magnitude mag.  The input causes a direct effect and
+    # possibly also indirect effects depending on the values of -s,
+    # -p, and -q.
+
+    method {coop persistent} {driver cause f g mag args} {
+        $self Log detail "coop persistent driver=$driver cause=$cause f=$f g=$g mag=$mag {*}$args"
+
+        # FIRST, validate the normal inputs and retrieve IDs.
+        set cause_id [$self GetCauseID $cause $driver]
+        set curve_id [$self GetCoopID $f $g]
+        set mag      [qmag validate $mag]
+        set f_id     [$self GetGroupID $f]
+        set g_id     [$self GetGroupID $g]
+
+        # NEXT, if the mag is 0.0, ignore it.
+        if {$mag == 0.0} {
+            return
+        }
+
+        # NEXT, parse the options
+        $self ParseInputOptions opts $args
+
+        # NEXT, schedule the effects in every influenced neighborhood
+        $cm persistent $driver $cause_id \
+            {*}[$self CoopSpreadEffects $f_id $g_id $mag \
+                    $opts(-s) $opts(-p) $opts(-q)]
+        
+        return
+    }
+
+
     # coop transient driver cause f g mag ?options...?
     #
     # driver   - An integer driver ID
@@ -1706,14 +1863,37 @@ snit::type ::simlib::uram {
         $self ParseInputOptions opts $args
 
         # NEXT, schedule the effects in every influenced neighborhood
+        $cm transient $driver $cause_id \
+            {*}[$self CoopSpreadEffects $f_id $g_id $mag \
+                    $opts(-s) $opts(-p) $opts(-q)]
+        
+        return
+    }
 
-        # NEXT, schedule the effects in every influenced neighborhood
+
+    # CoopSpreadEffects f_id g_id mag s p q
+    #
+    # f_id   - The directly affected civilian group
+    # g_id   - The directly affected force group
+    # mag    - The input magnitude
+    # s      - The -s "here factor"
+    # p      - The -p "near factor"
+    # q      - The -q "far factor".
+    #
+    # Computes the cooperation spread as a curve_id/magnitude list, 
+    # suitable to be given to ucurve(n), for persistent and transient 
+    # cooperation effects.
+
+    method CoopSpreadEffects {f_id g_id mag s p q} {
+        # FIRST, schedule the effects in every influenced neighborhood
         # within the proximity limit.
-        set plimit [$self GetProxLimit $opts(-s) $opts(-p) $opts(-q)]
+        set plimit [$self GetProxLimit $s $p $q]
 
         set CRL [$parm get uram.coopRelationshipLimit]
 
         # Schedule the effects
+        set cmlist [list]
+
         $rdb eval {
             SELECT curve_id, factor, proximity 
             FROM uram_coop_spread
@@ -1724,24 +1904,22 @@ snit::type ::simlib::uram {
         } {
             # FIRST, apply the here, near, and far factors.
             if {$proximity == 2} {
-                set imag [expr {$opts(-q) * $factor * $mag}]
+                set imag [expr {$q * $factor * $mag}]
             } elseif {$proximity == 1} {
-                set imag [expr {$opts(-p) * $factor * $mag}]
+                set imag [expr {$p * $factor * $mag}]
             } elseif {$proximity == 0} {
-                set imag [expr {$opts(-s) * $factor * $mag}]
+                set imag [expr {$s * $factor * $mag}]
             } else {
                 # The group with itself
                 set imag [expr {$factor * $mag}]
             }
 
             if {$imag != 0} {
-                lappend cmags $curve_id $imag
+                lappend cmlist $curve_id $imag
             }
         }
 
-        $cm effect $driver $cause_id {*}$cmags
-
-        return
+        return $cmlist
     }
 
     # coop badjust driver f g delta

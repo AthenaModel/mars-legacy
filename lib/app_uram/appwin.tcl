@@ -140,6 +140,7 @@ snit::widget appwin {
                     { e_id      - -sortmode integer }
                     { driver_id - -sortmode integer }
                     { cause     -                   }
+                    { pflag     -                   }
                     { mag       - -sortmode real    }
                 }
             }
@@ -182,6 +183,7 @@ snit::widget appwin {
                     { e_id      - -sortmode integer }
                     { driver_id - -sortmode integer }
                     { cause     -                   }
+                    { pflag     -                   }
                     { mag       - -sortmode real    }
                 }
             }
@@ -225,6 +227,7 @@ snit::widget appwin {
                     { e_id      - -sortmode integer }
                     { driver_id - -sortmode integer }
                     { cause     -                   }
+                    { pflag     -                   }
                     { mag       - -sortmode real    }
                 }
             }
@@ -267,6 +270,7 @@ snit::widget appwin {
                     { e_id      - -sortmode integer }
                     { driver_id - -sortmode integer }
                     { cause     -                   }
+                    { pflag     -                   }
                     { mag       - -sortmode real    }
                 }
             }

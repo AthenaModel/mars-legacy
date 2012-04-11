@@ -340,10 +340,11 @@ cooperation with <i>g</i>.<p>
 This command would normally be used to set the natural level for all
 cooperation curves just prior to a time advance.<p>
 
-<<defitem "coop transient" {$obj coop transient <i>driver cause f g mag</i>}>>
+<<defitem "coop persistent" {$obj coop persistent <i>driver cause f g mag</i> ?<i>options...</i>?}>>
+<<defitem "coop transient" {$obj coop transient <i>driver cause f g mag</i> ?<i>options...</i>?}>>
 
 <b>Undoable.</b>
-This command schedules a transient attitude input of
+These commands schedule a persistent or transient attitude input of
 magnitude <i>mag</i>, a <<xref qmag(n)>> value, on the cooperation
 of civilian group <i>f</i> with force group <i>g</i>.  The input was
 produced by the specified <i>driver</i>
@@ -479,10 +480,11 @@ relationship with <i>g</i>.<p>
 This command would normally be used to set the natural level for all
 relationship curves just prior to a time advance.<p>
 
+<<defitem "hrel persistent" {$obj hrel persistent <i>driver cause f g mag</i>}>>
 <<defitem "hrel transient" {$obj hrel transient <i>driver cause f g mag</i>}>>
 
 <b>Undoable.</b>
-This command schedules a transient attitude input of
+These commands schedule a persistent or transient attitude input of
 magnitude <i>mag</i>, a <<xref qmag(n)>> value, on the horizontal
 relationship of group <i>f</i> with group <i>g</i>.  The input was
 produced by the specified <i>driver</i>
@@ -494,7 +496,7 @@ this case, the driver ID will be used as the numeric cause ID, making
 this driver a unique cause.<p>
 
 We have no spread model for horizontal relationship inputs; hence,
-this command creates one direct effect and no indirect effects.<p>
+these commands create one direct effect and no indirect effects.<p>
 
 <</deflist hrel>>
 
@@ -632,10 +634,11 @@ satisfaction curves just prior to a time advance.<p>
 the natural satisfaction level will be ignored for all concerns 
 except <b>SFT</b>.<p>
 
+<<defitem "sat persistent" {$obj sat persistent <i>driver cause g c mag</i> ?<i>options...</i>?}>>
 <<defitem "sat transient" {$obj sat transient <i>driver cause g c mag</i> ?<i>options...</i>?}>>
 
 <b>Undoable.</b>
-This command schedules a transient attitude input of
+These commands schedule a persistent or transient attitude input of
 magnitude <i>mag</i>, a <<xref qmag(n)>> value, on the satisfaction
 of group <i>g</i> with concern <i>c</i>.  The input was
 produced by the specified <i>driver</i>
@@ -755,10 +758,11 @@ value, the natural level of <i>g</i>'s relationship with <i>a</i>.<p>
 This command would normally be used to set the natural level for all
 relationship curves just prior to a time advance.<p>
 
+<<defitem "vrel persistent" {$obj vrel persistent <i>driver cause g a mag</i>}>>
 <<defitem "vrel transient" {$obj vrel transient <i>driver cause g a mag</i>}>>
 
 <b>Undoable.</b>
-This command schedules a transient attitude input of
+These commands schedule a persistent or transient attitude input of
 magnitude <i>mag</i>, a <<xref qmag(n)>> value, on the vertical
 relationship of group <i>g</i> with actor <i>a</i>.  The input was
 produced by the specified <i>driver</i>
@@ -770,7 +774,7 @@ this case, the driver ID will be used as the numeric cause ID, making
 this driver a unique cause.<p>
 
 We have no spread model for vertical relationship inputs; hence,
-this command creates one direct effect and no indirect effects.<p>
+these commands create one direct effect and no indirect effects.<p>
 
 <</deflist vrel>>
 

@@ -520,7 +520,7 @@ snit::type ::simlib::ucurve {
         $self edit reset
     }
 
-    # effect driver_id cause_id curve_id mag ?curve_id mag...?
+    # transient driver_id cause_id curve_id mag ?curve_id mag...?
     #
     # driver_id   - The unique integer ID of the driver causing this
     #               effect.
@@ -528,10 +528,41 @@ snit::type ::simlib::ucurve {
     # curve_id    - The curve receiving this effect.
     # mag         - The magnitude of the effect.
     #
-    # Undoable.  Adds one or more effects, all related to a single driver 
-    # and cause.
+    # Undoable.  Adds one or more transient effects, all related to a 
+    # single driver and cause.
     
-    method effect {driver_id cause_id args} {
+    method transient {driver_id cause_id args} {
+        $self AddEffect 0 $driver_id $cause_id {*}$args
+    }
+
+    # persistent driver_id cause_id curve_id mag ?curve_id mag...?
+    #
+    # driver_id   - The unique integer ID of the driver causing this
+    #               effect.
+    # cause_id    - The unique integer ID of the "cause", e.g., sickness
+    # curve_id    - The curve receiving this effect.
+    # mag         - The magnitude of the effect.
+    #
+    # Undoable.  Adds one or more persistent effects, all related to a 
+    # single driver and cause.
+    
+    method persistent {driver_id cause_id args} {
+        $self AddEffect 1 $driver_id $cause_id {*}$args
+    }
+
+    # AddEffect pflag driver_id cause_id curve_id mag ?curve_id mag...?
+    #
+    # pflag       - Persistence flag, 1 if persistent, 0 if transient
+    # driver_id   - The unique integer ID of the driver causing this
+    #               effect.
+    # cause_id    - The unique integer ID of the "cause", e.g., sickness
+    # curve_id    - The curve receiving this effect.
+    # mag         - The magnitude of the effect.
+    #
+    # Undoable.  Adds one or more persistent effects, all related to a 
+    # single driver and cause.
+    
+    method AddEffect {pflag driver_id cause_id args} {
         # FIRST, prepare to save the undo info
         set eid ""
 
@@ -543,11 +574,13 @@ snit::type ::simlib::ucurve {
                         curve_id, 
                         driver_id,
                         cause_id, 
+                        pflag,
                         mag)
                     VALUES(
                         $curve_id,
                         $driver_id,
                         $cause_id,
+                        $pflag,
                         $mag
                     );
                 }
@@ -685,40 +718,42 @@ snit::type ::simlib::ucurve {
     # the curves.
 
     method apply {t} {
-        # FIRST, apply the existing effects.
-        $self ClearCurveDeltas
-        $self ApplyBaselineAdjustments $t
+        # FIRST, handle pending adjustments.
+        $self SaveAdjustmentContributions $t
+
+        # NEXT, compute B.t = alpha*A.t-1 + beta*B.t-1 + gamma*C.t,
+        # along with scaling factors for B.t.
         $self ComputeBaselineAndScalingFactors
-        $self ComputeContributionsByCause
-        $self ComputeContributionsByDriver $t
-        $self PurgeEffectsAndAdjustments
+
+        # NEXT, apply pending persistent effects
+        if {[$self ComputeContributionsByCause -persistent]} {
+            # Add the DeltaB's to the B.t's, and update the
+            # scaling factors.
+            $self UpdateBaselineAndScalingFactors
+        }
+        
+        # NEXT, apply the pending transient effects.
+        $self ComputeContributionsByCause -transient
         $self ComputeCurrentLevels
+
+        # NEXT, save the contributions of each driver due to
+        # both baseline and transient effects.
+        $self SaveContributionsByDriver $t
+
+        # NEXT, clean up for next time.
+        $self PurgeEffectsAndAdjustments
 
         # NEXT, This cannot be undone.
         $self edit reset
     }
 
-    # ClearCurveDeltas
-    # 
-    # Clears the delta for every curve, so that we can accumulate
-    # new ones.
-
-    method ClearCurveDeltas {} {
-        # FIRST, clear the deltas
-        $rdb eval {
-            UPDATE ucurve_curves_t
-            SET delta = 0.0
-        }
-    }
-
-    # ApplyBaselineAdjustments t
+    # SaveAdjustmentContributions t
     #
     # t - A timestamp
     #
-    # Save the contributions for all of the baseline adjustments; 
-    # note that the baseline was adjusted in real time.
+    # Save the contributions for all of the baseline adjustments.
 
-    method ApplyBaselineAdjustments {t} {
+    method SaveAdjustmentContributions {t} {
         $rdb eval {
             SELECT curve_id       AS curve_id,
                    driver_id      AS driver_id,
@@ -729,6 +764,7 @@ snit::type ::simlib::ucurve {
             $self SaveContrib $curve_id $driver_id $t $delta
         }
     }
+
 
     # ComputeBaselineAndScalingFactors
     #
@@ -744,24 +780,46 @@ snit::type ::simlib::ucurve {
             FROM ucurve_ctypes   AS T
             JOIN ucurve_curves_t AS C USING (ct_id)
         }] {
-            $rdb eval {
-                UPDATE ucurve_curves_t
-                SET b = $bnew,
-                    posfactor = ($max - $bnew)/100.0,
-                    negfactor = ($bnew - $min)/100.0
-                WHERE curve_id = $curve_id
-            }
+            $self SetBaseline $curve_id $bnew $min $max
         }
     }
 
 
-    # Method: ComputeContributionsByCause
+    # SetBaseline curve_id b min max
     #
-    # Determine the maximum positive and negative contributions
-    # for each curve and cause and apply them to the curve.
+    # curve_id   - A curve ID
+    # b          - A new baseline value
+    # min        - The curve's minimum bound
+    # max        - The curve's maximum bound
 
-    method ComputeContributionsByCause {} {
-        # FIRST, accumulate the actual contributions to the
+    method SetBaseline {curve_id b min max} {
+        $rdb eval {
+            UPDATE ucurve_curves_t
+            SET b = $b,
+                posfactor = ($max - $b)/100.0,
+                negfactor = ($b - $min)/100.0
+            WHERE curve_id = $curve_id
+        }
+    }
+
+    # ComputeContributionsByCause mode
+    #
+    # mode - -persistent or -transient
+    #
+    # Given the current mode, determine the maximum positive and 
+    # negative contributions for each curve and cause and apply them 
+    # to the curve's delta.
+    #
+    # Returns 1 if there were any contributions, and 0 otherwise.
+
+    method ComputeContributionsByCause {mode} {
+        # FIRST, get the pflag
+        set pflag [expr {$mode eq "-persistent"}]
+
+        # NEXT, clear the curve deltas
+        $rdb eval {UPDATE ucurve_curves_t SET delta = 0.0}
+
+        # NEXT, accumulate the actual contributions to the
         # curves.
         set updates [list]
 
@@ -786,7 +844,8 @@ snit::type ::simlib::ucurve {
                          THEN E.mag
                          ELSE 0 END AS neg
              FROM ucurve_effects_t AS E
-             JOIN ucurve_curves_t  AS C USING (curve_id))
+             JOIN ucurve_curves_t  AS C USING (curve_id)
+             WHERE E.pflag=$pflag)
             GROUP BY curve_id, cause_id
         } {
             # FIRST, get the net contribution of this cause.
@@ -815,6 +874,11 @@ snit::type ::simlib::ucurve {
             }
         }
 
+        # NEXT, if there were none, we can stop here.
+        if {[llength $updates] == 0} {
+            return 0
+        }
+
         # NEXT, apply the net contributions to the curves.
         foreach {curve_id acontrib} $updates {
             $rdb eval {
@@ -833,7 +897,7 @@ snit::type ::simlib::ucurve {
                    cause_id AS cause_id,
                    mag      AS mag
             FROM ucurve_effects_t
-            WHERE mag != 0.0
+            WHERE pflag=$pflag AND mag != 0.0
         } {
             # FIRST, retrieve the multiplier based on the sign of the
             # magnitude
@@ -850,36 +914,32 @@ snit::type ::simlib::ucurve {
                 WHERE e_id=$e_id
             }
         }
+
+        return 1
     }
 
-    # ComputeActualContributionsByDriver t
+    # UpdateBaselineAndScalingFactors
     #
-    # t - The timestamp of this time advance.
-    #
-    # Saves the contribution of each effect to the relevant driver.
+    # Adds the DeltaB resulting from persistent effects to the baseline,
+    # clamping if need be, and updates the scale factors.
 
-    method ComputeContributionsByDriver {t} {
-        if {!$options(-savehistory)} {
-            return
-        }
+    method UpdateBaselineAndScalingFactors {} {
+        foreach {curve_id bnew min max} [$rdb eval {
+            SELECT C.curve_id    AS curve_id,
+                   C.b + C.delta AS bnew,
+                   T.min         AS min,
+                   T.max         AS max
+            FROM ucurve_curves_t AS C
+            JOIN ucurve_ctypes_t AS T USING (ct_id)
+        }] {
+            # FIRST, clamp the curve
+            if {$bnew > $max} {
+                set bnew $max
+            } elseif {$bnew < $min} {
+                set bnew $min
+            }
 
-        $rdb eval {
-            SELECT curve_id, driver_id, total(actual) as contrib
-            FROM ucurve_effects_t
-            GROUP BY curve_id, driver_id
-        } {
-            $self SaveContrib $curve_id $driver_id $t $contrib
-        }
-    }
-
-    # PurgeEffectsAndAdjustments
-    #
-    # Purges the applied effects and adjustments; we don't need them anymore.
-    
-    method PurgeEffectsAndAdjustments {} {
-        $rdb eval {
-            DELETE FROM ucurve_effects_t;
-            DELETE FROM ucurve_adjustments_t;
+            $self SetBaseline $curve_id $bnew $min $max
         }
     }
 
@@ -909,6 +969,37 @@ snit::type ::simlib::ucurve {
                 SET a = $anew
                 WHERE curve_id = $curve_id
             }
+        }
+    }
+
+    # SaveContributionsByDriver t
+    #
+    # t - The timestamp of this time advance.
+    #
+    # Saves the contribution of each effect to the relevant driver.
+
+    method SaveContributionsByDriver {t} {
+        if {!$options(-savehistory)} {
+            return
+        }
+
+        $rdb eval {
+            SELECT curve_id, driver_id, total(actual) as contrib
+            FROM ucurve_effects_t
+            GROUP BY curve_id, driver_id
+        } {
+            $self SaveContrib $curve_id $driver_id $t $contrib
+        }
+    }
+
+    # PurgeEffectsAndAdjustments
+    #
+    # Purges the applied effects and adjustments; we don't need them anymore.
+    
+    method PurgeEffectsAndAdjustments {} {
+        $rdb eval {
+            DELETE FROM ucurve_effects_t;
+            DELETE FROM ucurve_adjustments_t;
         }
     }
 

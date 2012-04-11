@@ -33,6 +33,7 @@ SELECT fg_id                  AS fg_id,
        e_id                   AS e_id,
        driver_id              AS driver_id,
        cause                  AS cause,
+       pflag                  AS pflag,
        format('%.3f',mag)     AS mag
 FROM uram_hrel_effects; 
 
@@ -58,6 +59,7 @@ SELECT ga_id                  AS ga_id,
        e_id                   AS e_id,
        driver_id              AS driver_id,
        cause                  AS cause,
+       pflag                  AS pflag,
        format('%.3f',mag)     AS mag
 FROM uram_vrel_effects; 
 
@@ -84,6 +86,7 @@ SELECT gc_id                  AS gc_id,
        e_id                   AS e_id,
        driver_id              AS driver_id,
        cause                  AS cause,
+       pflag                  AS pflag,
        format('%.3f',mag)     AS mag
 FROM uram_sat_effects; 
 
@@ -108,5 +111,6 @@ SELECT fg_id                  AS fg_id,
        e_id                   AS e_id,
        driver_id              AS driver_id,
        cause                  AS cause,
+       pflag                  AS pflag,
        format('%.3f',mag)     AS mag
 FROM uram_coop_effects; 

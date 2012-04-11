@@ -136,6 +136,9 @@ CREATE TABLE ucurve_effects_t (
     --------------------------------------------------------------------
     -- Data
 
+    -- Persistence flag.  If 1, persistent, if 0, transient.
+    pflag        INTEGER DEFAULT 0,
+
     -- Nominal (unscaled) magnitude of the effect.
     mag          DOUBLE DEFAULT 0.0
         CHECK (mag = CAST (mag AS real)),
