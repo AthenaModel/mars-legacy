@@ -10,6 +10,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.66, 24 April 2012</h3>
+
+This build contains the initial version of URAM, the Unified Regional
+Attitude Model.<p>
+
+<ul>
+  <li> Bug 3376: URAM: Unified Regional Attitude Model
+  <li> Bug 3380: URAM: Persistent Effects
+</ul><p>
+
 <h3>Build 1.65, 21 February 2012</h3>
 
 This build contains a number of small fixes, notably to
