@@ -76,8 +76,6 @@ snit::type ::simlib::uram {
             of the actual contribution to each effect's curve during 
             that timestep by each driver, as well as the current
             level of each curve.  If no, it doesn't.
-
-            TBD: ucurve(n) needs a -savehistory option.
         }
 
         $parm define uram.coopRelationshipLimit ::simlib::rfraction 1.0 {
@@ -419,8 +417,10 @@ snit::type ::simlib::uram {
     # -reload   - If present, calls the -loadcmd to reload the 
     #             initial data into the rdb.
     #
-    # Initializes the simulation to time 0.  Reloads initial data on
-    # demand.
+    # Initializes the simulation to time -1, reloads initial data on
+    # demand.  [advance 0] must be called (after any transient inputs
+    # due to starting conditions have been entered) to compute the
+    # current levels at t=0 and thus complete the initialization.
 
     method init {{opt ""}} {
         # FIRST, get inputs from the RDB
@@ -431,8 +431,8 @@ snit::type ::simlib::uram {
             error "invalid option: \"$opt\""
         }
 
-        # NEXT, set the time to 0.
-        set db(time) 0
+        # NEXT, set the time to -1.
+        set db(time) -1
 
         # NEXT, reset the driver ID
         set db(nextDriver) $options(-driverbase)
@@ -1024,8 +1024,14 @@ snit::type ::simlib::uram {
 
     # advance t
     #
+    # t - The current simulation time.
+    #
     # Advances simulation time to t, applying all current effects to
     # the attitude curves and computing mood and other outputs.
+    #
+    # Initializing URAM is expected to involve two calls: [init]
+    # and [advance 0].  When t=0, only transient effects will be 
+    # applied, leaving the initial baseline levels as set by the caller.
 
     method advance {t} {
         # FIRST, update the time.
@@ -1037,7 +1043,11 @@ snit::type ::simlib::uram {
         set db(ssCache) [dict create]
 
         # NEXT, Apply current effects to the attitude curves.
-        $cm apply $t
+        if {$t == 0} {
+            $cm apply $t -transients
+        } else {
+            $cm apply $t
+        }
 
         # NEXT, Compute all roll-ups
         $self ComputeSatRollups
@@ -1198,6 +1208,8 @@ snit::type ::simlib::uram {
     # only effect is the direct effect.
 
     method {hrel persistent} {driver cause f g mag} {
+        require {$db(time) >= 0} "Persistent inputs not allowed when t=-1"
+
         $self Log detail "hrel persistent driver=$driver cause=$cause f=$f g=$g mag=$mag"
         set cause_id [$self GetCauseID $cause $driver]
         set curve_id [$self GetHrelID $f $g]
@@ -1243,6 +1255,8 @@ snit::type ::simlib::uram {
     # [advance].
 
     method {hrel badjust} {driver f g delta} {
+        require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
+
         $self Log detail "hrel badjust driver=$driver f=$f g=$g delta=$delta"
         set curve_id [$self GetHrelID $f $g]
         snit::double validate $delta
@@ -1264,6 +1278,8 @@ snit::type ::simlib::uram {
     # at the next [advance].
 
     method {hrel bset} {driver f g value} {
+        require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
+
         $self Log detail "hrel bset driver=$driver f=$f g=$g value=$value"
 
         # FIRST, validate inputs.
@@ -1345,6 +1361,8 @@ snit::type ::simlib::uram {
     # only effect is the direct effect.
 
     method {vrel persistent} {driver cause g a mag} {
+        require {$db(time) >= 0} "Persistent inputs not allowed when t=-1"
+
         $self Log detail "vrel persistent driver=$driver cause=$cause g=$g a=$a mag=$mag"
         set cause_id [$self GetCauseID $cause $driver]
         set curve_id [$self GetVrelID $g $a]
@@ -1390,6 +1408,8 @@ snit::type ::simlib::uram {
     # [advance].
 
     method {vrel badjust} {driver g a delta} {
+        require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
+
         $self Log detail "vrel badjust driver=$driver g=$g a=$a delta=$delta"
         set curve_id [$self GetVrelID $g $a]
         snit::double validate $delta
@@ -1411,6 +1431,8 @@ snit::type ::simlib::uram {
     # at the next [advance].
 
     method {vrel bset} {driver g a value} {
+        require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
+
         $self Log detail "vrel bset driver=$driver g=$g a=$a value=$value"
 
         # FIRST, validate inputs.
@@ -1497,6 +1519,8 @@ snit::type ::simlib::uram {
     # -p, and -q.
 
     method {sat persistent} {driver cause g c mag args} {
+        require {$db(time) >= 0} "Persistent inputs not allowed when t=-1"
+
         $self Log detail "sat persistent driver=$driver cause=$cause g=$g c=$c mag=$mag {*}$args"
         # FIRST, validate the normal inputs and retrieve IDs.
         set cause_id [$self GetCauseID $cause $driver]
@@ -1669,6 +1693,8 @@ snit::type ::simlib::uram {
     # [advance].
 
     method {sat badjust} {driver g c delta} {
+        require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
+
         $self Log detail "sat badjust driver=$driver g=$g c=$c delta=$delta"
 
         set curve_id [$self GetSatID $g $c]
@@ -1691,6 +1717,8 @@ snit::type ::simlib::uram {
     # at the next [advance].
 
     method {sat bset} {driver g c value} {
+        require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
+
         $self Log detail "sat bset driver=$driver g=$g c=$c value=$value"
 
         # FIRST, validate inputs.
@@ -1798,6 +1826,8 @@ snit::type ::simlib::uram {
     # -p, and -q.
 
     method {coop persistent} {driver cause f g mag args} {
+        require {$db(time) >= 0} "Persistent inputs not allowed when t=-1"
+
         $self Log detail "coop persistent driver=$driver cause=$cause f=$f g=$g mag=$mag {*}$args"
 
         # FIRST, validate the normal inputs and retrieve IDs.
@@ -1935,6 +1965,8 @@ snit::type ::simlib::uram {
     # [advance].
 
     method {coop badjust} {driver f g delta} {
+        require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
+
         $self Log detail "coop badjust driver=$driver f=$f g=$g delta=$delta"
         set curve_id [$self GetCoopID $f $g]
         snit::double validate $delta
@@ -1956,6 +1988,8 @@ snit::type ::simlib::uram {
     # at the next [advance].
 
     method {coop bset} {driver f g value} {
+        require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
+
         $self Log detail "coop bset driver=$driver f=$f g=$g value=$value"
 
         # FIRST, validate inputs.

@@ -2096,6 +2096,50 @@ curve_id driver_id t contrib
         cleanup
     } -result {0}
 
+    # 11.x -- -transients mode
+
+    test apply-11.1 {b is not recomputed} -setup {
+        create
+        uc ctype add T1 -100 100 -alpha 0.1
+        uc curve add T1 20.0 50.0 0.0
+    } -body {
+        uc apply 1 -transients
+        rdb eval {SELECT b FROM ucurve_curves_t}
+    } -cleanup {
+        cleanup
+    } -result {50.0}
+
+    test apply-11.2 {b is unchanged by persistent effects} -setup {
+        create
+        uc ctype add T1 -100 100
+        uc curve add T1 0.0 50.0 0.0
+    } -body {
+        uc persistent 1 1 1 10.0
+        uc apply 1 -transients
+        uc curve cget 1 -b
+    } -cleanup {
+        cleanup
+    } -result {50.0}
+
+    test apply-11.3 {a is changed by transient effects} -setup {
+        create
+        uc ctype add T1 -100 100
+        uc curve add T1 50.0 50.0 0.0 -50.0 -50.0 0.0
+        uc transient 1 1 1 10.0
+        uc transient 2 2 2 20.0
+    } -body {
+        uc apply 1 -transients
+
+        pprint [rdb query {SELECT curve_id, a, b, delta FROM ucurve_curves_t}]
+    } -cleanup {
+        cleanup
+    } -result {
+curve_id a     b     delta 
+-------- ----- ----- ----- 
+1        55.0  50.0  5.0   
+2        -20.0 -50.0 30.0  
+    }
+
     #-------------------------------------------------------------------
     # -savehistory
     #

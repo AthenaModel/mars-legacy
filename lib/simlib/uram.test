@@ -81,8 +81,10 @@ namespace eval ::simlib::test {
     # Creates a pre-configured URAM.  All uram options can be
     # used.
     #
-    # -rdb     cmd       - Defaults to RDB created for this test file
-    # -gramdb  contents  - Defaults to contents of test.uramdb
+    # -rdb      cmd       - Defaults to RDB created for this test file
+    # -gramdb   contents  - Defaults to contents of test.uramdb
+    # -advance0 flag      - Whether to advance to 0 automatically.
+    #                       Defaults to yes.
 
     proc create {args} {
         # FIRST, set up the RDB
@@ -90,6 +92,7 @@ namespace eval ::simlib::test {
         set rdb [namespace current]::rdb
         
         set uramdb [optval args -gramdb]
+        set advance0 [optval args -advance0 yes]
 
         if {$uramdb eq ""} {
             uramdb loadfile ./test.uramdb $rdb
@@ -103,6 +106,10 @@ namespace eval ::simlib::test {
             {*}$args
 
         jr init
+
+        if {$advance0} {
+            jr advance 0
+        }
 
         return
     }
@@ -165,7 +172,6 @@ namespace eval ::simlib::test {
     } -cleanup {
         cleanup
     } -result {Error in constructor: RDB ::simlib::test::rdb already in use by URAM ::simlib::test::jr}
-
 
     #-------------------------------------------------------------------
     # Object destruction
@@ -306,6 +312,14 @@ namespace eval ::simlib::test {
     } -cleanup {
         cleanup
     } -result {0 1}
+
+    test init-1.5 {Initial time is -1} -setup {
+        create -advance0 off
+    } -body {
+        jr time
+    } -cleanup {
+        cleanup
+    } -result {-1}
 
     test init-2.1 {initial contents: uram_a} -setup {
         create
@@ -993,6 +1007,17 @@ cause_id cause
         cleanup
     } -result {invalid value "NONESUCH", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
 
+
+    test hrel_persistent-1.5 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr hrel persistent [jr driver] CAUSE01 F1 F2 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {Persistent inputs not allowed when t=-1}
+
     test hrel_persistent-2.1 {effect when cause is known} -setup {
         create
     } -body {
@@ -1183,6 +1208,16 @@ pflag f  g  e_id driver_id cause mag
         cleanup
     } -result {invalid value "NONESUCH", expected double}
 
+    test hrel_badjust-1.4 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr hrel badjust [jr driver] F1 F2 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {baseline adjustments not allowed when t=-1}
+
 
     test hrel_badjust-2.1 {adjustment is saved} -setup {
         create
@@ -1257,6 +1292,15 @@ F1 F2 1      1000      0.1
         cleanup
     } -result {invalid value "NONESUCH", should be a real number in range -1.0, 1.0, or one of: SUPPORT, LIKE, INDIFF, DISLIKE, OPPOSE}
 
+    test hrel_bset-1.4 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr hrel bset [jr driver] F1 F2 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {baseline adjustments not allowed when t=-1}
 
     test hrel_bset-2.1 {value is set} -setup {
         create
@@ -1407,6 +1451,16 @@ F1  F2  0.1
     } -cleanup {
         cleanup
     } -result {invalid value "NONESUCH", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+
+    test vrel_persistent-1.5 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr vrel persistent [jr driver] CAUSE01 F1 A1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {Persistent inputs not allowed when t=-1}
 
     test vrel_persistent-2.1 {effect when cause is known} -setup {
         create
@@ -1599,6 +1653,15 @@ pflag g  a  e_id driver_id cause mag
         cleanup
     } -result {invalid value "NONESUCH", expected double}
 
+    test vrel_badjust-1.4 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr vrel badjust [jr driver] F1 A1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {baseline adjustments not allowed when t=-1}
 
     test vrel_badjust-2.1 {adjustment is saved} -setup {
         create
@@ -1672,6 +1735,16 @@ F1 A1 1      1000      -0.25
         cleanup
     } -result {invalid value "NONESUCH", should be a real number in range -1.0, 1.0, or one of: SUPPORT, LIKE, INDIFF, DISLIKE, OPPOSE}
 
+
+    test vrel_bset-1.4 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr vrel bset [jr driver] F1 A1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {baseline adjustments not allowed when t=-1}
 
     test vrel_bset-2.1 {value is set} -setup {
         create
@@ -1820,6 +1893,16 @@ F2 A2 0.2
     } -cleanup {
         cleanup
     } -result {invalid value "NONESUCH", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+
+    test sat_persistent-1.5 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr sat persistent [jr driver] CAUSE01 CA1 AUT 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {Persistent inputs not allowed when t=-1}
 
     test sat_persistent-2.1 {effect when cause is known} -setup {
         create
@@ -2188,6 +2271,16 @@ pflag g   c   e_id driver_id cause mag
         cleanup
     } -result {invalid value "NONESUCH", expected double}
 
+    test sat_badjust-1.4 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr sat badjust [jr driver] CA1 AUT 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {baseline adjustments not allowed when t=-1}
+
 
     test sat_badjust-2.1 {adjustment is saved} -setup {
         create
@@ -2261,6 +2354,16 @@ CA1 AUT 1      1000      10.0
         cleanup
     } -result {invalid value "NONESUCH", should be a real number in range -100.0, 100.0, or one of: VS, S, A, D, VD}
 
+
+    test sat_bset-1.4 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr sat bset [jr driver] CA1 AUT 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {baseline adjustments not allowed when t=-1}
 
     test sat_bset-2.1 {value is set} -setup {
         create
@@ -2410,6 +2513,16 @@ CB2 QOL 0.2
     } -cleanup {
         cleanup
     } -result {invalid value "NONESUCH", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+
+    test coop_persistent-1.5 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr coop persistent [jr driver] CAUSE01 CA1 F2 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {Persistent inputs not allowed when t=-1}
 
     test coop_persistent-2.1 {effect when cause is known} -setup {
         create
@@ -2710,6 +2823,16 @@ pflag f   g  e_id driver_id cause mag
         cleanup
     } -result {invalid value "NONESUCH", expected double}
 
+    test coop_badjust-1.4 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr coop badjust [jr driver] CA1 F1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {baseline adjustments not allowed when t=-1}
+
 
     test coop_badjust-2.1 {adjustment is saved} -setup {
         create
@@ -2783,6 +2906,15 @@ CA1 F1 1      1000      10.0
         cleanup
     } -result {invalid value "NONESUCH", should be a real number in range 0.0, 100.0, or one of: AC, VC, C, MC, U, VU, NC}
 
+    test coop_bset-1.4 {invalid at t=-1} -setup {
+        create -advance0 off
+    } -body {
+        jr coop bset [jr driver] CA1 F1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {baseline adjustments not allowed when t=-1}
 
     test coop_bset-2.1 {value is set} -setup {
         create
@@ -2990,6 +3122,28 @@ ct_id name min    max   alpha gamma
     } -cleanup {
         cleanup
     } -result {2}
+
+    test advance-1.3 {advance 0 doesn't update the baseline} -setup {
+        create -advance0 off
+        
+        # hrel baseline between F1 and F2 is initially 0.8.
+        # Set natural level to 0.0; this would ordinarily cause
+        # a baseline change on advance.
+        jr hrel cset F1 F2 0.0
+    } -body {
+        set bold [rdb onecolumn {
+            SELECT bvalue FROM uram_hrel WHERE f='F1' and g='F2'
+        }]
+        jr advance 0
+        set bnew [rdb onecolumn {
+            SELECT bvalue FROM uram_hrel WHERE f='F1' and g='F2'
+        }]
+
+        list $bold $bnew
+    } -cleanup {
+        cleanup
+    } -result {0.8 0.8}
+
 
     test advance-2.1 {curves are updated} -setup {
         create

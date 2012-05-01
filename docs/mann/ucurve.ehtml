@@ -173,13 +173,20 @@ The delta is applied immediately; its net delta will be saved as
 part of the driver's contribution the next time
 <<iref apply>> is called.<p>
 
-<<defitem apply {$obj apply <i>t</i>}>>
+<<defitem apply {$obj apply <i>t</i> ?-transients?}>>
 
 <b>Not Undoable.</b> Applies and deletes all pending adjustments and
 effects, and records their actual contributions by curve and driver at time
 <i>t</i>, which is specified as an integer tick.  Note that ucurve(n)
 has no real notion of simulation time; <i>t</i> is simply used as a
 time stamp.<p>
+
+If the <code>-transients</code> flag is given, then the baseline level
+will not be updated in any way; pending persistent effects will be ignored,
+and the current level will be recomputed based on any pending
+transient effects.  This is intended to allow <<xref uram(n)>> to
+initialize the current attitude levels based on simulation starting
+conditions at time 0.<p>
 
 <<defitem cget {$obj cget <i>option</i>}>>
 

@@ -710,25 +710,41 @@ snit::type ::simlib::ucurve {
     #-------------------------------------------------------------------
     # apply
 
-    # apply t
+    # apply t ?-transients?
     #
-    # t   - A timestamp
+    # t            - A timestamp
+    # -transients  - Flag
     #
     # Applies the current set of effects to the curves, and updates
-    # the curves.
+    # the curves.  
+    #
+    # If -transients is given, then the baseline is NOT recomputed and
+    # only transient effects are applied.  (Any persistent effects will 
+    # be ignored...so don't make any.)
 
-    method apply {t} {
+    method apply {t {flag ""}} {
+        require {$flag in {-transients ""}} "Invalid option: \"$flag\""
+
         # FIRST, handle pending adjustments.
         $self SaveAdjustmentContributions $t
 
-        # NEXT, compute B.t = alpha*A.t-1 + beta*B.t-1 + gamma*C.t,
-        # along with scaling factors for B.t.
-        $self ComputeBaselineAndScalingFactors
+        # NEXT, handle baseline effects if the flag is not given.
+        if {$flag eq ""} {
+            # NEXT, compute B.t = alpha*A.t-1 + beta*B.t-1 + gamma*C.t,
+            # along with scaling factors for B.t.
+            $self ComputeBaselineAndScalingFactors
 
-        # NEXT, apply pending persistent effects
-        if {[$self ComputeContributionsByCause -persistent]} {
-            # Add the DeltaB's to the B.t's, and update the
-            # scaling factors.
+            # NEXT, apply pending persistent effects
+            if {[$self ComputeContributionsByCause -persistent]} {
+                # Add the DeltaB's to the B.t's, and update the
+                # scaling factors.
+                $self UpdateBaselineAndScalingFactors
+            }
+        } else {
+            # Transient effects only; but we still need to compute
+            # the baseline scaling factors.  Clear the deltas.
+
+            $rdb eval {UPDATE ucurve_curves_t SET delta = 0.0}
             $self UpdateBaselineAndScalingFactors
         }
         
@@ -922,6 +938,9 @@ snit::type ::simlib::ucurve {
     #
     # Adds the DeltaB resulting from persistent effects to the baseline,
     # clamping if need be, and updates the scale factors.
+    #
+    # On [apply $t -transients], this is called with deltas all zero,
+    # just to compute the scaling factors.
 
     method UpdateBaselineAndScalingFactors {} {
         foreach {curve_id bnew min max} [$rdb eval {
