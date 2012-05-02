@@ -710,26 +710,25 @@ snit::type ::simlib::ucurve {
     #-------------------------------------------------------------------
     # apply
 
-    # apply t ?-transients?
+    # apply t
     #
     # t            - A timestamp
-    # -transients  - Flag
     #
     # Applies the current set of effects to the curves, and updates
     # the curves.  
     #
-    # If -transients is given, then the baseline is NOT recomputed and
-    # only transient effects are applied.  (Any persistent effects will 
-    # be ignored...so don't make any.)
+    # If t=0, then we are initializing at time 0.  The baseline is NOT
+    # recomputed, and only transient effects are applied.  Finally,
+    # the a, b, and c values for each curve will be saved as a0, b0, and c0.
+    # (Any persistent effects will be thrown away unused...so don't 
+    # make any.)
 
-    method apply {t {flag ""}} {
-        require {$flag in {-transients ""}} "Invalid option: \"$flag\""
-
+    method apply {t} {
         # FIRST, handle pending adjustments.
         $self SaveAdjustmentContributions $t
 
         # NEXT, handle baseline effects if the flag is not given.
-        if {$flag eq ""} {
+        if {$t > 0} {
             # NEXT, compute B.t = alpha*A.t-1 + beta*B.t-1 + gamma*C.t,
             # along with scaling factors for B.t.
             $self ComputeBaselineAndScalingFactors
@@ -758,6 +757,16 @@ snit::type ::simlib::ucurve {
 
         # NEXT, clean up for next time.
         $self PurgeEffectsAndAdjustments
+
+        # NEXT, if t=0, save a0, b0, and c0 for all curves.
+        if {$t == 0} {
+            $rdb eval {
+                UPDATE ucurve_curves_t
+                SET a0 = a,
+                    b0 = b,
+                    c0 = c;
+            }
+        }
 
         # NEXT, This cannot be undone.
         $self edit reset

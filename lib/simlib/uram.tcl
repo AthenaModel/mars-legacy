@@ -1043,11 +1043,7 @@ snit::type ::simlib::uram {
         set db(ssCache) [dict create]
 
         # NEXT, Apply current effects to the attitude curves.
-        if {$t == 0} {
-            $cm apply $t -transients
-        } else {
-            $cm apply $t
-        }
+        $cm apply $t
 
         # NEXT, Compute all roll-ups
         $self ComputeSatRollups
