@@ -146,6 +146,24 @@ snit::type ::simlib::uram {
             <i>alpha</i> plus <i>gamma</i> must be less than or equal
             to 1.0.
         }
+
+        $parm subset uram.raf {
+            The Relationship Attenuation Factors are used when computing
+            indirect effects based on horizontal relationships.  The 
+            relationship multiplier is attenuated (decreased) by 
+            multiplying it with either the positive or negative RAF.  This
+            is so that strongly negative relationships will no longer
+            cause pathological indirect effects.  (The positive RAF
+            is defined mostly for symmetry.)
+        }
+
+        $parm define uram.raf.positive ::simlib::rfraction 1.0 {
+            The positive Relationship Attenuation Factor.
+        }
+
+        $parm define uram.raf.negative ::simlib::rfraction 0.5 {
+            The negative Relationship Attenuation Factor.
+        }
     }
 
     # ParmsNotify dummy
@@ -1641,8 +1659,10 @@ snit::type ::simlib::uram {
             return [dict get $db(ssCache) $tag]
         }
 
-        # NEXT, get the proximity limit
+        # NEXT, get the proximity limit and RAFs
         set plimit [$self GetProxLimit $s $p $q]
+        set praf   [$parm get uram.raf.positive]
+        set nraf   [$parm get uram.raf.negative]
         
         # NEXT, create the empty dictionary
         set spread [dict create]
@@ -1656,7 +1676,10 @@ snit::type ::simlib::uram {
             WHERE R.g_id = $g_id
             AND   P.proximity < $plimit
         } {
-            # FIRST, apply the here, near, and far factors.
+            # FIRST, Apply the RAFs.
+            set hrel [expr {$hrel > 0.0 ? $hrel * $praf : $hrel * $nraf}]
+
+            # NEXT, apply the here, near, and far factors.
             # TBD: Put s,p,q in a list, 0, 1, 2 and extract using lindex!
             if {$proximity == 2} {
                 # Far
@@ -1925,7 +1948,9 @@ snit::type ::simlib::uram {
         # within the proximity limit.
         set plimit [$self GetProxLimit $s $p $q]
 
-        set CRL [$parm get uram.coopRelationshipLimit]
+        set CRL  [$parm get uram.coopRelationshipLimit]
+        set praf [$parm get uram.raf.positive]
+        set nraf [$parm get uram.raf.negative]
 
         # Schedule the effects
         set cmlist [list]
@@ -1938,7 +1963,13 @@ snit::type ::simlib::uram {
             AND   proximity <  $plimit
             AND   civrel    >= $CRL
         } {
-            # FIRST, apply the here, near, and far factors.
+            # FIRST, The factor is the HREL between two force groups,
+            # and as such is subject to the RAFs.
+            set factor [expr {
+                $factor > 0.0 ? $factor * $praf : $factor * $nraf
+            }]
+            
+            # NET, apply the here, near, and far factors.
             if {$proximity == 2} {
                 set imag [expr {$q * $factor * $mag}]
             } elseif {$proximity == 1} {

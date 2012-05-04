@@ -100,12 +100,17 @@ namespace eval ::simlib::test {
             uramdb loadfile $uramdb $rdb
         }
 
+
         uram jr \
             -rdb     $rdb                                \
             -loadcmd [list ::simlib::uramdb loader $rdb] \
             {*}$args
 
         jr init
+
+        # Set the negative RAF to 0.0 so that indirect effects
+        # are easier to predict.  We'll reset it for testing RAFs.
+        uram parm set uram.raf.negative 1.0
 
         if {$advance0} {
             jr advance 0
@@ -1969,7 +1974,40 @@ CB1 0.6  0.6
 CC1 -0.3 -0.3 
     }
 
-    test sat_persistent-2.4 {spread factor includes s, p, q} -setup {
+    test sat_persistent-2.4 {spread factor includes hrel with RAF} -setup {
+        create
+        
+        # Reset the RAF parameters
+        uram parm reset
+
+        # Set up some group proximities
+        setprox CA2 CA1 0  ;# HERE
+        setprox CB1 CA1 1  ;# NEAR
+        setprox CC1 CA1 2  ;# FAR
+        setprox CB2 CA1 3  ;# REMOTE
+        setprox CC2 CA1 3  ;# REMOTE
+    } -body {
+        jr sat persistent [jr driver] "" CA1 AUT 1.0 -s 1.0 -p 1.0 -q 1.0
+        
+        pprint [rdb query {
+            SELECT E.g     AS f, 
+                   E.mag   AS mag,
+                   H.hrel  AS hrel
+            FROM uram_sat_effects AS E
+            JOIN uram_hrel AS H ON (E.g = H.f AND H.g='CA1')
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+f   mag   hrel 
+--- ----- ---- 
+CA1 1.0   1.0  
+CA2 1.0   1.0  
+CB1 0.6   0.6  
+CC1 -0.15 -0.3 
+    }
+
+    test sat_persistent-2.5 {spread factor includes s, p, q} -setup {
         create
         
         # Set up some group proximities
@@ -1999,7 +2037,7 @@ CB1 0.3   0.6
 CC1 -0.03 -0.3 
     }
 
-    test sat_persistent-2.5 {a factor of zero limits spread} -setup {
+    test sat_persistent-2.6 {a factor of zero limits spread} -setup {
         create
         
         # Set up some group proximities
@@ -2590,7 +2628,33 @@ pflag f   g  e_id driver_id cause mag
 1     CA2 F3 6    1000      1000  -4.0 
     }
 
-    test coop_persistent-2.4 {effect on other civ groups NEAR} -setup {
+    test coop_persistent-2.4 {effect on groups HERE with RAF} -setup {
+        create
+        uram parm reset
+        setprox CA2 CA1 0 ;# CA2 is HERE to CA1
+    } -body {
+        jr coop persistent [jr driver] "" CA1 F1 10.0 -s 0.5
+        
+        # Negative effects should be half the size as in test
+        # 2.3.
+        pprint [rdb query {
+            SELECT pflag, f, g, e_id, driver_id, cause, mag 
+            FROM uram_coop_effects
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+pflag f   g  e_id driver_id cause mag  
+----- --- -- ---- --------- ----- ---- 
+1     CA1 F1 1    1000      1000  10.0 
+1     CA1 F2 2    1000      1000  8.0  
+1     CA1 F3 3    1000      1000  -4.0 
+1     CA2 F1 4    1000      1000  5.0  
+1     CA2 F2 5    1000      1000  4.0  
+1     CA2 F3 6    1000      1000  -2.0 
+    }
+
+    test coop_persistent-2.5 {effect on other civ groups NEAR} -setup {
         create
         setprox CA2 CA1 1 ;# CA2 is NEAR to CA1
     } -body {
