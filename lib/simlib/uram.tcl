@@ -742,25 +742,27 @@ snit::type ::simlib::uram {
     }
 
 
-    # load hrel f g hrel0 ?f g hrel0...?
+    # load hrel f g base nat ?f g base nat...?
     #
     # f     - Group name
     # g     - Group name
-    # hrel0 - Initial group relationship
+    # base  - Initial baseline relationship
+    # nat   - Initial natural relationship
     #
-    # Loads group-to-group relationships into uram_hrel_t. 
+    # Loads horizontal relationships into uram_hrel_t. The current value
+    # is made the same as the baseline, pending an [advance 0].
 
     method {load hrel} {args} {
         assert {$trans(loadstate) eq "otherg"}
 
         array set gids [$rdb eval {SELECT g, g_id FROM uram_g}]
 
-        foreach {f g hrel0} $args {
+        foreach {f g base nat} $args {
             set f_id $gids($f)
             set g_id $gids($g)
 
-            # A=B=C
-            set curve_id [$cm curve add HREL $hrel0 $hrel0 $hrel0]
+            # A=B
+            set curve_id [$cm curve add HREL $base $base $nat]
 
             $rdb eval {
                 INSERT INTO uram_hrel_t(f_id, g_id, curve_id)
@@ -777,13 +779,16 @@ snit::type ::simlib::uram {
         set trans(loadstate) "hrel"
     }
 
-    # load vrel g a vrel ?g a vrel ...?
+    # load vrel g a base nat ?g a base nat...?
     #
     # g     - Group name
     # a     - Actor name
-    # vrel0 - Initial vertical relationship
+    # base  - Initial baseline relationship
+    # nat   - Initial natural relationship
     #
-    # Loads group-to-actor relationships into uram_ga.
+    # Loads vertical relationships into uram_ga.  The current value
+    # is made the same as the baseline, pending an [advance 0].
+
 
     method {load vrel} {args} {
         assert {$trans(loadstate) eq "hrel"}
@@ -791,12 +796,12 @@ snit::type ::simlib::uram {
         array set gids [$rdb eval {SELECT g, g_id FROM uram_g}]
         array set aids [$rdb eval {SELECT a, a_id FROM uram_a}]
 
-        foreach {g a vrel0} $args {
+        foreach {g a base nat} $args {
             set g_id $gids($g)
             set a_id $aids($a)
 
-            # A=B; C will be set explicitly later.
-            set curve_id [$cm curve add VREL $vrel0 $vrel0 $vrel0]
+            # A=B
+            set curve_id [$cm curve add VREL $base $base $nat]
 
             $rdb eval {
                 INSERT INTO uram_vrel_t(g_id, a_id, curve_id)
@@ -808,15 +813,17 @@ snit::type ::simlib::uram {
     }
 
 
-    # load sat g c sat0 saliency ?g c sat0 saliency ...?
+    # load sat g c base nat saliency ?g c base nat saliency ...?
     #
     # g        - Group name
     # c        - Concern name
-    # sat0     - Initial satisfaction level
+    # base     - Initial baseline level
+    # nat      - Initial natural level
     # saliency - Saliency
     #
     # Loads the satisfaction curve data into ucurve(n) and
-    # uram_sat_t.
+    # uram_sat_t.  The current value is made the same as the baseline, 
+    # pending an [advance 0].
 
     method {load sat} {args} {
         assert {$trans(loadstate) eq "vrel"}
@@ -824,12 +831,12 @@ snit::type ::simlib::uram {
         array set gids [$rdb eval {SELECT g, g_id FROM uram_g}]
         array set cids [$rdb eval {SELECT c, c_id FROM uram_c}]
 
-        foreach {g c sat0 saliency} $args {
+        foreach {g c base nat saliency} $args {
             set g_id $gids($g)
             set c_id $cids($c)
 
             # A=B; C will be set explicitly later.
-            set curve_id [$cm curve add $c $sat0 $sat0 $sat0]
+            set curve_id [$cm curve add $c $base $base $nat]
 
             $rdb eval {
                 INSERT INTO uram_sat_t(g_id, c_id, curve_id, saliency)
@@ -840,13 +847,16 @@ snit::type ::simlib::uram {
         set trans(loadstate) "sat"
     }
 
-    # load coop f g coop0 ?f g coop0...?
+    # load coop f g base nat ?f g base nat...?
     #
     # f     - Force group name
     # g     - Civ group name
-    # coop0 - Initial cooperation level
+    # base  - Initial baseline level
+    # nat   - Initial natural level
     #
-    # Loads cooperation curve data into ucurve(n) and uram_coop_t.
+    # Loads cooperation curve data into ucurve(n) and uram_coop_t.  
+    # The current value is made the same as the baseline, 
+    # pending an [advance 0].
 
     method {load coop} {args} {
         assert {$trans(loadstate) eq "sat"}
@@ -854,13 +864,13 @@ snit::type ::simlib::uram {
         # FIRST, get the group IDs
         array set gids [$rdb eval {SELECT g, g_id FROM uram_g}]
 
-        foreach {f g coop0} $args {
+        foreach {f g base nat} $args {
             set f_id $gids($f)
             set g_id $gids($g)
             set fg_id [dict get $trans(fgids) $f_id,$g_id]
             
-            # A=B; C will be set explicitly later.
-            set curve_id [$cm curve add COOP $coop0 $coop0 $coop0]
+            # A=B
+            set curve_id [$cm curve add COOP $base $base $nat]
 
             # Make sure we get the same fg_id's as in uram_hrel_t.
             $rdb eval {

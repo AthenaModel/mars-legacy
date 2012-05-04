@@ -594,26 +594,16 @@ is <b>FRC</b> or <b>ORG</b>. The groups
 should be sorted by name, and there should be at least one force
 group.<p>
 
-<<defitem "load hrel" {$obj load hrel <i>f g hrel0</i> ?<i>f g hrel0</i>...?}>>
+<<defitem "load hrel" {$obj load hrel <i>f g base nat</i> ?<i>f g base nat</i>...?}>>
+<<defitem "load vrel" {$obj load vrel <i>g a base nat</i> ?<i>g a base nat</i>...?}>>
+<<defitem "load sat" {$obj load sat <i>g c base nat saliency</i> ?<i>g c base nat saliency</i>...?}>>
+<<defitem "load coop" {$obj load coop <i>f g base nat</i> ?<i>f g base nat</i>...?}>>
 
-This command is used to specify the set of horizontal relationships.
-<p>
-
-<<defitem "load vrel" {$obj load vrel <i>g a vrel0</i> ?<i>g a vrel0</i>...?}>>
-
-This command is used to specify the set of vertical relationships.
-<p>
-
-
-<<defitem "load sat" {$obj load sat <i>g c sat0 saliency</i> ?<i>g c sat0 saliency</i>...?}>>
-
-This command is used to specify the set of satisfaction
-data.<p>
-
-<<defitem "load coop" {$obj load coop <i>f g coop0</i> ?<i>f g coop0</i>...?}>>
-
-This command is used to specify the set of initial
-cooperation values for each civilian group/force group pair.<p>
+These commands are used to specify the initial baseline and natural
+(B and C) levels for each attitude curve (plus, for satisfaction
+curves, the saliency as well).  The current level (A) for each curve 
+is set equal to the initial baseline, pending a possible 
+<<iref advance>> to time 0.<p>
 
 <</deflist load>>
 
