@@ -38,6 +38,13 @@
 -- views associated with them; in this case the table and the view will
 -- have the same name, with the table name have a "_t" suffix, e.g.,
 -- "uram_sat" and "uram_sat_t".
+--
+-- NOTE: Cascading deletes are generally not used in this schema.  The
+-- parent columns for FK constraints are all initialized by [init] and
+-- never change.  Using cascading deletes makes it impossible to exclude
+-- a table from an Athena snapshot unless all parent tables are excluded
+-- as well, which has been a problem in the past.  So, since cascading
+-- deletes aren't needed, we don't specify them.
 
 
 ------------------------------------------------------------------------
@@ -76,12 +83,10 @@ CREATE TABLE uram_mn (
     mn_id     INTEGER PRIMARY KEY,      -- URAM Unique record ID
     m_id      INTEGER                   -- URAM unique nbhood ID
               REFERENCES uram_n(n_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
 
     n_id      INTEGER                   -- URAM unique nbhood ID
               REFERENCES uram_n(n_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
 
     -- Proximity of nbhood m to nbhood n from the point of view of 
@@ -107,12 +112,10 @@ CREATE TABLE uram_civ_g (
     -- Data specific to civilian groups
     g_id       INTEGER PRIMARY KEY              -- URAM unique group ID
                REFERENCES uram_g(g_id)
-               ON DELETE CASCADE
                DEFERRABLE INITIALLY DEFERRED,
 
     -- Neighborhood in which g resides
     n_id       INTEGER REFERENCES uram_n(n_id)  -- URAM unique nbhood ID
-               ON DELETE CASCADE
                DEFERRABLE INITIALLY DEFERRED,
 
     pop        INTEGER,                         -- g's population
@@ -143,11 +146,9 @@ CREATE TABLE uram_civrel_t (
     fg_id     INTEGER PRIMARY KEY,            -- URAM unique FG record ID
     f_id      INTEGER                         -- URAM unique group ID
               REFERENCES uram_g(g_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
     g_id      INTEGER                         -- URAM unique group ID
               REFERENCES uram_g(g_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
 
     hrel_id   INTEGER UNIQUE,                 -- HREL curve_id
@@ -177,11 +178,9 @@ CREATE TABLE uram_frcrel_t (
     fg_id     INTEGER PRIMARY KEY,            -- URAM unique FG record ID
     f_id      INTEGER                         -- URAM unique group ID
               REFERENCES uram_g(g_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
     g_id      INTEGER                         -- URAM unique group ID
               REFERENCES uram_g(g_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
 
     hrel_id   INTEGER UNIQUE,                 -- HREL curve_id
@@ -208,11 +207,9 @@ CREATE TABLE uram_hrel_t (
     fg_id     INTEGER PRIMARY KEY,            -- URAM unique FG record ID
     f_id      INTEGER                         -- URAM unique group ID
               REFERENCES uram_g(g_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
     g_id      INTEGER                         -- URAM unique group ID
               REFERENCES uram_g(g_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
 
     curve_id  INTEGER UNIQUE,                 -- ucurve(n) curve ID
@@ -288,11 +285,9 @@ CREATE TABLE uram_vrel_t (
     ga_id     INTEGER PRIMARY KEY,            -- URAM unique record ID
     g_id      INTEGER                         -- URAM unique group ID
               REFERENCES uram_g(g_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
     a_id      INTEGER                         -- URAM unique actor ID
               REFERENCES uram_a(a_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
 
     curve_id  INTEGER UNIQUE,                 -- ucurve(n) curve ID
@@ -367,11 +362,9 @@ CREATE TABLE uram_sat_t (
     gc_id     INTEGER PRIMARY KEY,               -- URAM unique record ID
     g_id      INTEGER                            -- URAM unique group ID
               REFERENCES uram_civ_g(g_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
     c_id      INTEGER                            -- URAM unique concern ID
               REFERENCES uram_c(c_id)  
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
 
     curve_id  INTEGER UNIQUE,                    -- ucurve(n) curve ID
@@ -452,11 +445,9 @@ CREATE TABLE uram_coop_t (
     fg_id     INTEGER PRIMARY KEY,            -- URAM unique FG record ID
     f_id      INTEGER                         -- URAM unique group ID
               REFERENCES uram_g(g_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
     g_id      INTEGER                         -- URAM unique group ID
               REFERENCES uram_g(g_id)
-              ON DELETE CASCADE
               DEFERRABLE INITIALLY DEFERRED,
 
     curve_id  INTEGER UNIQUE,                 -- ucurve(n) curve ID
@@ -559,11 +550,9 @@ CREATE TABLE uram_nbcoop_t (
     ng_id        INTEGER PRIMARY KEY,            -- URAM Unique record ID
     n_id         INTEGER                         -- URAM unique nbhood ID
                  REFERENCES uram_n(n_id)
-                 ON DELETE CASCADE
                  DEFERRABLE INITIALLY DEFERRED,
     g_id         INTEGER                         -- URAM unique group ID
                  REFERENCES uram_g(g_id)
-                 ON DELETE CASCADE
                  DEFERRABLE INITIALLY DEFERRED,
 
     -- Outputs

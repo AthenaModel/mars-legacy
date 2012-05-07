@@ -492,12 +492,15 @@ snit::type ::simlib::uram {
     # Deletes all data from the uram.sql tables for this instance
 
     method ClearTables {} {
-        # FIRST, clear all URAM tables.
-        $rdb eval {
-            SELECT name FROM sqlite_master
-            WHERE type='table' AND name GLOB 'uram_*'
-        } {
-            $rdb eval "DELETE FROM $name"
+        # FIRST, clear all URAM tables.  Wrap it in a transaction,
+        # so that we don't get FK constraint failures.
+        $rdb transaction {
+            $rdb eval {
+                SELECT name FROM sqlite_master
+                WHERE type='table' AND name GLOB 'uram_*'
+            } {
+                $rdb eval "DELETE FROM $name"
+            }
         }
 
         # NEXT, clear the curve manager tables

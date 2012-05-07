@@ -181,6 +181,15 @@ CREATE TABLE ucurve_adjustments_t (
 -- Contribution History
 
 -- ucurve(n) contribs table
+--
+-- NOTE: This table does not implement cascading deletes when a 
+-- curve_id is deleted.  This is to support Athena's snapshot 
+-- capability; Athena wants to exclude contribs from the snapshots
+-- because they are large.  However, the tables that define curves
+-- generally need to be in the snaphot, and importing a snapshot causes
+-- them to be cleared temporarily, which would purge this table if
+-- a cascading delete was defined.  The [clear] method explicitly
+-- deletes records from this table.
 
 CREATE TABLE ucurve_contribs_t (
     --------------------------------------------------------------------
@@ -188,7 +197,6 @@ CREATE TABLE ucurve_contribs_t (
 
     -- Curve ID: ID of the curve receiving the effect.
     curve_id     INTEGER REFERENCES ucurve_curves_t(curve_id)
-                 ON DELETE CASCADE
                  DEFERRABLE INITIALLY DEFERRED,
 
     -- Driver ID, an integer assigned by the client.
