@@ -205,8 +205,7 @@ snit::type ::simlib::ucurve {
 
     method clear {} {
         # Note: Deleting the curve types will also delete all
-        # curves effects, and adjustments.  We also need to delete
-        # contribs, because it has cascading deletes disabled.
+        # curves, effects, and adjustments.
         $rdb eval {
             DELETE FROM ucurve_contribs_t;
             DELETE FROM ucurve_ctypes_t;
