@@ -10,6 +10,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.67, 8 May 2012</h3>
+
+This build contains changes and fixes for URAM in support of Athena 4
+development.<p>
+
+<ul>
+  <li> Bug 3426: uram(n): Allow transient effects at t=0
+  <li> Bug 3433: ucurve(n): Special behavior on [apply 0]
+  <li> Bug 3438: uram(n): "load" commands should take both initial baseline and initial natural levels.
+  <li> Bug 3441: uram(n): Relationship attenuation factors
+  <li> Bug 3446: uram(n)/ucurve(n): tables contain cascading deletes
+</ul><p>
+
 <h3>Build 1.66, 24 April 2012</h3>
 
 This build contains the initial version of URAM, the Unified Regional
