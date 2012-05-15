@@ -58,8 +58,14 @@ CREATE TABLE mam_topic (
         CHECK (title != ''),
 
      -- Relevance of this topic in the region.
-    relevance INTEGER DEFAULT 1  
-        CHECK (relevance IN (0, 1))
+    relevance REAL DEFAULT 1.0  
+        CHECK (relevance = CAST (relevance AS real))
+        CHECK (0.0 <= relevance AND relevance <= 1.0),
+
+    -- Affinity Flag: 1 if the topic is used to compute affinity, and
+    -- 0 otherwise.
+    affinity INTEGER DEFAULT 1  
+        CHECK (affinity IN (0, 1))
 );
 
 -- mam(n) Beliefs table.  A belief is a position taken by an entity

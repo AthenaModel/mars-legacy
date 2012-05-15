@@ -183,7 +183,8 @@ Returns the value of the specified <i>option</i>.<p>
 
 <<defitem compute {$obj compute}>>
 
-Recomputed all affinities given the current set of model inputs.  Call
+Recomputes all affinities given the current set of model inputs, using only
+topics whose <code>-affinity</code> flag is set.  Call
 this explicitly before referencing the <b>mam_affinity</b> table if
 model inputs might have changed.<p>
 
@@ -223,7 +224,7 @@ This subcommand is used to create and modify entities.<p>
 <<defitem "entity add" {$obj entity add <i>eid option value...</i>}>>
 
 <b>Undoable.</b>  Creates a new entity with ID <i>eid</i>, along with
-all relevant <<iref belief>> and affinity records.  See
+all related <<iref belief>> and affinity records.  See
 <<iref entity configure>> for the available options.<p>
 
 <<defitem "entity cget" {$obj entity cget <i>eid option</i>}>>
@@ -301,7 +302,7 @@ This subcommand is used to create and modify topics.<p>
 <<defitem "topic add" {$obj topic add <i>tid option value...</i>}>>
 
 <b>Undoable.</b>  Creates a new topic with ID <i>tid</i>, along with
-all relevant <<iref belief>> records.  See <<iref topic configure>>
+all related <<iref belief>> records.  See <<iref topic configure>>
 for the available options.<p>
 
 <<defitem "topic cget" {$obj topic cget <i>tid option</i>}>>
@@ -318,10 +319,16 @@ Returns the value of the specified topic option.<p>
 Specifies the topic's title, a short human-readable name.  Defaults to
 "TBD".<p>
 
-<<defopt {-relevance <i>flag</i>}>>
+<<defopt {-relevance <i>fraction</i>}>>
 
-Specifies a numeric flag, 0 or 1.  If 1 (the default), this topic is
-relevant and will be included in the computation of affinity; if 0,
+Specifies the relevance of the topic as a fraction from 0.0 to 1.0 
+(the default).  Positions on a topic have decreasing effect as their 
+relevance declines.<p>
+
+<<defopt {-affinity <i>flag</i>}>>
+
+Specifies a numeric flag, 0 or 1.  If 1 (the default), this topic
+will be included in the computation of affinity; if 0,
 then it will be excluded.<p>
 
 <</deflist options>>

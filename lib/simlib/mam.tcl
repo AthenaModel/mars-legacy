@@ -410,8 +410,10 @@ snit::type ::simlib::mam {
     #
     # Options:
     # 
-    # -title     The topic's human-readable title
-    # -relevance The topic's relevance (0 or 1)
+    #   -title     - The topic's human-readable title
+    #   -relevance - The topic's relevance (0.0 to 1.0)
+    #   -affinity  - 1 if the topic used when computing affinity,
+    #                and 0 otherwise.
     #
     # Adds a new topic to the topics table.  In addition:
     #
@@ -605,12 +607,12 @@ snit::type ::simlib::mam {
         # playbox, eta.playbox.
         set gamma [$rdb onecolumn {SELECT gamma FROM mam_playbox}]
 
-        set nTopics [$rdb onecolumn {
-            SELECT count(tid) FROM mam_topic
-            WHERE relevance = 1
+        set totalRelevance [$rdb onecolumn {
+            SELECT total(relevance) FROM mam_topic
+            WHERE affinity = 1
         }]
 
-        let etaPlaybox {$gamma*$nTopics}
+        let etaPlaybox {$gamma*$totalRelevance}
 
         # NEXT, get each entity's participation in the commonality
         # of the playbox, theta:
@@ -620,13 +622,17 @@ snit::type ::simlib::mam {
         }]
         
 
-        # NEXT, Get each entity's signs, strengths, and emphases
+        # NEXT, Get each entity's signs, strengths, and emphases.
+        # The entity's position is attenuated by the relevance of the
+        # topic.
         set count 0
         $rdb eval {
-            SELECT eid, position, emphasis
-            FROM mam_belief
-            JOIN mam_topic USING (tid)
-            WHERE mam_topic.relevance = 1
+            SELECT B.eid                    AS eid, 
+                   B.position * T.relevance AS position, 
+                   B.emphasis               AS emphasis
+            FROM mam_belief AS B
+            JOIN mam_topic  AS T USING (tid)
+            WHERE T.affinity = 1
             ORDER by eid, tid
         } {
             incr count
@@ -673,6 +679,9 @@ snit::type ::simlib::mam {
     # Computes the affinity of entity f for entity g given their
     # positions on the same topics and f's emphasis on agreement/disagreement,
     # per the Mars Analyst's Guide.
+    #
+    # NOTE: The eta and positions have already been modified by topic
+    # relevance.
 
     proc Affinity {eta pfList eList pgList} {
         # FIRST, set epsilon.  This could be a parmset parameter, but
@@ -927,7 +936,7 @@ snit::type ::simlib::mam {
         mam_entity-where    {WHERE eid=$key(eid)}
 
         mam_topic-keys      tid
-        mam_topic-options   {-title -relevance}
+        mam_topic-options   {-title -relevance -affinity}
         mam_topic-where     {WHERE tid=$key(tid)}
 
         mam_belief-keys     {eid tid}
