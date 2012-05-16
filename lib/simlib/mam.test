@@ -1777,6 +1777,96 @@ E1  T2  0.0      0.5
         cleanup
     } -result {0.429 0.647}
 
+    #-------------------------------------------------------------------
+    # resonance
+    
+    proc resonanceSetup {} {
+        create
+
+        # Two entities, so we can be sure we're getting the right one.
+        mymam entity add E1
+        mymam entity add E2
+
+        # Three topics
+        mymam topic add T1
+        mymam topic add T2
+        mymam topic add T3
+       
+        # E2's beliefs don't matter; set up E1's.
+        mymam belief configure E1 T1 -position 1.0
+        mymam belief configure E1 T2 -position 0.5
+        mymam belief configure E1 T3 -position -0.5
+    }
+
+    test resonance-1.1 {single topics} -setup {
+        resonanceSetup
+    } -body {
+        set a [mymam resonance E1 1.0 {T1 0.5}]
+        set b [mymam resonance E1 1.0 {T2 0.5}]
+        set c [mymam resonance E1 1.0 {T3 0.5}]
+
+        format "%.2f %.2f %.2f" $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {0.65 0.83 0.43}
+
+    test resonance-1.2 {single topics, theta=0} -setup {
+        resonanceSetup
+    } -body {
+        set a [mymam resonance E1 0.0 {T1 0.5}]
+        set b [mymam resonance E1 0.0 {T2 0.5}]
+        set c [mymam resonance E1 0.0 {T3 0.5}]
+
+        format "%.2f %.2f %.2f" $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {0.37 0.50 -0.33}
+
+    test resonance-1.3 {single topics, relevance=0.5} -setup {
+        resonanceSetup
+        mymam topic configure T1 -relevance 0.5
+        mymam topic configure T2 -relevance 0.5
+        mymam topic configure T3 -relevance 0.5
+    } -body {
+        set a [mymam resonance E1 1.0 {T1 0.5}]
+        set b [mymam resonance E1 1.0 {T2 0.5}]
+        set c [mymam resonance E1 1.0 {T3 0.5}]
+
+        format "%.2f %.2f %.2f" $a $b $c
+    } -cleanup {
+        cleanup
+    } -result {0.58 0.75 0.54}
+
+    test resonance-1.4 {multiple topics} -setup {
+        resonanceSetup
+    } -body {
+        set a [mymam resonance E1 1.0 {T1 0.5 T3 0.5}]
+
+        format "%.2f" $a 
+    } -cleanup {
+        cleanup
+    } -result {0.55}
+
+    test resonance-1.5 {multiple topics, theta=0} -setup {
+        resonanceSetup
+    } -body {
+        set a [mymam resonance E1 0.0 {T1 0.5 T3 0.5}]
+
+        format "%.2f" $a 
+    } -cleanup {
+        cleanup
+    } -result {0.10}
+
+    test resonance-1.6 {multiple topics, relevance=0.5} -setup {
+        resonanceSetup
+        mymam topic configure T1 -relevance 0.5
+    } -body {
+        set a [mymam resonance E1 1.0 {T1 0.5 T3 0.5}]
+
+        format "%.2f" $a 
+    } -cleanup {
+        cleanup
+    } -result {0.49}
 
     #-------------------------------------------------------------------
     # Cleanup

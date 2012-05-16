@@ -669,6 +669,69 @@ snit::type ::simlib::mam {
         }
     }
 
+    # resonance eid theta hook
+    #
+    # eid     - An entity ID.
+    # theta   - The hook's entity commonality, 0.0 to 1.0
+    # hook    - A dictionary {tid -> position}
+    #
+    # Computes the resonance of the hook with the entity,
+    # given the hook's entity commonality.  Essentially, 
+    # the resonance of the hook with an entity is simply the 
+    # affinity of the entity with the hook considering only the
+    # explicit topics included in the hook, along with the 
+    # implicit topics implied by the playbox commonality setting
+    # and the entity's and hook's entity commonality.
+
+    method resonance {eid theta hook} {
+        # FIRST, if there are no topics in the hook, return 0.0.
+        if {[dict size $hook] == 0} {
+            return 0.0
+        }
+
+        # NEXT, create an "IN" clause for the topics in the hook.
+        set topics [dict keys $hook]
+        set topicSet "('[join $topics ',']')"
+        
+        # NEXT, retrieve gamma and compute the commonality of the
+        # playbox, eta.playbox, for the topics in the topic set.
+        set gamma [$rdb onecolumn {SELECT gamma FROM mam_playbox}]
+
+        set totalRelevance [$rdb onecolumn "
+            SELECT total(relevance) FROM mam_topic
+            WHERE tid IN $topicSet
+        "]
+
+        let etaPlaybox {$gamma*$totalRelevance}
+
+        # NEXT, get eid's entity commonality, and compute eta.
+        set eid_theta [$rdb onecolumn {
+            SELECT commonality FROM mam_entity WHERE eid=$eid
+        }]
+        
+        let eta {$etaPlaybox * min($eid_theta, $theta)}
+
+        # NEXT, Get the entity's signs, strengths, and emphases.
+        # The entity's position is attenuated by the relevance of the
+        # topic.
+        $rdb eval "
+            SELECT B.position   AS position, 
+                   B.emphasis   AS emphasis,
+                   B.tid        AS tid,
+                   T.relevance  AS relevance
+            FROM mam_belief AS B
+            JOIN mam_topic  AS T USING (tid)
+            WHERE eid=\$eid AND tid IN $topicSet
+            ORDER by tid
+        " {
+            lappend ePos [expr {$relevance * $position}]
+            lappend hPos [expr {$relevance * [dict get $hook $tid]}]
+            lappend tau $emphasis
+        }
+
+        return [Affinity $eta $ePos $tau $hPos]
+    }
+
     # Affinity $eta pfList eList pgList
     #
     # eta     - A measure of the commonality between the entities

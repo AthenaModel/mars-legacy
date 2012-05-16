@@ -293,6 +293,20 @@ many.  The <i>value</i> can range from 0.0 to 100.0, and defaults to 1.0.<p>
 
 <</deflist playbox>>
 
+<<defitem resonance {$obj resonance <i>eid theta hook</i>}>>
+
+This command returns the resonance of a semantic <i>hook</i> with
+entity <i>eid</i> given the <i>hook</i>'s perceived commonality
+<i>theta</i>, an entity commonality fraction from 0.0 to 1.0.  The
+<i>hook</i> is a dictionary of topic IDs and 
+<<xref simtypes(n) qposition>> values.<p>
+
+The resonance is essentially the affinity of the entity for the hook
+using only and exactly the topics given in the hook.  Topic
+<code>-relevance</code>, the playbox <code>-gamma</code> setting, and
+the entity's own <code>-commonality</code> setting are all taken into
+account.<p>
+
 <<defitem topic {$obj topic <i>subcommand</i> ?<i>args...</i>?}>>
 
 This subcommand is used to create and modify topics.<p>
