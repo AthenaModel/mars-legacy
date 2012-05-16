@@ -669,21 +669,21 @@ snit::type ::simlib::mam {
         }
     }
 
-    # resonance eid theta hook
+    # congruence eid theta hook
     #
     # eid     - An entity ID.
     # theta   - The hook's entity commonality, 0.0 to 1.0
     # hook    - A dictionary {tid -> position}
     #
-    # Computes the resonance of the hook with the entity,
+    # Computes the congruence of the hook with the entity,
     # given the hook's entity commonality.  Essentially, 
-    # the resonance of the hook with an entity is simply the 
+    # the congruence of the hook with an entity is simply the 
     # affinity of the entity with the hook considering only the
     # explicit topics included in the hook, along with the 
     # implicit topics implied by the playbox commonality setting
     # and the entity's and hook's entity commonality.
 
-    method resonance {eid theta hook} {
+    method congruence {eid theta hook} {
         # FIRST, if there are no topics in the hook, return 0.0.
         if {[dict size $hook] == 0} {
             return 0.0
