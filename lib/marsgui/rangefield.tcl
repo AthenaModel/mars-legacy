@@ -322,7 +322,7 @@ snit::widget ::marsgui::rangefield {
 
             $qmenu configure \
                 -enumtype $options(-type) \
-                -width    $width
+                -width    [expr {$width + 3}]
         }
 
         # NEXT, lay out the widgets.
