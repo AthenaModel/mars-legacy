@@ -74,27 +74,28 @@ namespace eval ::simlib:: {
 
 # Magnitude: satisfaction and cooperation inputs
 ::marsutil::quality ::simlib::qmag {
-    XXXXL+ "XXXX_LARGE_PLUS"   30.0
-    XXXL+  "XXX_LARGE_PLUS"    20.0
-    XXL+   "XX_LARGE_PLUS"     15.0
-    XL+    "X_LARGE_PLUS"      10.0
-    L+     "LARGE_PLUS"         7.5
-    M+     "MEDIUM_PLUS"        5.0
-    S+     "SMALL_PLUS"         3.0
-    XS+    "X_SMALL_PLUS"       2.0
-    XXS+   "XX_SMALL_PLUS"      1.5
-    XXXS+  "XXX_SMALL_PLUS"     1.0
-    XXXS-  "XXX_SMALL_MINUS"   -1.0
-    XXS-   "XX_SMALL_MINUS"    -1.5
-    XS-    "X_SMALL_MINUS"     -2.0
-    S-     "SMALL_MINUS"       -3.0
-    M-     "MEDIUM_MINUS"      -5.0
-    L-     "LARGE_MINUS"       -7.5
-    XL-    "X_LARGE_MINUS"    -10.0
-    XXL-   "XX_LARGE_MINUS"   -15.0
-    XXXL-  "XXX_LARGE_MINUS"  -20.0
-    XXXXL- "XXXX_LARGE_MINUS" -30.0
-} -format {%5.2f}
+    XXXXL+ "XXXXL+"   30.0
+    XXXL+  "XXXL+"    20.0
+    XXL+   "XXL+"     15.0
+    XL+    "XL+"      10.0
+    L+     "L+"        7.5
+    M+     "M+"        5.0
+    S+     "S+"        3.0
+    XS+    "XS+"       2.0
+    XXS+   "XXS+"      1.5
+    XXXS+  "XXXS+"     1.0
+    ZERO   "ZERO"      0.0
+    XXXS-  "XXXS-"    -1.0
+    XXS-   "XXS-"     -1.5
+    XS-    "XS-"      -2.0
+    S-     "S-"       -3.0
+    M-     "M-"       -5.0
+    L-     "L-"       -7.5
+    XL-    "XL-"     -10.0
+    XXL-   "XXL-"    -15.0
+    XXXL-  "XXXL-"   -20.0
+    XXXXL- "XXXXL-"  -30.0
+} -format {%5.2f} -min -100.0 -max 100.0
 
 # Position: a mam(n) entity's position on a topic.
 ::marsutil::quality ::simlib::qposition {

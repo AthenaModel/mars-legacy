@@ -245,27 +245,28 @@ namespace eval ::simlib::test {
 
     test qmag-1.1 {long names map to short names} -body {
         list \
-            [qmag name "XXXX_LARGE_PLUS" ] \
-            [qmag name "XXX_LARGE_PLUS"  ] \
-            [qmag name "XX_LARGE_PLUS"   ] \
-            [qmag name "X_LARGE_PLUS"    ] \
-            [qmag name "LARGE_PLUS"      ] \
-            [qmag name "MEDIUM_PLUS"     ] \
-            [qmag name "SMALL_PLUS"      ] \
-            [qmag name "X_SMALL_PLUS"    ] \
-            [qmag name "XX_SMALL_PLUS"   ] \
-            [qmag name "XXX_SMALL_PLUS"  ] \
-            [qmag name "XXX_SMALL_MINUS" ] \
-            [qmag name "XX_SMALL_MINUS"  ] \
-            [qmag name "X_SMALL_MINUS"   ] \
-            [qmag name "SMALL_MINUS"     ] \
-            [qmag name "MEDIUM_MINUS"    ] \
-            [qmag name "LARGE_MINUS"     ] \
-            [qmag name "X_LARGE_MINUS"   ] \
-            [qmag name "XX_LARGE_MINUS"  ] \
-            [qmag name "XXX_LARGE_MINUS" ] \
-            [qmag name "XXXX_LARGE_MINUS"] 
-    } -result {XXXXL+ XXXL+ XXL+ XL+ L+ M+ S+ XS+ XXS+ XXXS+ XXXS- XXS- XS- S- M- L- XL- XXL- XXXL- XXXXL-}
+            [qmag name "XXXXL+" ] \
+            [qmag name "XXXL+"  ] \
+            [qmag name "XXL+"   ] \
+            [qmag name "XL+"    ] \
+            [qmag name "L+"     ] \
+            [qmag name "M+"     ] \
+            [qmag name "S+"     ] \
+            [qmag name "XS+"    ] \
+            [qmag name "XXS+"   ] \
+            [qmag name "XXXS+"  ] \
+            [qmag name "ZERO"   ] \
+            [qmag name "XXXS-"  ] \
+            [qmag name "XXS-"   ] \
+            [qmag name "XS-"    ] \
+            [qmag name "S-"     ] \
+            [qmag name "M-"     ] \
+            [qmag name "L-"     ] \
+            [qmag name "XL-"    ] \
+            [qmag name "XXL-"   ] \
+            [qmag name "XXXL-"  ] \
+            [qmag name "XXXXL-" ] 
+    } -result {XXXXL+ XXXL+ XXL+ XL+ L+ M+ S+ XS+ XXS+ XXXS+ ZERO XXXS- XXS- XS- S- M- L- XL- XXL- XXXL- XXXXL-}
 
     test qmag-1.2 {short names map to values} -body {
         list \
@@ -279,6 +280,7 @@ namespace eval ::simlib::test {
             [qmag value XS+]    \
             [qmag value XXS+]   \
             [qmag value XXXS+]  \
+            [qmag value ZERO]   \
             [qmag value XXXS-]  \
             [qmag value XXS-]   \
             [qmag value XS-]    \
@@ -289,14 +291,14 @@ namespace eval ::simlib::test {
             [qmag value XXL-]   \
             [qmag value XXXL-]  \
             [qmag value XXXXL-]
-    } -result {30.0 20.0 15.0 10.0 7.5 5.0 3.0 2.0 1.5 1.0 -1.0 -1.5 -2.0 -3.0 -5.0 -7.5 -10.0 -15.0 -20.0 -30.0}
+    } -result {30.0 20.0 15.0 10.0 7.5 5.0 3.0 2.0 1.5 1.0 0.0 -1.0 -1.5 -2.0 -3.0 -5.0 -7.5 -10.0 -15.0 -20.0 -30.0}
 
     test qmag-1.3 {options} -body {
         list \
             [qmag cget -min]    \
             [qmag cget -max]    \
             [qmag cget -format]
-    } -result {{} {} %5.2f}
+    } -result {-100.0 100.0 %5.2f}
 
     #-----------------------------------------------------------------------
     # qduration
