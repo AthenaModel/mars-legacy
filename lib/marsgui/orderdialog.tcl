@@ -141,6 +141,9 @@ snit::widget ::marsgui::orderdialog {
             -labels   %?                \
             -widths   %?
 
+        $type fieldopts text \
+            -width    %?
+
         # NEXT, note that we're initialized
         set info(initialized) 1
     }

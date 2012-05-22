@@ -339,8 +339,6 @@ The following standard field types are provided by orderdialog(n).
 Custom field types can be registered with <<xref form(n)>>;
 see <<xref "Fields and Field Types">> for more information.<p>
 
-TBD: Need to make the <b>multi</b> field a standard field type.<p>
-
 <<deflist field types>>
 
 <<defitem "color field" {color}>>
@@ -385,7 +383,8 @@ the widget's <code>-table</code>, <code>-universe</code>, and
 
 <<defitem "text field" {text}>>
 
-The field is a <<xref textfield(n)>> widget.<p>
+The field is a <<xref textfield(n)>> widget.  The parameter may specify 
+the field's <code>-width</code>.<p>
 
 <</deflist>>
 
