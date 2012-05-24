@@ -212,7 +212,16 @@ snit::widget ::marsgui::rangefield {
         }
     }
     
-
+    # -min value
+    # -max value
+    #
+    # Set the min and max bounds.  Defaults to the min and max bounds
+    # of the -type.  
+    
+    option -min \
+        -readonly yes
+    option -max \
+        -readonly yes
 
     #-------------------------------------------------------------------
     # Instance Variables
@@ -293,6 +302,21 @@ snit::widget ::marsgui::rangefield {
             return
         }
 
+        # NEXT, determine the -min and -max bounds.
+        set min [$options(-type) cget -min]
+        set max [$options(-type) cget -max]
+
+        if {$options(-min) ne "" && $options(-min) > $min} {
+            set min $options(-min)
+        }
+
+        if {$options(-max) ne "" && $options(-max) < $max} {
+            set max $options(-max)
+        }
+
+        set options(-min) $min
+        set options(-max) $max
+
         # NEXT, set the scale's bounds and value.
         if {$options(-resetvalue) eq ""} {
             $self ChooseResetValue
@@ -303,8 +327,8 @@ snit::widget ::marsgui::rangefield {
         }
 
         $scale configure \
-            -from       [$options(-type) cget -min]  \
-            -to         [$options(-type) cget -max]  \
+            -from       $min                  \
+            -to         $max                  \
             -resolution $options(-resolution)
 
         set vlabelWidth [$self GetLabelWidth]
@@ -369,8 +393,8 @@ snit::widget ::marsgui::rangefield {
     # Picks a reasonable resolution for the scale based on the limits.
 
     method ChooseResetValue {} {
-        set min [$options(-type) cget -min]
-        set max [$options(-type) cget -max]
+        set min $options(-min)
+        set max $options(-max)
 
         if {$min <= 0 && 0 <= $max} {
             set options(-resetvalue) 0
@@ -384,8 +408,8 @@ snit::widget ::marsgui::rangefield {
     # Picks a reasonable resolution for the scale based on the limits.
 
     method ChooseResolution {} {
-        set min [$options(-type) cget -min]
-        set max [$options(-type) cget -max]
+        set min $options(-min)
+        set max $options(-max)
 
         if {$max - $min >= 50} {
             set options(-resolution) 1

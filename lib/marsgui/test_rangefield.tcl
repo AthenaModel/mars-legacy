@@ -23,6 +23,7 @@
 #-----------------------------------------------------------------------
 # Required packages
 
+lappend auto_path [file normalize ..]
 package require marsutil
 package require simlib
 package require marsgui
@@ -59,12 +60,21 @@ proc main {argv} {
         -type ::fraction              \
         -resetvalue 0.0
 
+    form register qpos rangefield \
+        -type ::simlib::qposition \
+        -showsymbols yes \
+        -resetvalue 0.0 \
+        -min        -0.9 \
+        -max        0.9 \
+        -resolution 0.01
+
     form register dummy rangefield
 
 
     .form field create s "Satisfaction" sat
     .form field create c "Cooperation"  coop
     .form field create f "Fraction"     fraction
+    .form field create p "Position"     qpos
     .form field create d "Dummy"        dummy
     .form field create t "Text"         text
 

@@ -64,6 +64,14 @@ symbolic quality values (if any).<p>
 Determines whether the label is positioned to the <b>left</b> or the
 <b>right</b> of the slider.  The default is <b>right</b>.<p>
 
+<<defopt {-min <i>value</i>}>>
+<<defopt {-max <i>value</i>}>>
+
+<b>Creation only.</b>  Normally the minimum and maximum bounds for
+the range come from the <code>-type</code> option; however, sometimes
+the valid range should be narrower than the type's.  Use these options to
+set a narrower range.<p>
+
 <<defopt {-scalelength <i>pixels</i>}>>
 
 Sets the length of the slider in pixels; the default is 150.  Note
