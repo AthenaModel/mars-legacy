@@ -8,15 +8,10 @@
 <<swallow {
     # Macro Definitions
 
-    # <<tree>>
+    # <<table ...>>
     # <<treedir path>> Description <</treedir>>
     #    ...
-    # <</tree>>
-
-    template tree {} {
-        |<--
-        <table border="0" cellspacing="0" cellpadding="0"> 
-    }
+    # <</table>>
 
     template treedir {path} {
         set trans {
@@ -36,13 +31,6 @@
         </td>
         </tr>
     }
-
-    template /tree {} {
-        |<--
-        </table>
-    }
-
-
 }>>
 
 <body>
@@ -117,7 +105,6 @@ projects.<p>
 The project directory tree is as follows:<p>
 
 <<table tab.tree "Project Directory Tree">>
-<<tree>>
 
 <<treedir <root>/       >> Root of project tree<</treedir>>
 <<treedir +bin/         >> Executables (both binaries and scripts)<</treedir>>
@@ -140,7 +127,6 @@ The project directory tree is as follows:<p>
 <<treedir ++<name>/     >> C/C++ source code for executable
                            <i>name</i><</treedir>>
 
-<</tree>>
 <</table>>
 
 <b>Notes:</b><p>
@@ -243,7 +229,6 @@ facilitate development of Mars and its clients.  Procedures appear in
 <<xref proc>>.<p>
 
 <<table tab.branches "Branches and Tags">>
-<table border="1" cellspacing="0">
 
 <tr align="left">
 <th>Branch/Tag</th>
@@ -274,7 +259,6 @@ facilitate development of Mars and its clients.  Procedures appear in
 <td><code>branches/bug/1776</code></td>
 <td>Bug-fix branch</td>
 </tr>
-</table>
 <</table>>
 
 <<section vc.branches.builds "Build Tags">>
@@ -335,7 +319,6 @@ following components will be used:<p>
 
 
 <<table tab.components "Bugzilla Components">>
-<table border="1" cellspacing="0">
 
 <tr align="left">
 <th>Component</th>
@@ -362,7 +345,6 @@ following components will be used:<p>
 <td>Purely documentation-related changes.</td>
 </tr>
 
-</table>
 <</table>>
 
 <<section bug.whiteboard "Status Whiteboard">>
@@ -380,7 +362,6 @@ where <i>x.y</i> is the build version.<p>
 Every bug has a severity; Bugzilla defines the following categories:<p>
 
 <<table tab.severity "Bugzilla Severities">>
-<table border="1" cellspacing="0">
 
 <tr align="left">
 <th>Severity</th>
@@ -423,7 +404,6 @@ present</td>
 <td>Request for enhancement</td>
 </tr>
 
-</table>
 <</table>>
 
 New features are tracked as "Enhancements"; other bugs are usually set
@@ -444,7 +424,6 @@ developer might give it a Resolution of <b>FIXED</b>, <b>INVALID</b>,
 When I&T verifies that the bug is resolved, it is marked <b>CLOSED</b>.<p>
 
 <<table tab.lifecycle "Bug Status and Resolution">>
-<table border="1" cellspacing="0">
 
 <tr align="left">
 <th>STATUS</th>
@@ -530,7 +509,6 @@ be reopened.
 </td>
 </tr>
 
-</table>
 <</table>>
 
 <<section bug.text "Report Description">>
