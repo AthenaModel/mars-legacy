@@ -60,6 +60,7 @@ namespace eval ::marsutil:: {
         readfile        \
         require         \
         stringToRegexp  \
+        throw           \
         try             \
         wildToRegexp
 
@@ -102,6 +103,23 @@ proc ::marsutil::marsver {} {
 
 #-----------------------------------------------------------------------
 # Control Structures
+
+# throw type message
+#
+# type    - A [return] -errorcode value
+# message - The error message
+#
+# This call is equivalent to 
+#
+#     return -code error -errorcode $code $message
+#
+# It is designed for forwards compatibility with Tcl 8.6.
+
+if {[llength [info command ::throw]] == 0} {
+    proc ::marsutil::throw {type message} {
+        return -code error -errorcode $type $message
+    }
+}
 
 # assert expression
 #

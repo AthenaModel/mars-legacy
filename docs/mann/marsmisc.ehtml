@@ -63,6 +63,13 @@ type or instance.<p>
 This is identical to <<iref assert>> except that error message is the
 specified <i>message</i>.<p>
 
+<<defitem throw {throw <i>type message</i>}>>
+
+Throws an error with <code>-errorcode</code> <i>type</i> and the
+given error <i>message</i>.  This call is forward-compatible with Tcl
+8.6's <b>::throw</b> command, and is only loaded if <b>::throw</b> is
+undefined.<p>
+
 <<defitem try {try <i>script1</i> ?finally <i>script2</i>?}>>
 
 Executes <i>script1</i> followed by <i>script2</i>, and returns the

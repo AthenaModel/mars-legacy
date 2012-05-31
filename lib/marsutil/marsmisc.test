@@ -41,6 +41,15 @@ namespace eval ::marsutil::test {
     namespace import ::marsutil::*
 
     #-------------------------------------------------------------------
+    # throw
+
+    test throw-1.1 {Throw error} -body {
+        global errorCode
+        catch { throw MYCODE "Simulated Error" } result
+        list $errorCode $result
+    } -result {MYCODE {Simulated Error}}
+
+    #-------------------------------------------------------------------
     # assert
 
     test assert-1.1 {Assertion succeeds} -body {
