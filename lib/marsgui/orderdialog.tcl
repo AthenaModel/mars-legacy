@@ -119,7 +119,8 @@ snit::widget ::marsgui::orderdialog {
         # NEXT, register the default field types that need it.
         $type fieldopts enum \
             -enumtype    %?  \
-            -displaylong %?
+            -displaylong %?  \
+            -width       %?
 
         $type fieldopts key \
             -db       [order cget -rdb] \
