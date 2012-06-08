@@ -111,6 +111,14 @@ snit::widget ::marsgui::enumfield {
     option -displaylong -default 0 \
         -configuremethod ConfigValues
 
+    # -autowidth flag
+    #
+    # If yes, compute -width automatically.
+
+    option -autowidth \
+        -type            snit::boolean \
+        -default         no            \
+        -configuremethod ConfigValues
 
     #-------------------------------------------------------------------
     # Instance Variables
@@ -193,6 +201,15 @@ snit::widget ::marsgui::enumfield {
             $combo set ""
         }
 
+        # NEXT, if -autowidth, set the width properly.
+        if {$options(-autowidth)} {
+            set width [lmaxlen [$combo cget -values]]
+
+            if {$width > 0} {
+                $combo configure \
+                    -width [expr {$width + 3}]
+            }
+        }
     }
 
     # DetectChange

@@ -29,6 +29,12 @@ returns <i>pathName</i>.  The widget supports the following options:<p>
 
 <<deflist options>>
 
+<<defopt {-autowidth <i>flag</i>}>>
+
+If true, the widget will compute its own width based on the 
+<code>-values</code>, however specified.  If false (the default) the
+width will not be based on the width of the content.<p>
+
 <<defopt {-background <i>color</i>}>>
 
 Sets the color of the underlying hull frame, which is invisible unless
