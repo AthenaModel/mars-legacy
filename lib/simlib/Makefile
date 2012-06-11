@@ -17,6 +17,12 @@ include $(TOP_DIR)/MakeDefs
 test:
 	$(TCLSH) simlib.test
 
+test_gram:
+	$(TCLSH) gram.test
+
+test_gram2:
+	$(TCLSH) gram2.test
+
 test_mam:
 	$(TCLSH) mam.test
 

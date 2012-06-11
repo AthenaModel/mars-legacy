@@ -2358,7 +2358,7 @@ time delta n  f    g
         create
     } -body {
         tableSave gram_sat
-        jr sat adjust 1 N1 SHIA AUT 300.0
+        jr sat adjust 1 N1 SHIA AUT 100.0
         tableDiff gram_sat ngc_id {n g c} sat
     } -cleanup {
         cleanup
@@ -2367,12 +2367,13 @@ time delta n  f    g
     test sat_adjust-3.2 {Satisfactions under -100.0 are clamped} -setup {
         create
     } -body {
+        jr sat adjust 1 N1 SHIA AUT -50.0
         tableSave gram_sat
-        jr sat adjust 1 N1 SHIA AUT -300.0
+        jr sat adjust 1 N1 SHIA AUT -100.0
         tableDiff gram_sat ngc_id {n g c} sat
     } -cleanup {
         cleanup
-    } -result {{N1 SHIA AUT -140}}
+    } -result {{N1 SHIA AUT -90}}
 
     test sat_adjust-4.1 {sat.ng is recomputed.} -setup {
         create
@@ -2853,7 +2854,7 @@ time driver acontrib curve_id n  g    c
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value "DUMMY", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "DUMMY", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
 
     test sat_level-1.8 {invalid days: unknown symbol} -setup {
         create
@@ -3815,7 +3816,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70   6.0 100.0 -100.0   5.23   5.225    2.61   2.6
         error
     } -cleanup {
         cleanup
-    } -result {invalid value "DUMMY", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "DUMMY", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
 
     # test sat_slope-1.8 {invalid limit: unknown symbol} OBSOLETE
 
@@ -5293,7 +5294,7 @@ driver n  g    c    acontrib
         create
     } -body {
         tableSave gram_coop
-        jr coop adjust 1 N2 SHIA BLUE 300.0
+        jr coop adjust 1 N2 SHIA BLUE 100.0
         tableDiff gram_coop nfg_id {n f g} coop
     } -cleanup {
         cleanup
@@ -5303,7 +5304,7 @@ driver n  g    c    acontrib
         create
     } -body {
         tableSave gram_coop
-        jr coop adjust 1 N2 SHIA BLUE -300.0
+        jr coop adjust 1 N2 SHIA BLUE -100.0
         tableDiff gram_coop nfg_id {n f g} coop
     } -cleanup {
         cleanup
@@ -5678,7 +5679,7 @@ time driver acontrib curve_id n  f    g
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value "DUMMY", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "DUMMY", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
 
     test coop_level-1.7 {invalid days: unknown symbol} -setup {
         create
@@ -6557,7 +6558,7 @@ CIVCAS 010000ZJAN70 020000ZJAN70  10.0 100.0   0.0   9.00   9.000    4.50   4.50
         error
     } -cleanup {
         cleanup
-    } -result {invalid value "DUMMY", should be a real number, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "DUMMY", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
 
     # test coop_slope-1.7 {invalid limit: unknown symbol} OBSOLETE
 
