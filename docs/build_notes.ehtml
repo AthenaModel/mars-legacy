@@ -10,6 +10,28 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.68, 11 June 2012</h3>
+
+This build contains two changes to the Mars Affinity Model in support of 
+Athena 4's ACII model, and a number of small user interface and
+utility enhancements.<p>
+
+<ul>
+    <li> Bug 3465: mam(n): Add affinity flag, relevance
+    <li> Bug 3468: mam(n): congruence
+    <li> Bug 3486: marsicons(n): Adding icons from Athena
+    <li> Bug 3489: rangefield(n): symbol menu width is too narrow
+    <li> Bug 3490: qmag(n) range, symbols
+    <li> Bug 3491: orderdialog(n): text field -width
+    <li> Bug 3497: mars: When mars builds the documentation, it needs to require the simlib package.
+    <li> Bug 3500: rangefield(n): -min and -max options
+    <li> Bug 3506: Mars CM Plan contains badly nested tables
+    <li> Bug 3509: marsmisc(n): throw command
+    <li> Bug 3515: orderdialog(n): Allow order parms to specify -width for enum fields
+    <li> Bug 3520: enumfield(n): -autowidth option
+</ul><p>
+
+
 <h3>Build 1.67, 8 May 2012</h3>
 
 This build contains changes and fixes for URAM in support of Athena 4
