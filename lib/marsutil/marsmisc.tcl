@@ -24,6 +24,7 @@ namespace eval ::marsutil:: {
         callwith        \
         commafmt        \
         count           \
+        degrees         \
         dicteq          \
         dictglob        \
         discrete        \
@@ -56,6 +57,7 @@ namespace eval ::marsutil:: {
         percent         \
         pickfrom        \
         poisson         \
+        radians         \
         roundrange      \
         readfile        \
         require         \
@@ -432,6 +434,28 @@ proc ::marsutil::min {x y} {
 
 proc ::marsutil::max {x y} {
     expr {($x > $y) ? $x : $y}
+}
+
+# radians deg
+#
+# deg  - An angle in decimal degrees.
+#
+# Returns the angle in radians.
+
+proc ::marsutil::radians {deg} {
+    variable radians
+    return [expr {$radians * $deg}] 
+}
+
+# degrees rad
+#
+# rad  - An angle in radians.
+#
+# Returns the angle in decimal degrees.
+
+proc ::marsutil::degrees {rad} {
+    variable radians
+    return [expr {$rad / $radians}] 
 }
 
 # roundrange min max

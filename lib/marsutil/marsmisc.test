@@ -521,6 +521,20 @@ should be "$xyz" or "{xyz}" or "xyz(...)" or ...}
 
 
     #-------------------------------------------------------------------
+    # radians
+
+    test radians-1.1 {converts degrees} -body {
+        radians 180.0
+    } -result {3.141592653589793}
+
+    #-------------------------------------------------------------------
+    # degrees
+
+    test degrees-1.1 {converts radians} -body {
+        degrees $::marsutil::pi 
+    } -result {180.0}
+
+    #-------------------------------------------------------------------
     # roundrange
 
     test roundrange-1.1 {round 0.12 0.89 } -body {
