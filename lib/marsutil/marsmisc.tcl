@@ -61,6 +61,7 @@ namespace eval ::marsutil:: {
         roundrange      \
         readfile        \
         require         \
+        restrict        \
         stringToRegexp  \
         throw           \
         try             \
@@ -180,6 +181,31 @@ proc ::marsutil::require {expression message} {
     return -code error -errorcode ASSERT $message
 }
 
+# restrict varname vtype defval
+#
+# varname - A variable name
+# vtype   - A validation type
+# defval  - A default value
+#
+# Restricts the variable's value to belong to the validation type,
+# without throwing an error.
+#
+# If the variable is not empty, and its value is valid,
+# the variable is assigned the canonicalized value as returned by
+# the validation type.  Otherwise, the variable is assigned the
+# default value.
+
+proc restrict {varname vtype defval} {
+    upvar 1 $varname value
+
+    if {$value eq "" ||
+        [catch { set value [{*}$vtype validate $value] }]
+    } {
+        set value $defval
+    }
+
+    return
+}
 
 # try script1 ?"finally" script2
 #

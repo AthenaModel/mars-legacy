@@ -301,6 +301,18 @@ errors.  The file will be closed automatically on read errors.<p>
 This is identical to <<iref assert>> except that error message is the
 specified <i>message</i>.<p>
 
+<<defitem restrict {restrict <i>varname vtype defval</i>}>>
+
+Restricts the value of the variable named <i>varname</i> to be a
+valid value of validation type <i>vtype</i>.  If the variable's value
+is empty, or if it isn't valid, the variable's value is set to the
+default value <i>defval</i>.  Otherwise, the variable's value is set
+to the canonicalized value returned by the validation type's 
+<code>validate</code> method.<p>
+
+This command is useful in contexts where input errors must be
+silently tolerated (i.e., in URL processing).<p>
+
 <<defitem roundrange {roundrange <i>min max</i>}>>
 
 Given a range of numbers (<i>min, max</i>), rounds <i>min</i> down and

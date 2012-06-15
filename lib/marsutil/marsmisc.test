@@ -40,6 +40,13 @@ namespace eval ::marsutil::test {
     # Import the code to be tested
     namespace import ::marsutil::*
 
+    # An enum type
+
+    enum testenum {
+        THIS  "This One"
+        THAT  "That One"
+    }
+
     #-------------------------------------------------------------------
     # throw
 
@@ -263,6 +270,28 @@ should be "$xyz" or "{xyz}" or "xyz(...)" or ...}
         list $errorCode $result
     } -result {ASSERT {Dummy message}}
 
+    #-------------------------------------------------------------------
+    # restrict
+
+    test restrict-1.1 {empty values get default} -body {
+        set value ""
+        restrict value snit::boolean no
+        set value
+    } -result {no}
+
+    test restrict-1.2 {invalid values get default} -body {
+        set value "NONESUCH"
+        restrict value snit::boolean yes
+        set value
+    } -result {yes}
+
+    test restrict-1.3 {valid values get canonicalized} -body {
+        set value "That One"
+        restrict value ::marsutil::test::testenum THIS
+        set value
+    } -result {THAT}
+
+    
     #-------------------------------------------------------------------
     # dicteq
 
