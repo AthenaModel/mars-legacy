@@ -10,6 +10,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.69, 18 June 2012</h3>
+
+This build contains a couple of additions to marsmisc(n).<p>
+
+<ul>
+    <li> Bug 3539: marsmisc(n): radians/degrees
+    <li> Bug 3543: marsmisc(n): restrict
+</ul><p>
+
 <h3>Build 1.68, 11 June 2012</h3>
 
 This build contains two changes to the Mars Affinity Model in support of 
