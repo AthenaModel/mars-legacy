@@ -215,6 +215,7 @@ snit::widgetadaptor ::marsgui::stripchart {
     # yaxis.ticklen    - Horizontal length of the X-axis tick marks, in pixels.
     # yaxis.font       - Font used for y-axis labels
     #
+    # data.plotwid     - Width of plotted lin, in pixels
     # data.color<n>    - Fill color for each plotted line,
     #                    0...chart.maxseries.
     #
@@ -256,6 +257,8 @@ snit::widgetadaptor ::marsgui::stripchart {
         yaxis.font       {"Nimbus Sans" -10}
         yaxis.ticklen    3
         yaxis.pad        2
+
+        data.plotwid     2
 
         data.color0      \#33FFFF
         data.color1      \#006666
@@ -1000,10 +1003,10 @@ snit::widgetadaptor ::marsgui::stripchart {
 
             # NEXT, plot the line
             set id [$plot create line $coords        \
-                        -tags  plot                  \
-                        -width 1                     \
+                        -tags   plot                 \
+                        -width  $parms(data.plotwid) \
                         -smooth $options(-smooth)    \
-                        -fill  $parms(data.color$i)]
+                        -fill   $parms(data.color$i)]
 
             # NEXT, save the ID
             set series(name-$id)   $name
