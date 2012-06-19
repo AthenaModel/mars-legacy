@@ -187,7 +187,7 @@ namespace eval ::simlib::test {
         error
     } -cleanup {
         cleanup
-    } -result {Invalid ucurve_ctypes_t -alpha: constraint failed}
+    } -result {Invalid ucurve_ctypes_t -alpha NONESUCH -gamma 0.0: constraint failed}
 
     test ctype_add-1.7 {Invalid -alpha: negative} -setup {
         create
@@ -197,7 +197,7 @@ namespace eval ::simlib::test {
         error
     } -cleanup {
         cleanup
-    } -result {Invalid ucurve_ctypes_t -alpha: constraint failed}
+    } -result {Invalid ucurve_ctypes_t -alpha -0.1 -gamma 0.0: constraint failed}
 
     test ctype_add-1.8 {Invalid -gamma: non-numeric} -setup {
         create
@@ -207,7 +207,7 @@ namespace eval ::simlib::test {
         error
     } -cleanup {
         cleanup
-    } -result {Invalid ucurve_ctypes_t -gamma: constraint failed}
+    } -result {Invalid ucurve_ctypes_t -alpha 0.1 -gamma NONESUCH: constraint failed}
 
     test ctype_add-1.9 {Invalid -gamma: negative} -setup {
         create
@@ -217,7 +217,7 @@ namespace eval ::simlib::test {
         error
     } -cleanup {
         cleanup
-    } -result {Invalid ucurve_ctypes_t -gamma: constraint failed}
+    } -result {Invalid ucurve_ctypes_t -alpha 0.1 -gamma -0.1: constraint failed}
 
     test ctype_add-1.10 {-alpha + -gamma > 1.0} -setup {
         create
@@ -227,7 +227,7 @@ namespace eval ::simlib::test {
         error
     } -cleanup {
         cleanup
-    } -result {Invalid ucurve_ctypes_t -gamma: constraint failed}
+    } -result {Invalid ucurve_ctypes_t -alpha 0.51 -gamma 0.51: constraint failed}
 
     test ctype_add-2.1 {No addition on error} -setup {
         create
@@ -405,7 +405,7 @@ beta   0.85
         error
     } -cleanup {
         cleanup
-    } -result {Invalid ucurve_ctypes_t -alpha: constraint failed}
+    } -result {Invalid ucurve_ctypes_t -alpha NONESUCH: constraint failed}
 
     test ctype_configure-1.2 {Invalid -gamma} -setup {
         create
@@ -416,7 +416,7 @@ beta   0.85
         error
     } -cleanup {
         cleanup
-    } -result {Invalid ucurve_ctypes_t -gamma: constraint failed}
+    } -result {Invalid ucurve_ctypes_t -gamma NONESUCH: constraint failed}
 
     test ctype_configure-1.3 {-alpha + -gamma > 1.0} -setup {
         create
@@ -427,7 +427,7 @@ beta   0.85
         error
     } -cleanup {
         cleanup
-    } -result {Invalid ucurve_ctypes_t -gamma: constraint failed}
+    } -result {Invalid ucurve_ctypes_t -alpha 0.51 -gamma 0.51: constraint failed}
 
     test ctype_configure-2.1 {No change on error} -setup {
         create
@@ -686,7 +686,7 @@ c0         9.0
         error
     } -cleanup {
         cleanup
-    } -result {Invalid ucurve_curves_t -b: constraint failed}
+    } -result {Invalid ucurve_curves_t -b NONESUCH: constraint failed}
 
     test curve_configure-1.3 {Invalid -c} -setup {
         create
@@ -698,7 +698,7 @@ c0         9.0
         error
     } -cleanup {
         cleanup
-    } -result {Invalid ucurve_curves_t -c: constraint failed}
+    } -result {Invalid ucurve_curves_t -c NONESUCH: constraint failed}
 
     test curve_configure-2.1 {No change on error} -setup {
         create

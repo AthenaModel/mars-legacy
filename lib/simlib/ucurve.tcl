@@ -1132,42 +1132,63 @@ snit::type ::simlib::ucurve {
     # transaction).
 
     method DbConfigure {table keyVals optList} {
-        # FIRST, get the key array
+        # FIRST, if there's nothing being updated, we are done
+        if {[llength $optList] == 0} {
+            return
+        }
+
+        # NEXT, store options in a local list, use the incoming
+        # options list for error reporting, if necessary.
+        set opts $optList
+
+        # NEXT, get the key array
         foreach name $tableInfo($table-keys) val $keyVals {
             set key($name) $val
         }
 
-        # NEXT, do this in a transaction, so that an error doesn't
-        # change the database.
+        # NEXT, accumulate option value pairs into a single list of
+        # updates in SQL syntax, we will update them at once.
+        # Note the use of a counter for array variables to update 
+        # column values -- this is to keep SQLite happy, it must have 
+        # fixed indices for arrays.
+        set ctr 0
+        set updates [list]
+
+        while {[llength $opts] > 0} {
+            set opt [lshift opts]
+
+            if {$opt in $tableInfo($table-options)} {
+                set colname     [string range $opt 1 end]
+                set value($ctr) [lshift opts]
+
+                lappend updates "$colname=\$value($ctr)"
+                incr ctr
+
+            } else {
+                error "Unknown $table option: \"$opt\""
+            }
+        }
+
+
+        # NEXT, join all updates and do the RDB transaction
+        set allsets [join $updates ", "]
+
         $rdb transaction {
-            while {[llength $optList] > 0} {
-                set opt [lshift optList]
-
-                if {$opt in $tableInfo($table-options)} {
-                    set colname [string range $opt 1 end]
-                    set value   [lshift optList]
-
-                    if {[catch {
-                        $rdb eval "
-                            UPDATE $table
-                            SET $colname = \$value
-                            $tableInfo($table-where)
-                        "
-                    } result]} {
-                        error "Invalid $table $opt: $result"
-                    }
-
-                    if {[$rdb changes] == 0} {
-                        error "Unknown $table key: \"$keyVals\""
-                    }
-                } else {
-                    error "Unknown $table option: \"$opt\""
-                }
+            if {[catch {
+                $rdb eval "
+                    UPDATE $table
+                    SET $allsets
+                    $tableInfo($table-where)
+                " 
+            } result]} {
+                error "Invalid $table $optList: $result"
+            }
+            if {[$rdb changes] == 0} {
+                error "Unknown $table key: \"$keyVals\""
             }
         }
 
         return
     }
-
-
 }
+
