@@ -10,6 +10,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.70, 20 June 2012</h3>
+
+This build contains two minor changes.<p>
+
+<ul>
+    <li> Bug 3488: PARM:SET bgerror 
+    <li> Bug 3551: stripchart(n): Set plot width = 2 
+</ul><p>
+
 <h3>Build 1.69, 18 June 2012</h3>
 
 This build contains a couple of additions to marsmisc(n).<p>
