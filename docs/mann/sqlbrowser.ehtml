@@ -100,6 +100,15 @@ These options are delegated to the hull ttk::frame widget.<p>
 
 These options are delegated to the underlying tablelist(n) widget.<p>
 
+<<defopt {-columnsorting <i>flag</i>}>>
+
+<b>Read-only after creation.</b>
+If <b>on</b> (the default), the user can sort the rows using the data in
+a particular column, in ascending or descending order, by clicking on
+the column label.  If <b>off</b>, the sort order is determined by the
+table or view being displayed, and cannot be changed.  (This is
+appropriate when the order of the items in the table is meaningful,
+e.g., priority ordering.)<p>
 
 <<defopt {-db <i>db</i>}>>
 

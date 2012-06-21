@@ -216,6 +216,15 @@ snit::widget ::marsgui::sqlbrowser {
     # TBD: We might want to be able to add to the list dynamically.
     
     option -views -readonly yes
+
+    # -columnsorting flag
+    #
+    # If on (the default), the user can sort columns by clicking on
+    # the column label.  If not, not.
+
+    option -columnsorting \
+        -default  yes     \
+        -readonly yes
     
     # ConfigureThenReload opt val
     #
@@ -312,6 +321,15 @@ snit::widget ::marsgui::sqlbrowser {
             -borderwidth 1    \
             -relief      flat
         
+        # Can the user sort columns?
+        set options(-columnsorting) [from args -columnsorting yes]
+
+        if {$options(-columnsorting)} {
+            set labelCommand [mymethod SortByColumn]
+        } else {
+            set labelCommand ""
+        }
+
         # Create the tablelist.
         install tlist using tablelist::tablelist $win.tlist \
             -background       white                         \
@@ -331,7 +349,7 @@ snit::widget ::marsgui::sqlbrowser {
             -activestyle      none                          \
             -yscrollcommand   [list $win.yscroll set]       \
             -xscrollcommand   [list $win.xscroll set]       \
-            -labelcommand     [mymethod SortByColumn]
+            -labelcommand     $labelCommand
 
         # Scrollbars
         ttk::scrollbar $win.yscroll       \
