@@ -23,7 +23,6 @@
 #                    documentation from scratch, using the version
 #                    number.  Should only be used after checking out
 #                    the tagged code.
-#       nd           Experimental: Build naturaldocs documentation
 #
 #---------------------------------------------------------------------
 
