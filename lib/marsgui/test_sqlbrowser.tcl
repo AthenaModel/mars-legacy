@@ -1,7 +1,9 @@
 #!/bin/sh
 # -*- tcl -*-
 # The next line is executed by /bin/sh, but not tcl \
-exec tclsh8.5 "$0" ${1+"$@"}
+exec tclsh "$0" ${1+"$@"}
+
+lappend auto_path ~/mars/lib
 
 package require marsutil
 package require marsgui
@@ -69,7 +71,8 @@ marsgui::sqlbrowser .browser        \
     -displaycmd     ::displaycmd    \
     -titlecolumns   1               \
     -uid            u               \
-    -filterbox      off
+    -filterbox      off             \
+    -columnsorting  on
 
 pack .browser -fill both -expand yes
 
