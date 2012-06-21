@@ -46,7 +46,7 @@ $(HTML_DOCS): $(EHTML_DOCS)
 #---------------------------------------------------------------------
 # Target: <subdir> -- Rebuilds individual subdirectories
 
-.PHONY: $(SUBS) nddocs
+.PHONY: $(SUBS) 
 
 $(SUBS):
 	cd $@ ; make clean ; make
@@ -57,19 +57,6 @@ $(SUBS):
 clean: cleansubs
 	rm -f $(HTML_DOCS)
         
-#---------------------------------------------------------------------
-# nddocs
-#
-# NaturalDocs documentation for Mars applications.  These are built
-# only on demands.
-
-nddocs:
-	NaturalDocs -r \
-        	-s Default MyCss \
-		-i $(TOP_DIR)/lib \
-		-o FramedHTML $(TOP_DIR)/docs/nddocs \
-		-p $(TOP_DIR)/docs/ndproj
-
 
 #---------------------------------------------------------------------
 # Standard Rules
