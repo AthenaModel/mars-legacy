@@ -20,7 +20,7 @@ include $(TOP_DIR)/MakePlatform
 export TCLLIBPATH = $(TOP_DIR)/lib
 
 # Set MARS_VERSION for development if it isn't set.
-export MARS_VERSION_DEFAULT = 1.x
+export MARS_VERSION_DEFAULT = 2.x
 export VERSION_FILE         = $(TOP_DIR)/lib/marsutil/version.txt
 
 ifndef MARS_VERSION

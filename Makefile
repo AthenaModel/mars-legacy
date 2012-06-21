@@ -9,7 +9,7 @@
 #    This Makefile defines the following targets:
 #
 #    	all          Builds Mars code and documentation.	
-# 	src          Builds Mars C code
+# 	    src          Builds Mars C code
 #    	docs         Builds Mars documentation
 #    	test         Runs Mars unit tests.
 #    	clean        Deletes all build products
