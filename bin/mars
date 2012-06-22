@@ -108,18 +108,6 @@ set metadata {
         mode     gui
     }
 
-    helpbrowser {
-        text     "Help Browser"
-        applib   app_helpbrowser
-        mode     cmdline
-    }
-
-    helptool {
-        text     "Help Compiler"
-        applib   app_helptool
-        mode     cmdline
-    }
-    
     icons {
         text     "Icon Browser"
         applib   app_icons

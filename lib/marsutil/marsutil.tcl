@@ -79,7 +79,6 @@ source [file join $::marsutil::library tabletext.tcl      ]
 source [file join $::marsutil::library cellmodel.tcl      ]
 source [file join $::marsutil::library mapref.tcl         ]
 source [file join $::marsutil::library mapsimple.tcl      ]
-source [file join $::marsutil::library helpdb.tcl         ]
 source [file join $::marsutil::library order.tcl          ]
 source [file join $::marsutil::library undostack.tcl      ]
 
