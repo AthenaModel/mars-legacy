@@ -23,9 +23,7 @@ package require treectrl 2.2.10
 package require tablelist 5.1
 package require Plotchart 1.6
 package require Tktable 2.10
-
-# NOTE: Tkhtml 2.0 is required by htmlviewer(n) when the first instance
-# is created.
+package require Tkhtml 3.0
 
 #-----------------------------------------------------------------------
 # Package Definition
@@ -103,3 +101,4 @@ source [file join $::marsgui::library mapcanvas.tcl      ]
 source [file join $::marsgui::library orderdialog.tcl    ]
 source [file join $::marsgui::library zcurvefield.tcl    ]
 source [file join $::marsgui::library gtifreader.tcl     ]
+source [file join $::marsgui::library htmlviewer.tcl     ]
