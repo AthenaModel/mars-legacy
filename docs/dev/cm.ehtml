@@ -47,6 +47,11 @@
 <<preface changelog "Change Log">>
 
 <<changelog>>
+<<change 6/25/2012 Update will>>
+
+Minor updates for Mars 2.x.<p>
+<</change>>
+
 <<change 10/7/2011 Update will>>
 <ul>
   <li> Changed the naming convention for experimental branches; they
@@ -219,7 +224,7 @@ The <code>trunk</code> directory contains the project's files on the
 main line of development.  Subdirectories of the <code>branches</code>
 directory represent development branches. Subdirectories of the
 <code>tags</code> directory represent snapshots of development, e.g.,
-the 1.3 build.
+the 2.3 build.
 
 
 <<section vc.branches "Subversion Branches and Tags">>
@@ -244,13 +249,13 @@ facilitate development of Mars and its clients.  Procedures appear in
 
 <tr valign="top">
 <td><code>tags/mars_<i>x.y</i></code></td>
-<td><code>tags/mars_1.3</code></td>
-<td>Snapshot of Mars build 1.3</td>
+<td><code>tags/mars_2.3</code></td>
+<td>Snapshot of Mars build 2.3</td>
 </tr>
 
 <tr valign="top">
-<td><code>branches/<i>user</i>/<i>yyyymmdd_name</i></code></td>
-<td><code>branches/will/20081015_sample</code></td>
+<td><code>branches/<i>user</i>/<i>yyyymm_name</i></code></td>
+<td><code>branches/will/200810_sample</code></td>
 <td>Experimental branch</td>
 </tr>
 
@@ -304,13 +309,13 @@ The JNEM Bugzilla Server resides at
 <<section bug.product "Product">>
 
 Bugzilla relates bugs to a specific Product, Version, and Component.
-The product for Mars is "Mars 1.0".<p>
+The product for Mars is "Mars 2.0".<p>
 
 <<section bug.version "Version">>
 
 The "Version" field indicates the build of Mars in which the
-bug was found. By convention, build <i>y</i> (i.e., Mars 1.<i>y</i>)
-is indicated in bug reports by the string "B<i>y</i>".<p>
+bug was found. By convention, build <i>y</i> (i.e., Mars 2.<i>y</i>)
+is indicated in Bugzilla by the string "B<i>y</i>".<p>
 
 <<section bug.component "Component">>
 
@@ -537,7 +542,7 @@ n/a
 <<step>>
 Determine the version number.
 <</step/>>
-E.g., "1.3".
+E.g., "2.3".
 <</step>>
 
 <<step>>
@@ -574,7 +579,7 @@ changes, and a list of the Bugzilla packages, with titles.
 <pre>
 $ cd ~/mars/docs
 $ emacs build_notes.ehtml
-$ svn commit -m"Updated for build 1.3"
+$ svn commit -m"Updated for build 2.3"
 </pre>
 <</step>>
 
@@ -594,16 +599,16 @@ workspace to the tagged code!</b>
 <</step/>>
 <pre>
 $ cd ~/mars
-$ make MARS_VERSION=1.3 tag
+$ make MARS_VERSION=2.3 tag
 </pre>
 
 This is equivalent to:<p>
 
 <pre>
 $ cd ~/mars
-$ svn cp . <i>repository</i>/mars/tags/mars_1.3
-$ svn switch <i>repository</i>/mars/tags/mars_1.3 .
-$ echo 1.3 > lib/marsutil/version.txt
+$ svn cp . <i>repository</i>/mars/tags/mars_2.3
+$ svn switch <i>repository</i>/mars/tags/mars_2.3 .
+$ echo 2.3 > lib/marsutil/version.txt
 $ svn commit lib/marsutil/version.txt
 </pre>
 
@@ -637,8 +642,8 @@ n/a
 Add the version to Bugzilla.
 <</step/>>
 On the Bugzilla toolbar, click "Administration".  On the resulting
-page click "Products", then "Mars 1.0", then "Edit Versions".  Add a
-version "B<i>y</i>", e.g., when building Mars 1.3, add a version "B3".
+page click "Products", then "Mars 2.0", then "Edit Versions".  Add a
+version "B<i>y</i>", e.g., when building Mars 2.3, add a version "B3".
 <</step>>
 
 <<step>>
@@ -695,7 +700,7 @@ anywhere.  Don't commit changes to tags.<p>
 <<step>>
 Check out the tag
 <</step/>>
-<pre>$ svn checkout <i>repository</i>/mars/tag/mars_1.3 ~/mars_1.3</pre>
+<pre>$ svn checkout <i>repository</i>/mars/tag/mars_2.3 ~/mars_2.3</pre>
 <</step>>
 
 <<step>>
@@ -731,7 +736,7 @@ name is "<code>branches/will/20081015_widget</code>".<p>
 Check out the branch
 <</step/>>
 <pre>
-$ svn checkout <i>repository</i>/mars/branches/will/20081015_widget \
+$ svn checkout <i>repository</i>/mars/branches/will/200810_widget \
       ~/mars_widget
 </pre>
 <</step>>
@@ -906,7 +911,7 @@ Determine whether any changes have been committed to Mars since the
 previous official build of Mars. If there have been, do an official
 build of Mars, as described in <<xref proc.cmbuild>>.  Otherwise,
 determine the version number of the latest build.  Either way,
-we'll assume that the latest build is Mars 1.6.
+we'll assume that the latest build is Mars 2.3.
 <</step/>>
 n/a
 <</step>>
@@ -914,28 +919,28 @@ n/a
 <<step>>
 Check out the desired trunk or branch of the client, as the desired
 version.  We'll assume that we wish to build the client's trunk as
-JNEM 4.0.9.
+Athena 4.0.9.
 <</step/>>
 <pre>
-$ cd ~/jnem_pkgs
-$ svn checkout <i>repository</i>/jnem/trunk jnem_4.0.9
+$ cd ~/athena_pkgs
+$ svn checkout <i>repository</i>/athena/trunk athena_4.0.9
 </pre>
 <</step>>
 
 <<step>>
-The Mars trunk was checked out as <code>jnem_4.0.9/mars</code>.
+The Mars trunk was checked out as <code>athena_4.0.9/mars</code>.
 Temporarily link the working copy to point at the desired build of Mars.
 <</step/>>
 <pre>
-$ cd ~/jnem_pkgs/jnem_4.0.9
-$ svn switch <i>repository</i>/mars/tags/mars_1.6 mars
+$ cd ~/athena_pkgs/athena_4.0.9
+$ svn switch <i>repository</i>/mars/tags/mars_2.3 mars
 </pre>
 
 or<p>
 
 <pre>
-$ cd ~/jnem_pkgs/jnem_4.0.9
-$ mars link 1.6
+$ cd ~/athena_pkgs/athena_4.0.9
+$ mars link 2.3
 </pre>
 <</step>>
 
@@ -945,7 +950,7 @@ Do a development build and test of the client. Resolve any errors, and
 retest, until the client builds cleanly.  Commit any changes.
 <</step/>>
 <pre>
-$ cd ~/jnem_pkgs/jnem_4.0.9
+$ cd ~/athena_pkgs/athena_4.0.9
 $ make build
 </pre>
 <</step>>
@@ -955,9 +960,9 @@ $ make build
 Tag the build, updating the working copy to the tagged version.
 <</step/>>
 <pre>
-$ cd ~/jnem_pkgs/jnem_4.0.9
-$ svn copy . <i>repository</i>/jnem/tags/jnem_4.0.9
-$ svn switch <i>repository</i>/jnem/tags/jnem_4.0.9 .
+$ cd ~/athena_pkgs/athena_4.0.9
+$ svn copy . <i>repository</i>/athena/tags/athena_4.0.9
+$ svn switch <i>repository</i>/athena/tags/athena_4.0.9 .
 </pre>
 <</step>>
 
@@ -969,20 +974,20 @@ to match the embedded working copy in <code>mars/</code>.<p>
 
 <b>NOTE:</b> The <code>svn switch</code> in the previous step probably
 switched the working copy of Mars back to the Mars trunk.  That's
-why we recreate the link with 1.6.
+why we recreate the link with 2.3.
 <</step/>>
 <pre>
-$ cd ~/jnem_pkgs/jnem_4.0.9
-$ svn switch <i>repository</i>/mars/tags/mars_1.6 mars
+$ cd ~/athena_pkgs/athena_4.0.9
+$ svn switch <i>repository</i>/mars/tags/mars_2.3 mars
 $ svn propset svn:externals . \
-    "mars <i>repository</i>/mars/tags/mars_1.6"
+    "mars <i>repository</i>/mars/tags/mars_2.3"
 </pre>
 
 or<p>
 
 <pre>
-$ cd ~/jnem_pkgs/jnem_4.0.9
-$ mars link 1.6
+$ cd ~/athena_pkgs/athena_4.0.9
+$ mars link 2.3
 $ mars link save
 </pre>
 
