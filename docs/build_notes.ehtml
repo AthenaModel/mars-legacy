@@ -10,14 +10,28 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.1, 25 June 2012</h3>
+
+This build contains the following changes:<p>
+
+<ul>
+    <li> Bug 3557: sqlbrowser(n): disable column-label sorting
+    <li> Bug 3565: Remove TkHTML 2.0 and related software
+    <li> Bug 3566: Move htmllviewer3(n) from projectgui(n) to marsgui(n) as htmlviewer(n).
+    <li> Bug 3569: Update CM plan to Mars 2.0
+</ul><p>
+
 <h3>Build 2.0, 21 June 2012</h3>
 
-Build 2.0 is the first Mars 2.x build; Mars has been split, with Mars 1.x continuing to support JNEM
-maintenance and Mars 2.x supporting Athena 4.0.x development.  This will allow the TkHTML 2.0 widget
-currently used in Mars to be replaced by the TkHTML 3.0 widget now used in Athena.<p>
+Build 2.0 is the first Mars 2.x build; Mars has been split, with Mars
+1.x continuing to support JNEM maintenance and Mars 2.x supporting
+Athena 4.0.x development.  This will allow the TkHTML 2.0 widget
+currently used in Mars to be replaced by the TkHTML 3.0 widget now
+used in Athena.<p>
 
-Build 2.0 contains no changes except for those required to identify it as Mars 2.x.  In terms of the Mars
-code, it is identical to Mars 1.70.<p>
+Build 2.0 contains no changes except for those required to identify it
+as Mars 2.x.  In terms of the Mars code, it is identical to Mars
+1.70.<p>
 
 </body>
 </html>
