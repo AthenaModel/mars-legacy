@@ -70,7 +70,7 @@ namespace eval ::simlib:: {
     M  "MEDIUM"  1.0
     S  "SHORT"   0.1
     XS "X_SHORT" 0.042
-} -format {%3.1f} -min 0.0
+} -format {%3.1f} -min 0.0 -max 100.0
 
 # Magnitude: satisfaction and cooperation inputs
 ::marsutil::quality ::simlib::qmag {
