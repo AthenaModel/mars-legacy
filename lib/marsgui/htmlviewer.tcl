@@ -66,16 +66,12 @@ snit::widgetadaptor ::marsgui::htmlviewer {
 
         /* Form input elements */
         INPUT {
+            border: 0px;
             vertical-align: middle;
         }
         
-        INPUT[type="text"] {
-            border: 0px;
-        }
-
         INPUT[type="submit"] {
             padding: 0px;
-            border: 0px;
         }
 
         /* Object elements */
