@@ -10,6 +10,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.2, 2 July 2012</h3>
+
+This build is in support of the Athena 4.0.9 Engineering Release to
+TRISA. It contains the following minor change:<p>
+
+<ul>
+<li> Bug 3580: htmlviewer(n): INPUT elements should have border: 1px.
+</ul>
+
 <h3>Build 2.1, 25 June 2012</h3>
 
 This build contains the following changes:<p>
