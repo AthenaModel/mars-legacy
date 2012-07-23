@@ -142,8 +142,7 @@ The two predefined interfaces are <b>app</b> and <b>gui</b>:<p>
        user input.  E.g., if order A sends order B, this is
        really just a fancy procedure call; order B should not be
        traced, and any parameter errors are the fault of the
-       programmer.  order(n) uses the <b>app</b> interface when
-       executing orders that have been scheduled in advance.<p>
+       programmer.<p>
 </ul>
 
 <<subsection "Order States">>
@@ -157,11 +156,10 @@ this sense) at different times. This is handled by the notion of the
 The application can define a list of states in which it can be at
 different times.  Then, using the <<iref options>> metadata command,
 each order is associated with a list of the states in which it can be 
-sent (<code>-sendstates)</code>, and with a list of the states in
-which it can be scheduled (<code>-schedulestates</code>).  Then,
+sent (<code>-sendstates)</code>.  Then,
 the application notifies order(n) of the current
 application state using <<iref order state>>.  If an order is sent
-or scheduled during a state in which it is invalid, the order is rejected
+during a state in which it is invalid, the order is rejected
 immediately.<p>
 
 The application can query both the states associated with an order
@@ -172,28 +170,6 @@ disable GUI controls (e.g., menu items) when the state changes.<p>
 By default, this mechanism is turned off.  See the
 <code>-checkstate</code> <<iref order interface>> option to enable
 it.<p>
-
-<<subsection "Order Scheduling">>
-
-If a <<xref simclock(n)>> is provided to order(n) via
-the <code>-clock</code> <<iref order init>> option, it is assumed that
-order(n) is being used in the context of a simulation, and that orders
-can be scheduled for future execution using <<xref eventq(n)>>.
-The <code>order_execute</code> event is defined with
-<<xref eventq(n)>>, and the <<iref order schedule>> and
-<<iref order cancel>> commands become available.<p>
-
-Scheduling must be enabled for each schedulable order by setting
-the order's <code>-schedulestates</code> option to the list of
-<<xref "Order States">> in which the order can be scheduled, or to "*"
-if the order can be scheduled in any state.<p>
-
-Scheduled orders can be cancelled in any state by default; to limit
-cancellation to particular states, set the <code>-cancelstates</code>
-<<iref order init>> option.<p>
-
-Note that <<xref orderdialog(n)>> provides support for scheduling
-orders within its order dialogs.<p>
 
 <<section COMMANDS>>
 
@@ -214,22 +190,7 @@ The application-level commands are as follows:<p>
 
 Returns 1 if the named order is "available" in the current
 <<iref order state>>, and 0 otherwise.  The order is available
-if it can be sent, if it can be scheduled, or both.<p>
-
-<<defitem "order cancel" {order cancel <i>interface id</i>}>>
-
-Cancels the scheduled order with the specified <i>id</i>; the
-cancellation comes from the specified <i>interface</i>..  Note that
-the current <<iref order state>> must be consistent with the
-<code>-cancelstates</code> <<iref order init>> option.<p>
-
-<<defitem "order canschedule" {order canschedule <i>name</i>}>>
-
-Returns 1 if the named order can be scheduled in the current
-<<iref order state>>, and 0 otherwise.  The order can be sent
-if its <code>-schedulestates</code> is "*", or if the
-current <<iref order state>> is included in the list of
-<code>-schedulestates</code>.<p>
+if it can be sent.<p>
 
 <<defitem "order cansend" {order cansend <i>name</i>}>>
 
@@ -301,11 +262,27 @@ dialog box for the named order.  The user can then fill in the
 parameters and send the order.  The dialog will be pre-populated with
 any included parameter values.<p>
 
+It is an error to try to enter an order dialog for an order that
+defines no parameters.<p>
+
 <<defitem "order exists" {order exists <i>name</i>}>>
 
 Returns 1 if there is an order with the specified <i>name</i>, and 0
 otherwise.<p>
 
+
+<<defitem "order fill" {order fill <i>order parmdict</i>}>>
+
+Given an <i>order</i> name and a parameter dictionary for the order,
+fills in missing values with the default values given in the order
+specification.  A parameter is presumed missing if it is absent
+from <i>parmdict</i> or if it has a value of "".  The return value is
+a dictionary containing a value for every order parameter.<p>
+
+Any parameters found in the <i>parmdict</i> that are not defined by the
+order are ignored.<p>
+
+This command is intended to be used by non-GUI interfaces.<p>
 
 <<defitem "order init" {order init ?<i>option value...</i>?}>>
 
@@ -317,21 +294,6 @@ The configuration options are as shown below; note that some of them
 can be modified later using <<iref order configure>>.<p>
 
 <<deflist options>>
-
-<<defopt {-cancelstates <i>states</i>}>>
-
-<b>Read-only after initialization.</b>  Specifies the list of
-<<xref "Order States">> in which scheduled orders can be cancelled.
-Defaults to "*", meaning that orders can be cancelled in any state.
-See <<xref "Order Scheduling">> for more details.<p>
-
-<<defopt {-clock <i>clock</i>}>>
-
-<b>Read-only after initialization.</b> If defined, order(n) assumes
-that the client is a simulation, and that <i>clock</i> is the instance
-of <<xref simclock(n)>> that governs the advance of simulated time.
-The presence or absence of this option determines whether orders can
-be scheduled in advance.<p>
 
 <<defopt {-logcmd <i>cmd</i>}>>
 
@@ -500,20 +462,16 @@ dictionary of all of the order's options and their values.<p>
 See <<iref options>> for a description of the available options.<p>
 
 
-<<defitem "order parm" {order parm <i>order parm</i> ?<i>option</i>?}>>
-
-An order's metadata defines its parameters; and each parameter can be
-defined with a number of options.  This command queries the options
-for parameter <i>parm</i> of order <i>order</i>.  If <i>option</i> is
-given, then the command returns the value of that option; otherwise,
-it returns a dictionary of all of the parameter's options and their
-values.<p>
-
-See <<iref parm>> for a description of the parameter options.<p>
-
 <<defitem "order parms" {order parms <i>name</i>}>>
 
 Returns a list of the names of the parameters of the named order.<p>
+
+<<defitem "order prune" {order prune <i>order parmdict</i>}>>
+
+Given a parameter dictionary <i>parmdict</i> for the named
+<i>order</i>, returns a dictionary containing only parameters
+with non-default values.  This is for use in producing order scripts
+with a minimum of extraneous data.<p>
 
 <<defitem "order puck" {order puck <i>tagdict</i>}>>
 
@@ -530,36 +488,6 @@ Erases all order and interface definitions from order(n)'s memory,
 along with all associated metadata, and returns order(n) to its
 pre-initialized state.  This command is primarily intended for use by
 the order(n) test suite.<p>
-
-<<defitem "order schedule" {order schedule <i>interface timespec name parmdict</i>}>>
-
-This command schedules an order to execute at a later time; see
-<<xref "Order Scheduling">> for the required background.  Order <i>name</i>
-is scheduled with the given <i>parmdict</i> for the given
-<i>interface</i>, and will execute at
-<i>timespec</i>, which is a <<xref simclock(n)>> time specification.<p>
-
-Note that <<iref order canschedule>> must be true for the named order,
-or the command will throw an error.<p>
-
-<<defitem "order scheduled" {order scheduled <i>subcommand</i> ?<i>args...</i>?}>>
-
-The subcommands of this command are used to query and validate
-scheduled order IDs.<p>
-
-<<deflist scheduled>>
-
-<<defitem "order scheduled names" {order scheduled names}>>
-
-Returns a list of the scheduled order IDs.<p>
-
-<<defitem "order scheduled validate" {order scheduled validate <i>id</i>}>>
-
-Validates that <i>id</i> is the ID of a scheduled order.  Throws
-an error with error code <b>INVALID</b> if not.<p>
-
-<</deflist scheduled>>
-
 
 <<defitem "order send" {order send <i>interface name parmdict</i>}>>
 <<defitem "order send" {order send <i>interface name parm value</i> ?<i>parm value...</i>?}>>
@@ -580,6 +508,19 @@ value.<p>
 
 Sets and queries the order state.  See <<xref "Order States">>
 for more information.<p>
+
+<<defitem "order tags" {order tags <i>order parm</i>}>>
+
+Returns a list of <<iref order puck>> tags associated with the field.
+If the user clicks on a neighborhood polygon in the application's map
+display, the application can call <<iref order puck>> with details:
+for example, the <b>nbhood</b> that was clicked, and the precise map
+<b>coords</b>.  If the field has tag <b>nbhood</b>, the
+neighborhood ID will be entered into it; if it has the tag
+<b>coords</b>, the map coordinates will be entered into it.<p>
+
+A parameter's tags are set using the <<iref parmtags>> metadata
+command.<p>
 
 <<defitem "order title" {order title <i>name</i>}>>
 
@@ -618,11 +559,11 @@ are available:<p>
 
 <<deflist options>>
 
-<<defopt {-layout <i>spec</i>}>>
+<<defopt {-dynaform <i>formtype</i>}>>
 
-<b>Read only.</b>  This option's value is set using the
-<<iref layout>> command; the layout <i>spec</i> can then be queried
-like any other order option using the <<iref order options>> command.<p>
+<b>Read only.</b>  Returns the name of the <<xref dynaform(n)>> 
+associated with this order, if any, or "" if none (i.e., if the order
+defines no parameters).<p>
 
 <<defopt {-monitor <i>flag</i>}>>
 
@@ -643,27 +584,6 @@ to its title.  If <i>cmd</i> is given, it must be a command prefix
 that takes two additional arguments, the order's name and a dictionary
 of parameter names and values, and returns the narrative string.<p>
 
-<<defopt {-refreshcmd <i>cmd</i>}>>
-
-Specifies a command to be called to refresh the order's dialog when
-field values change.  Refreshing involves enabling and
-disabling fields and setting field values, usually based on the values
-of other fields.  If <i>cmd</i> is given, it must be a command prefix
-that takes three additional arguments: the name of the
-<<xref orderdialog(n)>> widget, a list of the names of the changed
-fields, and a dictionary of the current field values.<p>
-
-Note that <<xref orderdialog(n)>> provides commands for this purpose
-that cover common cases, e.g., loading field values from the RDB when
-a key value is changed.<p>
-
-<<defopt {-schedulestates <i>states</i>}>>
-
-Specifies a list of the <<xref "Order States">> in which orders of
-this kind can be scheduled for future execution.  Defaults to the
-empty list, which means that the order cannot be scheduled.  See
-<<xref "Order Scheduling">> for more information.<p>
-
 <<defopt {-sendstates <i>states</i>}>>
 
 Specifies a list of the <<xref "Order States">> in which orders of
@@ -672,94 +592,20 @@ order can be sent in any state.<p>
 
 <</deflist>>
 
+<<defitem "form" {form <i>spec</i>}>>
 
-<<defitem "parm" {parm <i>name fieldType label</i> ?<i>option value...</i>?}>>
+Specify the <<xref dynaform(n)>> form specification for this order.
+See the <<xref dynaform(n)>> man page for the specification
+language.<p>
 
-Defines one of the order's parameters.  The parameter will be called
-<i>name</i>, and will have the specified <i>fieldType</i> and
-<i>label</i> text.<p>
+The form specification defines the parameters available for the
+order, as well as the layout and dynamic behavior for the order's
+dialog.<p>
 
-Field types are defined by <<xref orderdialog(n)>> (or by the
-application) and determine what the field looks like and how the user
-edits its contents in the dialog.  If <<xref orderdialog(n)>> is not
-being used, or if the field has no special requirements, a field type
-of <b>text</b> is always safe.<p>
+<<defitem "parmtags" {parmtags <i>parm</i> <i>tag</i> ?<i>tag...</i>?}>>
 
-The <i>label</i> text is displayed in the dialog next to the edit
-field itself.  It is usually a human-readable version of the field
-name.<p>
-
-Each parameter can take an arbitrary number of options and values.
-There are two kinds of options: those defined by
-order(n)/<<xref orderdialog(n)>>, which can be used for any parameter,
-and those defined by the field types, which are, of course,
-field-type-specific.  The former kind are validated by this command;
-the latter kind cannot be validated until the fields are created as
-part of populating the order dialog.<p>
-
-The options available for use with any field are as follows:<p>
-
-<<deflist options>>
-
-<<defopt {-context <i>flag</i>}>>
-
-Defaults to no.  If <i>flag</i> is yes, then the parameter is a
-"context" parameter, one that must be provided to the order dialog
-rather than entered by the user.  When <<iref order enter>> is called,
-the parameter dictionary must include values for all context
-parameters, or the command will throw an error.<p>
-
-<<defopt {-defval <i>value</i>}>>
-
-The default value to display in the field when the order dialog is
-initialized or cleared.<p>
-
-<<defopt {-fieldtype <i>fieldType</i>}>>
-
-<b>Read-only.</b>  This option's value is set by the command's
-<i>fieldType</i> argument, but can be queried using
-<<iref order parm>>.<p>
-
-<<defopt {-label <i>label</i>}>>
-
-<b>Read-only.</b>  This option's value is set by the command's
-<i>label</i> argument, but can be queried using
-<<iref order parm>>.<p>
-
-<<defopt {-schedwheninvalid <i>flag</i>}>>
-
-By default, an order that is scheduled to execute in the future must
-be completely valid at the time that it is scheduled.  Sometimes,
-however, other things must happen in the future for the order to be
-valid.  For example, consider a pair of orders, one that creates an
-entity and one that destroys it.  If both the creation and destruction
-are to be scheduled in advance, then the destruction order will be
-invalid at the time that it is scheduled.<p>
-
-This option allows the programmer to specify which particular
-parameters may be invalid when this order is scheduled in advance.<p>
-
-
-<<defopt {-tags <i>taglist</i>}>>
-
-A list of <<iref order puck>> tags associated with the field.  If the
-user clicks on a neighborhood polygon in the application's map
-display, the application can call <<iref order puck>> with details:
-for example, the <b>nbhood</b> that was clicked, and the precise
-map <b>coords</b>.  If the field has tag <b>nbhood</b>, the
-neighborhood ID will be entered into it; if it has the tag
-<b>coords</b>, the map coordinates will be entered into it.<p>
-
-
-<</deflist options>>
-
-
-<<defitem layout {layout <i>spec</i>}>>
-
-Specifies a custom layout for the fields in the order's dialog box.
-See <<xref form(n)>> for the layout syntax; note that the field
-names in the <<xref form(n)>> are the same as the names of the
-order parameters.<p>
+Attaches the listed tags to the given parameter, so that the
+parameter can be "pucked" from the GUI.<p>
 
 <</deflist meta>>
 
@@ -878,6 +724,12 @@ validation type.  If any element fails, the parameter is
 If the parameter's value is <<iref valid>>, the value is transformed
 by passing it to the specified command.<p>
 
+<<defopt {-selector}>>
+
+The parameter is a <<xref dynaform(n)>> selector; validate that its
+value matches one of the selector's cases.  This option is used in
+place of a <code>-type</code> option.<p>
+
 <</deflist>>
 
 <<defitem reject {reject <i>parm msg</i>}>>
@@ -986,19 +838,6 @@ order(n) sends the following events using <<iref order init>>'s
 This event is sent whenever an order is accepted by
 <<iref order send>>.  The arguments are the order's name
 and parameter dictionary.<p>
-
-<<defitem EventRejected {&lt;EventRejected&gt; <i>name parmdict rdict</i>}>>
-
-This event is sent whenever an order that was scheduled in advance
-is rejected when it is finally executed.  The arguments are the
-order's name and parameter dictionary.  Such rejections are logged
-automatically; this event allows the application to notify the user
-in some suitable way.  The <i>rdict</i> is the rejection dictionary.<p>
-
-<<defitem Queue {&lt;Queue&gt;}>>
-
-This event is sent whenever an order is scheduled for future
-execution, or a scheduled order is cancelled.<p>
 
 <<defitem State {&lt;State&gt; <i>state</i>}>>
 

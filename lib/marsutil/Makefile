@@ -19,8 +19,14 @@ include $(TOP_DIR)/MakeDefs
 test:
 	$(TCLSH) marsutil.test $(FLAGS)
 
+test_dynaform:
+	$(TCLSH) dynaform.test $(FLAGS)
+
 test_marsmisc:
 	$(TCLSH) marsmisc.test $(FLAGS)
+
+test_order:
+	$(TCLSH) order.test $(FLAGS)
 
 test_undostack:
 	$(TCLSH) undostack.test $(FLAGS)

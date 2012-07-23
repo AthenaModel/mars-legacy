@@ -49,7 +49,6 @@ snit::widget ::marsgui::orderdialog {
     typecomponent rdb    ;# The order(n) -rdb.
 
 
-
     #-------------------------------------------------------------------
     # Type Variables
 
@@ -115,35 +114,6 @@ snit::widget ::marsgui::orderdialog {
 
         # NEXT, get the rdb
         set rdb [order cget -rdb]
-
-        # NEXT, register the default field types that need it.
-        $type fieldopts enum \
-            -enumtype    %?  \
-            -displaylong %?  \
-            -width       %?
-
-        $type fieldopts key \
-            -db       [order cget -rdb] \
-            -table    %!                \
-            -keys     %!                \
-            -labels   %?                \
-            -dispcols %?                \
-            -widths   %?
-    
-        $type fieldopts multi \
-            -table    %!      \
-            -key      %!
-
-        $type fieldopts newkey \
-            -db       [order cget -rdb] \
-            -table    %!                \
-            -universe %!                \
-            -keys     %!                \
-            -labels   %?                \
-            -widths   %?
-
-        $type fieldopts text \
-            -width    %?
 
         # NEXT, note that we're initialized
         set info(initialized) 1
@@ -215,59 +185,6 @@ snit::widget ::marsgui::orderdialog {
     }
 
     #-------------------------------------------------------------------
-    # Field Options
-    #
-    # An order dialog is based around a form(n) entry form.  Many
-    # form(n) field types (e.g., "text") can be used without any
-    # additional configuration.  Others, like "key", require many
-    # additional options.  The developer has two choices:
-    #
-    # 1. Define specific form(n) field types for all of the 
-    #    required configurations, and use those field types in
-    #    the order metadata.
-    #
-    # 2. Use configurable field types, and require the programmer
-    #    to include the relevant configuration options in the
-    #    the order metadata.
-    # 
-    # In case #1, orderdialog(n) doesn't need any additional 
-    # information; unconfigurable form(n) field types can be used
-    # freely.
-    #
-    # In case #2, orderdialog(n) needs to know how to configure
-    # fields of the given type.  The fieldopts command is used to
-    # provide this information.
-
-
-    # fieldopts fieldType option valspec ?option valspec...?
-    #
-    # fieldType - A field type registered with form(n)
-    # option    - An option taken by that field type
-    # valspec   - A string specifying the value the option should
-    #             have.
-    #
-    # If the valspec begins with "%", then it specifies a translation
-    # to be done by orderdialog(n); otherwise, it is simply an option
-    # value.  The available translations are as follows, where 
-    # "<parmOption>" is the name of an option passed to "parm" in the
-    # order metadata:
-    #
-    #    %!<parmOption>
-    #        The value is the value of the named order parameter option, 
-    #        which is required to be present.
-    #
-    #    %?<parmOption>
-    #        The value is the value of the named order parameter option,
-    #        *if* it is present; otherwise, this option is omitted.
-    #
-    # Often the <parmOption> will have the same name as the field 
-    # option; in this case, the <parmOption> can be omitted.
-
-    typemethod fieldopts {fieldType args} {
-        dict set info(ftrans) $fieldType $args
-    }
-    
-    #-------------------------------------------------------------------
     # Order Entry
 
     # enter name ?parmdict?
@@ -289,6 +206,8 @@ snit::widget ::marsgui::orderdialog {
     typemethod enter {name args} {
         require {$info(initialized)}    "$type is uninitialized."
         require {[order exists $name]} "Undefined order: \"$name\""
+        require {[llength [order parms $name]] != 0} \
+            "Can't enter order dialog, no parameters: \"$name\""
 
         # FIRST, get the initial parmdict.
         if {[llength $args] > 1} {
@@ -402,8 +321,6 @@ snit::widget ::marsgui::orderdialog {
     # Components
 
     component form       ;# The form(n) widget
-    component whenFld    ;# textfield, time to schedule
-    component schedBtn   ;# Schedule button
 
     #-------------------------------------------------------------------
     # Instance Variables
@@ -412,15 +329,11 @@ snit::widget ::marsgui::orderdialog {
     #
     # parms             Names of all parms.
     # context           Names of all context parms
-    # noncontext        Names of all non-context parms
-    # table             Name of associated RDB table/view, or ""
     # valid             1 if current values are valid, and 0 otherwise.
 
     variable my -array {
         parms      {}
         context    {}
-        noncontext {}
-        table      ""
         valid      0
     }
 
@@ -476,19 +389,19 @@ snit::widget ::marsgui::orderdialog {
             pack $win.tbar.help  -side right
         }
 
-        # NEXT, create the form to hold the fields
-        install form using form $win.form       \
-            -borderwidth 1                        \
-            -relief      raised                   \
-            -padding     2                        \
-            -currentcmd  [mymethod CurrentField]  \
+        # NEXT, create the dynaview.
+        install form using dynaview $win.form    \
+            -formtype    $options(-order)        \
+            -borderwidth 1                       \
+            -relief      raised                  \
+            -padding     2                       \
+            -currentcmd  [mymethod CurrentField] \
             -changecmd   [mymethod FormChange] 
-        
-        grid columnconfigure $form 1 -weight 1
 
-        # NEXT, create the fields
-        $self CreateFields
-        $form layout [order options $options(-order) -layout]
+        # NEXT, set up the metadata.
+        set my(parms)      [order parms $options(-order)]
+        set my(context)    [dynaform context $options(-order)]
+        set my(valid)      0
 
         # NEXT, create the message display
         rotext $win.message                                \
@@ -511,15 +424,6 @@ snit::widget ::marsgui::orderdialog {
             -width   6                        \
             -command [mymethod Clear]
 
-        install schedBtn using ttk::button $win.buttons.schedule \
-            -text    "Schedule"                                  \
-            -width   8                                           \
-            -command [mymethod Schedule]
-
-        install whenFld using textfield $win.buttons.when \
-            -width     13                                 \
-            -changecmd [mymethod CheckWhen]
-
         ttk::button $win.buttons.send         \
             -text    "Send"                   \
             -width   6                        \
@@ -533,15 +437,6 @@ snit::widget ::marsgui::orderdialog {
         pack $win.buttons.clear     -side left  -padx {2 15}
         pack $win.buttons.sendclose -side right -padx 2
         pack $win.buttons.send      -side right -padx 2
-
-        # Can't do this above, as it sets the state of the
-        # send and sendclose buttons.
-        if {[order options $options(-order) -schedulestates] ne ""} {
-            pack $win.buttons.when      -side right -padx 2
-            pack $win.buttons.schedule  -side right -padx 2
-
-            $whenFld set "NOW+1"
-        }
 
         # NEXT, pack components
         pack $win.tbar    -side top -fill x
@@ -582,92 +477,6 @@ snit::widget ::marsgui::orderdialog {
 
     destructor {
         notifier forget $win
-    }
-
-    # CreateFields
-    #
-    # Creates the data entry fields
-
-    method CreateFields {} {
-        # FIRST, save some variables
-        set order          $options(-order)
-        set my(parms)      [order parms $order]
-        set my(context)    [list]
-        set my(noncontext) [list]
-        set my(valid)      0
-
-        # NEXT, Create the fields
-        foreach parm $my(parms) {
-            # FIRST, get the parameter dictionary
-            set pdict [order parm $order $parm]
-
-            # NEXT, create the field
-            set ftype [dict get $pdict -fieldtype]
-
-            set opts [$self TranslateFieldOptions $ftype $pdict]
-
-            $form field create $parm [dict get $pdict -label] $ftype {*}$opts
-
-            # NEXT, save whether it's a context or non-context parm; and
-            # if it's context, disable it so that the user can't edit it.
-            if {[dict get $pdict -context]} {
-                lappend my(context) $parm
-            } else {
-                lappend my(noncontext) $parm
-            }
-        }
-    }
-
-
-    # TranslateFieldOptions ftype pdict
-    #
-    # ftype   - A field type
-    # pdict   - An order parameter option dictionary
-
-    method TranslateFieldOptions {ftype pdict} {
-        # FIRST, if no translation is needed, don't do any.
-        if {![dict exists $info(ftrans) $ftype]} {
-            return {}
-        }
-
-        # NEXT, translate the valspecs
-        set opts [list]
-
-        foreach {opt valspec} [dict get $info(ftrans) $ftype] {
-            # FIRST, just copy normal values.
-            if {[string index $valspec 0] ne "%"} {
-                lappend opts $opt $valspec
-                continue
-            }
-
-            # NEXT, get the translation code and the parm option name
-            set code [string range $valspec 0 1]
-
-            if {[string length $valspec] eq 2} {
-                set popt $opt
-            } else {
-                set popt [string range $valspec 2 end]
-            }
-
-            # NEXT, translate given the code.
-            if {$code eq "%!"} {
-                if {![dict exists $pdict $popt]} {
-                    error \
-               "missing parameter option for field type \"$ftype\": \"$popt\""
-                }
-
-                lappend opts $opt [dict get $pdict $popt]
-            } elseif {$code eq "%?"} {
-                if {[dict exists $pdict $popt]} {
-                    lappend opts $opt [dict get $pdict $popt]
-                }
-            } else {
-                error \
-          "Unexpected translation code for field type \"$ftype\", option $opt"
-            }
-        }
-
-        return $opts
     }
 
     #-------------------------------------------------------------------
@@ -716,6 +525,8 @@ snit::widget ::marsgui::orderdialog {
     method SetFocus {} {
         # TBD: Set the focus to the first editable, non-disabled
         # field.
+
+        # TBD: Is this needed?
     }
 
     #-------------------------------------------------------------------
@@ -729,11 +540,7 @@ snit::widget ::marsgui::orderdialog {
     # the button state.
 
     method FormChange {fields} {
-        # FIRST, refresh the contents of the form given the changed
-        # fields.
-        $self RefreshFields $fields
-
-        # NEXT, validate the order.
+        # FIRST, validate the order.
         $self CheckValidity
 
         # NEXT, set the button state
@@ -754,7 +561,7 @@ snit::widget ::marsgui::orderdialog {
     method ObjectSelect {tagdict} {
         # FIRST, Get the current field.  If there is none,
         # we're done.
-        set current [$form field current]
+        set current [$self GetCurrentField]
 
         if {$current eq ""} {
             return
@@ -763,7 +570,7 @@ snit::widget ::marsgui::orderdialog {
         # NEXT, get the tags for the current field.  If there are none,
         # we're done.
 
-        set tags [order parm $options(-order) $current -tags]
+        set tags [order tags $options(-order) $current]
 
         if {[llength $tags] == 0} {
             return
@@ -815,36 +622,10 @@ snit::widget ::marsgui::orderdialog {
     # triggered by any notifier(n) event.
 
     method RefreshDialog {args} {
-        # Mark -context fields
-        if {[llength $my(context)] > 0} {
-            $form context $my(context)
-        }
-
-        # Refresh all fields
-        $self RefreshFields $my(parms)
-    }
-
-    # RefreshFields fields
-    #
-    # fields   A list of the fields to refresh.  Generally, all fields
-    #          downstream of a changed field.
-    # 
-    # Refreshes the named fields.
-    
-    method RefreshFields {fields} {
-        # FIRST, call the order's -refreshcmd, if any.
-        set cmd [order options $options(-order) -refreshcmd]
-        
-        if {$cmd ne ""} {
-            {*}$cmd $self $fields [$form get]
-        }
-
-        # NEXT, since fields might have changed, check the validity
-        # and set the button state.
+        $form refresh
         $self CheckValidity
         $self SetButtonState
     }
-
 
     #-------------------------------------------------------------------
     # Order Validation
@@ -876,12 +657,10 @@ snit::widget ::marsgui::orderdialog {
             $form invalid [dict keys $result]
 
             # NEXT, show the current error message
-            set current [$form field current]
+            set current [$self GetCurrentField]
 
             if {$current ne "" && [info exists ferrors($current)]} {
-                set label \
-                    [order parm $options(-order) $current -label]
-                $self Message "$label: $ferrors($current)"
+                $self ShowParmError $current $ferrors($current)
             } elseif {[dict exists $result *]} {
                 $self Message "Error in order: [dict get $result *]"
             } else {
@@ -905,21 +684,10 @@ snit::widget ::marsgui::orderdialog {
     # Clears all parameter values
 
     method Clear {} {
-        # FIRST, clear the parameter values.  Skip "multi" fields.
-        set dict [dict create]
-
-        foreach parm $my(noncontext) {
-            if {[$form field ftype $parm] ne "multi"} {
-                dict set dict $parm \
-                    [order parm $options(-order) $parm -defval]
-            }
-        }
-
-        $form set $dict
-
+        # FIRST, clear the dialog
+        $form clear
 
         # NEXT, refresh all of the fields.
-        # TBD: Is this necessary?
         $self RefreshDialog
 
         # NEXT, set the focus to first editable field
@@ -1018,51 +786,6 @@ snit::widget ::marsgui::orderdialog {
         }
     }
 
-    # CheckWhen timespec
-    #
-    # Sets the state of the Schedule button based on the
-    # validity of the "when" field.
-
-    method CheckWhen {timespec} {
-        $self SetButtonState
-    }
-
-    # Schedule
-    #
-    # Schedules the current order
-
-    method Schedule {} {
-        # FIRST, Is the order valid?
-        if {!$my(valid)} {
-            set answer [messagebox popup \
-                            -title         "Are you sure?"                    \
-                            -icon          warning                            \
-                            -buttons       {ok "Schedule it" cancel "Cancel"} \
-                            -default       cancel                             \
-                            -ignoretag     ORDER:SCHEDULE                     \
-                            -ignoredefault ok                                 \
-                            -parent        [$type Parent]                     \
-                            -message       [normalize {
-                                This order is invalid at the present
-                                time.  Are you sure you wish to schedule
-                                it to execute in the future?
-                            }]]
-
-            if {$answer eq "cancel"} {
-                return
-            }
-        }
-
-        # NEXT, schedule it.
-        order send gui ORDER:SCHEDULE \
-            timespec [$whenFld get]   \
-            name     $options(-order) \
-            parmdict [$form get]
-
-        $self Message "Order Scheduled"
-    }
-
-
     #-------------------------------------------------------------------
     # Event Handlers: Other
 
@@ -1075,14 +798,13 @@ snit::widget ::marsgui::orderdialog {
     method CurrentField {parm} {
         # FIRST, if there's an error message, display it.
         if {[info exists ferrors($parm)]} {
-            set label [order parm $options(-order) $parm -label]
-            $self Message "$label: $ferrors($parm)"
+            $self ShowParmError $parm $ferrors($parm)
         } else {
             $self Message ""
         }
 
         # NEXT, tell the app what kind of parameter this is.
-        set tags [order parm $options(-order) $parm -tags]
+        set tags [order tags $options(-order) $parm]
 
         if {[llength $tags] == 0} {
             set tags null
@@ -1093,7 +815,7 @@ snit::widget ::marsgui::orderdialog {
 
     # SetButtonState
     #
-    # Enables/disables the send and schedule buttons based on 
+    # Enables/disables the send button based on 
     # whether there are unsaved changes, and whether the data is valid,
     # and so forth.
 
@@ -1111,44 +833,20 @@ snit::widget ::marsgui::orderdialog {
             $win.buttons.send      configure -state disabled
             $win.buttons.sendclose configure -state disabled
         }
-
-        # NEXT, the order can be scheduled if it can be scheduled
-        # in this state, and the "when" is valid, and either the
-        # field values are valid or escaped with -schedwheninvalid
-        set valid 1
-
-        foreach p [array names ferrors] {
-            if {![order parm $options(-order) $p -schedwheninvalid]} {
-                set valid 0
-            }
-        }
-
-        if {$valid && [order canschedule $options(-order)]} {
-            $whenFld configure -state normal
-
-            set timespec [$whenFld get]
-
-            # Next, the schedule button is valid if the order can
-            # really be scheduled, and not otherwise.
-            if {[catch {
-                order check ORDER:SCHEDULE    \
-                    timespec $timespec        \
-                    name     $options(-order) \
-                    parmdict {}
-            }]} {
-                $schedBtn configure -state disabled
-            } else {
-                $schedBtn configure -state normal
-            }
-        } else {
-            $schedBtn configure -state disabled
-            $whenFld  configure -state disabled
-        }
     }
 
     #-------------------------------------------------------------------
     # Utility Methods
 
+
+    # GetCurrentField
+    #
+    # Gets the name of the currently active field, or the first
+    # editable field otherwise.
+
+    method GetCurrentField {} {
+        return [$form current]
+    }
 
     # Message text
     #
@@ -1165,61 +863,97 @@ snit::widget ::marsgui::orderdialog {
         $win.message see 1.0
     }
 
+    # ShowParmError parm message
+    #
+    # parm    - The parameter name
+    # message - The error message string
+    #
+    # Shows the error message on the message line.
+    #
+    # TBD: The method used to get the dynaform field's label 
+    # is kind of fragile.  Perhaps some other way of linking
+    # the field with the message could be used?  I.e., an
+    # asterisk on the current field, if the current field is in
+    # error?
+
+    method ShowParmError {parm message} {
+        set label [$form getlabel $parm]
+
+        if {$label ne ""} {
+            $self Message "$label: $message"
+        } else {
+            $self Message $message
+        }
+    }
 
     #-------------------------------------------------------------------
     # Public methods
 
-    delegate method field    to form
-    delegate method get      to form
-    delegate method disabled to form
-    delegate method set      to form
+    delegate method get to form
+    delegate method set to form
 
-    # loadForKey key ?fields?
-    #
-    # key     Name of a key field.
-    # fields  Fields whose values should be loaded given the key field.
-    #         If "*", all fields are loaded.  Defaults to "*".
-    #
-    # Reads the named fields from the key's -table given the key's
-    # current value.
+    #-------------------------------------------------------------------
+    # Refresh Callbacks
 
-    method loadForKey {key {fields *}} {
-        # FIRST, get the table name.
-        set table  [$form field cget $key -table]
-        set keyval [$form field get $key]
+    # keyload key fields idict value
+    #
+    # key     - Name of a key field.  For tables with complex keys, use a
+    #           view that concatenates the key columns into one column.
+    # fields  - Fields whose values should be loaded given the key field.
+    #           If "*", all fields are loaded.  Defaults to "*".
+    # idict   - The field item's definition dictionary.
+    # value   - The current value of the key field.
+    #
+    # For use as a dynaform field -loadcmd with key fields.
+    #
+    # Loads the table row from the database specified in the idict given 
+    # the other parameters, and returns it as a dictionary.  If "fields"
+    # is not *, only the listed field names will be returned.
+
+    typemethod keyload {key fields idict value} {
+        # FIRST, get the metadata.
+        set ftype  [dict get $idict ftype]
+        set db     [dict get $idict db]
+        set table  [dict get $idict table]
 
         # NEXT, get the list of fields
         if {$fields eq "*"} {
-            set fields [$form field names]
+            set fields [dynaform fields $ftype]
         }
 
         # NEXT, retrieve the record.
         $rdb eval "
             SELECT [join $fields ,] FROM $table
-            WHERE $key=\$keyval
+            WHERE $key=\$value
         " row {
             unset row(*)
 
-            $form set [array get row]
+            return [array get row]
         }
+
+        return ""
     }
 
-    # loadForMulti multi ?fields?
+    # multiload multi fields idict keyvals
     #
-    # multi     Name of a multi field.
-    # fields  Fields whose values should be loaded given the multi field's
-    #         value.  If "*", all fields are loaded.  Defaults to "*".
+    # multi   - Name of the multi field itself
+    # fields  - Fields whose values should be loaded given the multi field.
+    #           If "*", all fields are loaded.  Defaults to "*".
+    # idict   - The field item's definition dictionary.
+    # keyvals - The current value of the multi field.
     #
-    # Reads the named fields from the multi's -table given the multi's
+    # For use as a dynaform field -loadcmd with multi fields.
+    #
+    # Reads the named fields from the multi's table given the multi's
     # current list of values.  Builds a dictionary of values common
     # to all records, and clears the others.
 
-    method loadForMulti {multi {fields *}} {
-        # FIRST, get the table name, the key column name, and
-        # the list of key values.
-        set table   [$form field cget $multi -table]
-        set keycol  [$form field cget $multi -key]
-        set keyvals [$form field get $multi]
+    typemethod multiload {multi fields idict keyvals} {
+        # FIRST, get the field metadata.
+        set ftype   [dict get $idict ftype]
+        set db      [dict get $idict db]
+        set table   [dict get $idict table] 
+        set keycol  [dict get $idict key]
 
         # NEXT, if the list of key values is empty, clear the values;
         # we're done.
@@ -1230,7 +964,7 @@ snit::widget ::marsgui::orderdialog {
         
         # NEXT, get the list of fields
         if {$fields eq "*"} {
-            set fields [$form field names]
+            set fields [dynaform fields $ftype]
             ldelete fields $multi
         }
 
@@ -1256,48 +990,8 @@ snit::widget ::marsgui::orderdialog {
             }
         }
 
-
-        # NEXT, save the values.
-        $form set [array get prev]
-    }
-
-    #-------------------------------------------------------------------
-    # Refresh Callbacks
-
-    # refreshForKey key fields  dlg changedFields fdict
-    #
-    # key        Name of a key field
-    # fields     Fields to be loaded for the key field.
-    # dlg, etc.  -refreshcmd arguments
-    #
-    # A -refreshcmd that simply loads field values when a key 
-    # field's value changes.  The user defines the -refreshcmd
-    # like this:
-    #
-    #   -refreshcmd {orderdialog refreshForKey g *}
-
-    typemethod refreshForKey {key fields dlg changedFields fdict} {
-        if {$key in $changedFields} {
-            $dlg loadForKey $key $fields
-        }
-    }
-
-    # refreshForMulti multi fields  dlg changedFields fdict
-    #
-    # multi      Name of a multi field
-    # fields     Fields to be loaded for the multi field.
-    # dlg, etc.  -refreshcmd arguments
-    #
-    # A -refreshcmd that simply loads field values when a multi 
-    # field's value changes.  The user defines the -refreshcmd
-    # like this:
-    #
-    #   -refreshcmd {orderdialog refreshForMulti ids *}
-
-    typemethod refreshForMulti {multi fields dlg changedFields fdict} {
-        if {$multi in $changedFields} {
-            $dlg loadForMulti $multi $fields
-        }
+        # NEXT, return the loaded values.
+        return [array get prev]
     }
 }
 

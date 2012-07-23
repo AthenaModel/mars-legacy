@@ -171,6 +171,11 @@ form <<iref shortnames>> is deprecated.<p>
 
 Returns a list of the long category names, in index order.<p>
 
+<<defitem namedict {$quality namedict}>>
+
+Returns a dictionary of the short and long category names, in index
+order.<p>
+
 <<defitem value {$quality value <i>input</i>}>>
 
 Given a short name, a long name, or a numeric value within the valid

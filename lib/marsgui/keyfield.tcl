@@ -203,6 +203,9 @@ snit::widget ::marsgui::keyfield {
             grid columnconfigure $win $c -weight 1
         }
 
+        # NEXT, handle the initial -state.
+        $self configure -state $options(-state)
+
         # NEXT, initialize the cached value
         set currentValue [$self GetValue]
     }

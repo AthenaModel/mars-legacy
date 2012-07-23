@@ -95,20 +95,9 @@ namespace eval ::marsutil::test {
     proc setup {args} {
         variable acc
         
-        if {[optval args -clockflag no]} {
-            set clock [namespace current]::clock
-        } else {
-            set clock ""
-        }
-
-        simclockType clock
-
-        sqldocument rdb -clock [namespace current]::clock
-        rdb register ::marsutil::eventq
+        sqldocument rdb 
         rdb open :memory:
         rdb clear
-
-        eventq init [namespace current]::rdb
 
         rdb eval {
             CREATE TABLE test_table(x PRIMARY KEY, y, z);
@@ -119,16 +108,17 @@ namespace eval ::marsutil::test {
 
         order init \
             -rdb      ::marsutil::test::rdb                 \
-            -clock    $clock                                \
             -logcmd   {::marsutil::test::Accumulate log}    \
             -ordercmd {::marsutil::test::Accumulate orders} \
             {*}$args
 
         if {$passthru} {
             order define PASS:THRU {
-                parm a text a
-                parm b text b
-                parm c text c
+                form {
+                    text a
+                    text b
+                    text c
+                }
             } {
                 array get parms
             }
@@ -150,11 +140,6 @@ namespace eval ::marsutil::test {
     # Reset the order(n) module.
     proc cleanup {} {
         variable acc
-
-        eventq restart
-        eventq destroy *
-
-        clock destroy
 
         order reset
         array unset acc
@@ -269,13 +254,11 @@ namespace eval ::marsutil::test {
     }  -cleanup {
         cleanup
     } -result {
-        -cancelstates: <*>
-        -clock:        <>
-        -logcmd:       <>
-        -ordercmd:     <>
-        -rdb:          <NONESUCH>
-        -subject:      <::marsutil::order>
-        -usedtable:    <>
+        -logcmd:    <>
+        -ordercmd:  <>
+        -rdb:       <NONESUCH>
+        -subject:   <::marsutil::order>
+        -usedtable: <>
     }
 
 
@@ -284,8 +267,6 @@ namespace eval ::marsutil::test {
         order reset
     } -body {
         order init \
-            -cancelstates {}                                 \
-            -clock        A                                  \
             -logcmd       {::marsutil::test::Accumulate log} \
             -ordercmd     C                                  \
             -rdb          D                                  \
@@ -296,13 +277,11 @@ namespace eval ::marsutil::test {
     }  -cleanup {
         cleanup
     } -result {
-        -cancelstates: <>
-        -clock:        <A>
-        -logcmd:       <::marsutil::test::Accumulate log>
-        -ordercmd:     <C>
-        -rdb:          <D>
-        -subject:      <E>
-        -usedtable:    <F>
+        -logcmd:    <::marsutil::test::Accumulate log>
+        -ordercmd:  <C>
+        -rdb:       <D>
+        -subject:   <E>
+        -usedtable: <F>
     }
 
     test init-1.3 {-rdb must be set} -setup {
@@ -324,17 +303,6 @@ namespace eval ::marsutil::test {
         cleanup
     } -result {MY:ORDER}
 
-    test init-1.5 {If -clock is given, scheduling is available} -setup {
-        setup
-        order reset
-    } -body {
-        order init \
-            -rdb   ::marsutil::test::rdb   \
-            -clock ::marsutil::test::clock
-        order names
-    }  -cleanup {
-        cleanup
-    } -result {ORDER:SCHEDULE ORDER:CANCEL}
 
     #-------------------------------------------------------------------
     # cget
@@ -371,14 +339,6 @@ namespace eval ::marsutil::test {
     }  -cleanup {
         cleanup
     } -result {Option -subject: no value given}
-
-    test configure-1.3 {Can't configure -clock} -setup {
-        setup
-    } -body {
-        errcatch order configure -clock nonesuch
-    }  -cleanup {
-        cleanup
-    } -result {Option -clock is readonly after initialization}
 
     test configure-1.4 {Can't configure -rdb} -setup {
         setup
@@ -522,76 +482,6 @@ Unknown option: -nonesuch}
     } -result {Metadata error for order MY:ORDER:
 invalid boolean "NONESUCH", should be one of: 1, 0, true, false, yes, no, on, off}
 
-    test define-2.1 {parm: invalid name} -setup {
-        setup
-    } -body {
-        errcatch order define MY:ORDER { 
-            parm "my parm" text "My Parm" 
-        } { }
-    } -cleanup {
-        cleanup
-    } -result {Metadata error for order MY:ORDER:
-Parm "my parm" has an invalid name}
-
-    test define-2.2 {parm: invalid field type} -setup {
-        setup
-    } -body {
-        errcatch order define MY:ORDER { 
-            parm myparm "bad type" "My Parm" 
-        } { }
-    } -cleanup {
-        cleanup
-    } -result {Metadata error for order MY:ORDER:
-Parm "myparm" has invalid field type: "bad type"}
-
-    test define-2.3 {parm: option with no value} -setup {
-        setup
-    } -body {
-        errcatch order define MY:ORDER { 
-            parm a text a -nonesuch 
-        } { }
-    } -cleanup {
-        cleanup
-    } -result {Metadata error for order MY:ORDER:
-Parm "a", option -nonesuch has no value}
-
-    test define-2.4 {parm: invalid option name} -setup {
-        setup
-    } -body {
-        # E.g., the name doesn't have a hyphen.
-        errcatch order define MY:ORDER { 
-            parm a text a nonesuch foo
-        } { }
-    } -cleanup {
-        cleanup
-    } -result {Metadata error for order MY:ORDER:
-Parm "a", invalid option: "nonesuch"}
-
-    test define-2.5 {parm: invalid -schedwheninvalid} -setup {
-        setup
-    } -body {
-        # E.g., the name doesn't have a hyphen.
-        errcatch order define MY:ORDER { 
-            parm a text a -schedwheninvalid nonesuch
-        } { }
-    } -cleanup {
-        cleanup
-    } -result {Metadata error for order MY:ORDER:
-Parm "a", option -schedwheninvalid, invalid boolean "nonesuch", should be one of: 1, 0, true, false, yes, no, on, off}
-
-    
-    test define-2.6 {parm: invalid -context} -setup {
-        setup
-    } -body {
-        # E.g., the name doesn't have a hyphen.
-        errcatch order define MY:ORDER { 
-            parm a text a -context nonesuch
-        } { }
-    } -cleanup {
-        cleanup
-    } -result {Metadata error for order MY:ORDER:
-Parm "a", option -context, invalid boolean "nonesuch", should be one of: 1, 0, true, false, yes, no, on, off}
-
     #-------------------------------------------------------------------
     # names
 
@@ -723,12 +613,10 @@ Parm "a", option -context, invalid boolean "nonesuch", should be one of: 1, 0, t
     } -cleanup {
         cleanup
     } -result {
-        -layout:         <>
-        -narrativecmd:   <>
-        -refreshcmd:     <>
-        -sendstates:     <*>
-        -schedulestates: <>
-        -monitor:        <1>
+        -dynaform:     <>
+        -narrativecmd: <>
+        -sendstates:   <*>
+        -monitor:      <1>
     }
 
 
@@ -739,8 +627,6 @@ Parm "a", option -context, invalid boolean "nonesuch", should be one of: 1, 0, t
             options \
                 -monitor        no      \
                 -narrativecmd   ncmd    \
-                -refreshcmd     rcmd    \
-                -schedulestates "A B C" \
                 -sendstates     "A B"
         } {}
 
@@ -748,12 +634,10 @@ Parm "a", option -context, invalid boolean "nonesuch", should be one of: 1, 0, t
     } -cleanup {
         cleanup
     } -result {
-        -layout:         <>
-        -narrativecmd:   <ncmd>
-        -refreshcmd:     <rcmd>
-        -sendstates:     <A B>
-        -schedulestates: <A B C>
-        -monitor:        <no>
+        -dynaform:     <>
+        -narrativecmd: <ncmd>
+        -sendstates:   <A B>
+        -monitor:      <no>
     }
 
     test options-2.3 {Can retrieve single options} -setup {
@@ -765,31 +649,6 @@ Parm "a", option -context, invalid boolean "nonesuch", should be one of: 1, 0, t
         cleanup
     } -result {1}
 
-    #-------------------------------------------------------------------
-    # layout
-
-    test layout-1.1 {Layout defaults to ""} -setup {
-        setup
-    } -body {
-        order define MY:ORDER {} {}
-
-        order options MY:ORDER -layout
-    } -cleanup {
-        cleanup
-    } -result {}
-
-    test layout-1.2 {Layout can be set} -setup {
-        setup
-    } -body {
-        order define MY:ORDER {
-            layout "bogus layout"
-        } {}
-
-        order options MY:ORDER -layout
-    } -cleanup {
-        cleanup
-    } -result {bogus layout}
-    
     #-------------------------------------------------------------------
     # narrative
 
@@ -842,9 +701,11 @@ Parm "a", option -context, invalid boolean "nonesuch", should be one of: 1, 0, t
         setup
     } -body {
         order define MY:ORDER {
-            parm a text a
-            parm b text b
-            parm c text c
+            form {
+                text a
+                text b
+                text c
+            }
         } {}
 
         order parms MY:ORDER
@@ -854,65 +715,37 @@ Parm "a", option -context, invalid boolean "nonesuch", should be one of: 1, 0, t
 
 
     #-------------------------------------------------------------------
-    # parm
+    # tags
 
-    test parm-1.1 {Order not defined} -setup {
+    test tags-1.1 {Order not defined} -setup {
         setup
     } -body {
-        errcatch order parm MY:ORDER a
+        errcatch order tags MY:ORDER a
     } -cleanup {
         cleanup
     } -result {Order is undefined: "MY:ORDER"}
     
-    test parm-1.2 {Parm not defined} -setup {
+    test tags-1.2 {parm not defined} -setup {
         setup
         order define MY:ORDER {} {}
     } -body {
-        errcatch order parm MY:ORDER a
+        errcatch order tags MY:ORDER a
     } -cleanup {
         cleanup
     } -result {Parm is undefined: "a"}
 
-    test parm-1.3 {Parm option not defined} -setup {
-        setup
-        order define MY:ORDER { parm a text a } {}
-    } -body {
-        errcatch order parm MY:ORDER a -nonesuch
-    } -cleanup {
-        cleanup
-    } -result {key "-nonesuch" not known in dictionary}
-
-    test parm-2.1 {Can retrieve one option} -setup {
+    test tags-2.1 {Can retrieve tags} -setup {
         setup
     } -body {
         order define MY:ORDER {
-            parm a enum a -type atype
+            form { text a }
+            parmtags a atype
         } {}
 
-        order parm MY:ORDER a -type
+        order tags MY:ORDER a
     } -cleanup {
         cleanup
     } -result {atype}
-
-    test parm-2.2 {Can retrieve all options} -setup {
-        setup
-    } -body {
-        order define MY:ORDER {
-            parm a enum a -type atype
-        } {}
-
-        pdict [order parm MY:ORDER a]
-    } -cleanup {
-        cleanup
-    } -result {
-        -fieldtype:        <enum>
-        -label:            <a>
-        -context:          <0>
-        -defval:           <>
-        -schedwheninvalid: <0>
-        -tags:             <>
-        -type:             <atype>
-    }
 
     #-------------------------------------------------------------------
     # state
@@ -998,16 +831,6 @@ Parm "a", option -context, invalid boolean "nonesuch", should be one of: 1, 0, t
     } -cleanup {
         cleanup
     } -result {1}
-
-    #-------------------------------------------------------------------
-    # canschedule
-
-    # TBD: wait on scheduling scrub
-
-    #-------------------------------------------------------------------
-    # isvalid
-
-    # TBD: wait on scheduling scrub
 
 
     #-------------------------------------------------------------------
@@ -1193,8 +1016,10 @@ Simulated Error}
     test send-7.2 {interface -trace: trace} -setup {
         setup
         order define MY:ORDER {
-            parm a text a
-            parm b text b
+            form {
+                text a
+                text b
+            }
         } {
             return OK
         }
@@ -1327,7 +1152,7 @@ Simulated Error}
 
     test prepare-1.1 {Adds missing parameter to parms array} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a
         }
     } -body {
@@ -1339,7 +1164,7 @@ Simulated Error}
 
     test prepare-1.2 {Value is trimmed} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a
         }
     } -body {
@@ -1351,7 +1176,7 @@ Simulated Error}
 
     test prepare-1.3 {prepare: unknown option} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -nonesuch
         }
     } -body {
@@ -1363,7 +1188,7 @@ unknown option: "-nonesuch"}
 
     test prepare-2.1 {prepare -toupper} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -toupper
         }
     } -body {
@@ -1375,7 +1200,7 @@ unknown option: "-nonesuch"}
 
     test prepare-3.1 {prepare -tolower} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -tolower
         }
     } -body {
@@ -1387,7 +1212,7 @@ unknown option: "-nonesuch"}
 
     test prepare-4.1 {prepare -normalize} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -normalize
         }
     } -body {
@@ -1399,7 +1224,7 @@ unknown option: "-nonesuch"}
 
     test prepare-5.1 {prepare -required, absent} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -required
             returnOnError
         }
@@ -1413,7 +1238,7 @@ unknown option: "-nonesuch"}
 
     test prepare-5.2 {prepare -required, present} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -required
             returnOnError
 
@@ -1428,7 +1253,7 @@ unknown option: "-nonesuch"}
 
     test prepare-6.1 {prepare -oldvalue, match} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -oldvalue "my value"
         }
     } -body {
@@ -1440,7 +1265,7 @@ unknown option: "-nonesuch"}
 
     test prepare-6.2 {prepare -oldvalue, no match} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -oldvalue "my value"
         }
     } -body {
@@ -1452,7 +1277,7 @@ unknown option: "-nonesuch"}
 
     test prepare-7.1 {prepare -oldnum, no match} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -oldnum 8
         }
     } -body {
@@ -1464,7 +1289,7 @@ unknown option: "-nonesuch"}
 
     test prepare-7.2 {prepare -oldnum, no match} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -oldnum 8
         }
     } -body {
@@ -1476,7 +1301,7 @@ unknown option: "-nonesuch"}
 
     test prepare-8.1 {prepare -unused, no -unusedtable} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -unused
         }
     } -body {
@@ -1497,7 +1322,7 @@ No -usedtable specified.}
 
         order configure -usedtable used_table
 
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -unused
             returnOnError
         }
@@ -1518,7 +1343,7 @@ No -usedtable specified.}
 
         order configure -usedtable used_table
 
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -unused
             returnOnError
 
@@ -1532,7 +1357,7 @@ No -usedtable specified.}
 
     test prepare-9.1 {prepare -type, valid} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -type ::marsutil::test::goodness
             returnOnError
             return OK
@@ -1545,7 +1370,7 @@ No -usedtable specified.}
 
     test prepare-9.2 {prepare -type, invalid} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -type ::marsutil::test::goodness
             returnOnError
             return OK
@@ -1558,7 +1383,7 @@ No -usedtable specified.}
 
     test prepare-10.1 {prepare -listof, valid} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -listof ::marsutil::test::goodness
             returnOnError
             return OK
@@ -1571,7 +1396,7 @@ No -usedtable specified.}
 
     test prepare-10.2 {prepare -listof, invalid} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -listof ::marsutil::test::goodness
             returnOnError
             return OK
@@ -1584,7 +1409,7 @@ No -usedtable specified.}
 
     test prepare-11.1 {prepare -xform} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             prepare a -xform {string toupper}
         }
     } -body {
@@ -1600,8 +1425,10 @@ No -usedtable specified.}
     test reject-1.1 {Reject adds to messages} -setup {
         setup
         order define MY:ORDER {
-            parm a text a
-            parm b text b
+            form {
+                text a
+                text b
+            }
         } {
             reject a "Bad A"
             reject b "Worse B"
@@ -1638,7 +1465,7 @@ No -usedtable specified.}
 
     test valid-1.1 {Valid if not rejected and not ""} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             valid a
         }
     } -body {
@@ -1649,7 +1476,7 @@ No -usedtable specified.}
     
     test valid-1.2 {Invalid if ""} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             valid a
         }
     } -body {
@@ -1660,7 +1487,7 @@ No -usedtable specified.}
     
     test valid-1.3 {Invalid if rejected} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             reject a "Simulated Error"
             valid a
         }
@@ -1676,7 +1503,7 @@ No -usedtable specified.}
 
     test validate-1.1 {Rejected if script throws INVALID} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             validate a {
                 return -code error -errorcode INVALID "Invalid a"
             }
@@ -1693,7 +1520,7 @@ No -usedtable specified.}
 
     test validate-1.2 {Rejected if script rejects} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             validate a {
                 reject a "Rejected a"
             }
@@ -1710,7 +1537,7 @@ No -usedtable specified.}
 
     test validate-1.3 {Unexpected error if throws anything else} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             validate a {
                 return -code error "Simulated Error"
             }
@@ -1728,7 +1555,7 @@ Simulated Error}
 
     test validate-1.4 {Otherwise, valid} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             validate a {
                 # Nothing
             }
@@ -1813,7 +1640,7 @@ Simulated Error}
 
     test nullmode-1.1 {null mode works} -setup {
         setup
-        order define MY:ORDER {parm a text a} {
+        order define MY:ORDER { form {text a} } {
             error "Shouldn't have gotten here"
         }
     } -body {
@@ -1823,317 +1650,6 @@ Simulated Error}
     } -cleanup {
         cleanup
     } -result {a NONESUCH _order MY:ORDER}
-
-    #-------------------------------------------------------------------
-    # schedule
-
-    test schedule-1.1 {Can't schedule without -clock} -setup {
-        setup
-    } -body {
-        errcatch order schedule gui T0 MY:ORDER {}
-    } -cleanup {
-        cleanup
-    } -result {Order scheduling is disabled}
-
-
-    test schedule-1.2 {Can't schedule without -schedulestates} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {} {}
-    } -body {
-        errcatch order schedule gui T0 MY:ORDER {}
-    } -cleanup {
-        cleanup
-    } -result {Scheduling is disabled for MY:ORDER}
-
-
-    test schedule-1.3 {Can't schedule in bad state} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates {A B}
-        } {}
-        order state C
-    } -body {
-        errcatch order schedule gui T0 MY:ORDER {}
-    } -cleanup {
-        cleanup
-    } -result {Cannot schedule MY:ORDER in state "C"}
-
-    test schedule-1.4 {Can't schedule when order is rejected} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-            parm a text a
-        } {
-            reject a "Bogus rejection"
-            returnOnError -final
-        }
-    } -body {
-        codecatch order schedule gui T0 MY:ORDER {a 1}
-    } -cleanup {
-        cleanup
-    } -result {REJECT a {Bogus rejection}}
-
-    test schedule-2.1 {Orders can be scheduled} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-            parm a text a
-        } {
-            prepare a
-            returnOnError -final
-        }
-    } -body {
-        order schedule gui T0 MY:ORDER {a 1}
-        bprint [rdb query {SELECT * FROM eventq_queue_order_execute}]
-    } -cleanup {
-        cleanup
-    } -result {
-id t etype         name     narrative parmdict 
--- - ------------- -------- --------- -------- 
-1  0 order_execute MY:ORDER MY:ORDER  a 1      
-    }
-
-    test schedule-2.2 {<Queue> sent} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-            parm a text a
-        } {
-            prepare a
-            returnOnError -final
-        }
-    } -body {
-        order schedule gui T0 MY:ORDER {a 1}
-        getacc events
-    } -cleanup {
-        cleanup
-    } -result {
-        ::marsutil::order <Queue> {} {}
-        ::marsutil::order <Accepted> {ORDER:SCHEDULE {timespec T0 name MY:ORDER parmdict {a 1}}} {}
-    }
-
-    test schedule-2.3 {-schedwheninvalid yes} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-            parm a text a -schedwheninvalid yes
-        } {
-            reject a "Bogus rejection"
-            returnOnError -final
-        }
-    } -body {
-        order schedule gui T0 MY:ORDER {a 1}
-        getacc events
-    } -cleanup {
-        cleanup
-    } -result {
-        ::marsutil::order <Queue> {} {}
-        ::marsutil::order <Accepted> {ORDER:SCHEDULE {timespec T0 name MY:ORDER parmdict {a 1}}} {}
-    }
-
-    test schedule-2.4 {Undo script} -setup {
-        setup -clockflag yes
-        order interface configure gui -trace yes
-        order define MY:ORDER {
-            options -schedulestates *
-            parm a text a
-        } {
-            prepare a
-            returnOnError -final
-        }
-    } -body {
-        order schedule gui T0 MY:ORDER {a 1}
-        getacc orders
-    } -cleanup {
-        cleanup
-    } -result {
-        gui ORDER:SCHEDULE {timespec T0 name MY:ORDER parmdict {a 1}} {order UndoSchedule}
-    }
-
-    test schedule-2.5 {Can undo script} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-            parm a text a
-        } {
-            prepare a
-            returnOnError -final
-        }
-    } -body {
-        order schedule gui T0 MY:ORDER {a 1}
-        order UndoSchedule
-        rdb query {SELECT * FROM eventq_queue_order_execute}
-    } -cleanup {
-        cleanup
-    } -result {}
-
-    test schedule-3.1 {Scheduled orders execute} -setup {
-        proc ::bgerror {msg} {
-            puts "msg: $msg\n$::errorInfo"
-        }
-
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-            parm a text a
-        } {
-            prepare a
-            returnOnError -final
-            ::marsutil::notifier send ::app <Executed> $parms(a)
-        }
-    } -body {
-        order schedule gui T0 MY:ORDER {a "Hello, world"}
-        eventq advance 1
-        getacc events
-    } -cleanup {
-        cleanup
-    } -result {
-        ::marsutil::order <Queue> {} {}
-        ::marsutil::order <Accepted> {ORDER:SCHEDULE {timespec T0 name MY:ORDER parmdict {a "Hello, world"}}} {}
-        ::app <Executed> {{Hello, world}} {}
-        ::marsutil::order <Accepted> {MY:ORDER {a "Hello, world"}} {}
-    }
-
-    test schedule-3.2 {Event sent on rejection of scheduled order} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-            parm a text a -schedwheninvalid yes
-        } {
-            reject a "Bogus rejection"
-            returnOnError -final
-            ::marsutil::notifier send ::app <Executed> $parms(a)
-        }
-    } -body {
-        order schedule gui T0 MY:ORDER {a "Hello, world"}
-        eventq advance 1
-        getacc events
-    } -cleanup {
-        cleanup
-    } -result {
-        ::marsutil::order <Queue> {} {}
-        ::marsutil::order <Accepted> {ORDER:SCHEDULE {timespec T0 name MY:ORDER parmdict {a "Hello, world"}}} {}
-        ::marsutil::order <EventRejected> {MY:ORDER {a "Hello, world"} {a {Bogus rejection}}} {}
-    }
-
-    #-------------------------------------------------------------------
-    # scheduled names
-
-    test scheduled_names-1.1 {No names initially} -setup {
-        setup -clockflag yes
-    } -body {
-        order scheduled names
-    } -cleanup {
-        cleanup
-    } -result {}
-
-    test scheduled_names-1.2 {IDs of scheduled orders} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-        } {
-            returnOnError -final
-        }
-        order schedule gui T0 MY:ORDER {}
-        order schedule gui T0+1 MY:ORDER {}
-    } -body {
-        order scheduled names
-    } -cleanup {
-        cleanup
-    } -result {1 2}
-
-    #-------------------------------------------------------------------
-    # scheduled validate
-
-    test scheduled_validate-1.1 {Invalid ID} -setup {
-        setup -clockflag yes
-    } -body {
-        codecatch order scheduled validate NONESUCH
-    } -cleanup {
-        cleanup
-    } -result {INVALID order not scheduled: "NONESUCH"}
-
-    test scheduled_validate-1.2 {Valid ID} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-        } {
-            returnOnError -final
-        }
-        order schedule gui T0 MY:ORDER {}
-        order schedule gui T0+1 MY:ORDER {}
-    } -body {
-        order scheduled validate 2
-    } -cleanup {
-        cleanup
-    } -result {2}
-
-    #-------------------------------------------------------------------
-    # order_cancel
-
-    test order_cancel-1.1 {Can't cancel without -clock} -setup {
-        setup
-    } -body {
-        errcatch order cancel gui 1
-    } -cleanup {
-        cleanup
-    } -result {Order scheduling is disabled}
-
-    test order_cancel-1.2 {Can't cancel in bad order state} -setup {
-        setup -clockflag yes -cancelstates {A B}
-        order state C
-    } -body {
-        errcatch order cancel gui 1
-    } -cleanup {
-        cleanup
-    } -result {Cannot cancel orders in state "C"}
-
-    test order_cancel-1.3 {Can't cancel invalid ID} -setup {
-        setup -clockflag yes
-    } -body {
-        errcatch order cancel gui 1
-    } -cleanup {
-        cleanup
-    } -result {order not scheduled: "1"}
-
-    test order_cancel-2.1 {Orders can be canceled} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-            parm a text a
-        } {
-            prepare a
-            returnOnError -final
-        }
-        order schedule gui T0 MY:ORDER {a 1}
-    } -body {
-        order cancel gui [lindex [order scheduled names] 0]
-        rdb query {SELECT * FROM eventq_queue_order_execute}
-    } -cleanup {
-        cleanup
-    } -result {}
-
-    test order_cancel-2.2 {<Queue> sent} -setup {
-        setup -clockflag yes
-        order define MY:ORDER {
-            options -schedulestates *
-            parm a text a
-        } {
-            prepare a
-            returnOnError -final
-        }
-        order schedule gui T0 MY:ORDER {a 1}
-    } -body {
-        order cancel gui [lindex [order scheduled names] 0]
-        getacc events
-    } -cleanup {
-        cleanup
-    } -result {
-        ::marsutil::order <Queue> {} {}
-        ::marsutil::order <Accepted> {ORDER:SCHEDULE {timespec T0 name MY:ORDER parmdict {a 1}}} {}
-        ::marsutil::order <Queue> {} {}
-        ::marsutil::order <Accepted> {ORDER:CANCEL {id 1}} {}
-    }
 
 
     #-------------------------------------------------------------------

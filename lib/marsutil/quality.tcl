@@ -32,7 +32,6 @@ namespace eval ::marsutil:: {
 snit::type ::marsutil::quality {
     typeconstructor {
         namespace import ::marsutil::* 
-        namespace import ::marsutil::*
     }
 
     #-------------------------------------------------------------------
@@ -270,6 +269,20 @@ snit::type ::marsutil::quality {
     # Returns a list of the long names.
     method longnames {} {
         return $longnames
+    }
+
+    # namedict
+    #
+    # Return a short name, long name dictionary.
+    
+    method namedict {} {
+        set result [dict create]
+
+        foreach name $shortnames long $longnames {
+            dict set result $name $long
+        }
+
+        return $result
     }
 
     # clamp value

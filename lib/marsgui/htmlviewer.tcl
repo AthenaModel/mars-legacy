@@ -70,6 +70,12 @@ snit::widgetadaptor ::marsgui::htmlviewer {
             vertical-align: middle;
         }
         
+        INPUT[type="text"] {
+            border: 0px;
+            vertical-align: middle;
+        }
+        
+        
         INPUT[type="submit"] {
             padding: 0px;
         }
