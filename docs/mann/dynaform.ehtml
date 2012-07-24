@@ -609,10 +609,11 @@ the remainder are primarily for use by <<xref dynaview(n)>>.<p>
 Returns a list of the IDs of all items defined by the named form
 type, in order of definition.<p>
 
-<<defitem cases {dynaform cases <i>ftype field</i>}>>
+<<defitem cases {dynaform cases <i>ftype field vdict</i>}>>
 
 Returns the symbolic names of the cases associated with form
-<i>ftype</i>'s <<iref selector>> field <i>field</i>.  This command is 
+<i>ftype</i>'s <<iref selector>> field <i>field</i> given the context
+provided by the value dictionary <i>vdict</i>.  This command is 
 provided to make it easy for clients (e.g., orders) to validate the 
 value of selector fields.<p>
 

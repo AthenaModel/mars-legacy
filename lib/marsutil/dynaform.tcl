@@ -91,8 +91,6 @@ snit::type ::marsutil::dynaform {
     #                    for this form type.
     # fields-$ftype    - List of distinct field names for this form type.
     #                    Items on different branches can share a field name.
-    # selectors-$ftype - List of field names for selector fields for this
-    #                    form type.  Selector field names must be unique.
     # layout-$ftype    - The layout algorithm for this form type.
     #                    Defaults to ncolumn
     # ft-$fieldtype    - Field type definition singleton
@@ -261,7 +259,6 @@ snit::type ::marsutil::dynaform {
         set meta(all-$ftype)       [list]
         set meta(top-$ftype)       [list]
         set meta(fields-$ftype)    [list]
-        set meta(selectors-$ftype) [list]
         set meta(layout-$ftype)    ncolumn
 
         # NEXT, evaluate the form definition script, building up data.  
@@ -450,10 +447,6 @@ snit::type ::marsutil::dynaform {
     # and options.
 
     proc FormField {fieldtype field args} {
-        # FIRST, check the field name.
-        require {$field ni $meta(selectors-$compile(ftype))} \
-            "field name duplicates a selector name: \"$field\""
-
         # FIRST, get the field type object
         set ft $meta(ft-$fieldtype)
 
@@ -593,19 +586,12 @@ snit::type ::marsutil::dynaform {
         set script [lindex $args end]
         set args [lrange $args 0 end-1]
 
-        # FIRST, if there's already a field with this name that's an
-        # error.
-        require {$field ni $meta(fields-$compile(ftype))} \
-            "selector field name is not unique in the form: \"$field\""
-
         # NEXT, parse the options
         set opts [GetOpts "selector" $args \
             {-tip -loadcmd -defvalue -context -invisible -listcmd}]
 
         # NEXT, save the item data
         set id [DefineField selector $field $opts]
-
-        ladd meta(selectors-$compile(ftype)) $field
 
         # NEXT, prepare to load the cases
         dict set meta(item-$id) dict    [dict create]
@@ -1026,24 +1012,30 @@ snit::type ::marsutil::dynaform {
         return ""
     }
 
-    # cases ftype field
+    # cases ftype field vdict
     #
     # ftype - A form type
-    # field - A selector field nam.e
+    # field - A selector field name
+    # vdict - A partial dictionary of field values.
     #
-    # Returns the selector cases for the named selector field.
-    # If field does not name a selector, returns "".
+    # Returns the selector cases for the named selector field in the
+    # context of the value dictionary, or if the selector cannot be
+    # reached, returns an empty list.
 
-    typemethod cases {ftype field} {
-        foreach id $meta(all-$ftype) {
-            if {[dict get $meta(item-$id) itype] eq "selector" &&
-                [dict get $meta(item-$id) field] eq $field
+    typemethod cases {ftype field vdict} {
+        require {[info exists meta(top-$ftype)]} \
+            "Undefined form type: \"$ftype\""
+
+        $type Traverse $ftype vdict {
+            # id, idict, and itype are available
+            if {$itype eq "selector" &&
+                [dict get $idict field] eq $field
             } {
-                return [dict keys [dict get $meta(item-$id) cases]]
+                return [dict keys [dict get $idict cases]]
             }
         }
 
-        return ""
+        return [list]
     }
 
 
@@ -1061,17 +1053,8 @@ snit::type ::marsutil::dynaform {
         require {[info exists meta(top-$ftype)]} \
             "Undefined form type: \"$ftype\""
 
-        # FIRST, get the list of candidate items.
-        set candidates $meta(top-$ftype)
-
-        while {[llength $candidates] > 0} {
-            # FIRST, get the data for this item
-            set id    [lshift candidates]
-            set idict $meta(item-$id)
-            set itype [dict get $idict itype]
-
-            # NEXT, insert the item's default value into the dict if 
-            # need be.
+        $type Traverse $ftype vdict {
+            # id, idict, and itype are available
             if {[dict exists $idict field]} {
                 set field [dict get $idict field]
 
@@ -1080,22 +1063,6 @@ snit::type ::marsutil::dynaform {
                 } {
                     dict set vdict $field [dict get $idict defvalue]
                 }
-            }
-
-            # NEXT, Insert child items into the list.
-            set case ""
-
-            if {$itype eq "selector"} {
-                set field [dict get $idict field]
-                set case [dict get $vdict $field]
-            } elseif {$itype eq "when"} {
-                set expr [dict get $idict expr]
-                set case [formexpr $vdict $expr] 
-            }
-
-            if {$case ne "" && [dict exists $idict cases $case]} {
-                set children [dict get $idict cases $case]
-                set candidates [concat $children $candidates]
             }
         }
         
@@ -1119,16 +1086,9 @@ snit::type ::marsutil::dynaform {
         # FIRST, prepare to accumulate the results.
         set result $vdict
 
-        # NEXT, get the list of candidate items.
-        set candidates $meta(top-$ftype)
+        $type Traverse $ftype vdict {
+            # id, idict, and itype are available
 
-        while {[llength $candidates] > 0} {
-            # FIRST, get the data for this item
-            set id    [lshift candidates]
-            set idict $meta(item-$id)
-            set itype [dict get $idict itype]
-
-            # NEXT, is the field defaulted? 
             if {[dict exists $idict field]} {
                 set field [dict get $idict field]
 
@@ -1145,7 +1105,65 @@ snit::type ::marsutil::dynaform {
                     set result [dict remove $result $field]
                 }
             }
+        }
+        
+        return $result
+    }
 
+    # Traverse ftype vdictVar script
+    #
+    # ftype    - A form type
+    # vdictVar - Name of a dictionary of field names and values
+    # script   - A script to execute for each selected item ID
+    #
+    # Traverses the selected items, starting with the toplevel items
+    # and working down, handling selector cases in the context of the
+    # vdict.  The script is called for each item.
+    #
+    # The script is executed in the caller's context, so that the caller's
+    # variables are visible.  In addition, the following variables are
+    # made available to the script:
+    #
+    #   id     - The current item's ID
+    #   idict  - The current item's definition dictionary
+    #   itype  - The current item's item type
+    #
+    # The vdict variable belongs to the caller, and thus is visible in
+    # the script; and changes to it by the script will be taken into account
+    # while traversing the tree.
+
+    typemethod Traverse {ftype vdictVar script} {
+        # FIRST, make the relevant variables visible in the caller
+        upvar 1 $vdictVar vdict
+        upvar 1 id id
+        upvar 1 idict idict
+        upvar 1 itype itype
+
+        # NEXT, get the list of candidate items.
+        set candidates $meta(top-$ftype)
+
+        while {[llength $candidates] > 0} {
+            # FIRST, get the data for this item
+            # FIRST, get the data for this item
+            set id    [lshift candidates]
+            set idict $meta(item-$id)
+            set itype [dict get $idict itype]
+
+            # NEXT, call the user's script, handling "continue".
+            set code [catch {uplevel 1 $script} result erropts]
+
+            # If they returned normally, we're OK.  If they "continue"'d,
+            # they've already skipped the code they wanted to skip,
+            # so again we're OK.  If they did anything else, including
+            # "break", we need to rethrow.
+
+            if {$code == 2} {
+                dict incr erropts -level
+                return {*}$erropts $result
+            } elseif {$code != 0 && $code != 4} {
+                return {*}$erropts $result
+            }
+            
             # NEXT, Insert child items into the list.
             set case ""
 
@@ -1162,10 +1180,7 @@ snit::type ::marsutil::dynaform {
                 set candidates [concat $children $candidates]
             }
         }
-        
-        return $result
     }
-
 
     # dump ftype
     #

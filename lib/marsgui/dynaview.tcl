@@ -876,7 +876,11 @@ snit::widget ::marsgui::dynaview {
                 # so again we're OK.  If they did anything else, including
                 # "break", we need to rethrow.
 
-                if {$code != 0 && $code != 4} {
+                if {$code == 2} {
+                    # Make an explicit return return through the caller.
+                    dict incr erropts -level
+                    return {*}$erropts $result
+                } elseif {$code != 0 && $code != 4} {
                     return {*}$erropts $result
                 }
             }
@@ -917,7 +921,7 @@ snit::widget ::marsgui::dynaview {
         foreach id [dynaform allitems $ftype] {
             set idict [dynaform item $id]
 
-            if {![dict get $idict widget] ||
+            if {[dict get $idict itype] ne "field" ||
                 [dict get $idict context]
             } {
                 continue

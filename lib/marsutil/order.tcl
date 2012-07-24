@@ -1173,7 +1173,7 @@ snit::type ::marsutil::order {
                         error "Not a dynaform selector: \"$parm\""
                     }
 
-                    set cases [dynaform cases $frm $parm]
+                    set cases [dynaform cases $frm $parm [array get parms]]
 
                     validate $parm {
                         if {$parms($parm) ni $cases} {
