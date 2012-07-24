@@ -165,10 +165,10 @@ snit::type ::marsutil::dynaform {
     #   span       - Number of table columns a column should span.
     
     typevariable meta -array {
-        types     {}
-        ftypes    {}
-        aliases   {}
-        idcounter 0
+        types      {}
+        fieldtypes {}
+        aliases    {}
+        idcounter  0
     }
 
     # itypeAttrs array: List of type-specific item attributes
@@ -204,6 +204,31 @@ snit::type ::marsutil::dynaform {
 
     #-------------------------------------------------------------------
     # Type Methods
+
+    # reset
+    #
+    # Clears all form type data and field type aliases.  (Normal field
+    # types are not affected.)  This command is intended for use in
+    # the dynaform(n) test suite.
+
+    typemethod reset {} {
+        # FIRST, save the field type data.
+        set save(fieldtypes) $meta(fieldtypes)
+
+        array set save [array get meta ft-*]
+
+        # NEXT, clear the meta array.
+        array unset meta
+
+        array set meta {
+            types      {}
+            aliases    {}
+            idcounter  0
+        }
+
+        # NEXT, restore the field types
+        array set meta [array get save] 
+    }
     
     # define ftype fscript
     #
@@ -1144,7 +1169,6 @@ snit::type ::marsutil::dynaform {
 
         while {[llength $candidates] > 0} {
             # FIRST, get the data for this item
-            # FIRST, get the data for this item
             set id    [lshift candidates]
             set idict $meta(item-$id)
             set itype [dict get $idict itype]
@@ -1169,10 +1193,15 @@ snit::type ::marsutil::dynaform {
 
             if {$itype eq "selector"} {
                 set field [dict get $idict field]
-                set case [dict get $vdict $field]
+                if {[dict exists $vdict $field]} {
+                    set case [dict get $vdict $field]
+                }
             } elseif {$itype eq "when"} {
                 set expr [dict get $idict expr]
-                set case [formexpr $vdict $expr] 
+                # Don't assume that the vdict is fully populated.
+                catch {
+                    set case [formexpr $vdict $expr] 
+                }
             }
 
             if {$case ne "" && [dict exists $idict cases $case]} {
