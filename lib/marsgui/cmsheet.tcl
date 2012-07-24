@@ -33,28 +33,15 @@ namespace eval ::marsgui:: {
 
 snit::widget ::marsgui::cmsheet {
     #-------------------------------------------------------------------
-    # Group: Components
+    # Componenents
 
-    # Component: cm
-    #
-    # The cellmodel(n) holding the model that backs the GUI.
-
-    component cm
-
-    # Component: tab
-    #
-    # The tktable displaying the cellmodel.
-
-    component tab
-
-    # Component: entry
-    #
-    # The ttk::entry used for editing cells in the Tktable.
-    component entry
+    component cm    ;# The cellmodel(n) holding the model that backs the GUI.
+    component tab   ;# The tktable displaying the cellmodel.
+    component entry ;# The ttk entry used for editing cells in the Tktable.
 
     #-------------------------------------------------------------------
-    # Group: Options
-    #
+    # Options
+
     # By default, options are delegated to the hull frame
 
     delegate option * to hull
@@ -66,86 +53,60 @@ snit::widget ::marsgui::cmsheet {
 
     delegate option -entryfont to entry as -font
 
-    # Option: -cols
-    #
     # The number of columns in the sheet.
 
     delegate option -cols to tab
 
-    # Option: -colorigin
-    #
     # Base index for columns.
 
     delegate option -colorigin to tab
 
-    # Option: -font
-    #
     # Base font
 
     delegate option -font to tab
 
-    # Option: -rows
-    #
     # The number of rows in the sheet.
 
     delegate option -rows to tab
 
-    # Option: -roworigin
-    #
     # Base index for rows.
 
     delegate option -roworigin to tab
 
-    # Option: -titlecols
-    #
     # Number of non-scrolling title columns.
 
     delegate option -titlecols to tab
 
-    # Option: -titlerows
-    #
     # Number of non-scrolling title rows.
 
     delegate option -titlerows to tab
 
-    # Option: -xscrollcommand
-    #
     # X scroll command.
 
     delegate option -xscrollcommand to tab
 
-    # Option: -yscrollcommand
-    #
     # Y scroll command.
 
     delegate option -yscrollcommand to tab
 
-    # Option: -cellmodel
-    #
     # Creation-time only.  Sets the cellmodel to map to this
     # cmsheet.
 
     option -cellmodel \
         -readonly yes
 
-    # Option: -solvecmd
-    #
     # Command to call to recompute the cellmodel.  By default,
     # solves the entire cellmodel.
 
     option -solvecmd \
         -default ""
 
-    # Option: -refreshcmd
-    #
     # Command to call after the data is refreshed, e.g., to
     # color cells or change text.
 
     option -refreshcmd \
         -default ""
 
-    # Option: -validatecmd 
-    #
     # Command to call to validate an edited cell value.  The command
     # should be a prefix to which will be added the r,c index of the
     # edited cell and the value to validate.  The command should
@@ -159,8 +120,6 @@ snit::widget ::marsgui::cmsheet {
     option -validatecmd \
         -default ""
 
-    # Option: -formatcmd
-    #
     # Specifies the default command for formatting cell values.
     # The command should take one command, the value to format, and
     # return the formatted value.  This command can be overridden
@@ -169,64 +128,71 @@ snit::widget ::marsgui::cmsheet {
     option -formatcmd \
         -default ""
 
-    # Option: -state
-    #
+    # Command to call when a cell value is actually changed. It appends
+    # the window, old value, new value and cell index to the command.
+
+    option -changecmd \
+        -default ""
+
     # The widget may be editable (normal) or readonly (disabled)
+
     option -state \
         -default normal \
         -type {snit::enum -values {normal disabled}}
 
-
     #-------------------------------------------------------------------
-    # Group: Instance Variables
+    # Instance Variables
 
-    # Variable: info
+    # info
     #
     # Array of scalars
     #
     #   mapped          - List of mapped cellmodel variables
     #   cellBeingEdited - r,c of the cell being edited.
+    #   cellValue       - The original value of the cell after 
+    #                     double click, but prior to any changes
     #   editValue       - value in the entry widget while the
     #                     cell is being edited.
     
     variable info -array {
         mapped          {}
         cellBeingEdited {}
+        cellValue       {}
         editValue       {}
     }
 
-    # Variable: cell2rc
+    # cell2rc
     #
     # Mapping from cell names to table indices
 
     variable cell2rc -array {}
 
-    # Variable: rc2cell
+    # rc2cell
     #
     # Mapping from r,c indices to cell names.
     
     variable rc2cell -array {}
 
-    # Variable: maptags
+    # maptags
     #
     # Array of map tags by cell name.
 
     variable maptags -array {}
 
-    # Variable: formatcmd
+    # formatcmd
     #
     # Array of -formatcmd values, by cell name
     
     variable formatcmd -array {}
 
-    # Variable: data
+    # data
     #
     # Array storing the data for the Tktable.
 
     variable data -array {}
 
     #-------------------------------------------------------------------
-    # Group: Constructor
+    # Constructor
 
     # Constructor: constructor
     #
@@ -256,9 +222,11 @@ snit::widget ::marsgui::cmsheet {
             -sparsearray        0                             \
             -variable           [myvar data]
 
-        install entry using ttk::entry $win.tab.entry \
-            -justify      right                       \
-            -textvariable [myvar info(editValue)]
+        install entry using ttk::entry $win.tab.entry    \
+            -justify         right                       \
+            -textvariable    [myvar info(editValue)]     \
+            -validate        all                         \
+            -validatecommand [mymethod EntryState %V %P] 
 
         # NEXT, configure the creation options
         $self configurelist $args
@@ -279,8 +247,8 @@ snit::widget ::marsgui::cmsheet {
 
         # NEXT, event bindings
         bind $tab    <Key-Tab>     [mymethod TabToNext]
-        bind $tab    <Key-Return>  [mymethod BeginEditing]
-        bind $tab    <Button-1>    [mymethod BeginEditing @%x,%y]
+        bind $tab    <Button-1>    [mymethod BrowseToEntry @%x,%y]
+        bind $tab    <Double-1>    [mymethod ActivateEntry @%x,%y]
         bind $entry  <Key-Escape>  [mymethod DoneEditing 0]
         bind $entry  <Key-Return>  [mymethod DoneEditing 1]
         bind $entry  <Key-Tab>     [mymethod DoneEditing 1 <Key-Tab>]
@@ -288,10 +256,7 @@ snit::widget ::marsgui::cmsheet {
         bind $entry  <Key-Down>    [mymethod DoneEditing 1 <Key-Down>]
     }
 
-    #-------------------------------------------------------------------
-    # Group: Event Handlers
-
-    # Method: TabToNext
+    # TabToNext
     #
     # Tabs to the next editable cell
 
@@ -344,29 +309,80 @@ snit::widget ::marsgui::cmsheet {
         return
     }
 
-    # Method: BeginEditing 
+    # BrowseToEntry index
     #
-    # This is called when a user wishes to edit a cell.  It pops up
-    # the cell entry with the cell's content.
+    # index  - the index of the cell that has been single clicked
     #
-    # Syntax:
-    #   BeginEditing _?index?_
+    # If the user has single clicked in a cell then allow navigation to
+    # it if the circumstances are right. The following circumstances will
+    # make it so that navigation does not work:
     #
-    #   index - If given, the index of the cell to edit.  Otherwise,
-    #           the currently selected cell is edited.
+    #     * The cmsheet is disabled
+    #     * The entry is disabled
+    #     * The entry is being edited
 
-    method BeginEditing {{index ""}} {
+    method BrowseToEntry {index} {
+        # FIRST, no navigation if the entire sheet is disabled
+        if {$options(-state) eq "disabled"} {
+            return
+        }
+
+        # NEXT, no navigation if the cell is actively being edited
+        if {$info(cellBeingEdited) ne ""} {
+            return
+        }
+
+        # NEXT, get the index of where the user clicked. If that cell
+        # is disabled, disallow navigation
+        set rc [$tab index $index]
+
+        if {![info exists maptags($rc)] ||
+            [$tab tag cget $maptags($rc) -state] eq "disabled"
+        } {
+            return
+        }
+
+        # NEXT, the navigation is allowed, have the place manager forget
+        # about any active entry and navigate to the new cell
+        if {[place info $entry] ne ""} {
+            place forget $entry
+        }
+
+        $tab selection clear all
+        $tab selection set $rc
+        $tab activate $rc
+    }
+
+    # ActivateEntry ?index?
+    #
+    #   index - If given, the index of the cell to activate.  Otherwise,
+    #           the currently selected cell is activated.
+    #
+    # This is called when a user activates a cell by double click.  
+    # It pops up the cell entry with the cell's content. The cell may or
+    # may not at that point be edited, if editing of the cell
+    # begins the EntryState method callback is called
+    #
+
+    method ActivateEntry {{index ""}} {
         # FIRST, if the widget or the cell is disabled, return.
         if {$options(-state) eq "disabled"} {
             return
         }
         
+        # NEXT, if there is already a cell being actively edited, return.
+        if {$info(cellBeingEdited) ne ""} {
+            return
+        }
+
+        # NEXT, get the cell index
         if {$index ne ""} {
             set rc [$tab index $index]
         } else {
             set rc [$tab curselection]
         }
 
+        # NEXT, if that cell is disabled, return.
         if {![info exists maptags($rc)] ||
             [$tab tag cget $maptags($rc) -state] eq "disabled"
         } {
@@ -376,45 +392,91 @@ snit::widget ::marsgui::cmsheet {
         $tab selection clear all
         $tab selection set $rc
         $tab activate $rc
+        set info(cellBeingEdited) $rc
 
         # NEXT, begin editing.
         set bbox [$tab bbox $rc]
 
         set info(editValue) $data($rc)
-        set info(cellBeingEdited) $rc
 
+        # NEXT, pop the entry up, it appears offset by 2 pixels to the
+        # right and down.
         place $entry \
             -bordermode outside          \
-            -x          [lindex $bbox 0] \
-            -y          [lindex $bbox 1] \
+            -x          [expr {[lindex $bbox 0] + 2}] \
+            -y          [expr {[lindex $bbox 1] + 2}] \
             -width      [lindex $bbox 2] \
             -height     [lindex $bbox 3]
 
         $entry icursor end
         $entry selection range 0 end
 
-        # Focus on the entry, wait for the focus take effect, and then
-        # grab on the entry so that they have to ESC or RETURN before
-        # doing anything else.
+        # Focus on the entry
         focus $entry
-        update idletasks
-        grab set $entry
 
         return -code break
     }
 
-    # Method: DoneEditing
+    # EntryState evt curr
     #
+    # evt   - The type of user event that caused the callback
+    # curr  - The current value of the entry
+    #
+    # Handles the state of the entry widget that pops up when the
+    # user double clicks a cell.
+
+    method EntryState {evt curr} {
+        # FIRST, react to the type of user action.
+        switch -exact -- $evt {
+            "focusin" {
+                # The user double clicked on a cell, set the cell value
+                # to the current value, it may or may not change
+                set info(cellValue) $curr
+            }
+           
+            "key" {
+                # The user is typing, if the value is unchanged
+                # release the entry otherwise grab it. Grabbing more
+                # than once doesn't hurt
+                if {$info(cellValue) eq $curr} {
+                    grab release $entry
+                } else {
+                    grab set $entry
+                }
+            }
+
+            "focusout" {
+                # The user clicked outside the entry, if it's value has
+                # not changed then it is allowed, otherwise do nothing
+                # and the entry still has focus
+                if {$info(cellValue) eq $curr} {
+                    grab release $entry
+                    place forget $entry
+
+                    focus $tab
+                    set info(cellBeingEdited) {}
+                    set info(cellValue) {}
+                }
+            }
+
+            default {
+            }
+        }
+
+        # NEXT, always return true, validation is handled when the user
+        # presses <ESC> or <ENTER>
+        return 1
+    }
+
+    # DoneEditing
+    #
+    #   keeper    - 1 if the new value should be saved, and 0 otherwise.
+    #   nextEvent - Event to pass along to Tktable
     #
     # Handles the end of the editing transaction.  The value is validated
     # and saved (or not), and the entry is hidden.  The event that ended
     # the transaction can be passed back to the Tktable.
     #
-    # Syntax:
-    #   DoneEditing _keeper ?nextEvent?_
-    #
-    #   keeper    - 1 if the new value should be saved, and 0 otherwise.
-    #   nextEvent - Event to pass along to Tktable
 
     method DoneEditing {keeper {nextEvent ""}} {
         if {$keeper} {
@@ -455,6 +517,11 @@ snit::widget ::marsgui::cmsheet {
             # Display it
             set data($info(cellBeingEdited)) [$self Format $cellname]
 
+            # If there is a change command specified, call it
+            if {$options(-changecmd) ne ""} {
+                {*}$options(-changecmd) $cellname $info(editValue)
+            }
+
             # Recompute
             $self Recompute
         }
@@ -471,11 +538,13 @@ snit::widget ::marsgui::cmsheet {
             after idle [list catch [list event generate $tab <Key-Return>]]
         }
 
+        set info(cellBeingEdited) {}
+
         return -code break
     }
 
 
-    # Method: Recompute
+    # Recompute
     #
     # Recomputes the cell model, and refreshes the displayed data.
     # If the user has specified a -solvecmd, that's used instead of 
@@ -494,18 +563,16 @@ snit::widget ::marsgui::cmsheet {
     #-------------------------------------------------------------------
     # Mapping Routines
 
-    # Method: textcell
-    #
-    # Puts boilerplate text into the specified cell with the specified
-    # tag and tag options.
-    #
-    # Syntax:
-    #   textcell _rc text ?tag ?options...??_
+    # textcell
     #
     #   rc      -  A row,column index
     #   text    -  Text to put there.
     #   tag     -  Tag name
     #   options -  Tag options.
+    #
+    # Puts boilerplate text into the specified cell with the specified
+    # tag and tag options.
+    #
     
     method textcell {rc text {tag ""} args} {
         # FIRST, it's an error if the cell is mapped.
@@ -526,19 +593,17 @@ snit::widget ::marsgui::cmsheet {
         }
     }
 
-    # Method: textrow
-    #
-    # Puts boilerplate text into the specified cells with the specified
-    # tag and tag options.  Each string from the _textlist_ goes into
-    # consecutive cells along the row from rc.
-    #
-    # Syntax:
-    #   textrow _rc textlist ?tag ?options...??_
+    # textrow
     #
     #   rc       -  A row,column index
     #   textlist -  List of text strings
     #   tag      -  Tag name
     #   options  -  Tag options.
+    #
+    # Puts boilerplate text into the specified cells with the specified
+    # tag and tag options.  Each string from the textlist goes into
+    # consecutive cells along the row from rc.
+    #
     
     method textrow {rc textlist {tag ""} args} {
         lassign [split $rc ,] r c
@@ -550,19 +615,17 @@ snit::widget ::marsgui::cmsheet {
         }
     }
 
-    # Method: textrow
-    #
-    # Puts boilerplate text into the specified cells with the specified
-    # tag and tag options.  Each string from the _textlist_ goes into
-    # consecutive cells along the column from rc.
-    #
-    # Syntax:
-    #   textcol _rc textlist ?tag ?options...??_
+    # textcol
     #
     #   rc       -  A row,column index
     #   textlist -  List of text strings
     #   tag      -  Tag name
     #   options  -  Tag options.
+    #
+    # Puts boilerplate text into the specified cells with the specified
+    # tag and tag options.  Each string from the textlist goes into
+    # consecutive cells along the column from rc.
+    #
     
     method textcol {rc textlist {tag ""} args} {
         lassign [split $rc ,] r c
@@ -574,7 +637,7 @@ snit::widget ::marsgui::cmsheet {
         }
     }
 
-    # Method: mapcell
+    # mapcell
     #
     # Maps a cellmodel cell to a Tktable cell, and assigns the tag.
     # If options are given, the tag is configured.  If the tag is "%cell",
@@ -638,7 +701,15 @@ snit::widget ::marsgui::cmsheet {
         set data($rc) [$self Format $cellname]
     }
 
-    # Method: map
+    # map
+    #
+    #   rc       - A row,column index
+    #   indx     - cellmodel index name for row indices
+    #   jndx     - cellmodel index name for column indices
+    #   pattern  - A pattern producing the set of cell names, with
+    #              "%" substitutions for the indices.
+    #   tag      - Tag name or "%cell"
+    #   options  - Tag options
     #
     # Maps a set of cellmodel cells to a rectangle of Tktable cells, and 
     # assigns the tag. If options are given, the tag is configured.  
@@ -648,16 +719,6 @@ snit::widget ::marsgui::cmsheet {
     # individual index values are substituted into the pattern to get
     # the cell names.  
     #
-    # Syntax:
-    #   map _rc indx jndx pattern tag ?options...?_
-    #
-    #   rc       - A row,column index
-    #   indx     - cellmodel index name for row indices
-    #   jndx     - cellmodel index name for column indices
-    #   pattern  - A pattern producing the set of cell names, with
-    #              "%" substitutions for the indices.
-    #   tag      - Tag name or "%cell"
-    #   options  - Tag options
     #
     # Example:
     #   If the index names are "i" and "j", then the following call
@@ -687,25 +748,22 @@ snit::widget ::marsgui::cmsheet {
         }
     }
 
-    # Method: maprow
+    # maprow
+    #
+    #   rc       - A row,column index
+    #   jndx     - cellmodel index name for column indices
+    #   pattern  - A pattern producing the set of cell names, with
+    #              "%" substitutions for the jndx.
+    #   tag      - Tag name or "%cell"
+    #   options  - Tag options
     #
     # Maps a set of cellmodel cells onto a row of Tktable cells, and 
     # assigns the tag. If options are given, the tag is configured.  
     # If the tag is "%cell", the cells are tagged with their own names.
     #
-    # The _jndx_ names an index in the cell model; the 
+    # The jndx names an index in the cell model; the 
     # individual index values are substituted into the pattern to get
     # the cell names.  
-    #
-    # Syntax:
-    #   maprow _rc jndx pattern tag ?options...?_
-    #
-    #   rc       - A row,column index
-    #   jndx     - cellmodel index name for column indices
-    #   pattern  - A pattern producing the set of cell names, with
-    #              "%" substitutions for the _jndx_.
-    #   tag      - Tag name or "%cell"
-    #   options  - Tag options
     #
     # Example:
     #   If the index name is "j", then the following call
@@ -728,18 +786,7 @@ snit::widget ::marsgui::cmsheet {
         }
     }
 
-    # Method: mapcol
-    #
-    # Maps a set of cellmodel cells onto a column of Tktable cells, and 
-    # assigns the tag. If options are given, the tag is configured.  
-    # If the tag is "%cell", the cells are tagged with their own names.
-    #
-    # The _indx_ names an index in the cell model; the 
-    # individual index values are substituted into the pattern to get
-    # the cell names.  
-    #
-    # Syntax:
-    #   mapcol _rc indx pattern tag ?options...?_
+    # mapcol
     #
     #   rc       - A row,column index
     #   indx     - cellmodel index name for row indices
@@ -748,10 +795,18 @@ snit::widget ::marsgui::cmsheet {
     #   tag      - Tag name or "%cell"
     #   options  - Tag options
     #
+    # Maps a set of cellmodel cells onto a column of Tktable cells, and 
+    # assigns the tag. If options are given, the tag is configured.  
+    # If the tag is "%cell", the cells are tagged with their own names.
+    #
+    # The indx names an index in the cell model; the 
+    # individual index values are substituted into the pattern to get
+    # the cell names.  
+    #
     # Example:
     #   If the index name is "i", then the following call
     #   will map CELL.i for each of the i's.  The i's will vary 
-    #   down the column _rc_.
+    #   down the column rc.
     #
     #   > map 0,0 i CELL..%i mytag ...
 
@@ -769,7 +824,7 @@ snit::widget ::marsgui::cmsheet {
         }
     }
 
-    # Method: empty
+    # empty
     #
     # Declares that the named range of cells is "empty" and unused.
     #
@@ -791,9 +846,9 @@ snit::widget ::marsgui::cmsheet {
     }
 
     #-------------------------------------------------------------------
-    # Group: Other Public Methods
+    # Other Public Methods
     #
-    # The *see*, *tag*, *width*, *window*, *xview*, and *yview* 
+    # The see, tag, width, window, xview, and yview 
     # methods are delegated to the underlying Tktable.
 
     delegate method tag    to tab
@@ -802,15 +857,12 @@ snit::widget ::marsgui::cmsheet {
     delegate method xview  to tab
     delegate method yview  to tab
 
-    # Method: index
+    # index
+    #
+    # index - A Tktable index, or a cell name.
     #
     # Returns the r,c index corresponding to the index specification,
     # which can be any Tktable index, or a mapped cell name.
-    #
-    # Syntax:
-    #   index _index_
-    #
-    #   index - A Tktable index, or a cell name.
     
     method index {index} {
         if {[info exists cell2rc($index)]} {
@@ -820,28 +872,22 @@ snit::widget ::marsgui::cmsheet {
         }
     }
 
-    # Method: see
-    #
-    # Scrolls the table so that the named cell or index is visible.
-    #
-    # Syntax:
-    #   see _index_
+    # see
     #
     #   index - A Tktable index, or a cell name.
+    #
+    # Scrolls the table so that the named cell or index is visible.
    
     method see {index} {
         $tab see [$self index $index]
     }
 
-    # Method: cell
+    # cell
+    #
+    #   index - A valid Tktable index string.
     #
     # Given a valid Tktable index, returns the corresponding cellmodel(n)
     # cell name, or "" if none.
-    #
-    # Syntax:
-    #   cell _index_
-    #
-    #   index - A valid Tktable index string.
 
     method cell {index} {
         set rc [$tab index $index]
@@ -853,7 +899,7 @@ snit::widget ::marsgui::cmsheet {
         }
     }
 
-    # Method: refresh
+    # refresh
     #
     # Updates the table with the current cell values, calling
     # the -refreshcmd so the client can additional details or colors.
@@ -874,7 +920,7 @@ snit::widget ::marsgui::cmsheet {
     #-------------------------------------------------------------------
     # Utility Methods
 
-    # Method: Format
+    # Format
     #
     # Given a cell name, returns the formatted value of the cell.
     #
@@ -891,3 +937,5 @@ snit::widget ::marsgui::cmsheet {
         }
     }
 }
+
+

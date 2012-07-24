@@ -48,6 +48,13 @@ The name of an instance of <<xref cellmodel(n)>>.  Note that multiple
 cmsheet(n) widgets can be mapped to a single instance of
 <<xref cellmodel(n)>>.<p>
 
+<<defopt {-changecmd <i>cmd</i>}>>
+
+Specifies a command to be called whenever a cell is successfully edited.
+The <i>cmd</i> must be a command prefix taking two additional arguments,
+the name of the cell in the <<xref cellmodel(n)>> and the new value of 
+the cell.<p>
+
 <<defopt {-colorigin <i>num</i>}>>
 
 The numeric index of the first column in the sheet.  The option
@@ -69,7 +76,7 @@ cells.<p>
 <<defopt {-formatcmd <i>cmd</i>}>>
 
 Specifies a command to format cell model values for display.  The
-<i>cmd</i> must be a command prefix taken one additional argument, the
+<i>cmd</i> must be a command prefix taking one additional argument, the
 value to format, and returning the formatted output.<p>
 
 This command can be overridden for particular cells using
