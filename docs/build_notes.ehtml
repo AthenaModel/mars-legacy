@@ -10,9 +10,32 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.3, 25 July 2012</h3>
+
+This build integrates the dynaform(n)/dynaview(n) data entry form
+infrastructure into Mars and specifically into
+order(n)/orderdialog(n).  In addition, order(n)/orderdialog(n) are no
+longer integrated with the eventq(n) mechanism; orders can no longer
+be scheduled in advance.  (We've learned that that's the wrong
+abstraction; orders are about user input right now.  Scheduling
+applies to other entities.)<p>
+
+In addition, there are significant updates to the cmsheet(n) module,
+allowing much improved user input via a cmsheet(n).<p>
+
+The complete set of changes is as follows:<p>
+
+<ul>
+    <li> Bug 3591: dynaform(n)/dynaview(n)
+    <li> Bug 3594: dynaform(n)/order(n): Improved validation of selector cases
+    <li> Bug 3595: cmsheet(n): change behavior and add -changecmd option
+    <li> Bug 3598: dynaform(n) test suite
+</ul><p>
+
+
 <h3>Build 2.2, 2 July 2012</h3>
 
-This build is in support of the Athena 4.0.9 Engineering Release to
+This build is in support of the Athena 4.0.8 Engineering Release to
 TRISA. It contains the following minor change:<p>
 
 <ul>
