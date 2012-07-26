@@ -1419,6 +1419,82 @@ No -usedtable specified.}
         cleanup
     } -result {a VALUE _order MY:ORDER}
 
+    test prepare-12.1 {invalid: prepare -oneof short} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -oneof {A B C}
+            returnOnError -final
+        }
+    } -body {
+        codecatch order send app MY:ORDER a NONESUCH
+    } -cleanup {
+        cleanup
+    } -result {REJECT a {invalid value "NONESUCH", should be one of: A, B, C}}
+
+    test prepare-12.2 {invalid: prepare -oneof long} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -oneof {
+                A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+            }
+            returnOnError -final
+        }
+    } -body {
+        codecatch order send app MY:ORDER a NONESUCH
+    } -cleanup {
+        cleanup
+    } -result {REJECT a {invalid value: "NONESUCH"}}
+
+    test prepare-12.3 {valid} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -oneof {A B C}
+            returnOnError -final
+        }
+    } -body {
+        order send app MY:ORDER a B
+    } -cleanup {
+        cleanup
+    } -result {}
+
+    test prepare-13.1 {invalid: prepare -someof short} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -someof {A B C}
+            returnOnError -final
+        }
+    } -body {
+        codecatch order send app MY:ORDER a {A NONESUCH C}
+    } -cleanup {
+        cleanup
+    } -result {REJECT a {invalid value "NONESUCH", should be one of: A, B, C}}
+
+    test prepare-13.2 {invalid: prepare -someof long} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -someof {
+                A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+            }
+            returnOnError -final
+        }
+    } -body {
+        codecatch order send app MY:ORDER a {A NONESUCH C}
+    } -cleanup {
+        cleanup
+    } -result {REJECT a {invalid value: "NONESUCH"}}
+
+    test prepare-13.3 {valid} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -someof {A B C}
+            returnOnError -final
+        }
+    } -body {
+        order send app MY:ORDER a {A B}
+    } -cleanup {
+        cleanup
+    } -result {}
+
     #-------------------------------------------------------------------
     # reject
 

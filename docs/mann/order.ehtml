@@ -719,6 +719,18 @@ a list of which every element must be a member of the specified
 validation type.  If any element fails, the parameter is
 <<iref reject>>ed.<p>
 
+<<defopt {-oneof <i>list</i>}>>
+
+Ensures that the parameter's value is a member of the <i>list</i>.  If
+the list is short enough, the valid values will be included in any
+error message.<p>
+
+<<defopt {-someof <i>list</i>}>>
+
+Ensures that the parameter's value consists of a list of values, each 
+of which is a member of <i>list</i>.  If <i>list</i> is short enough,
+the valid values will be included in any error message.<p>
+
 <<defopt {-xform <i>cmd</i>}>>
 
 If the parameter's value is <<iref valid>>, the value is transformed

@@ -1166,6 +1166,38 @@ snit::type ::marsutil::order {
                         set parms($parm) $newvalue
                     }
                 }
+                -oneof {
+                    set list [lshift args]
+
+                    validate $parm {
+                        if {$parms($parm) ni $list} {
+                            if {[llength $list] > 15} {
+                                reject $parm \
+                                    "invalid value: \"$parms($parm)\""
+                            } else {
+                                reject $parm \
+                                    "invalid value \"$parms($parm)\", should be one of: [join $list {, }]"
+                            }
+                        }
+                    }
+                }
+                -someof {
+                    set list [lshift args]
+
+                    validate $parm {
+                        foreach val $parms($parm) {
+                            if {$val ni $list} {
+                                if {[llength $list] > 15} {
+                                    reject $parm \
+                                        "invalid value: \"$val\""
+                                } else {
+                                    reject $parm \
+                                        "invalid value \"$val\", should be one of: [join $list {, }]"
+                                }
+                            }
+                        }
+                    }
+                }
                 -selector {
                     set frm [order options $parms(_order) -dynaform]
 
