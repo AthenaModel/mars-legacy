@@ -10,6 +10,20 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.4, 2 August 2012</h3>
+
+This build contains two additions to marsutil(n)'s order(n) module's
+[prepare] command, the -oneof and -someof options.  These allow 
+[prepare] to validate that a particular parameter's value is within
+a set of values, or is a subset of a set of values, where the set of
+values is specified as a list rather than as the name of a validation
+type.<p>
+
+<ul>
+    <li> Bug 3607: order(n): prepare -oneof, -someof
+</ul><p>
+
+
 <h3>Build 2.3, 25 July 2012</h3>
 
 This build integrates the dynaform(n)/dynaview(n) data entry form
