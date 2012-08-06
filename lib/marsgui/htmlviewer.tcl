@@ -77,6 +77,7 @@ snit::widgetadaptor ::marsgui::htmlviewer {
         
         
         INPUT[type="submit"] {
+            border: 0px;
             padding: 0px;
         }
 
