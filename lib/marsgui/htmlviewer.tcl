@@ -330,11 +330,19 @@ snit::widgetadaptor ::marsgui::htmlviewer {
     # out a selection.  Returns the "node -index" corresponding to x,y.
 
     proc ExtendSelection {w x y} {
-        # Clear old selection
-        $w tag delete selection
-
-        # Set new selection
+        # Get new end point.  If it's outside the widget, ignore it.
         set endNI [$w node -index $x $y]
+
+        if {$endNI eq ""} {
+            # Mouse pointer is outside the widget.  In my experience,
+            # this means that it's before the beginning of the widget,
+            # but I can't depend on that.  So just ignore it; to select
+            # data in the widget, they need to be a little more precise.
+            return
+        }
+
+        # Clear old selection and add new selection.
+        $w tag delete selection
         $w tag add selection {*}$tinfo(sweep-$w) {*}$endNI
 
         # Make it look right
