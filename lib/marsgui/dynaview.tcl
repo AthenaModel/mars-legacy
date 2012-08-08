@@ -227,6 +227,7 @@ snit::widget ::marsgui::dynaview {
         set f [dict get $idict field]
         set info(w-$id) $w
         set info(f-$id) $f
+        lappend info(fwidgets) $w
     
         # NEXT, create the widget
         set opts [list]
