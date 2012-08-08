@@ -549,8 +549,9 @@ proc ::marsutil::commafmt {value} {
     }
 
     # NEXT, round to the nearest integer, remove the sign, and
-    # convert to a list for easy processing.
-    set old [lreverse [split [expr {abs(int(round($value)))}] ""]]
+    # convert to a list for easy processing. tcl::mathfunc::wide() 
+    # limits the value returned by round to be less than 2**63
+    set old [lreverse [split [expr {abs(wide(round($value)))}] ""]]
 
     # NEXT, build up the new string with commas.
     set new [list]
