@@ -43,9 +43,21 @@ in the global scope.  This is to be used when calling callback
 commands.  If <i>prefix</i> is the empty list, then <<iref callwith>>
 does and returns nothing.<p>
 
-<<defitem commafmt {commafmt <i>value</i>}>>
+<<defitem commafmt {commafmt <i>value ?options...?</i> }>>
 
-Formats numbers as integers with commas inserted every three digits.<p>
+Formats numbers as integers with commas inserted every three digits. This
+command has the following option:<p>
+
+<<deflist options>>
+
+<<defopt {-places <i>num</i>}>>
+
+Specifies the number of decimal places to be displayed. If there are fewer
+decimal places than in <i>num</i> then zeroes are padded to the end. If 
+there are more then rounding takes place. If not supplied, the default for 
+<i>num</i> is zero.<p>
+
+<</deflist>>
 
 <<defitem degrees {degrees <i>rad</i>}>>
 

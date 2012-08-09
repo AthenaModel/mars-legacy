@@ -540,18 +540,49 @@ proc ::marsutil::percent {frac} {
 #
 # Formats the integer part of the value with commas every three digits.
 
-proc ::marsutil::commafmt {value} {
-    # FIRST, save the sign.
+proc ::marsutil::commafmt {value args} {
+    # FIRST, default number of decimal places to 0
+    set places 0
+
+    # NEXT, see what args
+    while {[llength $args] > 0} {
+        set opt [lshift args]
+
+        switch -exact -- $opt {
+            -places {
+                set places [lshift args]
+                if {$places < 0} {
+                    error "Invalid value: \"$places\" should be > 0"
+                }
+
+                if {![string is integer -strict $places]} {
+                    error "Invalid value: \"$places\" should be an integer "
+                }
+            }
+
+            default {
+                error "Invalid option: \"$opt\""
+            }
+        }
+    }
+
+    # NEXT, save the sign.
     if {$value < 0} {
         set sign "-"
     } else {
         set sign ""
     }
 
+    # NEXT, get the number of decimal places
+    set fmtstr "%.$places"
+    append fmtstr "f"
+
+    lassign [split [format $fmtstr $value] .] whole dec
+
     # NEXT, round to the nearest integer, remove the sign, and
     # convert to a list for easy processing. tcl::mathfunc::wide() 
     # limits the value returned by round to be less than 2**63
-    set old [lreverse [split [expr {abs(wide(round($value)))}] ""]]
+    set old [lreverse [split [expr {abs($whole)}] ""]]
 
     # NEXT, build up the new string with commas.
     set new [list]
@@ -571,6 +602,11 @@ proc ::marsutil::commafmt {value} {
     }
 
     set num [join [lreverse $new] ""] 
+
+    if {$places > 0} {
+        append num ".$dec"
+    }
+
     return "$sign$num"
 }
 
@@ -607,8 +643,7 @@ proc ::marsutil::moneyfmt {value} {
 
     # NEXT, get pennies
     if {$value < 10000} {
-        lassign [split [format %.2f $value] .] dollars pennies
-        return "$sign[commafmt $dollars].$pennies"
+        return $sign[commafmt $value -places 2]
     }
 
     if {$value < 1e6} {
