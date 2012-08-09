@@ -53,6 +53,8 @@ snit::widget ::marsgui::cmsheet {
 
     delegate option -entryfont to entry as -font
 
+    delegate option -browsecommand to tab
+
     # The number of columns in the sheet.
 
     delegate option -cols to tab

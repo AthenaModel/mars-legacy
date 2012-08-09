@@ -41,6 +41,11 @@ a constant, and the application can map one or the other as desired.<p>
 The widget has the following options.<p>
 
 <<deflist options>>
+<<defopt {-browsecommand <i>cmd</i>}>>
+
+Specifies a command to be called when the user browses to a different 
+cell in the cmsheet(n).  See the TkTable documentation for more details, 
+this option is delegated to it.<p>
 
 <<defopt {-cellmodel <i>cmd</i>}>>
 
