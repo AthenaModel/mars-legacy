@@ -10,6 +10,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.5, 13 August 2012</h3>
+
+This build contains bug fixes and some improvements to marsgui(n)'s
+ability to display  monetary spreadsheet data.<p>
+
+<ul>
+    <li> Bug 3616: htmlviewer(n): "submit" elements have visible border
+    <li> Bug 3620: dynabox(n): Dynaform-based modal dialog
+    <li> Bug 3621: marsmisc(n): commafmt command should use wide() not int()
+    <li> Bug 3623: marsmisc(n): add option to commafmt command to specify decimal places
+    <li> Bug 3624: cmsheet(n): add -browsecommand option
+</ul><p>
+
 <h3>Build 2.4, 2 August 2012</h3>
 
 This build contains two additions to marsutil(n)'s order(n) module's
