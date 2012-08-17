@@ -54,6 +54,12 @@ model to a solution.  The default value is 0.0001.  The epsilon can be
 thought of as defining the number of signficant digits in the output,
 one for each decimal place.<p>
 
+<<defopt {-failcmd <i>cmd</i>}>>
+
+Specifies a command to call when a cell model solution fails. The command
+is appended with two arguments, the type of failure - either <b>diverge</b>
+or <b>errors</b> and the page name in which the failure happened.<p>
+
 <<defopt {-maxiters <i>maxiters</i>}>>
 
 Specifies the maximum number of iterations when iterating the model to
@@ -195,6 +201,12 @@ Called with no arguments, this method returns a list of the names of
 the indices defined in the current model using the
 <<xref cellmodel(5) index>> command.  If <i>name</i> is given, returns
 the list of values associated with the named index.<p>
+
+<<defitem initial {<i>object</i> initial}>>
+
+Returns a dictionary of fully qualified cell names and values just prior to
+the start of the most recent attempt to solve. This is useful for debugging
+when a cell model fails to solve.<p>
 
 <<defitem iterate {<i>object</i> iterate <i>page</i>}>>
 

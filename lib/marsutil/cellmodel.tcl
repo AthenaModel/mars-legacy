@@ -303,6 +303,22 @@ snit::type ::marsutil::cellmodel {
     option -tracecmd
 
 
+    # Option: -failcmd
+    #
+    # A command that's called if the solution of the cell model fails
+    # for any reason.
+    #
+    # If solution of the cellmodel fails, this command is called and 
+    # appended with two arguments, the first argument appended is one of:
+    #
+    #    diverge    - the cell model did not converge
+    #    errors     - the cell model encountered some errors
+    #
+    # The second argument is the page that either diverged or had an 
+    # error.
+
+    option -failcmd
+
     #-------------------------------------------------------------------
     # Group: Uncheckpointed variables
 
@@ -334,6 +350,8 @@ snit::type ::marsutil::cellmodel {
     #                   which is also the order of computation.
     # cells           - List of fully-qualified cell names, in the order 
     #                   of definition.
+    # initial         - Dict of fully-qualified cell names, with their
+    #                   values prior to attempting a solution
     # barecells       - List of unqualified cell names, with no 
     #                   duplicates.
     # unknown         - List of unknown cells referenced in formulas.
@@ -379,7 +397,6 @@ snit::type ::marsutil::cellmodel {
     #   cell        - The name of the cell currently being analyzed.
     
     variable trans -array { }
-
 
     #-------------------------------------------------------------------
     # Group: Checkpointed Variables
@@ -1408,7 +1425,11 @@ snit::type ::marsutil::cellmodel {
     method solve {{from ""} {to ""}} {
         require {$model(sane)} "Model is not sane."
 
-        # FIRST, get the pages to solve.
+        # FIRST, set the initial values just prior to attempting
+        # the solution.
+        set model(initial) [$self get]
+
+        # NEXT, get the pages to solve.
         if {$from eq ""} {
             set pages $model(pages)
         } else {
@@ -1444,8 +1465,13 @@ snit::type ::marsutil::cellmodel {
 
                 callwith $options(-tracecmd) converge $page 1
 
-                # If there are errors, report them.
+                # If there are errors, call the -failcmd, if supplied and
+                # report them.
                 if {[llength $errors(all)] > 0} {
+                    if {$options(-failcmd) ne "" } {
+                        callwith $options(-failcmd) errors $page
+                    }
+
                     return [list errors $page]
                 }
 
@@ -1457,10 +1483,18 @@ snit::type ::marsutil::cellmodel {
             # solution.
             if {![$self PageConverges $page]} {
                 # If there are errors, report them; otherwise, report
-                # that the page diverges.
+                # that the page diverges. In either case, call the
+                # -failcmd, if it was supplied
+
                 if {[llength $errors(all)] > 0} {
+                    if {$options(-failcmd) ne ""} {
+                        callwith $options(-failcmd) errors $page
+                    }
                     return [list errors $page]
                 } else {
+                    if {$options(-failcmd) ne ""} {
+                        callwith $options(-failcmd) diverge $page
+                    }
                     return [list diverge $page]
                 }
             }
@@ -1530,6 +1564,15 @@ snit::type ::marsutil::cellmodel {
 
     method pages {} {
         return $model(pages)
+    }
+
+    # initial
+    #
+    # Returns a list of cell names and values as they were
+    # just prior to solving
+
+    method initial {} {
+        return $model(initial)
     }
 
     # cells ?page?
