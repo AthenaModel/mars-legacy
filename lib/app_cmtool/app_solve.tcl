@@ -215,7 +215,7 @@ snit::type app_solve {
         }
 
         if {$opts(-initfrom) ne ""} {
-            app section "Initializing CGE from $opts(-initfrom)"
+            app section "Initializing cellmodel from $opts(-initfrom)"
             set f [open $opts(-initfrom) r]
             array set data [read $f]
             $cm set [array get data]
