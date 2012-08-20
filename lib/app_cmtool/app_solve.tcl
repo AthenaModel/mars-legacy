@@ -32,6 +32,9 @@
 #  -maxiters num    - Max number of iterations; defaults to 100
 #  -dumpstart       - Output dump of starting cell values and 
 #                     formulas.
+#  -initfrom        - A file that contiains a dictionary of fully 
+#                     qualified cell names and values that the
+#                     cell model should be initialized from.
 #  -dumpfinal       - Output dump of final cell values and formulas.
 #  -diffpages a b   - Dumps a comparison of the final values of two 
 #                     pages a and b.
