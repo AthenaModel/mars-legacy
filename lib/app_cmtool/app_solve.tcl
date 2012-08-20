@@ -110,6 +110,7 @@ snit::type app_solve {
             -dumpiters   {}
             -tracevalues {}
             -tracedeltas {}
+            -initfrom    {}
         }
         set opts(-epsilon)  [$cm cget -epsilon]
         set opts(-maxiters) [$cm cget -maxiters]
@@ -182,6 +183,17 @@ snit::type app_solve {
 
                     lappend opts($opt) $page
                 }
+                
+                -initfrom {
+                    set filename [lshift argv]
+
+                    if {![file exists $filename]} {
+                        puts "-initfrom file, \"$filename\" does not exist."
+                        exit 1
+                    }
+
+                    lappend opts($opt) $filename
+                }
 
                 default {
                     puts "Invalid option: \"$opt\""
@@ -202,16 +214,22 @@ snit::type app_solve {
             set opts(-dumpfinal) 1
         }
 
+        if {$opts(-initfrom) ne ""} {
+            app section "Initializing CGE from $opts(-initfrom)"
+            set f [open $opts(-initfrom) r]
+            array set data [read $f]
+            $cm set [array get data]
+        }
+
         # NEXT, -dumpstart
         if {$opts(-dumpstart)} {
             app section "Initial Model"
             puts [$cm dump]
             puts ""
         }
-        
+
         # NEXT, solving
         app section "Solving, -epsilon $opts(-epsilon) -maxiters $opts(-maxiters)"
-
         $cm configure \
             -epsilon  $opts(-epsilon)  \
             -maxiters $opts(-maxiters) \

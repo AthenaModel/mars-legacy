@@ -165,6 +165,15 @@ and traced.<p>
 Specifies the <i>epsilon</i> to use in the convergence test.  Defaults
 to 0.0001.<p>
 
+<<defopt {-initfrom <i>filename</i>}>>
+
+Specifies a file that contains fully qualified cell names and values
+that the cellmodel reads for the purpose of setting
+initial values. This is useful when debugging initial conditions
+from some other source (such as Athena) that cause the cell model
+to not solve.<p> 
+
+
 <<defopt {-maxiters <i>num</i>}>>
 
 Specifies the maximum number of iterations when iterating a cyclic
