@@ -10,6 +10,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.6, 21 August 2012</h3>
+
+This build contains two changes to the cellmodel(5) tools in support
+of debugging Athena's 6x6 CGE.<p>
+
+<ul>
+    <li> Bug 3637: cellmodel(n): add a -failcmd option that calls back to users with some information about a failure
+    <li> Bug 3638: mars_cmtool(1): add -initfrom option to allow cell models to be initialized from outside data
+</ul><p>
+
 <h3>Build 2.5, 13 August 2012</h3>
 
 This build contains bug fixes and some improvements to marsgui(n)'s
