@@ -69,7 +69,7 @@ snit::type app {
     typemethod init {argv} {
         # FIRST, if there are no arguments, do help.
         if {[llength $argv] == 0} {
-            $type Cmd_help {}
+            $type help {}
             exit
         }
 
