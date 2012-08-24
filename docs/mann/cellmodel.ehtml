@@ -218,8 +218,15 @@ client to use the method directly.<p>
 <<defitem load {<i>object</i> load <i>model</i>}>>
 
 Loads a <i>model</i> into the object, replacing any previous model.
-The input is a <<xref cellmodel(5)>> model definition.  Returns 1 if
-the model appears to be "sane", and 0 if there are obvious errors.<p>
+The input is a <<xref cellmodel(5)>> model definition.<p>
+
+If the model cannot be loaded due to syntax errors, <<iref load>>
+throws an error with error code "<b>SYNTAX <i>line_number</i></b>",
+where <i>linenumber</i> is the line number of the input in the
+<i>model</i>.<p>
+
+Otherwise, <<iref load>> returns 1 if the model appears to be "sane", and 
+0 if there are obvious errors.<p>
 
 <<defitem pages {<i>object</i> pages}>>
 

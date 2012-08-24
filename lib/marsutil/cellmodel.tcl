@@ -97,6 +97,8 @@ snit::type ::marsutil::cellmodel {
 
     # Loader procs, used directly or indirectly in models.
     typevariable loaderProcs {
+        namespace eval ::cellmodel:: {}
+
         # fsubst formula
         #
         # formula   A formula or formula template
@@ -483,6 +485,7 @@ snit::type ::marsutil::cellmodel {
     method load {text} {
         # FIRST, create the load interpreter.
         set loader [interp create -safe]
+
         $loader alias index    $self Load_index    $loader
         $loader alias function $self Load_function $loader
         $loader alias page     $self Load_page     $loader
@@ -503,7 +506,16 @@ snit::type ::marsutil::cellmodel {
 
         # NEXT, load the model, and destroy the loader when done.
         try {
-            $loader eval $text
+            set code [$loader eval \
+                [list catch $text ::cellmodel::result ::cellmodel::eopts]]
+
+            set result [$loader eval {set ::cellmodel::result}]
+            set eopts  [$loader eval {set ::cellmodel::eopts}]
+
+            if {$code} {
+                set errorline [dict get $eopts -errorline]
+                throw [list SYNTAX $errorline] $result
+            }
         } finally {
             rename $loader ""
         }
