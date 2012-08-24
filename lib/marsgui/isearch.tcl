@@ -72,14 +72,14 @@ snit::type ::marsgui::isearch {
             break
         }
         
-        # On Control-s or Control-r, search for the same thing in the
+        # On Control-f or Control-r, search for the same thing in the
         # specified direction.
-        bind ::marsgui::ISearch <Control-s> {
+        bind ::marsgui::ISearch <Control-f> {
             ::marsgui::isearch::FindNext %W -forwards
             break
         }
         
-        bind ::marsgui::ISearch <Control-S> {
+        bind ::marsgui::ISearch <Control-F> {
             ::marsgui::isearch::FindNext %W -forwards
             break
         }
@@ -114,7 +114,7 @@ snit::type ::marsgui::isearch {
     #
     # For $w or all:
     #   _logger        Logging command for status info, or ""
-    #   _oldbindings   Old ^S and ^R bindings
+    #   _oldbindings   Old ^F and ^R bindings
     #
     # For $w only:
     #   _direction     -forwards | -backwards 
@@ -161,16 +161,16 @@ snit::type ::marsgui::isearch {
             }
 
             foreach event {
-                <Control-s>
-                <Control-S>
+                <Control-f>
+                <Control-F>
                 <Control-r>
                 <Control-R>
             } {
                 lappend _oldbindings $event [bind $tag $event]
             }
             
-            bind $tag <Control-s> {::marsgui::isearch::Begin %W -forwards}
-            bind $tag <Control-S> {::marsgui::isearch::Begin %W -forwards}
+            bind $tag <Control-f> {::marsgui::isearch::Begin %W -forwards}
+            bind $tag <Control-F> {::marsgui::isearch::Begin %W -forwards}
             bind $tag <Control-r> {::marsgui::isearch::Begin %W -backwards}
             bind $tag <Control-R> {::marsgui::isearch::Begin %W -backwards}
         }

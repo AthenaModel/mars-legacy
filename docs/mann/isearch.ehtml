@@ -59,7 +59,7 @@ even if no logger is defined.<p>
 Incremental searching is activated by the following keystrokes:<p>
 
 <ul>
-<li> <b>Ctrl+S</b> -- Search forwards from the insertion point
+<li> <b>Ctrl+F</b> -- Search forwards from the insertion point
 <li> <b>Ctrl+R</b> -- Search backwards from the insertion point
 </ul><p>
 
@@ -72,13 +72,13 @@ search for it as the user types.<p>
 Next, the Backspace key will back up in the search, deleting characters
 from the search target.
 
-Next, pressing Ctrl+S will find the next occurrence of the currently found
+Next, pressing Ctrl+F will find the next occurrence of the currently found
 search target, and pressing Ctrl+R will find the previous occurrence.<p>
 
-Note that if Ctrl+R or Ctrl+S is pressed <i>immediately</i> after entering
+Note that if Ctrl+R or Ctrl+F is pressed <i>immediately</i> after entering
 incremental search mode, the widget will search for the search target from
 the previous search.  In other words, to search for the same thing again,
-press Ctrl+S twice in a row.<p>
+press Ctrl+F twice in a row.<p>
 
 Next, incremental search mode will terminate if:<p>
 
@@ -105,7 +105,10 @@ Will Duquette<p>
 
 <<section HISTORY>>
 
-Original package.
+24 Aug 2012: Changed the search forward key from Ctrl+S to Ctrl+F,
+because Ctrl+S conflicts with the usual keystroke for saving the
+current document.<p>
+
 
 <</manpage>>
 
