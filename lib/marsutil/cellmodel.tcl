@@ -491,7 +491,9 @@ snit::type ::marsutil::cellmodel {
 
         # NEXT, instrument the script so that we get line numbers.
         set text [Instrument $text 1]
-
+set f [open idump.txt w]
+puts $f $text
+close $f
         # NEXT, create the load interpreter.
         set loader [interp create -safe]
 
@@ -1990,7 +1992,12 @@ snit::type ::marsutil::cellmodel {
             append arg [lshift tokens]
 
             if {[info complete $arg]} {
-                lappend args [string trim $arg]
+                set arg [string trim $arg]
+
+                # skip extraneous blanks
+                if {$arg ne ""} {
+                    lappend args $arg
+                }
                 set arg ""
             }
         }
