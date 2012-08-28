@@ -491,9 +491,7 @@ snit::type ::marsutil::cellmodel {
 
         # NEXT, instrument the script so that we get line numbers.
         set text [Instrument $text 1]
-set f [open idump.txt w]
-puts $f $text
-close $f
+
         # NEXT, create the load interpreter.
         set loader [interp create -safe]
 
