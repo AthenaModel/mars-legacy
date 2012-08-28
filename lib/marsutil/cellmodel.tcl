@@ -19,7 +19,7 @@ namespace eval ::marsutil:: {
 }
 
 #-------------------------------------------------------------------
-# Object Type: cellmodel
+# cellmodel
 #
 # Pseudo-spreadsheet Cell Model
 #
@@ -262,9 +262,9 @@ snit::type ::marsutil::cellmodel {
     component interp    ;# Safe interpreter used for evaluating formulas.
 
     #-------------------------------------------------------------------
-    # Group: Options
+    # Options
 
-    # Option: -epsilon
+    # -epsilon
     #
     # The epsilon for convergence of page during <solve>.
 
@@ -272,7 +272,7 @@ snit::type ::marsutil::cellmodel {
         -type    {snit::double -min 0.0} \
         -default 0.0001
 
-    # Option: -maxiters
+    # -maxiters
     #
     # The maximum number of iterations when iterating a page
     # to convergence during <solve>.
@@ -281,7 +281,7 @@ snit::type ::marsutil::cellmodel {
         -type    {snit::integer -min 1} \
         -default 100
 
-    # Option: -tracecmd
+    # -tracecmd
     #
     # A command that's called to trace computation of the model
     # during <solve>.  The command is passed a variety of additional
@@ -305,7 +305,7 @@ snit::type ::marsutil::cellmodel {
     option -tracecmd
 
 
-    # Option: -failcmd
+    # -failcmd
     #
     # A command that's called if the solution of the cell model fails
     # for any reason.
@@ -322,7 +322,7 @@ snit::type ::marsutil::cellmodel {
     option -failcmd
 
     #-------------------------------------------------------------------
-    # Group: Uncheckpointed variables
+    # Uncheckpointed variables
 
     # Variable: info
     #
@@ -359,6 +359,7 @@ snit::type ::marsutil::cellmodel {
     # unknown         - List of unknown cells referenced in formulas.
     # unused          - List of cells unused by other cells.
     # invalid         - Cells with serious model errors, if sane=0
+    # pline-$page     - Line number at which page begins
     # cyclic-$page    - 1 if $page contains cyclic definitions, and
     #                   0 otherwise.
     # cells-$page     - List of fully-qualifed names of cells on page 
@@ -370,6 +371,7 @@ snit::type ::marsutil::cellmodel {
     # initfrom-$page  - List of pages used to initialize cells on $page
     #                   prior to computing $page.
     # page-$cell      - The name of the page on which $cell appears.
+    # line-$cell      - The line number at which $cell is defined.
     # bare-$cell      - The bare name of $cell.
     # ctype-$cell     - Cell Type: constant|formula
     # vtype-$cell     - Value Type: number|symbol
@@ -389,6 +391,7 @@ snit::type ::marsutil::cellmodel {
     #
     # An array variable used for transient values.  During loading:
     #
+    #   line        - Line number of current command in model script
     #   page        - Page currently being defined.
     #   copiedCells - Names of cells that were originally copied from
     #                 another page; the current page may override them
@@ -401,7 +404,7 @@ snit::type ::marsutil::cellmodel {
     variable trans -array { }
 
     #-------------------------------------------------------------------
-    # Group: Checkpointed Variables
+    # Checkpointed Variables
 
     # Variable: values
     #
@@ -420,7 +423,7 @@ snit::type ::marsutil::cellmodel {
     variable errors -array { }
 
     #-------------------------------------------------------------------
-    # Group: Constructor
+    # Constructor
 
     constructor {args} {
         # FIRST, get the options
@@ -431,7 +434,7 @@ snit::type ::marsutil::cellmodel {
     }
 
     #-------------------------------------------------------------------
-    # Group: Loading the Model
+    # Loading the Model
     #
     # The model is loaded from a script of "page" and "let" commands.
     # Initial "let" commands define cells on the "null" page; subsequent
@@ -439,7 +442,7 @@ snit::type ::marsutil::cellmodel {
     # most recently created page.
 
 
-    # Method: reset
+    # reset
     #
     # Resets all cells to their initial values.
 
@@ -449,7 +452,7 @@ snit::type ::marsutil::cellmodel {
         }
     }
 
-    # Method: clear
+    # clear
     #
     # Deletes all content.
 
@@ -468,24 +471,31 @@ snit::type ::marsutil::cellmodel {
         set model(unknown)        [list]
         set model(unused)         [list]
         set model(invalid)        [list]
+        set model(pline-null)     1
         set model(cells-null)     [list]
         set model(barecells-null) [list]
         set model(initfrom-null)  [list]
     }
 
-    # Method: load
+    # load text
     #
-    # Loads a new model from a model definition script.
+    # text  - A cellmodel(5) model script
     #
-    # Syntax:
-    #   load _model_
-    #
-    #   model - A model definition script.
+    # Loads a new model from a model definition script, throwing
+    # SYNTAX with the line number of the error if a syntax error 
+    # is found.
 
     method load {text} {
-        # FIRST, create the load interpreter.
+        # FIRST, clear any previous model.
+        $self clear
+
+        # NEXT, instrument the script so that we get line numbers.
+        set text [Instrument $text 1]
+
+        # NEXT, create the load interpreter.
         set loader [interp create -safe]
 
+        $loader alias AtLine   $self Load_AtLine   $loader
         $loader alias index    $self Load_index    $loader
         $loader alias function $self Load_function $loader
         $loader alias page     $self Load_page     $loader
@@ -496,25 +506,18 @@ snit::type ::marsutil::cellmodel {
 
         $loader eval $loaderProcs
 
-        # NEXT, clear any previous model.
-        $self clear
-
         # NEXT, prepare transient data
         array unset trans
+        set trans(line)        1
         set trans(page)        null
         set trans(copiedCells) {}
 
         # NEXT, load the model, and destroy the loader when done.
         try {
-            set code [$loader eval \
-                [list catch $text ::cellmodel::result ::cellmodel::eopts]]
-
-            set result [$loader eval {set ::cellmodel::result}]
-            set eopts  [$loader eval {set ::cellmodel::eopts}]
+            set code [catch {$loader eval $text} result]
 
             if {$code} {
-                set errorline [dict get $eopts -errorline]
-                throw [list SYNTAX $errorline] $result
+                throw [list SYNTAX $trans(line)] $result
             }
         } finally {
             rename $loader ""
@@ -532,7 +535,21 @@ snit::type ::marsutil::cellmodel {
         return $model(sane)
     }
 
-    # Method: Load_index
+    # Load_AtLine loader line
+    #
+    # loader   - The loader interpreter
+    # line     - A line number
+    #
+    # Gives the line number of the subsequent command in the original
+    # model file.  This command is inserted in the model script by
+    # [Instrument] before the script is evaluated.
+
+    method Load_AtLine {loader line} {
+        set trans(line) $line
+        return
+    }
+
+    # Load_index
     #
     # Defines an index that can be used with sum and prod in load
     # scripts.  The index list is saved for introspection.
@@ -561,7 +578,7 @@ snit::type ::marsutil::cellmodel {
 
     }
 
-    # Method: Load_function
+    # Load_function
     #
     # Defines a function in the formula interpreter's tcl::mathfunc
     # namespace, so that it can be used in formulas.  The function
@@ -580,7 +597,7 @@ snit::type ::marsutil::cellmodel {
         lappend model(functions) $name $arglist $body
     }
 
-    # Method: Load_page
+    # Load_page
     #
     # The implementation of the definition script's "page" command.
     # Adds a new page with the specified name.  The name must not
@@ -603,6 +620,7 @@ snit::type ::marsutil::cellmodel {
         # NEXT, create the page.
         lappend model(pages) $page
 
+        set model(pline-$page)     $trans(line)
         set model(cyclic-$page)    0
         set model(cells-$page)     [list]
         set model(barecells-$page) [list]
@@ -612,7 +630,7 @@ snit::type ::marsutil::cellmodel {
         return
     }
 
-    # Method: Load_copypage
+    # Load_copypage
     #
     # The implementation of the definition script's "copypage" command.
     # Copies cell definitions from another page.  Formula cells are
@@ -685,7 +703,7 @@ snit::type ::marsutil::cellmodel {
         return
     }
 
-    # Method: ValidatePageName
+    # ValidatePageName
     #
     # Validates the page name, throwing an error if it's invalid
     # and returning it otherwise.  A new page name must:
@@ -714,7 +732,7 @@ snit::type ::marsutil::cellmodel {
     }
     
 
-    # Method: Load_initfrom
+    # Load_initfrom
     #
     # The implementation of the definition script's "initfrom" command.
     # Directs the object to initialize this page's cells from the 
@@ -851,6 +869,7 @@ snit::type ::marsutil::cellmodel {
         ladd model(barecells-$trans(page)) $barename
 
         set model(page-$cell)    $trans(page)
+        set model(line-$cell)    $trans(line)
         set model(bare-$cell)    $barename
         set model(ctype-$cell)   $celltype
         set model(vtype-$cell)   $vtype
@@ -1150,7 +1169,7 @@ snit::type ::marsutil::cellmodel {
         }
     }
 
-    # Proc: CaseFunc
+    # CaseFunc
     #
     # Defines a function case(condition1,value1,condition2, value2,...)
     # that returns value1 if condition1 is true, and value2 if 
@@ -1166,7 +1185,7 @@ snit::type ::marsutil::cellmodel {
         return 0.0
     }
 
-    # Proc: IfFunc
+    # IfFunc
     #
     # Defines a function fif(condition,value1,?value2?)
     # that returns value1 if condition is true, and value2 otherwise.
@@ -1179,7 +1198,7 @@ snit::type ::marsutil::cellmodel {
         }
     }
 
-    # Method: Epsilon
+    # Epsilon
     #
     # Defines a function epsilon() that returns the current
     # epsilon value.
@@ -1189,7 +1208,7 @@ snit::type ::marsutil::cellmodel {
     }
 
 
-    # Method: EpsilonDiff
+    # EpsilonDiff
     #
     # Defines a function ediff() that takes the difference of
     # two values and returns 0 if the difference is within
@@ -1407,7 +1426,7 @@ snit::type ::marsutil::cellmodel {
         return [list $maxDelta $maxCell]
     }
 
-    # Method: solve
+    # solve
     #
     # Attempts to solve the model, computing each page in order.
     # Acyclic pages are computed once, and cyclic pages are iterated
@@ -1515,7 +1534,7 @@ snit::type ::marsutil::cellmodel {
         return ok
     }
 
-    # Method: PageConverges
+    # PageConverges
     #
     # Tries to iterate a cyclic page to convergence.
     #
@@ -1544,7 +1563,7 @@ snit::type ::marsutil::cellmodel {
         return 0
     }
 
-    # Method: eval
+    # eval
     #
     # Evaluates an arbitrary expression in the cellmodel given the
     # current cell values, and returns the value.
@@ -1708,9 +1727,9 @@ snit::type ::marsutil::cellmodel {
 
 
     #-------------------------------------------------------------------
-    # Group: Utility Procs
+    # Utility Procs
 
-    # Proc: pagens
+    # pagens
     #
     # Returns the namespace for a given page.
     #
@@ -1742,7 +1761,7 @@ snit::type ::marsutil::cellmodel {
         return -code error -errorcode INVALID $message
     }
 
-    # Proc: toposort
+    # toposort
     #
     # Does a topological sort of a directed acyclic graph; throws an
     # error if the graph isn't actually acyclic.  Uses the Kahn
@@ -1804,4 +1823,195 @@ snit::type ::marsutil::cellmodel {
         return $L
     }
 
+    #-------------------------------------------------------------------
+    # Script Instrumentation
+
+    # Instrument text firstline linecmd
+    #
+    # text      - Script text to instrument
+    # firstline - Line number of the first line of the script
+    #
+    # Returns an instrument script.
+
+    proc Instrument {text firstline} {
+        # FIRST, split into lines and initialize line counter
+        set lc $firstline
+        set lines [split $text "\n"]
+        set result {}
+
+        # Decrement lc so that when we increment after getting the
+        # first line, we get the right value
+        incr lc -1
+        while {[llength $lines] > 0} {
+            set line [lshift lines]
+            incr lc
+
+            set tline [string trim $line]
+
+            # Handle blank lines.
+            if {$tline eq ""} {
+                append result $line "\n"
+                continue
+            }
+
+            # Handle comments
+            if {[string match "\#*" $tline]} {
+                append result $line "\n"
+                continue
+            }
+
+            # Handle comments
+            if {[string match ";\#*" $tline]} {
+                append result $line "\n"
+                continue
+            }
+
+            # So it must be a command.  Insert a marker.
+            append result "AtLine $lc\n"
+
+            # Now, grab the whole command.
+            set cmd $line
+            set firstCmdLine $lc
+            while {![info complete $cmd]} {
+                if {[llength $lines] == 0} {
+                    throw [list SYNTAX $lc] \
+                        "Unterminated command in cell model"
+                }
+
+                set line [lshift lines]
+                incr lc
+                append cmd "\n$line"
+            }
+            
+            # Now, see whether the command needs additional processing.
+            set cmd [SplitCommand $cmd]
+            set cmdName [lshift cmd]
+
+            # Determine which arguments are code bodies: define bodies
+            # to contain their indices in the "cmd" list.  Note that the
+            # command name has already been stripped off.
+            switch -exact -- $cmdName {
+                "for"     -
+                "forall" -
+                "foreach" -
+                "while"   {
+                    # Pattern: the last argument is a body.
+                    set index [expr {[llength $cmd] - 1}]
+                    set bodies $index
+                }
+                "if" {
+                    # This one's tricky.
+                    set bodies {}
+                    set ifcmd $cmd
+
+                    # Skip the first argument; we know it's a condition.
+                    lshift ifcmd
+                    set index 0
+
+                    while {[llength $ifcmd] > 0} {
+                        set arg [lshift ifcmd]
+                        incr index
+
+                        switch -exact -- $arg {
+                            "then" -
+                            "else" {
+                                continue
+                            }
+                            "elseif" {
+                                # Skip the condition
+                                lshift ifcmd
+                                incr index
+                                continue
+                            }
+                            default {
+                                # It's a body
+                                lappend bodies $index
+                            }
+                        }
+                    }
+                }
+                default {
+                    set bodies {}
+                }
+            }
+
+            # Now, add the arguments back onto the command, instrumenting
+            # the bodies.
+            set newCmd $cmdName
+            set firstBodyLine $firstCmdLine
+
+            for {set i 0} {$i < [llength $cmd]} {incr i} {
+                set arg [lindex $cmd $i]
+                set narg $arg
+
+                # If it's a body, instrument it.  It's a body if it's 
+                # supposed to be a body, AND it isn't a variable or
+                # command interpolation.
+                if {[lsearch $bodies $i] != -1 &&
+                    [string index $arg 0] eq "\{"} {
+
+                    # Strip off the braces
+                    set arg [string range $arg 1 end-1]
+                    set narg "\{"
+                    append narg [Instrument $arg $firstBodyLine]
+                    append narg "\}"
+                }
+
+                append newCmd " "
+                append newCmd $narg
+
+                set firstBodyLine \
+                    [expr {$firstBodyLine + [LineCount $arg] - 1}]
+            }
+
+            append result $newCmd
+            append result "\n"
+        }
+
+        return $result
+    }
+
+    # SplictCommand cmd
+    #
+    # cmd   - A single Tcl command
+    #
+    # Splits a single Tcl command string into its component arguments.
+
+    proc SplitCommand {cmd} {
+        set tokens [split $cmd " "]
+
+        set args {}
+
+        set arg ""
+
+        while {[llength $tokens] > 0} {
+            
+            append arg " "
+            append arg [lshift tokens]
+
+            if {[info complete $arg]} {
+                lappend args [string trim $arg]
+                set arg ""
+            }
+        }
+
+        if {$arg ne ""} {
+            # This shouldn't happen, as Instrument should pass us only
+            # valid commands.
+            error "bad command '$cmd'"
+        }
+
+        return $args
+    }
+
+    # LineCount text
+    #
+    # text  - A text string
+    #
+    # Returns the number of lines of text in the string.
+
+    proc LineCount {text} {
+        return [llength [split $text "\n"]]
+    }
+    
 }

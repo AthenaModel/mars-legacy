@@ -19,6 +19,9 @@ include $(TOP_DIR)/MakeDefs
 test:
 	$(TCLSH) marsutil.test $(FLAGS)
 
+test_cellmodel:
+	$(TCLSH) cellmodel.test $(FLAGS)
+
 test_dynaform:
 	$(TCLSH) dynaform.test $(FLAGS)
 

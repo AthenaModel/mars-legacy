@@ -833,6 +833,33 @@ B =         "is" <= [x] == 5 ? "is" : "isn't"
         CleanUp
     } -result {B C A}
 
+    test pageinfo-2.5 {pageinfo pline for page null} -setup {
+        Setup
+        cm load {
+            let A = {[C] + 1}
+            let B = 2
+            let C = 3
+        }
+    } -body {
+        cm pageinfo pline null
+    } -cleanup {
+        CleanUp
+    } -result {1}
+
+    test pageinfo-2.6 {pageinfo pline for other page} -setup {
+        Setup
+        cm load {
+            let A = {[C] + 1}
+            let B = 2
+            let C = 3
+            page P
+            let D = 4
+        }
+    } -body {
+        cm pageinfo pline P
+    } -cleanup {
+        CleanUp
+    } -result {5}
 
     #-------------------------------------------------------------------
     # cellinfo
@@ -985,6 +1012,18 @@ B =         "is" <= [x] == 5 ? "is" : "isn't"
     } -cleanup {
         CleanUp
     } -result {number symbol}
+
+    test cellinfo-2.12 {cellinfo line} -setup {
+        Setup
+        cm load {
+            let    A = 1
+            letsym B = {"Foo"}
+        }
+    } -body {
+        list [cm cellinfo line A] [cm cellinfo line B]
+    } -cleanup {
+        CleanUp
+    } -result {2 3}
 
     #-------------------------------------------------------------------
     # formula

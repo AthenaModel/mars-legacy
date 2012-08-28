@@ -137,6 +137,8 @@ Returns information about the specified <i>cell</i>.  The available
 <ul>
   <li> <b>page</b> -- The name of the page on which the <i>cell</i>
        appears.
+  <li> <b>line</b> -- The line number at which the cell is defined in
+       the model script.
   <li> <b>bare</b> -- The cell's bare (unqualified) name.
   <li> <b>ctype</b> -- Cell Type: whether the cell is a <b>constant</b> or a
        <b>formula</b> cell.
@@ -239,6 +241,8 @@ Returns information about the specified <i>page</i>.  The available
 <i>field</i> names are as follows:<p>
 
 <ul>
+  <li> <b>pline</b> -- The line number at which the page definition
+       begins in the model script.
   <li> <b>cyclic</b> -- 1 if the page is cyclic, and 0 if the page is
        acyclic.
   <li> <b>order</b> -- Returns the order in which cells on acyclic
