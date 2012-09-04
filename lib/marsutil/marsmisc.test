@@ -230,6 +230,18 @@ should be "$xyz" or "{xyz}" or "xyz(...)" or ...}
         moneyscan -12.345T
     } -result {-12345000000000.0}
 
+    test moneyscan-2.10 {Scan 0100} -body {
+        moneyscan 0100
+    } -result {100.0}
+
+    test moneyscan-2.11 {Scan 0100K} -body {
+        moneyscan 0100K
+    } -result {100000.0}
+
+    test moneyscan-2.12 {Scan 0} -body {
+        moneyscan 0
+    } -result {0.0}
+
     #-------------------------------------------------------------------
     # moneysort
 

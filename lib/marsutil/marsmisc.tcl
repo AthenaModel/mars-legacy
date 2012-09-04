@@ -691,6 +691,11 @@ proc ::marsutil::moneyscan {value} {
         return -code error -errorcode INVALID "Invalid input: \"$value\""
     }
 
+    # NEXT, handle leading zeroes
+    if {[string is integer $value] && $value != 0} {
+        set value [string trimleft $value "0"]
+    }
+
     return [expr {$value * $factor($lastchar)}]
 }
 
