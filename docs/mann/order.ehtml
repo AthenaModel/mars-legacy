@@ -673,8 +673,10 @@ replaced with single spaces.<p>
 
 <<defopt {-num}>>
 
-Removes leading zeroes from a parameter with a numeric value, so that
-Tcl doesn't interpret it as octal rather than decimal.<p>
+Tcl interprets integer numbers with leading zeroes as octal numbers.
+To prevent this, this option removes leading zeroes from parameter
+values which are non-zero integers.  Floating point and other
+non-integer values are left alone, and plain zeroes are left alone.<p>
 
 <<defopt {-oldnum <i>oldNumber</i>}>>
 

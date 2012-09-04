@@ -1521,6 +1521,32 @@ No -usedtable specified.}
         cleanup
     } -result {a 200 _order MY:ORDER}
 
+    test prepare-14.3 {prepare -num with zero} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -num
+            returnOnError -final
+        }
+    } -body {
+        order send app MY:ORDER a 0 
+        order lastparms
+    } -cleanup {
+        cleanup
+    } -result {a 0 _order MY:ORDER}
+
+    test prepare-14.4 {prepare -num with decimal} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -num
+            returnOnError -final
+        }
+    } -body {
+        order send app MY:ORDER a 0.1 
+        order lastparms
+    } -cleanup {
+        cleanup
+    } -result {a 0.1 _order MY:ORDER}
+
     #-------------------------------------------------------------------
     # reject
 

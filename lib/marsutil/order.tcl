@@ -1113,7 +1113,14 @@ snit::type ::marsutil::order {
                     set parms($parm) [normalize $parms($parm)]
                 }
                 -num {
-                    set parms($parm) [string trimleft $parms($parm) "0"]
+                    # Integer numbers beginning with 0 are interpreted as
+                    # octal, so we need to trim leading zeroes when the
+                    # number is a non-zero integer.
+                    if {[string is integer -strict $parms($parm)] &&
+                        $parms($parm) != 0
+                    } {
+                        set parms($parm) [string trimleft $parms($parm) "0"]
+                    }
                 }
                 -required { 
                     if {$parms($parm) eq ""} {
