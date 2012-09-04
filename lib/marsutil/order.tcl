@@ -1112,6 +1112,9 @@ snit::type ::marsutil::order {
                 -normalize {
                     set parms($parm) [normalize $parms($parm)]
                 }
+                -num {
+                    set parms($parm) [string trimleft $parms($parm) "0"]
+                }
                 -required { 
                     if {$parms($parm) eq ""} {
                         reject $parm "required value"

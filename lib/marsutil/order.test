@@ -1495,6 +1495,32 @@ No -usedtable specified.}
         cleanup
     } -result {}
 
+    test prepare-14.1 {prepare -num with no zeroes} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -num
+            returnOnError -final
+        }
+    } -body {
+        order send app MY:ORDER a 100 
+        order lastparms
+    } -cleanup {
+        cleanup
+    } -result {a 100 _order MY:ORDER}
+
+    test prepare-14.2 {prepare -num with zeroes} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -num
+            returnOnError -final
+        }
+    } -body {
+        order send app MY:ORDER a 0200 
+        order lastparms
+    } -cleanup {
+        cleanup
+    } -result {a 200 _order MY:ORDER}
+
     #-------------------------------------------------------------------
     # reject
 
