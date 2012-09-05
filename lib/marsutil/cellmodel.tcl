@@ -946,6 +946,15 @@ snit::type ::marsutil::cellmodel {
         array unset errors
         set errors(all) [list]
         
+        # TBD: We can probably optimize this.  At present it detects
+        # cell references in formulas using both [subst] and [expr]; 
+        # probably only [subst] is needed for that.  However, 
+        # [expr] is also required to check cell syntax.  I'm thinking
+        # that it might be better to do only [subst] first, and then
+        # as a second step, disabled "analysis" mode on the cells and
+        # call [expr] for each formula; this will save a bunch of
+        # superfluous [ladd] calls.  However, unless we notice a 
+        # slow down it probably doesn't matter.
         foreach cell $model(cells) {
             # FIRST, save the cell name, so that the evaluation
             # commands will know what it is.
@@ -969,6 +978,12 @@ snit::type ::marsutil::cellmodel {
             }
 
             if {[catch {
+                # This will catch cell references that expr doesn't
+                $interp invokehidden namespace eval $ns \
+                    [list ::subst $model(formula-$cell)]
+
+                # This will catch expression syntax errors, and most
+                # cell references.
                 $interp invokehidden namespace eval $ns \
                     [list expr $model(formula-$cell)]
             } result opts]} {
@@ -1148,6 +1163,7 @@ snit::type ::marsutil::cellmodel {
         $interp expose return
         $interp expose set
         $interp expose string
+        $interp expose subst
 
         # NEXT, alias in min and max funcs; the default versions
         # use commands we've hidden, and don't currently work in

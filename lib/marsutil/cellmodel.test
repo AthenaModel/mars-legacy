@@ -1848,6 +1848,27 @@ X.c.c =            1
     } -result {35.0}
 
     #-------------------------------------------------------------------
+    # Bug Fixes
+    # 
+    # These tests are written to verify that specific bugs have been
+    # fixed.
+
+    test bug3670-1.1 {Short-circuited cells are detected} -setup {
+        Setup
+    } -body {
+        cm load {
+            let A = 1
+            let B = 1
+            let C = {[A] ? 2.0 : [B]}
+        }
+
+        # With the bug, only A will be returned.
+        cm cellinfo uses C 
+    } -cleanup {
+        CleanUp
+    } -result {A B}
+
+    #-------------------------------------------------------------------
     # Cleanup
 
     cleanupTests
