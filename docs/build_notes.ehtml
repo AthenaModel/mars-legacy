@@ -1,4 +1,3 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
 <title>Mars <<version>> Simulation Infrastructure Library</title>
@@ -9,6 +8,23 @@
 Library</h1>
 
 <h2>Build Notes</h2>
+
+<h3>Build 2.7, 11 September 2012</h3>
+
+The build contains some minor bug fixes and some cellmodel(n) changes
+in support of the new athena_cell(1) tool.<p>
+
+<ul>
+<li> Bug 3649: mars_cmtool(1): Error when called with no arguments
+<li> Bug 3653: isearch(n): Ctrl-S for searching conflicts with Ctrl-S for saving documents
+<li> Bug 3654: cellmodel(n): Improved reporting of syntax errors in cellmodel(5) input
+<li> Bug 3657: cellmodel(n): Instrument cellmodel(5) commands with line numbers
+<li> Bug 3661: order(n): prepare -num
+<li> Bug 3663: moneyscan: leading zeroes treated as octal
+<li> Bug 3670: cellmodel(n): [cellinfo uses] can miss some cells
+<li> Bug 3675: dynaform(n): contextkey field type.
+</ul><p>
+
 
 <h3>Build 2.6, 21 August 2012</h3>
 
