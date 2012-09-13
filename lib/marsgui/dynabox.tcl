@@ -294,6 +294,7 @@ snit::type ::marsgui::dynabox {
     typemethod ValidateData {dict} {
         if {$opts(-validatecmd) ne ""} {
             set errorDict {}
+            set errorText ""
 
             if {[catch {
                 {*}$opts(-validatecmd) $dict
@@ -315,9 +316,10 @@ snit::type ::marsgui::dynabox {
 
                 return 0
             }
+
+            $dialog.form invalid {}
         }
 
-        set errorText ""
         return 1
     }
 
