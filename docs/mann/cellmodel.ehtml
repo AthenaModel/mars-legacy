@@ -244,11 +244,13 @@ Returns information about the specified <i>page</i>.  The available
   <li> <b>pline</b> -- The line number at which the page definition
        begins in the model script.
   <li> <b>cyclic</b> -- 1 if the page is cyclic, and 0 if the page is
-       acyclic.
+       acyclic (or if the model is not sane).
   <li> <b>order</b> -- Returns the order in which cells on acyclic
        pages are computed, which might be different from the order of
        definition.  (Because the page is acyclic, each formula can be
        computed only once--provided it's done in the right order.)
+       Returns the empty list for cyclic pages (or if the model is
+       not sane).
 </ul><p>
 
 <<defitem reset {<i>object</i> reset}>>

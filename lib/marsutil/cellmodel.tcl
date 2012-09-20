@@ -472,9 +472,11 @@ snit::type ::marsutil::cellmodel {
         set model(unused)         [list]
         set model(invalid)        [list]
         set model(pline-null)     1
+        set model(cyclic-null)    0
         set model(cells-null)     [list]
         set model(barecells-null) [list]
         set model(initfrom-null)  [list]
+        set model(order-null)     [list]
     }
 
     # load text
