@@ -9,6 +9,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.8, 24 September 2012</h3>
+
+This build contains minor fixes to dynabox(n) and cellmodel(n).<p>
+
+<ul>
+<li> Bug 3689: dynabox(n): Error flags not cleared when all fields contain valid data.
+<li> Bug 3703: cellmodel(n): pageinfo cyclic and pageinfo order fail if model is not sane.
+</ul><p>
+
 <h3>Build 2.7, 11 September 2012</h3>
 
 The build contains some minor bug fixes and some cellmodel(n) changes
