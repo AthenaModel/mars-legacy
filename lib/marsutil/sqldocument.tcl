@@ -175,6 +175,14 @@ snit::type ::marsutil::sqldocument {
     option -commitcmd \
         -default "" 
 
+    # -explaincmd cmd
+    #
+    # Specifies a command prefix to be called with two additional
+    # arguments when the [explain] method is used.  The first is the
+    # query, and the second is the result of EXPLAIN QUERY PLAN.
+
+    option -explaincmd
+
     #-------------------------------------------------------------------
     # Instance variables
 
@@ -778,6 +786,30 @@ snit::type ::marsutil::sqldocument {
                 DROP TRIGGER IF EXISTS sqldocument_trace_${table};
             "
         }
+    }
+
+    #-------------------------------------------------------------------
+    # explain
+
+    # explain 
+    #
+    # Like "eval", but also does "EXPLAIN QUERY PLAN"
+
+    method explain {args} {
+        # FIRST, get the query.
+        set query [lshift args]
+
+        # NEXT, explain it and give the result to the -explaincmd.
+        set query2 "EXPLAIN QUERY PLAN $query"
+        
+        set explanation [$self query $query2 -mode list]
+        callwith $options(-explaincmd) $query $explanation
+
+
+        # NEXT, Evaluate the query 
+        set command [list $db eval $query {*}$args]
+
+        return [uplevel 1 $command]
     }
 
     #-------------------------------------------------------------------

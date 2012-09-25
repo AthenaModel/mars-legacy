@@ -205,6 +205,12 @@ before a new transaction is begun. This is most useful when the
 some task while the database is not locked due to an open transaction.
 <p>
 
+<<defopt {-explaincmd <i>command</i>}>>
+
+If specified, the <i>command</i> is a command prefix to be called by 
+<<iref explain>> with two additional arguments: the query, and the
+result of using SQLite's "EXPLAIN QUERY PLAN" on the query.<p>
+
 <<defopt {-foreignkeys <i>boolean</i>}>>
 
 Explicitly enables or disables foreign key checking, according to the
@@ -294,6 +300,20 @@ deletes can be easily undone using <<iref ungrab>>.  For example,<p>
 
 Note that this command does not support <<iref grab>>'s
 <code>-tcl</code> option.<p>
+
+<<defitem explain {$db explain <i>query</i> ?<i>args...</i>?}>>
+
+The <<iref explain>> method is intended to function identically to 
+SQLite's standard <<iref eval>> method, except that it will run
+"EXPLAIN QUERY PLAN" on the query and call the
+<code>-explaincmd</code> prior to actually executing the query.<p>
+
+This feature is for use by the developer as an aid to improving
+performance: set the <code>-explaincmd</code> when creating the
+instance of <<iref sqldocument(n)>>; then, in order to tune a
+particular query, replace the call to <<iref eval>> with a call to
+<<iref explain>>.  When optimization is complete, replace
+<<iref explain>> with <<iref eval>> once again.<p>
 
 <<defitem fklist {$db fklist <i>table</i> ?-indirect?}>>
 

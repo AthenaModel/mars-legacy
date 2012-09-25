@@ -205,7 +205,6 @@ namespace eval ::marsutil::test {
         }
     }
 
-
     #-------------------------------------------------------------------
     # sqlsection schema
 
@@ -1151,6 +1150,66 @@ plus(a,b,c)
     } -cleanup {
         cleanup
     } -result {}
+
+    #-------------------------------------------------------------------
+    # explain
+
+    proc explain_setup {} {
+        variable Explanation
+
+        sqldocument db -explaincmd [namespace current]::ExplainCmd
+        db open :memory:
+
+        db eval {
+            CREATE TABLE mytab(
+               a INTEGER,
+               b INTEGER,
+               c TEXT,
+               PRIMARY KEY (a,b)
+            );
+
+            INSERT INTO mytab(a,b,c) VALUES(1,2,'FOO');
+            INSERT INTO mytab(a,b,c) VALUES(3,4,'BAR');
+        }
+
+        set Explanation [list]
+    }
+
+    proc ExplainCmd {query explanation} {
+        variable Explanation
+        set Explanation [list $query $explanation]
+    }
+
+
+    test explain-1.1 {explain does a normal eval} -setup {
+        explain_setup  
+    } -body {
+        db explain {SELECT * FROM mytab}
+    } -cleanup {
+        cleanup
+    } -result {1 2 FOO 3 4 BAR}
+
+    test explain-1.2 {explain handles variables} -setup {
+        explain_setup  
+    } -body {
+        set a 3
+        db explain {SELECT * FROM mytab WHERE a=$a}
+    } -cleanup {
+        cleanup
+    } -result {3 4 BAR}
+
+    test explain-1.3 {explain handles EXPLAIN QUERY PLAN} -setup {
+        explain_setup  
+    } -body {
+        db explain {SELECT * FROM mytab}
+        set Explanation
+    } -cleanup {
+        cleanup
+    } -result {{SELECT * FROM mytab} {selectid  0
+order     0
+from      0
+detail    SCAN TABLE mytab (~1000000 rows)
+}}
 
     #-------------------------------------------------------------------
     # Standard Functions

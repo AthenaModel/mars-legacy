@@ -31,6 +31,9 @@ test_marsmisc:
 test_order:
 	$(TCLSH) order.test $(FLAGS)
 
+test_sqldocument:
+	$(TCLSH) sqldocument.test $(FLAGS)
+
 test_undostack:
 	$(TCLSH) undostack.test $(FLAGS)
 
