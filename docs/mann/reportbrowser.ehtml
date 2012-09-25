@@ -90,6 +90,24 @@ user.  The <i>command</i> is a Tcl command expecting one additional
 argument, a text string.  The client will usually arrange for this
 string to be written to a <<xref messageline(n)>>.<p>
 
+<<defopt {-reloadon <i>eventList</i>}>>
+
+Causes the browser to subscribe to any number of <<xref notifier(n)>>
+events, and reload its contents when any of them are received.  The
+<i>eventList</i> must be a list of <<xref notifier(n)>> subjects and
+events.  For example, the following option causes the browser to
+reload whenever the <b>&lt;Report&gt;</b> event is received from
+the <b>::sim</b> object.<p>
+
+<pre>
+    reportbrowser .browser \
+        ...                \
+        -reloadon { ::sim &lt;Report&gt; }
+</pre>
+
+If the value of <b>-reloadon</b> is changed, the previous bindings will be
+unbound; and all bindings will be unbound when the browser is destroyed.<p>
+
 <</deflist reportbrowser options>>
 
 <</deflist commands>>
@@ -111,6 +129,15 @@ Returns the value of the specified <i>option</i>.<p>
 Tells the browser to refresh it contents from the <code>-db</code>.
 A fresh set of bin definitions will be loaded, and the browser will
 automatically display the first bin in the tree.<p>
+
+<<defitem reload {$browser reload}>>
+
+Asks the browser to update its contents and from the <code>-db</code>
+when new reports are available.  Note that the work is done <i>after</i> 
+the caller returns to the Tk event loop.<p>
+
+<b>Note:</b> Use this call in preference to <<iref update>>, which is
+deprecated.<p>
 
 <<defitem setbin {$browser setbin <i>bin</i>}>>
 
@@ -144,7 +171,10 @@ user.  The following options are set by default:<p>
 
 <<defitem update {$browser update}>>
 
-Checks for new reports and updates the currently displayed bin.<p>
+<b>Deprecated.</b>  Checks for new reports and updates the currently
+displayed bin.<p>
+
+<b>Note:</b> Use <<iref reload>> instead.<p>
 
 <</deflist>>
 

@@ -417,9 +417,6 @@ snit::type ::marsutil::reporter {
         require {$opts(-text)  ne ""} "Report has no -text"
 
         # NEXT, save it to the runtime database
-        set time [$clock now]
-        set zulu [$clock asZulu]
-
         if {$opts(-id) eq ""} {
             # Server side: ID is generated automatically
             $db eval {

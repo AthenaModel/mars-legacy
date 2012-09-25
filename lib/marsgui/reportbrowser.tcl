@@ -90,9 +90,33 @@ snit::widget ::marsgui::reportbrowser {
     option -logcmd \
         -default ""
 
+    # -reloadon events
+    #
+    # events is a list of notifier(n) subjects and events.  The
+    # browser will reload its contents when the events are received.
+    
+    option -reloadon                       \
+        -default         {}                \
+        -configuremethod ConfigureReloadOn
+    
+    method ConfigureReloadOn {opt val} {
+        # FIRST, remove any existing bindings
+        foreach {subject event} $options(-reloadon) {
+            notifier bind $subject $event $win ""
+        }
+        
+        # NEXT, add the new bindings
+        set options($opt) $val
+        
+        foreach {subject event} $val {
+            notifier bind $subject $event $win [mymethod ReloadOnEvent]
+        }
+    }
+
     #-------------------------------------------------------------------
     # Components
 
+    component reloader    ;# Timeout that handles reloading the content.
     component search      ;# The toolbar search box
     component bintree     ;# The rb_bintree of report bins
     component replist     ;# The listbox of report titles
@@ -102,6 +126,8 @@ snit::widget ::marsgui::reportbrowser {
     #-------------------------------------------------------------------
     # Instance variables
 
+    variable reloadRequests 0     ;# Number of reload requests since the
+                                   # last reload.
     variable reportList   {}      ;# List of report headers
     variable reportIds    {}      ;# Matching list of report IDs
     variable timeOfFirstReport -1 ;# Timestamp of earliest report in
@@ -124,7 +150,13 @@ snit::widget ::marsgui::reportbrowser {
     # reports and the text of a single report.
 
     constructor {args} {
-        # FIRST, prepare the grid.  The browser itself
+        # FIRST, create the reloader.
+        install reloader using timeout ${selfns}::reloader \
+            -command    [mymethod ReloadContent]           \
+            -interval   1                                  \
+            -repetition no
+        
+        # NEXT, prepare the grid.  The browser itself
         # should stretch vertically on resize; the toolbar and separator
         # shouldn't. And everything should stretch horizontally.
 
@@ -235,13 +267,64 @@ snit::widget ::marsgui::reportbrowser {
         bind $replist <Left>  {break}
         bind $replist <Right> {break}
 
+        # Reload the content from the current view when the window
+        # is mapped.
+        bind $win <Map> [mymethod MapWindow]
+
         # NEXT, get the options.
         $self configurelist $args
+
+        # NEXT, schedule the first reload
+        $self reload
+    }
+
+    destructor {
+        notifier forget $win
     }
 
     #-------------------------------------------------------------------
     # Event Handlers
     
+    # MapWindow
+    #
+    # Reload the browser when the window is mapped, if there have
+    # been any reload requests.
+    
+    method MapWindow {} {
+        # If a reload has been requested, but the reloader is no
+        # longer scheduled (i.e., the reload was requested while
+        # the window was unmapped) then reload it now.
+        if {$reloadRequests > 0 && ![$reloader isScheduled]} {
+            $self ReloadContent
+        }
+    }
+
+    # ReloadOnEvent
+    #
+    # Reloads the widget when a -reloadon event is received.
+    # The "args" parameter is so that any event can be handled.
+    
+    method ReloadOnEvent {args} {
+        $self reload
+    }
+
+    # ReloadContent
+    #
+    # Reloads the data from the database.
+
+    method ReloadContent {} {
+        # FIRST, we don't do anything until we're mapped.
+        if {![winfo ismapped $win]} {
+            return
+        }
+        
+        # NEXT, clear the reload request counter.
+        set info(reloadRequests) 0
+
+        # NEXT, update.
+        $self update
+    }
+
     # Method: Log
     #
     # Logs a status message by calling the <-logcmd>.
@@ -405,6 +488,16 @@ snit::widget ::marsgui::reportbrowser {
         }
 
         set reportList $list
+    }
+
+    # reload
+    #
+    # Schedules a reload of the content.  Note that the reload will
+    # be ignored if the window isn't mapped.
+    
+    method reload {} {
+        incr info(reloadRequests)
+        $reloader schedule -nocomplain
     }
 
     # update
