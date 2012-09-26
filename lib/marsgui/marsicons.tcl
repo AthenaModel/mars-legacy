@@ -95,6 +95,28 @@ namespace eval ::marsgui::icon:: {
         . trans
         X black
     }
+
+    mkicon ::marsgui::icon::zoom {
+        ........XXXXX...
+        .......X.....X..
+        ......X.......X.
+        .....X.........X
+        .....X.........X
+        .....X.........X
+        .....X.........X
+        .....X.........X
+        ......X.......X.
+        .....XXX.....X..
+        ....XXX.XXXXX...
+        ...XXX..........
+        ..XXX...........
+        .XXX............
+        XXX.............
+        XX..............
+    } {
+        . trans
+        X black
+    }
     
     mkicon ::marsgui::icon::autoscroll_on {
         ..XXXXXXXXXX..

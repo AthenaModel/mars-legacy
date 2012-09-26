@@ -124,6 +124,13 @@ snit::widgetadaptor ::marsgui::mapcanvas {
 
         bind Mapcanvas.pan <ButtonPress-1> {%W scan mark %x %y}
         bind Mapcanvas.pan <B1-Motion>     {%W scan dragto %x %y 1}
+
+        # Mode: zoom in
+
+        bind Mapcanvas.zoom <ButtonPress-1>   {%W ZoomMark-1 %x %y}
+        bind Mapcanvas.zoom <B1-Motion>       {%W ZoomMark-2 %x %y}
+        bind Mapcanvas.zoom <ButtonRelease-1> {%W ZoomArea %x %y}
+        bind Mapcanvas.zoom <ButtonPress-3>   {%W ZoomOut}
     }
 
     #-------------------------------------------------------------------
@@ -188,6 +195,12 @@ snit::widgetadaptor ::marsgui::mapcanvas {
 
         pan {
             cursor   fleur
+            cleanup  {}
+            bindings {}
+        }
+
+        zoom {
+            cursor   crosshair
             cleanup  {}
             bindings {}
         }
@@ -1193,7 +1206,133 @@ snit::widgetadaptor ::marsgui::mapcanvas {
             return [list $cx $cy]
         }
     }
-   
+
+    #  ZoomMark-1 wx wy
+    #
+    #  wx,wy   A point in window coordinates
+    #
+    #  Marks the first window coordinate (upper-left corner) for area zooming.
+    #  This also creates a temporary rectangle zooming box 
+
+    method ZoomMark-1 {wx wy} {
+        # FIRST, convert the window coordinates to canvas coordinates.
+        lassign [$win w2c $wx $wy] cx cy
+        set trans(startx) $cx
+        set trans(starty) $cy
+
+        # NEXT, create a retangular box
+        $self create rectangle $wx $wy $wx $wy -outline red -tag zoominfotag
+    }
+
+    #  ZoomMark-2 wx wy
+    #
+    #  wx,wy   A point in window coordinates
+    #
+    #  Marks the second window coordinate (lower-right corner) for area zooming.
+
+    method ZoomMark-2 {wx wy} {
+        # FIRST, convert the window coordinates to canvas coordinates.
+        lassign [$win w2c $wx $wy] cx cy
+        set trans(cx) $cx
+        set trans(cy) $cy
+
+        # NEXT, remember the coordinates 
+        $self coords zoominfotag $trans(startx) $trans(starty) $trans(cx) $trans(cy)
+    }
+
+    #  ZoomArea wx wy
+    #
+    #  wx,wy   A point in window coordinates
+    #
+    #  Zoom in to the area selected by ZoomMark-1 and ZoomMark-2
+
+    method ZoomArea {wx wy} {
+        # FIRST, convert the final window coordinates to canvas coordinates.
+        lassign [$win w2c $wx $wy] cx cy
+        set trans(cx) $cx
+        set trans(cy) $cy
+
+        # NEXT, remove area selection rectangle
+        $self delete zoominfotag
+
+        # NEXT, return if no area selected
+         if {($trans(startx)==$trans(cx)) || ($trans(starty)==$trans(cy))} {
+            return
+        }
+
+        # NEXT, determine size and center of selected area
+        set areaxlength [expr {abs($trans(cx)-$trans(startx))}]
+        set areaylength [expr {abs($trans(cy)-$trans(starty))}]
+        set xcenter [expr {($trans(startx)+$trans(cx))/2.0}]
+        set ycenter [expr {($trans(starty)+$trans(cy))/2.0}]
+
+        # NEXT, determine width and height of the window
+        set winxlength [winfo width $self]
+        set winylength [winfo height $self]
+
+        # NEXT, calculate scale factors, and choose the smaller
+        set xscale [expr {$winxlength/$areaxlength}]
+        set yscale [expr {$winylength/$areaylength}]
+        
+        if { $xscale > $yscale } {
+            set factor [expr 100*round($yscale)]
+        } else {
+            set factor [expr 100*round($xscale)]
+        }
+         
+        # NEXT, check if zoom up from the current factor
+        set viewzoom [$self zoom]
+ 
+        if { $viewzoom >= $factor } {
+            set factor [expr {$viewzoom+$factor}]
+        }
+
+        # NEXT, check if exceed the maximum zooming level
+        set maxzoomfactor [expr max([join [$self zoomfactors] {, }])] 
+ 
+        if { $factor > $maxzoomfactor } {
+            set factor $maxzoomfactor
+        }
+
+        # NEXT, do the zooming
+        set centerloc [$self c2m $xcenter $ycenter]
+        notifier send ::map <ZoomUpdate> $factor
+        $self zoom $factor
+        $self see $centerloc
+        $self mode zoom
+    }
+
+    #  ZoomOut
+    #
+    #  Zoom out by right click on the mouse while in zoom mode.
+    #  This operation zooms up one level (e.g., from 300% to 200%).
+
+    method ZoomOut {} {
+        # FIRST, find the center
+        set centerloc [$self Center2m]
+
+        # NEXT, determine the zoom factors
+        set viewzoom [$self zoom]
+
+        set zoomfacs [$self zoomfactors]
+
+        # NEXT, return if the minimum zooming level has been achieved
+        set minzoomfac [expr min([join $zoomfacs {, }])]
+        if { $viewzoom == $minzoomfac } {
+            return
+        } 
+
+        # NEXT zoom up one level   
+        set index [lsearch $zoomfacs $viewzoom]
+        set factor [lindex $zoomfacs [expr $index-1]]
+
+        # NEXT, do the zooming
+        notifier send ::map <ZoomUpdate> $factor
+        $self zoom $factor
+        $self see $centerloc
+        $self mode zoom    
+    }   
+
     #-------------------------------------------------------------------
     # Coordinate Conversion methods
 
