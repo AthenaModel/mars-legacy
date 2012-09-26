@@ -9,6 +9,18 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.9, 26 September 2012</h3>
+
+This build contains a performance optimization to the marsutil(n)
+report handling code, and an enhancement to sqldocument(n) to aid
+performance optimization of SQL queries.  The full set of packages is
+as follows:<p>
+
+<ul>
+<li> Bug 3710: sqldocument(n): explain, -explaincmd
+<li> Bug 3713: reporter(n)/reportbrowser(n) optimization
+</ul><p>
+
 <h3>Build 2.8, 24 September 2012</h3>
 
 This build contains minor fixes to dynabox(n) and cellmodel(n).<p>
