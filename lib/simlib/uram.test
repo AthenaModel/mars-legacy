@@ -980,7 +980,7 @@ cause_id cause
         error
     } -cleanup {
         cleanup
-    } -result {Unknown cause name: "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_persistent-1.2 {unknown f} -setup {
         create
@@ -990,7 +990,7 @@ cause_id cause
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "NONESUCH", "F2"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_persistent-1.3 {unknown g} -setup {
         create
@@ -1000,7 +1000,7 @@ cause_id cause
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "F1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_persistent-1.4 {invalid mag} -setup {
         create
@@ -1010,7 +1010,7 @@ cause_id cause
         error
     } -cleanup {
         cleanup
-    } -result {invalid value "NONESUCH", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "NONESUCH", expected double}
 
 
     test hrel_persistent-1.5 {invalid at t=-1} -setup {
@@ -1091,7 +1091,7 @@ pflag f  g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {Unknown cause name: "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_transient-1.2 {unknown f} -setup {
         create
@@ -1101,7 +1101,7 @@ pflag f  g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "NONESUCH", "F2"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_transient-1.3 {unknown g} -setup {
         create
@@ -1111,7 +1111,7 @@ pflag f  g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "F1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_transient-1.4 {invalid mag} -setup {
         create
@@ -1121,7 +1121,7 @@ pflag f  g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {invalid value "NONESUCH", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "NONESUCH", expected double}
 
     test hrel_transient-2.1 {effect when cause is known} -setup {
         create
@@ -1191,7 +1191,7 @@ pflag f  g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "NONESUCH", "F2"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_badjust-1.2 {unknown g} -setup {
         create
@@ -1201,7 +1201,7 @@ pflag f  g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "F1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_badjust-1.3 {invalid delta} -setup {
         create
@@ -1275,7 +1275,7 @@ F1 F2 1      1000      0.1
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "NONESUCH", "F2"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_bset-1.2 {unknown g} -setup {
         create
@@ -1285,7 +1285,7 @@ F1 F2 1      1000      0.1
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "F1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_bset-1.3 {invalid value} -setup {
         create
@@ -1359,7 +1359,7 @@ F1 F2 0.75
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "NONESUCH", "F2"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_cset-1.2 {unknown g} -setup {
         create
@@ -1369,7 +1369,7 @@ F1 F2 0.75
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "F1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test hrel_cset-1.3 {invalid value} -setup {
         create
@@ -1425,7 +1425,7 @@ F1  F2  0.1
         error
     } -cleanup {
         cleanup
-    } -result {Unknown cause name: "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_persistent-1.2 {unknown g} -setup {
         create
@@ -1435,7 +1435,7 @@ F1  F2  0.1
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "NONESUCH" with actor "A1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_persistent-1.3 {unknown a} -setup {
         create
@@ -1445,7 +1445,7 @@ F1  F2  0.1
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "F1" with actor "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_persistent-1.4 {invalid mag} -setup {
         create
@@ -1455,7 +1455,7 @@ F1  F2  0.1
         error
     } -cleanup {
         cleanup
-    } -result {invalid value "NONESUCH", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "NONESUCH", expected double}
 
     test vrel_persistent-1.5 {invalid at t=-1} -setup {
         create -advance0 off
@@ -1536,7 +1536,7 @@ pflag g  a  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {Unknown cause name: "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_transient-1.2 {unknown g} -setup {
         create
@@ -1546,7 +1546,7 @@ pflag g  a  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "NONESUCH" with actor "A1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_transient-1.3 {unknown a} -setup {
         create
@@ -1556,7 +1556,7 @@ pflag g  a  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "F1" with actor "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_transient-1.4 {invalid mag} -setup {
         create
@@ -1566,7 +1566,7 @@ pflag g  a  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {invalid value "NONESUCH", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "NONESUCH", expected double}
 
     test vrel_transient-2.1 {effect when cause is known} -setup {
         create
@@ -1636,7 +1636,7 @@ pflag g  a  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "NONESUCH" with actor "A1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_badjust-1.2 {unknown a} -setup {
         create
@@ -1646,7 +1646,7 @@ pflag g  a  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "F1" with actor "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_badjust-1.3 {invalid delta} -setup {
         create
@@ -1718,7 +1718,7 @@ F1 A1 1      1000      -0.25
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "NONESUCH" with actor "A1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_bset-1.2 {unknown a} -setup {
         create
@@ -1728,7 +1728,7 @@ F1 A1 1      1000      -0.25
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "F1" with actor "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_bset-1.3 {invalid value} -setup {
         create
@@ -1801,7 +1801,7 @@ F1 A1 -0.25
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "NONESUCH" with actor "A1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_cset-1.2 {unknown a} -setup {
         create
@@ -1811,7 +1811,7 @@ F1 A1 -0.25
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "F1" with actor "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test vrel_cset-1.3 {invalid value} -setup {
         create
@@ -1867,7 +1867,7 @@ F2 A2 0.2
         error
     } -cleanup {
         cleanup
-    } -result {Unknown cause name: "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_persistent-1.2 {unknown g} -setup {
         create
@@ -1877,7 +1877,7 @@ F2 A2 0.2
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "NONESUCH" with concern "AUT"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_persistent-1.3 {unknown c} -setup {
         create
@@ -1887,7 +1887,7 @@ F2 A2 0.2
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "CA1" with concern "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_persistent-1.4 {invalid mag} -setup {
         create
@@ -1897,7 +1897,7 @@ F2 A2 0.2
         error
     } -cleanup {
         cleanup
-    } -result {invalid value "NONESUCH", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "NONESUCH", expected double}
 
     test sat_persistent-1.5 {invalid at t=-1} -setup {
         create -advance0 off
@@ -2099,7 +2099,7 @@ pflag g   c   e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {Unknown cause name: "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_transient-1.2 {unknown g} -setup {
         create
@@ -2109,7 +2109,7 @@ pflag g   c   e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "NONESUCH" with concern "AUT"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_transient-1.3 {unknown c} -setup {
         create
@@ -2119,7 +2119,7 @@ pflag g   c   e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "CA1" with concern "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_transient-1.4 {invalid mag} -setup {
         create
@@ -2129,7 +2129,7 @@ pflag g   c   e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {invalid value "NONESUCH", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "NONESUCH", expected double}
 
     test sat_transient-2.1 {effect when cause is known} -setup {
         create
@@ -2287,7 +2287,7 @@ pflag g   c   e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "NONESUCH" with concern "AUT"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_badjust-1.2 {unknown c} -setup {
         create
@@ -2297,7 +2297,7 @@ pflag g   c   e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "CA1" with concern "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_badjust-1.3 {invalid delta} -setup {
         create
@@ -2370,7 +2370,7 @@ CA1 AUT 1      1000      10.0
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "NONESUCH" with concern "AUT"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_bset-1.2 {unknown c} -setup {
         create
@@ -2380,7 +2380,7 @@ CA1 AUT 1      1000      10.0
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "CA1" with concern "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_bset-1.3 {invalid value} -setup {
         create
@@ -2453,7 +2453,7 @@ CA1 AUT 10.0
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "NONESUCH" with concern "AUT"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_cset-1.2 {unknown c} -setup {
         create
@@ -2463,7 +2463,7 @@ CA1 AUT 10.0
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "CA1" with concern "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test sat_cset-1.3 {invalid value} -setup {
         create
@@ -2520,7 +2520,7 @@ CB2 QOL 0.2
         error
     } -cleanup {
         cleanup
-    } -result {Unknown cause name: "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_persistent-1.2 {unknown f} -setup {
         create
@@ -2530,7 +2530,7 @@ CB2 QOL 0.2
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "NONESUCH", "F1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_persistent-1.3 {unknown g} -setup {
         create
@@ -2540,7 +2540,7 @@ CB2 QOL 0.2
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "CA1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_persistent-1.4 {invalid mag} -setup {
         create
@@ -2550,7 +2550,7 @@ CB2 QOL 0.2
         error
     } -cleanup {
         cleanup
-    } -result {invalid value "NONESUCH", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "NONESUCH", expected double}
 
     test coop_persistent-1.5 {invalid at t=-1} -setup {
         create -advance0 off
@@ -2711,7 +2711,7 @@ pflag f   g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {Unknown cause name: "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_transient-1.2 {unknown f} -setup {
         create
@@ -2721,7 +2721,7 @@ pflag f   g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "NONESUCH", "F1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_transient-1.3 {unknown g} -setup {
         create
@@ -2731,7 +2731,7 @@ pflag f   g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "CA1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_transient-1.4 {invalid mag} -setup {
         create
@@ -2741,7 +2741,7 @@ pflag f   g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {invalid value "NONESUCH", should be a real number in range -100.0, 100.0, or one of: XXXXL+, XXXL+, XXL+, XL+, L+, M+, S+, XS+, XXS+, XXXS+, ZERO, XXXS-, XXS-, XS-, S-, M-, L-, XL-, XXL-, XXXL-, XXXXL-}
+    } -result {invalid value "NONESUCH", expected double}
 
     test coop_transient-2.1 {effect when cause is known} -setup {
         create
@@ -2865,7 +2865,7 @@ pflag f   g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "NONESUCH", "F1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_badjust-1.2 {unknown g} -setup {
         create
@@ -2875,7 +2875,7 @@ pflag f   g  e_id driver_id cause mag
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "CA1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_badjust-1.3 {invalid delta} -setup {
         create
@@ -2948,7 +2948,7 @@ CA1 F1 1      1000      10.0
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "NONESUCH", "F1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_bset-1.2 {unknown g} -setup {
         create
@@ -2958,7 +2958,7 @@ CA1 F1 1      1000      10.0
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "CA1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_bset-1.3 {invalid value} -setup {
         create
@@ -3030,7 +3030,7 @@ CA1 F1 10.0
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "NONESUCH", "F1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_cset-1.2 {unknown g} -setup {
         create
@@ -3040,7 +3040,7 @@ CA1 F1 10.0
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "CA1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test coop_cset-1.3 {invalid value} -setup {
         create
@@ -3334,7 +3334,7 @@ ng_id n_id g_id n  g  nbcoop_denom nbcoop nbcoop0
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "NONESUCH", "F1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test contribs_hrel-1.2 {Unknown c} -setup {
         create
@@ -3344,7 +3344,7 @@ ng_id n_id g_id n  g  nbcoop_denom nbcoop nbcoop0
         error
     } -cleanup {
         cleanup
-    } -result {No HREL curve for groups "CA1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test contribs_hrel-1.3 {invalid -start} -setup {
         create
@@ -3521,7 +3521,7 @@ driver contrib
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "NONESUCH" with actor "A1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test contribs_vrel-1.2 {Unknown c} -setup {
         create
@@ -3531,7 +3531,7 @@ driver contrib
         error
     } -cleanup {
         cleanup
-    } -result {No VREL curve for group "CA1" with actor "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test contribs_vrel-1.3 {invalid -start} -setup {
         create
@@ -3708,7 +3708,7 @@ driver contrib
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "NONESUCH" with concern "AUT"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test contribs_sat-1.2 {Unknown c} -setup {
         create
@@ -3718,7 +3718,7 @@ driver contrib
         error
     } -cleanup {
         cleanup
-    } -result {No SAT curve for group "CA1" with concern "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test contribs_sat-1.3 {invalid -start} -setup {
         create
@@ -3895,7 +3895,7 @@ driver contrib
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "NONESUCH", "F1"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test contribs_coop-1.2 {Unknown g} -setup {
         create
@@ -3905,7 +3905,7 @@ driver contrib
         error
     } -cleanup {
         cleanup
-    } -result {No COOP curve for groups "CA1", "NONESUCH"}
+    } -result {key "NONESUCH" not known in dictionary}
 
     test contribs_coop-1.3 {invalid -start} -setup {
         create

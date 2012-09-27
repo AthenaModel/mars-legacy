@@ -23,6 +23,10 @@ namespace eval ::simlib:: {
 #-----------------------------------------------------------------------
 # Object Types
 
+# A simpler replacement for qmag(n), since we do not in fact give
+# symbolic values to uram(n).
+snit::double ::simlib::umag -min -100.0 -max 100.0
+
 #-----------------------------------------------------------------------
 # uram Type
 #
@@ -318,6 +322,11 @@ snit::type ::simlib::uram {
     #                 {$g,$s,$p,$q -> spread}, where spread is a dict
     #                 {$g_id -> $factor}.
     #   scid        - Sat curve_id dict: g_id -> c_id -> curve_id
+    #   causeIDs    - Dictionary: cause -> cause_id
+    #   hrelIDs     - Dictionary: f -> g -> curve_id
+    #   vrelIDs     - Dictionary: g -> a -> curve_id
+    #   satIDs      - Dictionary: g -> c -> curve_id
+    #   coopIDs     - Dictionary: f -> g -> curve_id
     #
     #-----------------------------------------------------------------------
     
@@ -336,6 +345,11 @@ snit::type ::simlib::uram {
         nextDriver       ""
         ssCache          ""
         scid             ""
+        causeIDs         ""
+        hrelIDs          ""
+        vrelIDs          ""
+        satIDs           ""
+        coopIDs          ""
     }
 
     # info
@@ -411,8 +425,6 @@ snit::type ::simlib::uram {
 
         # NEXT, initialize db
         array set db $clearedDB
-
-        $self Log normal "Created"
     }
     
     # destructor
@@ -632,6 +644,11 @@ snit::type ::simlib::uram {
             }
         }
 
+        # NEXT, save them in a dictionary for quick access.
+        set db(causeIDs) [$rdb eval {
+            SELECT cause, cause_id FROM uram_cause ORDER BY cause_id
+        }]
+
         set trans(loadstate) "causes"
     }
 
@@ -775,6 +792,8 @@ snit::type ::simlib::uram {
 
         array set gids [$rdb eval {SELECT g, g_id FROM uram_g}]
 
+        set db(vrelIDs) [dict create]
+
         foreach {f g base nat} $args {
             set f_id $gids($f)
             set g_id $gids($g)
@@ -786,6 +805,8 @@ snit::type ::simlib::uram {
                 INSERT INTO uram_hrel_t(f_id, g_id, curve_id)
                 VALUES($f_id, $g_id, $curve_id)
             }
+
+            dict set db(hrelIDs) $f $g $curve_id
         }
 
         # Get the fg_id mapping
@@ -811,8 +832,11 @@ snit::type ::simlib::uram {
     method {load vrel} {args} {
         assert {$trans(loadstate) eq "hrel"}
 
+        # FIRST, load the data
         array set gids [$rdb eval {SELECT g, g_id FROM uram_g}]
         array set aids [$rdb eval {SELECT a, a_id FROM uram_a}]
+
+        set db(vrelIDs) [dict create]
 
         foreach {g a base nat} $args {
             set g_id $gids($g)
@@ -825,6 +849,8 @@ snit::type ::simlib::uram {
                 INSERT INTO uram_vrel_t(g_id, a_id, curve_id)
                 VALUES($g_id, $a_id, $curve_id)
             }
+
+            dict set db(vrelIDs) $g $a $curve_id
         }
 
         set trans(loadstate) "vrel"
@@ -849,6 +875,8 @@ snit::type ::simlib::uram {
         array set gids [$rdb eval {SELECT g, g_id FROM uram_g}]
         array set cids [$rdb eval {SELECT c, c_id FROM uram_c}]
 
+        set db(satIDs) [dict create]
+
         foreach {g c base nat saliency} $args {
             set g_id $gids($g)
             set c_id $cids($c)
@@ -860,6 +888,8 @@ snit::type ::simlib::uram {
                 INSERT INTO uram_sat_t(g_id, c_id, curve_id, saliency)
                 VALUES($g_id, $c_id, $curve_id, $saliency);
             }
+
+            dict set db(satIDs) $g $c $curve_id
         }
 
         set trans(loadstate) "sat"
@@ -882,6 +912,8 @@ snit::type ::simlib::uram {
         # FIRST, get the group IDs
         array set gids [$rdb eval {SELECT g, g_id FROM uram_g}]
 
+        set db(coopIDs) [dict create]
+
         foreach {f g base nat} $args {
             set f_id $gids($f)
             set g_id $gids($g)
@@ -895,6 +927,8 @@ snit::type ::simlib::uram {
                 INSERT INTO uram_coop_t(fg_id, f_id, g_id, curve_id)
                 VALUES($fg_id, $f_id, $g_id, $curve_id)
             }
+
+            dict set db(coopIDs) $f $g $curve_id
         }
 
         set trans(loadstate) "coop"
@@ -1222,7 +1256,7 @@ snit::type ::simlib::uram {
     # cause    - A cause name, or ""
     # f        - A group
     # g        - Another group
-    # mag      - A qmag(n) value
+    # mag      - A umag(n) value
     #
     # UNDOABLE. Creates a persistent HREL attitude input with given 
     # driver and cause, affecting the horizontal relationship between 
@@ -1234,10 +1268,9 @@ snit::type ::simlib::uram {
     method {hrel persistent} {driver cause f g mag} {
         require {$db(time) >= 0} "Persistent inputs not allowed when t=-1"
 
-        $self Log detail "hrel persistent driver=$driver cause=$cause f=$f g=$g mag=$mag"
         set cause_id [$self GetCauseID $cause $driver]
-        set curve_id [$self GetHrelID $f $g]
-        set mag      [qmag validate $mag]
+        set curve_id [dict get $db(hrelIDs) $f $g]
+        set mag      [umag validate $mag]
 
         $cm persistent $driver $cause_id $curve_id $mag
     }
@@ -1248,7 +1281,7 @@ snit::type ::simlib::uram {
     # cause    - A cause name, or ""
     # f        - A group
     # g        - Another group
-    # mag      - A qmag(n) value
+    # mag      - A umag(n) value
     #
     # UNDOABLE. Creates a transient HREL attitude input with given 
     # driver and cause, affecting the horizontal relationship between 
@@ -1258,10 +1291,9 @@ snit::type ::simlib::uram {
     # only effect is the direct effect.
 
     method {hrel transient} {driver cause f g mag} {
-        $self Log detail "hrel transient driver=$driver cause=$cause f=$f g=$g mag=$mag"
         set cause_id [$self GetCauseID $cause $driver]
-        set curve_id [$self GetHrelID $f $g]
-        set mag      [qmag validate $mag]
+        set curve_id [dict get $db(hrelIDs) $f $g]
+        set mag      [umag validate $mag]
 
         $cm transient $driver $cause_id $curve_id $mag
     }
@@ -1281,8 +1313,7 @@ snit::type ::simlib::uram {
     method {hrel badjust} {driver f g delta} {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
-        $self Log detail "hrel badjust driver=$driver f=$f g=$g delta=$delta"
-        set curve_id [$self GetHrelID $f $g]
+        set curve_id [dict get $db(hrelIDs) $f $g]
         snit::double validate $delta
 
         # ucurve adds the necessary record to the undo stack
@@ -1304,10 +1335,8 @@ snit::type ::simlib::uram {
     method {hrel bset} {driver f g value} {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
-        $self Log detail "hrel bset driver=$driver f=$f g=$g value=$value"
-
         # FIRST, validate inputs.
-        set curve_id [$self GetHrelID $f $g]
+        set curve_id [dict get $db(hrelIDs) $f $g]
         qaffinity validate $value
 
         # NEXT, get the current value and compute the delta
@@ -1338,33 +1367,12 @@ snit::type ::simlib::uram {
 
         foreach {f g value} $args {
             lappend cmlist \
-                [$self GetHrelID $f $g] [qaffinity validate $value]
+                [dict get $db(hrelIDs) $f $g] [qaffinity validate $value]
         }
 
         # ucurve adds the necessary records to the undo stack
         $cm curve cset {*}$cmlist
     }
-
-    # GetHrelID f g
-    #
-    # f   - A group
-    # g   - Another group
-    #
-    # Returns the curve_id of the HREL curve for f with g,
-    # or throws an error if no curve is found.
-
-    method GetHrelID {f g} {
-        set curve_id [$rdb onecolumn {
-            SELECT curve_id
-            FROM uram_hrel
-            WHERE f=$f AND g=$g
-        }]
-        
-        require {$curve_id ne ""} "No HREL curve for groups \"$f\", \"$g\""
-
-        return $curve_id
-    }
-
 
     #-------------------------------------------------------------------
     # VREL attitude methods
@@ -1375,7 +1383,7 @@ snit::type ::simlib::uram {
     # cause    - A cause name, or ""
     # g        - A group
     # a        - An actor
-    # mag      - A qmag(n) value
+    # mag      - A umag(n) value
     #
     # UNDOABLE. Creates a persistent VREL attitude input with given 
     # driver and cause, affecting the vertical relationship between 
@@ -1387,10 +1395,9 @@ snit::type ::simlib::uram {
     method {vrel persistent} {driver cause g a mag} {
         require {$db(time) >= 0} "Persistent inputs not allowed when t=-1"
 
-        $self Log detail "vrel persistent driver=$driver cause=$cause g=$g a=$a mag=$mag"
         set cause_id [$self GetCauseID $cause $driver]
-        set curve_id [$self GetVrelID $g $a]
-        set mag      [qmag validate $mag]
+        set curve_id [dict get $db(vrelIDs) $g $a] 
+        set mag      [umag validate $mag]
 
         $cm persistent $driver $cause_id $curve_id $mag
     }
@@ -1401,7 +1408,7 @@ snit::type ::simlib::uram {
     # cause    - A cause name, or ""
     # g        - A group
     # a        - An actor
-    # mag      - A qmag(n) value
+    # mag      - A umag(n) value
     #
     # UNDOABLE. Creates a transient VREL attitude input with given 
     # driver and cause, affecting the vertical relationship between 
@@ -1411,10 +1418,9 @@ snit::type ::simlib::uram {
     # only effect is the direct effect.
 
     method {vrel transient} {driver cause g a mag} {
-        $self Log detail "vrel transient driver=$driver cause=$cause g=$g a=$a mag=$mag"
         set cause_id [$self GetCauseID $cause $driver]
-        set curve_id [$self GetVrelID $g $a]
-        set mag      [qmag validate $mag]
+        set curve_id [dict get $db(vrelIDs) $g $a] 
+        set mag      [umag validate $mag]
 
         $cm transient $driver $cause_id $curve_id $mag
     }
@@ -1434,8 +1440,7 @@ snit::type ::simlib::uram {
     method {vrel badjust} {driver g a delta} {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
-        $self Log detail "vrel badjust driver=$driver g=$g a=$a delta=$delta"
-        set curve_id [$self GetVrelID $g $a]
+        set curve_id [dict get $db(vrelIDs) $g $a] 
         snit::double validate $delta
 
         # ucurve adds the necessary record to the undo stack
@@ -1457,10 +1462,8 @@ snit::type ::simlib::uram {
     method {vrel bset} {driver g a value} {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
-        $self Log detail "vrel bset driver=$driver g=$g a=$a value=$value"
-
         # FIRST, validate inputs.
-        set curve_id [$self GetVrelID $g $a]
+        set curve_id [dict get $db(vrelIDs) $g $a] 
         qaffinity validate $value
 
         # NEXT, get the current value and compute the delta
@@ -1491,32 +1494,12 @@ snit::type ::simlib::uram {
 
         foreach {g a value} $args {
             lappend cmlist \
-                [$self GetVrelID $g $a] [qaffinity validate $value]
+                [dict get $db(vrelIDs) $g $a] \
+                [qaffinity validate $value]
         }
 
         # ucurve adds the necessary records to the undo stack
         $cm curve cset {*}$cmlist
-    }
-
-    # GetVrelID g a
-    #
-    # g   - A group
-    # a   - An actor group
-    #
-    # Returns the curve_id of the VREL curve for g with a,
-    # or throws an error if no curve is found.
-
-    method GetVrelID {g a} {
-        set curve_id [$rdb onecolumn {
-            SELECT curve_id
-            FROM uram_vrel
-            WHERE g=$g AND a=$a
-        }]
-        
-        require {$curve_id ne ""} \
-            "No VREL curve for group \"$g\" with actor \"$a\""
-
-        return $curve_id
     }
 
     #-------------------------------------------------------------------
@@ -1528,7 +1511,7 @@ snit::type ::simlib::uram {
     # cause    - A cause name, or ""
     # g        - A civilian group
     # c        - A concern
-    # mag      - A qmag(n) value
+    # mag      - A umag(n) value
     #
     # Options:
     #
@@ -1545,13 +1528,12 @@ snit::type ::simlib::uram {
     method {sat persistent} {driver cause g c mag args} {
         require {$db(time) >= 0} "Persistent inputs not allowed when t=-1"
 
-        $self Log detail "sat persistent driver=$driver cause=$cause g=$g c=$c mag=$mag {*}$args"
         # FIRST, validate the normal inputs and retrieve IDs.
         set cause_id [$self GetCauseID $cause $driver]
-        set curve_id [$self GetSatID $g $c]
+        set curve_id [dict get $db(satIDs) $g $c]
         set g_id     [$self GetGroupID $g]
         set c_id     [$self GetConcernID $c]
-        set mag      [qmag validate $mag]
+        set mag      [umag validate $mag]
 
         # NEXT, if the mag is 0.0, ignore it.
         if {$mag == 0.0} {
@@ -1575,7 +1557,7 @@ snit::type ::simlib::uram {
     # cause    - A cause name, or ""
     # g        - A civilian group
     # c        - A concern
-    # mag      - A qmag(n) value
+    # mag      - A umag(n) value
     #
     # Options:
     #
@@ -1590,13 +1572,12 @@ snit::type ::simlib::uram {
     # -p, and -q.
 
     method {sat transient} {driver cause g c mag args} {
-        $self Log detail "sat transient driver=$driver cause=$cause g=$g c=$c mag=$mag {*}$args"
         # FIRST, validate the normal inputs and retrieve IDs.
         set cause_id [$self GetCauseID $cause $driver]
-        set curve_id [$self GetSatID $g $c]
+        set curve_id [dict get $db(satIDs) $g $c]
         set g_id     [$self GetGroupID $g]
         set c_id     [$self GetConcernID $c]
-        set mag      [qmag validate $mag]
+        set mag      [umag validate $mag]
 
         # NEXT, if the mag is 0.0, ignore it.
         if {$mag == 0.0} {
@@ -1724,9 +1705,7 @@ snit::type ::simlib::uram {
     method {sat badjust} {driver g c delta} {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
-        $self Log detail "sat badjust driver=$driver g=$g c=$c delta=$delta"
-
-        set curve_id [$self GetSatID $g $c]
+        set curve_id [dict get $db(satIDs) $g $c]
         snit::double validate $delta
 
         # ucurve adds the necessary record to the undo stack
@@ -1748,10 +1727,8 @@ snit::type ::simlib::uram {
     method {sat bset} {driver g c value} {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
-        $self Log detail "sat bset driver=$driver g=$g c=$c value=$value"
-
         # FIRST, validate inputs.
-        set curve_id [$self GetSatID $g $c]
+        set curve_id [dict get $db(satIDs) $g $c]
         qsat validate $value
 
         # NEXT, get the current value and compute the delta
@@ -1783,32 +1760,11 @@ snit::type ::simlib::uram {
 
         foreach {g c value} $args {
             lappend cmlist \
-                [$self GetSatID $g $c] [qsat validate $value]
+                [dict get $db(satIDs) $g $c] [qsat validate $value]
         }
 
         # ucurve adds the necessary records to the undo stack
         $cm curve cset {*}$cmlist
-    }
-
-    # GetSatID g c
-    #
-    # g   - A civilian group
-    # c   - A concern
-    #
-    # Returns the curve_id of the SAT curve for g with c,
-    # or throws an error if no curve is found.
-
-    method GetSatID {g c} {
-        set curve_id [$rdb onecolumn {
-            SELECT curve_id
-            FROM uram_sat
-            WHERE g=$g AND c=$c
-        }]
-        
-        require {$curve_id ne ""} \
-            "No SAT curve for group \"$g\" with concern \"$c\""
-
-        return $curve_id
     }
 
     # GetConcernID c
@@ -1840,7 +1796,7 @@ snit::type ::simlib::uram {
     # cause    - A cause name, or ""
     # f        - A civilian group
     # g        - A force group
-    # mag      - A qmag(n) value
+    # mag      - A umag(n) value
     #
     # Options:
     #
@@ -1857,12 +1813,10 @@ snit::type ::simlib::uram {
     method {coop persistent} {driver cause f g mag args} {
         require {$db(time) >= 0} "Persistent inputs not allowed when t=-1"
 
-        $self Log detail "coop persistent driver=$driver cause=$cause f=$f g=$g mag=$mag {*}$args"
-
         # FIRST, validate the normal inputs and retrieve IDs.
         set cause_id [$self GetCauseID $cause $driver]
-        set curve_id [$self GetCoopID $f $g]
-        set mag      [qmag validate $mag]
+        set curve_id [dict get $db(coopIDs) $f $g]
+        set mag      [umag validate $mag]
         set f_id     [$self GetGroupID $f]
         set g_id     [$self GetGroupID $g]
 
@@ -1889,7 +1843,7 @@ snit::type ::simlib::uram {
     # cause    - A cause name, or ""
     # f        - A civilian group
     # g        - A force group
-    # mag      - A qmag(n) value
+    # mag      - A umag(n) value
     #
     # Options:
     #
@@ -1904,12 +1858,10 @@ snit::type ::simlib::uram {
     # -p, and -q.
 
     method {coop transient} {driver cause f g mag args} {
-        $self Log detail "coop transient driver=$driver cause=$cause f=$f g=$g mag=$mag {*}$args"
-
         # FIRST, validate the normal inputs and retrieve IDs.
         set cause_id [$self GetCauseID $cause $driver]
-        set curve_id [$self GetCoopID $f $g]
-        set mag      [qmag validate $mag]
+        set curve_id [dict get $db(coopIDs) $f $g]
+        set mag      [umag validate $mag]
         set f_id     [$self GetGroupID $f]
         set g_id     [$self GetGroupID $g]
 
@@ -2004,8 +1956,7 @@ snit::type ::simlib::uram {
     method {coop badjust} {driver f g delta} {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
-        $self Log detail "coop badjust driver=$driver f=$f g=$g delta=$delta"
-        set curve_id [$self GetCoopID $f $g]
+        set curve_id [dict get $db(coopIDs) $f $g]
         snit::double validate $delta
 
         # ucurve adds the necessary record to the undo stack
@@ -2027,10 +1978,8 @@ snit::type ::simlib::uram {
     method {coop bset} {driver f g value} {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
-        $self Log detail "coop bset driver=$driver f=$f g=$g value=$value"
-
         # FIRST, validate inputs.
-        set curve_id [$self GetCoopID $f $g]
+        set curve_id [dict get $db(coopIDs) $f $g]
         qcooperation validate $value
 
         # NEXT, get the current value and compute the delta
@@ -2061,34 +2010,12 @@ snit::type ::simlib::uram {
 
         foreach {f g value} $args {
             lappend cmlist \
-                [$self GetCoopID $f $g] [qcooperation validate $value]
+                [dict get $db(coopIDs) $f $g] [qcooperation validate $value]
         }
 
         # ucurve adds the necessary records to the undo stack
         $cm curve cset {*}$cmlist
     }
-
-    # GetCoopID f g
-    #
-    # f   - A civilian group
-    # g   - A force group
-    #
-    # Returns the curve_id of the COOP curve for f with g,
-    # or throws an error if no curve is found.
-
-    method GetCoopID {f g} {
-        set curve_id [$rdb onecolumn {
-            SELECT curve_id
-            FROM uram_coop
-            WHERE f=$f AND g=$g
-        }]
-        
-        require {$curve_id ne ""} "No COOP curve for groups \"$f\", \"$g\""
-
-        return $curve_id
-    }
-
-
 
     #-------------------------------------------------------------------
     # Input Helpers
@@ -2106,11 +2033,7 @@ snit::type ::simlib::uram {
         if {$cause eq ""} {
             set cause_id $driver
         } else {
-            set cause_id [$rdb onecolumn {
-                SELECT cause_id FROM uram_cause WHERE cause=$cause
-            }]
-
-            require {$cause_id ne ""} "Unknown cause name: \"$cause\""
+            set cause_id [dict get $db(causeIDs) $cause]
         }
 
         return $cause_id
@@ -2227,7 +2150,7 @@ snit::type ::simlib::uram {
     #    -end      - End tick; default is now.
 
     method {contribs hrel} {f g args} {
-        $self GetCurveContribs [$self GetHrelID $f $g] {*}$args
+        $self GetCurveContribs [dict get $db(hrelIDs) $f $g] {*}$args
     }
 
     # contribs vrel g a ?options...?
@@ -2240,7 +2163,7 @@ snit::type ::simlib::uram {
     #    -end      - End tick; default is now.
 
     method {contribs vrel} {g a args} {
-        $self GetCurveContribs [$self GetVrelID $g $a] {*}$args
+        $self GetCurveContribs [dict get $db(vrelIDs) $g $a] {*}$args
     }
 
     # contribs sat g c ?options...?
@@ -2253,7 +2176,7 @@ snit::type ::simlib::uram {
     #    -end      - End tick; default is now.
 
     method {contribs sat} {g c args} {
-        $self GetCurveContribs [$self GetSatID $g $c] {*}$args
+        $self GetCurveContribs [dict get $db(satIDs) $g $c] {*}$args
     }
 
     # contribs coop f g ?options...?
@@ -2266,7 +2189,7 @@ snit::type ::simlib::uram {
     #    -end      - End tick; default is now.
 
     method {contribs coop} {f g args} {
-        $self GetCurveContribs [$self GetCoopID $f $g] {*}$args
+        $self GetCurveContribs [dict get $db(coopIDs) $f $g] {*}$args
     }
 
     # contribs mood g ?options...?
