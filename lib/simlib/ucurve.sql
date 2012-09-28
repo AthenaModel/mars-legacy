@@ -148,6 +148,8 @@ CREATE TABLE ucurve_effects_t (
     actual       DOUBLE DEFAULT 0.0
 );
 
+CREATE INDEX ucurve_effects_cc_index ON ucurve_effects_t(curve_id,cause_id);
+
 ------------------------------------------------------------------------
 -- Baseline Adjustments
 
