@@ -806,27 +806,19 @@ snit::type ::simlib::ucurve {
             FROM ucurve_ctypes   AS T
             JOIN ucurve_curves_t AS C USING (ct_id)
         }] {
-            $self SetBaseline $curve_id $bnew $min $max
+            # Note: This same UPDATE is used in 
+            # UpdateBaselineAndScalingFactors; if it's updated here,
+            # it should be updated there.
+            $rdb eval {
+                UPDATE ucurve_curves_t
+                SET b = $bnew,
+                    posfactor = ($max - $bnew)/100.0,
+                    negfactor = ($bnew - $min)/100.0
+                WHERE curve_id = $curve_id
+            }
         }
     }
 
-
-    # SetBaseline curve_id b min max
-    #
-    # curve_id   - A curve ID
-    # b          - A new baseline value
-    # min        - The curve's minimum bound
-    # max        - The curve's maximum bound
-
-    method SetBaseline {curve_id b min max} {
-        $rdb eval {
-            UPDATE ucurve_curves_t
-            SET b = $b,
-                posfactor = ($max - $b)/100.0,
-                negfactor = ($b - $min)/100.0
-            WHERE curve_id = $curve_id
-        }
-    }
 
     # ComputeContributionsByCause mode
     #
@@ -968,7 +960,16 @@ snit::type ::simlib::ucurve {
                 set bnew $min
             }
 
-            $self SetBaseline $curve_id $bnew $min $max
+            # Note: This same UPDATE is used in 
+            # ComputeBaselineAndScalingFactors; if it's updated here,
+            # it should be updated there.
+            $rdb eval {
+                UPDATE ucurve_curves_t
+                SET b = $bnew,
+                    posfactor = ($max - $bnew)/100.0,
+                    negfactor = ($bnew - $min)/100.0
+                WHERE curve_id = $curve_id
+            }
         }
     }
 
@@ -1012,7 +1013,7 @@ snit::type ::simlib::ucurve {
             return
         }
 
-        $rdb eval {
+        $rdb explain {
             SELECT curve_id, driver_id, total(actual) as contrib
             FROM ucurve_effects_t
             GROUP BY curve_id, driver_id
