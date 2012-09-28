@@ -1013,7 +1013,7 @@ snit::type ::simlib::ucurve {
             return
         }
 
-        $rdb explain {
+        $rdb eval {
             SELECT curve_id, driver_id, total(actual) as contrib
             FROM ucurve_effects_t
             GROUP BY curve_id, driver_id

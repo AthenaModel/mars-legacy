@@ -1662,13 +1662,12 @@ snit::type ::simlib::uram {
         set spread [dict create]
 
         $rdb eval {
-            SELECT R.f_id      AS f_id,
-                   R.hrel      AS hrel,
-                   P.proximity AS proximity
-            FROM uram_hrel     AS R
-            JOIN uram_civrel_t AS P USING (fg_id)
-            WHERE R.g_id = $g_id
-            AND   P.proximity < $plimit
+            SELECT f_id      AS f_id,
+                   hrel      AS hrel,
+                   proximity AS proximity
+            FROM uram_civrel 
+            WHERE g_id = $g_id
+            AND   proximity < $plimit
         } {
             # FIRST, Apply the RAFs.
             set hrel [expr {$hrel > 0.0 ? $hrel * $praf : $hrel * $nraf}]
