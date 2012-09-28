@@ -323,6 +323,8 @@ snit::type ::simlib::uram {
     #                 {$g_id -> $factor}.
     #   scid        - Sat curve_id dict: g_id -> c_id -> curve_id
     #   causeIDs    - Dictionary: cause -> cause_id
+    #   groupIDs    - Dictionary: g -> g_id
+    #   concernIDs  - Dictionary: c -> c_id
     #   hrelIDs     - Dictionary: f -> g -> curve_id
     #   vrelIDs     - Dictionary: g -> a -> curve_id
     #   satIDs      - Dictionary: g -> c -> curve_id
@@ -343,13 +345,15 @@ snit::type ::simlib::uram {
         initialized      0
         time             ""
         nextDriver       ""
-        ssCache          ""
-        scid             ""
-        causeIDs         ""
-        hrelIDs          ""
-        vrelIDs          ""
-        satIDs           ""
-        coopIDs          ""
+        ssCache          {}
+        scid             {}
+        causeIDs         {}
+        groupIDs         {}
+        concernIDs       {}
+        hrelIDs          {}
+        vrelIDs          {}
+        satIDs           {}
+        coopIDs          {}
     }
 
     # info
@@ -583,6 +587,10 @@ snit::type ::simlib::uram {
             INSERT INTO uram_c(c) VALUES('SFT');
         }
 
+        set db(concernIDs) [$rdb eval {
+            SELECT c, c_id FROM uram_c
+        }]
+
         # NEXT, the client's -loadcmd must call the "load *" methods
         # in a precise sequence.  Set up the state machine to handle
         # it.
@@ -772,6 +780,11 @@ snit::type ::simlib::uram {
                 INSERT INTO uram_g(g,gtype) VALUES($g,$gtype);
             }
         }
+
+        # NEXT, cache all of the group IDs.
+        set db(groupIDs) [$rdb eval {
+            SELECT g, g_id FROM uram_g
+        }]
 
         set trans(loadstate) "otherg"
     }
@@ -1071,7 +1084,7 @@ snit::type ::simlib::uram {
 
     method {update pop} {args} {
         foreach {g pop} $args {
-            set g_id [$self GetGroupID $g]
+            set g_id [dict get $db(groupIDs) $g]
 
             $rdb eval {
                 UPDATE uram_civ_g
@@ -1531,8 +1544,8 @@ snit::type ::simlib::uram {
         # FIRST, validate the normal inputs and retrieve IDs.
         set cause_id [$self GetCauseID $cause $driver]
         set curve_id [dict get $db(satIDs) $g $c]
-        set g_id     [$self GetGroupID $g]
-        set c_id     [$self GetConcernID $c]
+        set g_id     [dict get $db(groupIDs) $g]
+        set c_id     [dict get $db(concernIDs) $c]
         set mag      [umag validate $mag]
 
         # NEXT, if the mag is 0.0, ignore it.
@@ -1575,8 +1588,8 @@ snit::type ::simlib::uram {
         # FIRST, validate the normal inputs and retrieve IDs.
         set cause_id [$self GetCauseID $cause $driver]
         set curve_id [dict get $db(satIDs) $g $c]
-        set g_id     [$self GetGroupID $g]
-        set c_id     [$self GetConcernID $c]
+        set g_id     [dict get $db(groupIDs) $g]
+        set c_id     [dict get $db(concernIDs) $c]
         set mag      [umag validate $mag]
 
         # NEXT, if the mag is 0.0, ignore it.
@@ -1767,26 +1780,6 @@ snit::type ::simlib::uram {
         $cm curve cset {*}$cmlist
     }
 
-    # GetConcernID c
-    #
-    # c   - A concern
-    #
-    # Returns the c_id of concern c,
-    # or throws an error if no curve is found.
-
-    method GetConcernID {c} {
-        set c_id [$rdb onecolumn {
-            SELECT c_id
-            FROM uram_c
-            WHERE c=$c
-        }]
-        
-        require {$c_id ne ""} \
-            "No concern \"$c\""
-
-        return $c_id
-    }
-
     #-------------------------------------------------------------------
     # COOP attitude methods
 
@@ -1817,8 +1810,8 @@ snit::type ::simlib::uram {
         set cause_id [$self GetCauseID $cause $driver]
         set curve_id [dict get $db(coopIDs) $f $g]
         set mag      [umag validate $mag]
-        set f_id     [$self GetGroupID $f]
-        set g_id     [$self GetGroupID $g]
+        set f_id     [dict get $db(groupIDs) $f]
+        set g_id     [dict get $db(groupIDs) $g]
 
         # NEXT, if the mag is 0.0, ignore it.
         if {$mag == 0.0} {
@@ -1862,8 +1855,8 @@ snit::type ::simlib::uram {
         set cause_id [$self GetCauseID $cause $driver]
         set curve_id [dict get $db(coopIDs) $f $g]
         set mag      [umag validate $mag]
-        set f_id     [$self GetGroupID $f]
-        set g_id     [$self GetGroupID $g]
+        set f_id     [dict get $db(groupIDs) $f]
+        set g_id     [dict get $db(groupIDs) $g]
 
         # NEXT, if the mag is 0.0, ignore it.
         if {$mag == 0.0} {
@@ -2038,25 +2031,6 @@ snit::type ::simlib::uram {
 
         return $cause_id
     }
-
-    # GetGroupID g
-    #
-    # g   - A group
-    #
-    # Returns the g_id of group g, or throws an error if no group 
-    # is found.
-
-    method GetGroupID {g} {
-        set g_id [$rdb onecolumn {
-            SELECT g_id FROM uram_g WHERE g=$g
-        }]
-        
-        require {$g_id ne ""} \
-            "No such group \"$g\""
-
-        return $g_id
-    }
-
 
     # ParseInputOptions optsArray optsList
     #

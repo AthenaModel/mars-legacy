@@ -124,8 +124,8 @@ namespace eval ::simlib::test {
     # Artificially sets group proximities in uram_civprox
 
     proc setprox {f g prox} {
-        set f_id [jr GetGroupID $f]
-        set g_id [jr GetGroupID $g]
+        set f_id [rdb onecolumn {SELECT g_id FROM uram_g WHERE g=$f}]
+        set g_id [rdb onecolumn {SELECT g_id FROM uram_g WHERE g=$g}]
 
         rdb eval {
             UPDATE uram_civrel_t 
