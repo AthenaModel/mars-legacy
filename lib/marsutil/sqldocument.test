@@ -959,6 +959,18 @@ namespace eval ::marsutil::test {
         cleanup
     } -result {{fifth INSERT} {52 {}}}
 
+    test delete-4.1 {grab NULLs use nullvalue} -setup {
+        delete_setup
+        db nullvalue "@"
+    } -body {
+        # Deleting a row from fifth that has NULL in fourth_id
+        # should grab only the row from fifth.
+        db delete -grab fifth {fifth_id=52}
+    } -cleanup {
+        db nullvalue ""
+        cleanup
+    } -result {{fifth INSERT} {52 @}}
+
     #-------------------------------------------------------------------
     # safeeval
 

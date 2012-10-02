@@ -686,6 +686,10 @@ snit::type ::marsutil::sqldocument {
 
     typevariable grab_data
 
+    # nullvalue: The current [$db nullvalue]
+
+    typevariable nullvalue
+
     # delete ?-grab? table condition ?table condition...?
     #
     # db         - An sqldocument handle
@@ -705,6 +709,7 @@ snit::type ::marsutil::sqldocument {
         }
 
         # NEXT, clear the grab_data
+        set nullvalue [$db nullvalue]
         set grab_data [dict create]
 
         # NEXT, delete the data
@@ -741,9 +746,17 @@ snit::type ::marsutil::sqldocument {
     # values  - A list of column values for a row.
     #
     # Stashes the grabbed data in the grab_data dict.
+    # TBD: Null values come across as "", regardless of
+    # the "nullvalue" setting.
 
     proc GrabFunc {table args} {
-        dict lappend grab_data [list $table INSERT] {*}$args
+        foreach value $args {
+            if {$value ne ""} {
+                dict lappend grab_data [list $table INSERT] $value
+            } else {
+                dict lappend grab_data [list $table INSERT] $nullvalue
+            }
+        }
         return
     }
 
