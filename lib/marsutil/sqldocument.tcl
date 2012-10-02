@@ -768,7 +768,7 @@ snit::type ::marsutil::sqldocument {
 
                 CREATE TEMP TRIGGER sqldocument_trace_${table}
                 BEFORE DELETE ON $table BEGIN
-                SELECT sqldocument_grab('$table',quote(old.[join $names ),quote(old.]));
+                SELECT sqldocument_grab('$table',old.[join $names ,old.]);
                 END;
             "
         }

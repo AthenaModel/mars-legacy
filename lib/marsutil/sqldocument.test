@@ -921,7 +921,7 @@ namespace eval ::marsutil::test {
         db delete -grab second {second_id=4}
     } -cleanup {
         cleanup
-    } -result {{second INSERT} {4 2 NULL 'W'}}
+    } -result {{second INSERT} {4 2 {} W}}
     
     test delete-2.2 {delete rows from multiple tables, -grab} -setup {
         delete_setup
@@ -929,7 +929,7 @@ namespace eval ::marsutil::test {
         db delete -grab second {second_id=4} fourth {fourth_id=5}
     } -cleanup {
         cleanup
-    } -result {{second INSERT} {4 2 NULL 'W'} {fourth INSERT} {5 'E'}}
+    } -result {{second INSERT} {4 2 {} W} {fourth INSERT} {5 E}}
 
     test delete-2.3 {cascading delete, -grab} -setup {
         delete_setup
@@ -937,7 +937,7 @@ namespace eval ::marsutil::test {
         db delete -grab first {first_id=1}
     } -cleanup {
         cleanup
-    } -result {{first INSERT} {1 'A'} {second INSERT} {1 1 1 'X' 2 2 1 'Y' 3 3 2 'Z'}}
+    } -result {{first INSERT} {1 A} {second INSERT} {1 1 1 X 2 2 1 Y 3 3 2 Z}}
 
     test delete-3.1 {grab with triggered-delete} -setup {
         delete_setup
@@ -947,7 +947,7 @@ namespace eval ::marsutil::test {
         db delete -grab fifth {fifth_id=51}
     } -cleanup {
         cleanup
-    } -result {{fifth INSERT} {51 4} {fourth INSERT} {4 'D'}}
+    } -result {{fifth INSERT} {51 4} {fourth INSERT} {4 D}}
 
     test delete-3.2 {grab with triggered-delete, no match} -setup {
         delete_setup
@@ -957,7 +957,7 @@ namespace eval ::marsutil::test {
         db delete -grab fifth {fifth_id=52}
     } -cleanup {
         cleanup
-    } -result {{fifth INSERT} {52 NULL}}
+    } -result {{fifth INSERT} {52 {}}}
 
     #-------------------------------------------------------------------
     # safeeval
