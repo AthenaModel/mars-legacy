@@ -323,7 +323,7 @@ specified <i>table</i>, excluding <i>table</i> itself.  If the
 tables that depend indirectly on <i>table</i>.  It is an error if
 <i>table</i> is unknown.<p>
 
-<<defitem grab {$db grab ?-tcl? <i>table condition</i> ?<i>table condition...</i>?}>>
+<<defitem grab {$db grab ?-insert? <i>table condition</i> ?<i>table condition...</i>?}>>
 
 Grabs a collection of rows from one or more tables in the 
 database, and returns them to the user as one value.  The grabbed data
@@ -337,16 +337,13 @@ structure {<i>tableSpec values tableSpec values...</i>} where
 <i>tableSpec</i> identifies the table and <i>values</i> is a flat list of
 column values for all of the grabbed rows from the table.  As returned
 by <<iref grab>>, the <i>tableSpec</i> is simply the name of the
-table; however, it may also be a list {<i>tableName</i> INSERT}.  The
+table; if the optional <code>-insert</code> option is included, 
+however, it will be a list {<i>tableName</i> INSERT}.  The
 INSERT tag tells <<iref ungrab>> to use INSERT to put the data
 in the table rather than UPDATE.<p>
 
-Because the primary use of this command is to save data to be
-ungrabbed later, the individual column values are SQL-quoted for
-direct interpolation into an SQL statement.  In particular, string
-values are quoted with single quotes and NULL values appear as NULL.
-Use the <code>-tcl</code> option when the grabbed data is to be used
-directly by Tcl code, as it leaves the column values unquoted.<p>
+NULL values are retrieved as the SQLite3 "nullvalue", which defaults
+to the empty string.<p>
 
 For example,<p>
 
@@ -357,15 +354,9 @@ For example,<p>
 will grab all rows from table1 where x = 5, and all rows from
 table2 where y = 10.<p>
 
-The "grab data set" returned by this command is one form of a
-more general structure in which the table names can be tagged
-with the word "INSERT".
-
 The result of calling <<iref grab>> can be passed to
 the <<iref ungrab>> command to put the rows
-back in the database (provided that the <code>-tcl</code> option is
-not specified).<p>
-
+back in the database.<p>
 
 <<defitem insert {$db insert <i>table dict</i>}>>
 
@@ -568,7 +559,7 @@ values.<p>
     ...
     # Code that updates the grabbed rows.
     ...
-    sqlib ungrab $db $data
+    $db ungrab $data
 </pre>
 
 If the INSERT tag is included in a table spec, this command
@@ -577,6 +568,10 @@ can also be used to re-insert deleted rows.<p>
 Note that the schemas of the relevant tables should not be altered
 between grabbing and ungrabbing, or the ungrabbing will have
 unpredictable results.<p>
+
+Whether updating or inserting, values that match the 
+SQLite3 "nullvalue" will be inserted as NULL.  When updating, however,
+it is assumed that key columns do not contain NULL.<p>
 
 <<defitem unlock {$db unlock <i>tables</i>}>>
 

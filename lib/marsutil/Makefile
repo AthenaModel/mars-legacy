@@ -34,6 +34,9 @@ test_order:
 test_sqldocument:
 	$(TCLSH) sqldocument.test $(FLAGS)
 
+test_sqlib:
+	$(TCLSH) sqlib.test $(FLAGS)
+
 test_undostack:
 	$(TCLSH) undostack.test $(FLAGS)
 

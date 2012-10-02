@@ -614,7 +614,7 @@ snit::type ::marsutil::sqlib {
         }
     }
 
-    # grab db ?-tcl? table condition ?table condition...?
+    # grab db ?-insert? table condition ?table condition...?
     #
     # db        - A database handle
     # table     - Name of a table in db
@@ -627,39 +627,31 @@ snit::type ::marsutil::sqlib {
     #    <table> <values> ...
     #
     # where <table> is the table name and <values> is a flat list 
-    # of column values for the columns in table.  The individual
-    # column values are SQL-quoted appropriately for direct insertion 
-    # into an INSERT statement; this allows grab/ungrab to preserve
-    # NULLs.
+    # of column values for the columns in table. NULLs are reported
+    # using the SQLite3 "nullvalue"; [ungrab] converts them back to NULLs.
     #
-    # If the -tcl option is included before the first table
-    # name, the values will not be SQL-quoted.
+    # If the -insert option is included, the table name will be the list
+    # {tableName INSERT}, and [ungrab] will INSERT the rows instead of
+    # UPDATE-ing them.
 
     typemethod grab {db args} {
-        # FIRST, prepare to stash the grabbed data
-        set result [list]
-
-        # NEXT, get the option, if any.
-        if {[lindex $args 0] eq "-tcl"} {
+        # FIRST, get the insert flag.
+        if {[lindex $args 0] eq "-insert"} {
+            set insertFlag 1
             lshift args
-            set tclSyntax 1
         } else {
-            set tclSyntax 0
+            set insertFlag 0
         }
+
+        # NEXT, prepare to stash the grabbed data
+        set result [list]
 
         # NEXT, grab rows for each table.
         foreach {table condition} $args {
-            set quotes [list]
+            set columns [sqlib columns $db $table]
 
-            foreach name [sqlib columns $db $table] {
-                if {$tclSyntax} {
-                    lappend quotes $name
-                } else {
-                    lappend quotes "quote($name)"
-                }
-            }
-
-            set query "SELECT [join $quotes ,] FROM $table"
+            # TBD: Use "*"?
+            set query "SELECT [join $columns ,] FROM $table"
 
             if {$condition ne ""} {
                 append query " WHERE $condition"
@@ -667,8 +659,14 @@ snit::type ::marsutil::sqlib {
             
             set rows [uplevel 1 [list $db eval $query]]
 
+            if {$insertFlag} {
+                set tableSpec [list $table INSERT]
+            } else {
+                set tableSpec $table
+            }
+
             if {[llength $rows] > 0} {
-                lappend result $table $rows
+                lappend result $tableSpec $rows
             }
         }
 
@@ -685,14 +683,16 @@ snit::type ::marsutil::sqlib {
     # Puts row data into each table using UPDATE, or INSERT if the
     # table spec includes the INSERT tag.  The same table may appear
     # multiple times.  Each "values" entry must be a list of column
-    # values quoted appropriately for direct inclusion in an SQL
-    # statement.  The length of the "values" entry must be a multiple
-    # of the number of columns in the table.
+    # values in Tcl format; values matching the SQLite3 "nullvalue"
+    # will be put into the database as NULLs.  The length of the "values" 
+    # entry must be a multiple of the number of columns in the table.
 
     typemethod ungrab {db data} {
-        set sql ""
-
         foreach {table values} $data {
+            if {[llength $values] == 0} {
+                continue
+            }
+
             # FIRST, parse the table spec.
             lassign $table tableName tag
             
@@ -704,35 +704,45 @@ snit::type ::marsutil::sqlib {
             # NEXT, get the SQL statements for this table
             # and set of values.
             if {$tag eq "INSERT"} {
-                append sql [InsertGrabValues $tableName $ncols $values]
+                InsertGrabValues $db $tableName $ncols $values
             } else {
-                append sql [UpdateGrabValues $db $tableName $values]
+                UpdateGrabValues $db $tableName $values
             }
         }
-
-        # NEXT, evaluate the query.
-        $db eval $sql
+        return
     }
 
-    # InsertGrabValues table ncols values
+    # InsertGrabValues db table ncols values
     #
+    # db     - The database
     # table  - A table name
     # ncols  - Number of columns in table
     # values - A list of column values comprising 1 to N distinct rows.
     #
-    # Returns SQL code to insert the rows into the table.
+    # Inserts the grab values into the table.
 
-    proc InsertGrabValues {table ncols values} {
-        set sql ""
-
-        while {[llength $values] > 0} {
-            set row    [lrange $values 0 $ncols-1]
-            set values [lrange $values $ncols end]
-
-            append sql "INSERT INTO $table VALUES([join $row ,]);\n"
+    proc InsertGrabValues {db table ncols values} {
+        # FIRST, create the query string.
+        set vars [list]
+        set nul [$db nullvalue]
+        for {set i 0} {$i < $ncols} {incr i} {
+            lappend vars "nullif(\$b($i),\$nul)"
         }
 
-        return $sql
+        set sql "INSERT INTO $table VALUES([join $vars ,]);"
+
+        # NEXT, insert the rows
+        set i 0
+
+        foreach val $values {
+            set b($i) $val
+            incr i
+
+            if {$i == $ncols} {
+                set i 0
+                $db eval $sql
+            }
+        }
     }
 
     # UpdateGrabValues db table values
@@ -754,31 +764,35 @@ snit::type ::marsutil::sqlib {
         
         set ncols [llength $columns]
 
-        # NEXT, prepare to accumulate the SQL code.
-        set sql ""
+        # NEXT, build the update statement
+        set ands [list]
+        set sets [list]
+        set nul [$db nullvalue]
 
-        # NEXT, step through the records, building UPDATE statemetns.
+        for {set i 0} {$i < $ncols} {incr i} {
+            set col [lindex $columns $i]
 
-        while {[llength $values] > 0} {
-            set row    [lrange $values 0 $ncols-1]
-            set values [lrange $values $ncols end]
-
-            set sets [list]
-            set ands [list]
-
-            foreach col $columns value $row {
-                if {$key($col)} {
-                    lappend ands "$col=$value"
-                } else {
-                    lappend sets "$col=$value"
-                }
+            if {$key($col)} {
+                lappend ands "$col=\$b($i)"
+            } else {
+                lappend sets "$col=nullif(\$b($i),\$nul)"
             }
-
-            append sql \
-             "UPDATE $table SET [join $sets ,] WHERE [join $ands { AND }];\n"
         }
 
-        return $sql
+        set sql "UPDATE $table SET [join $sets ,] WHERE [join $ands { AND }]"
+
+        # NEXT, update the rows
+        set i 0
+
+        foreach val $values {
+            set b($i) $val
+            incr i
+
+            if {$i == $ncols} {
+                $db eval $sql
+                set i 0
+            }
+        }
     }
 
     # fklist db table ?-indirect?

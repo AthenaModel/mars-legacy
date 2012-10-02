@@ -361,7 +361,7 @@ CREATE TABLE third(g,h,i)}
         sqlib insert $db mytable {a 4 b 5 c 6}
     } -body {
         sqlib grab $db mytable {}
-    } -result {mytable {1 '2' '3' 4 '5' '6'}}
+    } -result {mytable {1 2 3 4 5 6}}
 
     test grab-1.5 {grabs particular row from table} -setup {
         sqlite3 $db :memory:
@@ -370,7 +370,7 @@ CREATE TABLE third(g,h,i)}
         sqlib insert $db mytable {a X b Y c Z}
     } -body {
         sqlib grab $db mytable {b='Y'}
-    } -result {mytable {'X' 'Y' 'Z'}}
+    } -result {mytable {X Y Z}}
 
     test grab-1.6 {grab condition includes variable} -setup {
         sqlite3 $db :memory:
@@ -380,7 +380,7 @@ CREATE TABLE third(g,h,i)}
     } -body {
         set a P
         sqlib grab $db mytable {a=$a}
-    } -result {mytable {'P' 'Q' 'R'}}
+    } -result {mytable {P Q R}}
 
     test grab-1.7 {grab from multiple tables} -setup {
         sqlite3 $db :memory:
@@ -394,25 +394,36 @@ CREATE TABLE third(g,h,i)}
         set x1 D
         set y2 K
         sqlib grab $db tablex {x1=$x1} tabley {y2=$y2}
-    } -result {tablex {'D' 'E' 'F'} tabley {'J' 'K' 'L'}}
+    } -result {tablex {D E F} tabley {J K L}}
 
-    test grab-1.8 {grab preserves NULLs} -setup {
+    test grab-1.8 {grab returns NULLs as empty strings} -setup {
         sqlite3 $db :memory:
         $db eval {CREATE TABLE tablex(x1,x2,x3)}
         sqlib insert $db tablex {x1 A x2 B}
         sqlib insert $db tablex {x1 D x3 F}
     } -body {
         sqlib grab $db tablex {}
-    } -result {tablex {'A' 'B' NULL 'D' NULL 'F'}}
+    } -result {tablex {A B {} D {} F}}
 
-    test grab-2.1 {grab -tcl doesn't do SQL quoting} -setup {
+    test grab-1.9 {grab returns NULLs as "nullvalue"} -setup {
         sqlite3 $db :memory:
         $db eval {CREATE TABLE tablex(x1,x2,x3)}
-        sqlib insert $db tablex {x1 A x2 B x3 C}
-        sqlib insert $db tablex {x1 D x2 E x3 F}
+        sqlib insert $db tablex {x1 A x2 B}
+        sqlib insert $db tablex {x1 D x3 F}
+        $db nullvalue @
     } -body {
-        sqlib grab $db -tcl tablex {}
-    } -result {tablex {A B C D E F}}
+        sqlib grab $db tablex {}
+    } -cleanup {
+        $db nullvalue ""
+    } -result {tablex {A B @ D @ F}}
+
+    test grab-1.10 {-insert sets INSERT tag} -setup {
+        sqlite3 $db :memory:
+        $db eval {CREATE TABLE mytable(a INTEGER, b, c)}
+        sqlib insert $db mytable {a 1 b 2 c 3}
+    } -body {
+        sqlib grab $db -insert mytable {}
+    } -result {{mytable INSERT} {1 2 3}}
 
     #-------------------------------------------------------------------
     # ungrab
@@ -431,8 +442,8 @@ CREATE TABLE third(g,h,i)}
     } -body {
         sqlib ungrab $db {
             {tablex INSERT} {
-                'A' 'B' 'C'
-                'D' 'E' 'F'
+                A B C
+                D E F
             }
         }
         sqlib query $db {SELECT * FROM tablex}
@@ -447,15 +458,15 @@ D  E  F
         $db eval {CREATE TABLE tablex(x1 INTEGER PRIMARY KEY,x2,x3)}
         sqlib ungrab $db {
             {tablex INSERT} {
-                1 'B' 'C'
-                2 'E' 'F'
+                1 B C
+                2 E F
             }
         }
     } -body {
         sqlib ungrab $db {
             tablex {
-                1 'P' 'Q'
-                2 'R' 'S'
+                1 P Q
+                2 R S
             }
         }
         sqlib query $db {SELECT * FROM tablex}
@@ -471,48 +482,52 @@ D  E  F
         $db eval {CREATE TABLE tabley(y1 INTEGER PRIMARY KEY,y2,y3)}
     } -body {
         sqlib ungrab $db {
-            {tablex INSERT} {1 'B' 'C'} 
-            {tabley INSERT} {2 'E' 'F'}
+            {tablex INSERT} {1 B C} 
+            {tabley INSERT} {2 E F}
         }
         sqlib grab $db tablex {} tabley {}
     } -cleanup {
         $db close
-    } -result {tablex {1 'B' 'C'} tabley {2 'E' 'F'}}
+    } -result {tablex {1 B C} tabley {2 E F}}
 
     test ungrab-1.5 {INSERT restores NULLs} -setup {
         sqlite3 $db :memory:
         $db eval {CREATE TABLE tablex(x1 INTEGER PRIMARY KEY,x2,x3)}
+        $db nullvalue "-NULL-"
     } -body {
         sqlib ungrab $db {
-            {tablex INSERT} {1 'B' NULL 2 NULL 'F'}
+            {tablex INSERT} {1 B -NULL- 2 -NULL- F}
         }
-        $db nullvalue "*NULL*"
+        $db nullvalue "@"
         $db eval {SELECT * FROM tablex ORDER BY x1}
     } -cleanup {
+        $db nullvalue ""
         $db close
-    } -result {1 B *NULL* 2 *NULL* F}
+    } -result {1 B @ 2 @ F}
 
     test ungrab-1.6 {UPDATE restores NULLs} -setup {
         sqlite3 $db :memory:
         $db eval {CREATE TABLE tablex(x1 INTEGER PRIMARY KEY,x2,x3)}
         sqlib ungrab $db {
-            {tablex INSERT} {1 'A' 'B' 2 'C' 'D'}
+            {tablex INSERT} {1 A B 2 C D}
         }
+        $db nullvalue "-NULL-"
     } -body {
         sqlib ungrab $db {
-            tablex {1 'E' NULL 2 NULL 'F'}
+            tablex {1 E -NULL- 2 -NULL- F}
         }
 
-        $db nullvalue "*NULL*"
+        $db nullvalue "@"
         $db eval {SELECT * FROM tablex ORDER BY x1}
     } -cleanup {
+        $db nullvalue ""
         $db close
-    } -result {1 E *NULL* 2 *NULL* F}
+    } -result {1 E @ 2 @ F}
 
     test ungrab-1.6 {unknown tables throw an error} -setup {
         sqlite3 $db :memory:
     } -body {
-        sqlib ungrab $db [list tablex {1 'B'}]
+        sqlib ungrab $db [list tablex {1 B}]
     } -returnCodes {
         error
     } -cleanup {
