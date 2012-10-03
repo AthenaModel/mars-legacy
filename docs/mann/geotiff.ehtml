@@ -1,0 +1,57 @@
+<<manpage {marsutil(n) geotiff(n)} "GeoTIFF Reader">>
+
+<<section SYNOPSIS>>
+
+<pre>
+package require util 0.1
+namespace import ::marsutil::*
+</pre>
+
+<<itemlist>>
+
+<<section DESCRIPTION>>
+
+geotiff(n) defines a type that can be used to read and return
+pertinent geo-referencing information from a GeoTIFF file.
+This operation is implemented in C and is available only in the
+optional libMarsutil.so extension.</b><p>
+
+<<section COMMANDS>>
+
+<<deflist>>
+
+<<defitem "geotiff read" {geotiff read <i>filename</i>}>>
+
+Given the name of a GeoTIFF file, reads and returns pertinent
+geo-reference information in the form of a dict. Currently supported
+projections are:
+
+<ul>
+  <li> TBD
+</ul><p>
+
+<</deflist>>
+
+<<section ENVIRONMENT>>
+
+geotiff(n) requires the libMarsutil.so extension for
+certain operations; the remainder require only Tcl 8.5 or later.<p>
+
+To use geotiff(n) in a Tcl script, the environment variable
+<code>TCLLIBPATH</code> must include the parent of the marsutil(n)
+library directory.
+
+<<section AUTHOR>>
+
+Dave Hanks<p>
+
+<<section HISTORY>>
+
+Original package.
+
+<</manpage>>
+
+
+
+
+

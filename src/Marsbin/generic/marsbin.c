@@ -35,6 +35,9 @@
 
 #include <geotrans/geotrans.h>
 #include <geostars/geoStars.h>
+#include <geotiff/xtiffio.h>
+#include <geotiff/geotiffio.h>
+#include <geotiff/geotiff.h>
 
 #include "marsbin.h"
 
@@ -105,6 +108,13 @@ typedef struct LatlongInfo {
     Points* pointsBuffer;      /* Points cache */
 } LatlongInfo;
 
+/* geotiff(n) data */
+
+typedef struct GeotiffInfo {
+    TIFF*  tiff;
+    GTIF*  gtif;
+} GeotiffInfo;
+
 /*
  * Static Function Prototypes
  */
@@ -141,6 +151,9 @@ static int marsutil_ptinpolyCmd     (ClientData, Tcl_Interp*, int,
 static int marsutil_latlongCmd      (ClientData, Tcl_Interp*, int, 
                                  Tcl_Obj* CONST argv[]);
 
+static int marsutil_geotiffCmd     (ClientData, Tcl_Interp*, int,
+                                 Tcl_Obj* CONST argv[]);
+
 /* latlong Subcommands */
 
 static int latlong_spheroid     (ClientData, Tcl_Interp*, int, 
@@ -167,6 +180,9 @@ static int latlong_validate     (ClientData, Tcl_Interp*, int,
                                  Tcl_Obj* CONST objv[]);
 static int latlong_area         (ClientData, Tcl_Interp*, int, 
                                  Tcl_Obj* CONST objv[]);
+/* GeoTIFF subcommands */
+static int geotiff_read         (ClientData, Tcl_Interp*, int,
+                                 Tcl_Obj* CONST objv[]);
 
 /* utility functions */
 
@@ -176,6 +192,9 @@ static Points*      newPoints         (void);
 static void         deletePoints      (Points*);
 
 static void         setEllipsoidData  (LatlongInfo*); 
+
+static GeotiffInfo* newGeotiffInfo    (void);
+static void         deleteGeotiffInfo (GeotiffInfo*);
 
 static double spheredist  (double, double, double, double);
 static void   bbox        (Points*, Bbox*);
@@ -211,6 +230,13 @@ static SubcommandVector latlongTable [] = {
     {"frommgrs", latlong_frommgrs},
     {"togcc",    latlong_togcc},
     {"fromgcc",  latlong_fromgcc},
+    {NULL}
+};
+
+/* geotiff Dispatch table */
+
+static SubcommandVector geotiffTable[] = {
+    {"read",  geotiff_read},
     {NULL}
 };
 
@@ -312,6 +338,10 @@ Marsbin_Init(Tcl_Interp *interp)
     Tcl_CreateObjCommand(interp, "::marsutil::latlong",
                          marsutil_latlongCmd, newLatlongInfo(), 
                          (Tcl_CmdDeleteProc*)deleteLatlongInfo);
+
+    Tcl_CreateObjCommand(interp, "::marsutil::geotiff",
+                         marsutil_geotiffCmd, newGeotiffInfo(),
+                         (Tcl_CmdDeleteProc*)deleteGeotiffInfo);
 
     return TCL_OK;
 }
@@ -856,6 +886,7 @@ marsutil_latlongCmd(ClientData cd, Tcl_Interp* interp,
     return (*latlongTable[index].proc)(cd, interp, objc, objv);
 }
 
+            
 
 
 
@@ -1566,6 +1597,121 @@ latlong_fromgcc(ClientData cd, Tcl_Interp *interp,
 }
 
 /*
+ * geotiff command and subcommands
+ */
+
+/***********************************************************************
+ * 
+ * FUNCTION :
+ *     marsutil_geotiffCmd()
+ *
+ * INPUTS:
+ *     subcommand        The subcommand name
+ *     args              Subcommand arguments
+ *
+ * RETURNS:
+ *     Whatever the subcommand returns.
+ *
+ * DESCRIPTION:
+ *     This is the ensemble command for the geotiff subcommands.
+ *     It looks up the subcommand name, and then passes execution
+ *     to the subcommand proc.
+ *
+ */
+
+static int
+marsutil_geotiffCmd(ClientData cd, Tcl_Interp* interp,
+                   int objc, Tcl_Obj* CONST objv[])
+{
+    if (objc < 2)
+    {
+        Tcl_WrongNumArgs(interp, 1, objv, "subcommand ?arg arg ...?");
+        return TCL_ERROR;
+    }
+
+    int index = 0;
+
+    if (Tcl_GetIndexFromObjStruct(interp, objv[1],
+                                  geotiffTable, sizeof(SubcommandVector),
+                                  "subcommand",
+                                  TCL_EXACT,
+                                  &index) != TCL_OK)
+    {
+        return TCL_ERROR;
+    }
+
+    return(*geotiffTable[index].proc)(cd, interp, objc, objv);
+}
+
+/***********************************************************************
+ * 
+ * FUNCTION :
+ *     geotiff read filename
+ *
+ * INPUTS:
+ *     filename - the name of a GeoTIFF file to read
+ *
+ * RETURNS:
+ *     Projection information to be used in geo-referencing the
+ *     map image contained within the GeoTIFF
+ *
+ * DESCRIPTION:
+ *     Opens a TIFF file and reads the appropriate geokeys and values
+ *     from the Geo information embedded in the TIFF. If this file is
+ *     not a TIFF or if the appropriate Geo information is not in it
+ *     an appropriate error message is returned.
+ *
+ */
+
+static int
+geotiff_read(ClientData cd, Tcl_Interp *interp,
+             int objc, Tcl_Obj* CONST objv[])
+{
+    GeotiffInfo* info = (GeotiffInfo*)cd;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 2, objv, "filename");
+        return TCL_ERROR;
+    }
+
+    char* fname = Tcl_GetStringFromObj(objv[2], NULL);
+
+    /* Disable TIFF libraries internal error handling, */
+    /* this prevents messages going to stderr          */
+    TIFFSetErrorHandler(NULL); 
+
+    info->tiff = XTIFFOpen(fname, "r");
+
+    /* File is not a TIFF */
+    if (info->tiff == NULL)
+    {
+        Tcl_SetResult(interp, "file is not a TIFF", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    info->gtif = GTIFNew(info->tiff);
+
+    /* File does not contain any GEO keys */
+    if (!info->gtif)
+    {
+        Tcl_SetResult(interp, "file is not a GeoTIFF", TCL_STATIC);
+        XTIFFClose(info->tiff);
+        info->tiff = NULL ;
+        return TCL_ERROR;
+    }
+
+    /* Done */
+    XTIFFClose(info->tiff);
+    info->tiff = NULL ;
+    info->gtif = NULL ;
+
+    Tcl_Obj* result = Tcl_GetObjResult(interp);
+    Tcl_SetBooleanObj(result, 1);
+
+    return TCL_OK;
+}
+
+/*
  * Math and Geometry Functions
  */
 
@@ -2024,6 +2170,34 @@ newLatlongInfo(void)
 /***********************************************************************
  *
  * FUNCTION:
+ *	newGeotiffInfo()
+ *
+ * INPUTS:
+ *	nothing
+ *
+ * OUTPUTS:
+ *	none
+ *
+ * RETURNS:
+ *	A pointer to a zeroed GeotiffInfo struct
+ *
+ * DESCRIPTION:
+ *	Allocates a new GeotiffInfo struct, and zeroes it.
+ */
+
+static GeotiffInfo*
+newGeotiffInfo(void)
+{
+    GeotiffInfo* info = (GeotiffInfo*)Tcl_Alloc(sizeof(GeotiffInfo));
+    memset(info, 0, sizeof(GeotiffInfo));
+    info->tiff = NULL;
+
+    return info;
+}
+
+/***********************************************************************
+ *
+ * FUNCTION:
  *	setEllipsoidData
  *
  * INPUTS:
@@ -2073,7 +2247,29 @@ deleteLatlongInfo(LatlongInfo* p)
     Tcl_Free((void*)p);
 }
 
+/***********************************************************************
+ *
+ * FUNCTION:
+ *	deleteGeotiffInfo()
+ *
+ * INPUTS:
+ *	A pointer to a GeotiffInfo struct
+ *
+ * OUTPUTS:
+ *	none
+ *
+ * RETURNS:
+ *  nothing
+ *
+ * DESCRIPTION:
+ *	Frees the GeotiffInfo* data.
+ */
 
+static void
+deleteGeotiffInfo(GeotiffInfo* g)
+{
+    Tcl_Free((void*)g);
+}
 
 /***********************************************************************
  *

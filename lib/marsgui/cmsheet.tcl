@@ -508,6 +508,7 @@ snit::widget ::marsgui::cmsheet {
             if {!$valid} {
                 # Not valid; ring bell, and return.  We stay in the
                 # entry widget.
+                ttk::style configure TEntry -background yellow
                 bell
                 return -code break
             }
