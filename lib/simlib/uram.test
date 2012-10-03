@@ -1050,6 +1050,7 @@ pflag f  g  e_id driver_id cause   mag
         pprint [rdb query {
             SELECT pflag, f, g, e_id, driver_id, cause, mag 
             FROM uram_hrel_effects
+            ORDER BY e_id
         }]
     } -cleanup {
         cleanup
@@ -1150,6 +1151,7 @@ pflag f  g  e_id driver_id cause   mag
         pprint [rdb query {
             SELECT pflag, f, g, e_id, driver_id, cause, mag 
             FROM uram_hrel_effects
+            ORDER BY e_id
         }]
     } -cleanup {
         cleanup

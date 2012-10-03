@@ -9,6 +9,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.10, 3 October 2012</h3>
+
+This build contains performance improvements to URAM and to Mars'
+SQLite3 infrastructure.<p>
+
+<ul>
+<li> Bug 3723: uram(n): Optimizations
+<li> Bug 3726: sqlib(n): grab/ungrab
+</ul><p>
+
+
 <h3>Build 2.9, 26 September 2012</h3>
 
 This build contains a performance optimization to the marsutil(n)
