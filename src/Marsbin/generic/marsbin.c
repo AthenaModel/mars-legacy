@@ -1674,7 +1674,17 @@ geotiff_read(ClientData cd, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
+    FILE* f;
     char* fname = Tcl_GetStringFromObj(objv[2], NULL);
+
+    /* See if the file exists */
+    if ((f = fopen(fname, "r")) == NULL)
+    {
+        Tcl_SetResult(interp, "file does not exist", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    fclose(f);
 
     /* Disable TIFF libraries internal error handling, */
     /* this prevents messages going to stderr          */
