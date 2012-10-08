@@ -33,6 +33,7 @@ namespace eval ::marsutil:: {
         fstringmap      \
         getcode         \
         gettimeofday    \
+        geotiff         \
         hexquote        \
         identifier      \
         ipaddress       \
@@ -1007,6 +1008,16 @@ proc ::marsutil::normalize {text} {
 
 proc ::marsutil::echo {args} {
     puts $args
+}
+
+#-------------------------------------------------------------------
+# Geotiff reading
+
+# ::marsutil::geotiff exists only if Marsbin.dll is loaded
+if {[llength [info commands ::marsutil::geotiff]] == 0} {
+    proc ::marsutil::geotiff {args} {
+        error "geotiff command requires Marsbin library"
+    }
 }
 
 #-------------------------------------------------------------------

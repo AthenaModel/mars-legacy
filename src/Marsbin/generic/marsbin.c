@@ -58,6 +58,18 @@ const double radians       = 0.017453292519943295; /* pi/180.0 */
 const double earthDiameter = 12742.0;
 const double earthRadius   = 6371.0; /* earthDiameter/2.0 */
 
+/* 
+ * GeoTIFF constants
+ * This will need to be expanded if and when
+ * other projections are supported
+ */
+#define GT_MODEL_TYPE         1024
+#define MODEL_TYPE_PROJECTED  1
+#define MODEL_TYPE_GEOGRAPHIC 2
+#define MODEL_TYPE_GEOCENTRIC 3
+
+#define MODEL_PIXEL_SCALE_TAG 33550
+#define MODEL_TIEPOINT_TAG    33922
 
 /*
  * Structure Definitions
@@ -195,6 +207,7 @@ static void         setEllipsoidData  (LatlongInfo*);
 
 static GeotiffInfo* newGeotiffInfo    (void);
 static void         deleteGeotiffInfo (GeotiffInfo*);
+static void         closeGeotiff      (GeotiffInfo*);
 
 static double spheredist  (double, double, double, double);
 static void   bbox        (Points*, Bbox*);
@@ -1667,6 +1680,13 @@ static int
 geotiff_read(ClientData cd, Tcl_Interp *interp,
              int objc, Tcl_Obj* CONST objv[])
 {
+    double    *d_list = NULL;
+    uint16    d_list_count;
+    ttag_t    field;
+    geocode_t code;
+    geokey_t  key;
+    Tcl_Obj   *result = NULL;
+
     GeotiffInfo* info = (GeotiffInfo*)cd;
 
     if (objc != 3) {
@@ -1687,7 +1707,7 @@ geotiff_read(ClientData cd, Tcl_Interp *interp,
     fclose(f);
 
     /* Disable TIFF libraries internal error handling, */
-    /* this prevents messages going to stderr          */
+    /* this prevents messages from going to stderr     */
     TIFFSetErrorHandler(NULL); 
 
     info->tiff = XTIFFOpen(fname, "r");
@@ -1701,22 +1721,122 @@ geotiff_read(ClientData cd, Tcl_Interp *interp,
 
     info->gtif = GTIFNew(info->tiff);
 
-    /* File does not contain any GEO keys */
+    /* File does not contain any geokeys */
     if (!info->gtif)
     {
-        Tcl_SetResult(interp, "file is not a GeoTIFF", TCL_STATIC);
+        Tcl_SetResult(interp, "file does not contain geokeys", TCL_STATIC);
         XTIFFClose(info->tiff);
         info->tiff = NULL ;
         return TCL_ERROR;
     }
 
-    /* Done */
-    XTIFFClose(info->tiff);
-    info->tiff = NULL ;
-    info->gtif = NULL ;
+    /* Extract data */
 
-    Tcl_Obj* result = Tcl_GetObjResult(interp);
-    Tcl_SetBooleanObj(result, 1);
+    /* Model Type */
+    key = (geokey_t)GT_MODEL_TYPE;
+
+    if (!GTIFKeyGet(info->gtif, key, &code, 0, 1))
+    {
+        Tcl_SetResult(interp, "file is not a GeoTIFF", TCL_STATIC);
+        closeGeotiff(info);
+        return TCL_ERROR;
+    }
+        
+    switch (code) 
+    {
+        /* Unsupported Model Types */
+        case MODEL_TYPE_GEOCENTRIC:
+        case MODEL_TYPE_PROJECTED:
+            Tcl_SetResult(interp, 
+                          "usupported model type, must be geographic", 
+                          TCL_STATIC);
+
+            closeGeotiff(info);
+
+            return TCL_ERROR;
+
+         /* Look for right tags */
+         case MODEL_TYPE_GEOGRAPHIC:
+            /* Result returned as a dictionary */
+            result = Tcl_NewDictObj();
+
+            /* Model type */
+            Tcl_Obj* modelkey = Tcl_NewStringObj("modeltype", 9);
+            Tcl_Obj* modelval = Tcl_NewStringObj("GEOGRAPHIC", 10);
+            Tcl_DictObjPut(interp, result, modelkey, modelval);
+
+            /* Tiepoints */
+            field = (ttag_t)MODEL_TIEPOINT_TAG;
+
+            if (TIFFGetField(info->tiff, field, &d_list_count, &d_list))
+            {
+                Tcl_Obj* tpkey  = Tcl_NewStringObj("tiepoints", 9);
+                Tcl_Obj* tplist = Tcl_NewObj();
+                
+                int i;
+
+                for (i=0; i<d_list_count; i++)
+                {
+                    Tcl_ListObjAppendElement(interp, tplist,
+                                             Tcl_NewDoubleObj(d_list[i]));
+                }
+
+                Tcl_DictObjPut(interp, result, tpkey, tplist);
+
+            } 
+            else
+            {
+                Tcl_SetResult(interp, 
+                              "no tiepoints found in image", 
+                              TCL_STATIC);
+
+                closeGeotiff(info);
+
+                return TCL_ERROR;
+            }
+
+            /* Pixel scaling */
+            field = (ttag_t)MODEL_PIXEL_SCALE_TAG;
+
+            if (TIFFGetField(info->tiff, field, &d_list_count, &d_list))
+            {
+                Tcl_Obj* pskey  = Tcl_NewStringObj("pscale", 6);
+                Tcl_Obj* pslist = Tcl_NewObj();
+                
+                int i;
+
+                for (i=0; i<d_list_count; i++)
+                {
+                    Tcl_ListObjAppendElement(interp, pslist,
+                                             Tcl_NewDoubleObj(d_list[i]));
+                }
+
+                Tcl_DictObjPut(interp, result, pskey, pslist);
+                break;
+
+            }
+            else
+            {
+                Tcl_SetResult(interp, 
+                              "no pixel scaling found in image", 
+                              TCL_STATIC);
+
+                closeGeotiff(info);
+                
+                return TCL_ERROR;
+            }
+
+         default:
+            Tcl_SetResult(interp, "unrecognized model type", TCL_STATIC);
+            closeGeotiff(info);
+
+            return TCL_ERROR;
+    }
+
+
+    /* Done */
+    closeGeotiff(info);
+    Tcl_SetObjResult(interp, result);
 
     return TCL_OK;
 }
@@ -2203,6 +2323,35 @@ newGeotiffInfo(void)
     info->tiff = NULL;
 
     return info;
+}
+
+/***********************************************************************
+ *
+ * FUNCTION:
+ *	closeGeotiff()
+ *
+ * INPUTS:
+ *	Pointer to a GeotiffInfo struct
+ *
+ * OUTPUTS:
+ *	none
+ *
+ * RETURNS:
+ *  nothing
+ *
+ * DESCRIPTION:
+ *	Closes a Geotiff associated with a Geotiff info and cleans up
+ *  pointers.
+ *
+ */
+
+static void
+closeGeotiff(GeotiffInfo* info)
+{
+    XTIFFClose(info->tiff);
+    info->tiff = NULL;
+    info->gtif = NULL;
+    return;
 }
 
 /***********************************************************************
