@@ -130,12 +130,17 @@ is at least 0.005, displays it as an integer percentage, e.g.,
 0.0, displays it as "~0%".
 <p>
 
+<<defitem timestr {timestr(<i>ticks</i>, ?<i>offset</i>?)}>>
 <<defitem tozulu {tozulu(<i>ticks</i>, ?<i>offset</i>?)}>>
 
-If <code>-clock</code> is specified, then <<iref tozulu>> will be
+If <code>-clock</code> is specified, then <<iref timestr>> and
+<<iref tozulu>> will be
 defined.  Given a simulation time as <i>ticks</i> plus an optional
 <i>offset</i>, returns the resulting simulation time as a
-<<xref zulu(n)>> time string.<p>
+human-readable time string; the format depends on the particular
+<<xref simclock(i)>> object assigned to <code>-clock</code>.<p>
+
+<b>Note: The <<iref tozulu>> form is deprecated.</b>
 
 <<defitem wallclock {wallclock()}>>
 
@@ -193,9 +198,9 @@ transactions as it chooses, and <<iref commit>> has no effect.<p>
 
 <<defopt {-clock <i>simclock</i>}>>
 
-<b>Readonly.</b> The <i>simclock</i> must be an instance of
-<<xref simclock(n)>>.  If this option is given, the <<iref now>> and
-<<iref tozulu>> SQL functions will be defined.<p>
+<b>Readonly.</b> The <i>simclock</i> must be a <<xref simclock(i)>>
+object.  If this option is given, the <<iref now>> and
+<<iref timestr>> SQL functions will be defined.<p>
 
 <<defopt {-commitcmd <i>command</i>}>>
 

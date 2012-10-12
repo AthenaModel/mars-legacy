@@ -167,7 +167,7 @@ string:<p>
        <<xref "Message Flattening">> for more details.<p>
 
   <dt> <code>&lt;simtime&gt;</code>
-  <dd> The simulation time as a <<xref zulu(n)>> time string.  This is
+  <dd> The simulation time as a human-readable string.  This is
        included only if the <code>-simclock</code> option is set.<p>
 
 </dl>
@@ -278,7 +278,7 @@ shown as being too long. The default is 20000.<p>
 
 <<defopt {-simclock <i>cmd</i>}>>
 
-Specifies the name of a <<xref simclock(n)>> object.  If set, the
+Specifies the name of a <<xref simclock(i)>> object.  If set, the
 simulation time will be included in every logged message (see
 <<xref "ENTRY FORMAT">>.  The option should be set before
 any messages are logged (e.g., when the logger(n) object is

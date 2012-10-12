@@ -33,7 +33,7 @@ snit::type ::marsutil::reporter {
     # Type Components
 
     typecomponent db                         ;# The sqldocument(n).
-    typecomponent clock                      ;# The simclock(n).
+    typecomponent clock                      ;# The simclock(i).
 
     #-------------------------------------------------------------------
     # Type Constructor
@@ -120,7 +120,7 @@ snit::type ::marsutil::reporter {
     #
     # Configures the reporter(n) options:
     #
-    # -clock      The simclock(n) for timestamping reports.
+    # -clock      The simclock(i) for timestamping reports.
     # -db         The sqldocument(n) into which reports are written.
     # -deletecmd  The callback for when reports are deleted
     # -reportcmd  The callback for when reports are saved
@@ -407,7 +407,7 @@ snit::type ::marsutil::reporter {
         }
 
         set opts(-time)  [$clock now]
-        set opts(-stamp) [$clock asZulu]
+        set opts(-stamp) [$clock asString]
 
 
         # NEXT, get and validate the required option values

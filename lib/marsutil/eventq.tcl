@@ -28,12 +28,12 @@
 #    a time-step simulation.  The "advance" method advances the eventq(n)
 #    time up until the specified time; this can be called by the parent
 #    simulation at each time step.  Hence, eventq does NOT use or update
-#    a simclock(n); it presumes that the parent simulation will do that,
+#    a simclock(i); it presumes that the parent simulation will do that,
 #    if need be.
 #
 #    eventq(n) could also be used for pure discrete event simulation;
 #    in this case, it would be necessary to allow eventq(n) to advance
-#    a simclock(n).
+#    a simclock(i).
 #
 # NICE TO HAVE:
 #    * Move lfilter to marsutil(n).
@@ -60,8 +60,6 @@ snit::type ::marsutil::eventq {
     # Type Components
 
     typecomponent rdb      ;# The run-time database (sqldocument(n))
-    typecomponent clock    ;# The simclock; advanced automatically if
-                            # defined.
 
     #-------------------------------------------------------------------
     # Type Constructor

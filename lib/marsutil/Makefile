@@ -31,6 +31,9 @@ test_marsmisc:
 test_order:
 	$(TCLSH) order.test $(FLAGS)
 
+test_simclock:
+	$(TCLSH) simclock.test $(FLAGS)
+
 test_sqldocument:
 	$(TCLSH) sqldocument.test $(FLAGS)
 

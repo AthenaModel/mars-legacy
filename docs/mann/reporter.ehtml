@@ -40,7 +40,7 @@ before anything else can be done.<p>
 
 <<defopt {-clock <i>clock</i>}>>
 
-<b>Required.</b>  The name of the <<xref simclock(n)>> object
+<b>Required.</b>  The name of the <<xref simclock(i)>> object
 used to timestamp reports.<p>
 
 <<defopt {-db <i>db</i>}>>

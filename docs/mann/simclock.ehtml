@@ -251,6 +251,7 @@ Returns the current simulation time in minutes.  If given,
 <i>offset</i> should be an offset in ticks; it is added to
 the returned time.<p>
 
+<<defitem asString {$simclock asString ?<i>offset</i>?}>>
 <<defitem asZulu {$simclock asZulu ?<i>offset</i>?}>>
 
 Returns the current simulation time as a <<xref zulu(n)>> time
@@ -391,6 +392,7 @@ Converts a simulation time in <i>ticks</i> into decimal
 minutes.  If given, <i>offset</i> should be an offset in ticks; it is added to
 the specified time.<p>
 
+<<defitem toString {$simclock toString <i>ticks</i> ?<i>offset</i>?}>>
 <<defitem toZulu {$simclock toZulu <i>ticks</i> ?<i>offset</i>?}>>
 
 Converts a simulation time in integer <i>ticks</i> into a

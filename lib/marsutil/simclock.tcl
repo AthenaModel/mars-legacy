@@ -295,6 +295,9 @@ snit::type ::marsutil::simclockType {
     #-------------------------------------------------------------------
     # Public methods: Time Management
 
+    delegate method asString using {%s asZulu}
+    delegate method toString using {%s toZulu}
+
     # ratio ?rat?
     #
     # rat          The new game ratio.

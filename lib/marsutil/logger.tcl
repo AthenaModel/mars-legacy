@@ -51,12 +51,12 @@
 #                      pre-existing backslashes.  This guarantees that
 #                      each message is on a single line.
 #
-#       Support for Zulu Time
+#       Support for Simulation Time Strings
 #
-#       In actual use, the Zulu Time of an entry is liable to be of
-#       more interest than the wall-clock time.  Zulu Time will be
-#       included automatically if the logger is given a -simclock.
-#       The keyword is "zulu".
+#       In actual use, the simulation time of an entry is liable to be of
+#       more interest than the wall-clock time.  The simulation time
+#       string will be included automatically if the logger is given a 
+#       -simclock.
 #
 #       Merging Log Files
 #
@@ -201,10 +201,10 @@ snit::type ::marsutil::logger {
 
     # -simclock cmd
     #
-    # cmd    A simclock(n) object command
+    # cmd    A simclock(i) object command
     #
     # Specifies a simclock which will provide simulated time.
-    # If specified, "zulu <zulutime>" will be included in each log message.
+    # If specified, the "<timeString>" will be included in each log message.
 
     option -simclock -default ""
 
@@ -423,9 +423,9 @@ snit::type ::marsutil::logger {
                            $component \
                            [Flatten $message]]
 
-            # NEXT, if there's a simclock, add the zulu time.
+            # NEXT, if there's a simclock, add the time string.
             if {$options(-simclock) ne ""} {
-                lappend entry [$options(-simclock) asZulu]
+                lappend entry [$options(-simclock) asString]
             }
   
             # NEXT, output the log entry

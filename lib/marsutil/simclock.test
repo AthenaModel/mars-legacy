@@ -1243,7 +1243,20 @@ namespace eval ::marsutil::test {
     } -result {150000ZJAN70}
 
     #-------------------------------------------------------------------
-    # 
+    # toString
+
+    test toString-1.1 {toString equals toZulu} -setup {
+        simclockType myclock
+    } -body {
+        set a [myclock toZulu 12]
+        set b [myclock toString 12]
+        expr {$a eq $b}
+    } -cleanup {
+        myclock destroy
+    } -result {1}
+
+    #-------------------------------------------------------------------
+    # fromTimeSpec
 
     test fromTimeSpec-1.1 {invalid spec 1} -setup {
         simclockType myclock
@@ -1412,6 +1425,15 @@ namespace eval ::marsutil::test {
     } -cleanup {
         myclock destroy
     } -result {1440 2880}
+
+    test as-1.4 {asString equals asZulu} -setup {
+        simclockType myclock
+    } -body {
+        myclock advance 60
+        list [myclock asString] [myclock asString 30]
+    } -cleanup {
+        myclock destroy
+    } -result {010100ZJAN70 010130ZJAN70}
 
     #-------------------------------------------------------------------
     # -t0

@@ -158,7 +158,7 @@ snit::type ::marsutil::sqldocument {
 
     # -clock
     #
-    # Specifies a simclock.  If it exists, simclock-related functions
+    # Specifies a simclock(i).  If it exists, simclock-related functions
     # are defined.
 
     option -clock     \
@@ -473,10 +473,12 @@ snit::type ::marsutil::sqldocument {
     # Define SQL functions.
 
     method DefineFunctions {} {
-        # FIRST, define the -clock functions
+        # FIRST, define the -clock functions.  Note that "tozulu" is
+        # deprecated.
         if {$options(-clock) ne ""} {
-            $db function tozulu [list $options(-clock) toZulu]
-            $db function now    [list $options(-clock) now]
+            $db function timestr [list $options(-clock) toString]
+            $db function tozulu  [list $options(-clock) toString]
+            $db function now     [list $options(-clock) now]
         }
 
         # NEXT, define functions defined in sqlsections.
