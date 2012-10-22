@@ -137,6 +137,11 @@ The mapcanvas(n) defines a number of user interaction modes:<p>
   <dt> <b>pan</b>
   <dd> In this mode, the user can click-and-drag to pan the map from
        side-to-side and up-and-down.<p>
+
+  <dt> <b>zoom</b>
+  <dd> In this mode, the user can draw a rectangular box around an
+       area on the map to zoom in. A right click on the mouse will
+       zoom out one level at a time.<p>
 </dl>
 
 Other modes are TBD.<p>
