@@ -546,10 +546,10 @@ Check the trunk out of the repository as <code>~/mars</code>.
 If you have not checked out Mars previously:<p>
 
 <pre>
-$ svn checkout <i>repository</i>/mars/trunk ~/mars
+$ svn checkout <i>repository</i>/mars/branches/mars_1.x ~/mars
 </pre>
 
-If the <code>~/mars</code> directory already points at the trunk:<p>
+If the <code>~/mars</code> directory already points at the mars_1.x branch:<p>
 
 <pre>
 $ cd ~/mars
@@ -560,7 +560,7 @@ If the <code>~/mars</code> directory points at some other branch or tag:<p>
 
 <pre>
 $ cd ~/mars
-$ svn switch <i>repository</i>/mars/trunk .
+$ svn switch <i>repository</i>/mars/branches/mars_1.x .
 </pre>
 
 <</step>>
@@ -647,7 +647,7 @@ development.
 <</step/>>
 <pre>
 $ cd ~/mars
-$ svn switch <i>repository</i>/mars/trunk .
+$ svn switch <i>repository</i>/mars/branches/mars_1.x .
 </pre>
 <</step>>
 
