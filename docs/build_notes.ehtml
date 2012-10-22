@@ -10,6 +10,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.71, 22 October 2012</h3>
+
+This build contains one minor changes.<p>
+
+<ul>
+    <li> Bug 3692: marsicons(n): Adding a zoom-tool icon
+    <li> Bug 3692: mapcanvas(n): Adding a zoom interaction mode
+</ul><p>
+
 <h3>Build 1.70, 20 June 2012</h3>
 
 This build contains two minor changes.<p>
