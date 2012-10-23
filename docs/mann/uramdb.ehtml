@@ -1,11 +1,11 @@
 <<manpage {simlib(n) uramdb(n)} "uramdb(5) Parser">>
 
-<<swallow {package require simlib 2.0}>>
+<<swallow {package require simlib}>>
 
 <<section SYNOPSIS>>
 
 <pre>
-package require simlib 2.0
+package require simlib
 namespace import ::simlib::*
 </pre>
 
@@ -137,6 +137,7 @@ uramdb(n) is based on <<xref gramdb2(n)>>, tailored to the needs
 of <<xref uram(n)>>.<p>
 
 <</manpage>>
+
 
 
 

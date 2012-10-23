@@ -1,11 +1,11 @@
 <<manpage {simlib(n) gramdb(n)} "gramdb(5) Parser">>
 
-<<swallow {package require simlib 2.0}>>
+<<swallow {package require simlib}>>
 
 <<section SYNOPSIS>>
 
 <pre>
-package require -exact simlib 1.0
+package require simlib
 namespace import ::simlib::*
 </pre>
 

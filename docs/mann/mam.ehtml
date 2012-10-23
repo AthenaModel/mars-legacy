@@ -9,7 +9,7 @@ namespace import ::simlib::*
 
 <<swallow {
     # So that schema is available.
-    package require simlib 2.0
+    package require simlib
 }>>
 
 <<itemlist>>
@@ -385,3 +385,4 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+

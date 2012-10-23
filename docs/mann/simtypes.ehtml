@@ -3,7 +3,7 @@
 <<section SYNOPSIS>>
 
 <pre>
-package require simlib 2.0
+package require simlib
 namespace import ::simlib::*
 </pre>
 
@@ -16,7 +16,7 @@ This module defines data types required by the Mars Simulation Library,
 
 <<swallow {
 # Let's let simlib do some of the work.
-package require simlib 2.0
+package require simlib
 namespace import -force ::simlib::q* ::simlib::e* ::simlib::r*
 }>>
 
@@ -217,6 +217,7 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
 
 
 

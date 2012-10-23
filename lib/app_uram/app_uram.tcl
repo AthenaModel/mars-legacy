@@ -41,7 +41,7 @@ package require snit
 # JNEM Packages
 package require marsutil
 package require marsgui
-package require simlib 2.0
+package require simlib
 
 namespace import ::marsutil::* 
 namespace import ::marsgui::*

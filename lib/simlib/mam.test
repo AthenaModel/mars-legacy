@@ -28,7 +28,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 #-----------------------------------------------------------------------
 # Load the package to be tested
 
-package require simlib 2.0    ;# mam(n) is part of simlib(n)
+package require simlib    ;# mam(n) is part of simlib(n)
 
 #-----------------------------------------------------------------------
 # Test Suite

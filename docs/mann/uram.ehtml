@@ -3,13 +3,13 @@
 <<section SYNOPSIS>>
 
 <pre>
-package require simlib 2.0
+package require simlib
 namespace import ::simlib::*
 </pre>
 
 <<swallow {
 # So we can get enum docs.
-package require simlib 2.0
+package require simlib
 namespace import ::simlib::*
 }>>
 
@@ -820,3 +820,4 @@ Will Duquette<p>
 Original package, derived from gram(n) v2.0.<p>
 
 <</manpage>>
+

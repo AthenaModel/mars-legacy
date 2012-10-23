@@ -1,15 +1,14 @@
 #-----------------------------------------------------------------------
 # TITLE:
-#	simlib2.tcl
+#	simlib.tcl
 #
 # AUTHOR:
 #	Will Duquette
 #
 # DESCRIPTION:
-#       Mars: simlib(n) main package for simlib 2.0
+#   Mars: simlib(n) main package for simlib 3.0
 #
-#       simlib 2.0 contains gram(n) and gramdb(n) V2.0.
-#
+#   simlib 3.0 contains GRAM 1 and URAM.
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
@@ -26,7 +25,7 @@ package require sqlite3
 #-----------------------------------------------------------------------
 # Package Definition
 
-package provide simlib 2.0
+package provide simlib 3.0
 
 #-----------------------------------------------------------------------
 # Namespace definition
@@ -41,16 +40,12 @@ namespace eval ::simlib:: {
 #-----------------------------------------------------------------------
 # Load simlib(n) submodules
 
-# Same for both v1.0 and v2.0
 source [file join $::simlib::library simtypes.tcl  ]
 source [file join $::simlib::library coverage.tcl  ]
 source [file join $::simlib::library rmf.tcl       ]
 source [file join $::simlib::library mam.tcl       ]
-
-# Different for v2.0
-source [file join $::simlib::library gram2.tcl     ]
-source [file join $::simlib::library gramdb2.tcl   ]
-
+source [file join $::simlib::library gram.tcl      ]
+source [file join $::simlib::library gramdb.tcl    ]
 source [file join $::simlib::library uramdb.tcl    ]
 source [file join $::simlib::library ucurve.tcl    ]
 source [file join $::simlib::library uram.tcl      ]

@@ -2,7 +2,7 @@
 
 <<swallow {
 # So we can get enum docs.
-package require simlib 2.0
+package require simlib
 namespace import ::simlib::*
 }>>
 
@@ -181,6 +181,7 @@ Will Duquette<p>
 Original package.
 
 <</manpage>>
+
 
 
 

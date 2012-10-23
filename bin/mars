@@ -98,16 +98,10 @@ set metadata {
     
     gram {
         text     "GRAM Workbench"
-        applib   "-exact app_gram 1.0"
+        applib   "app_gram"
         mode     gui
     }
     
-    gram2 {
-        text     "GRAM Workbench V2"
-        applib   "app_gram 2.0"
-        mode     gui
-    }
-
     icons {
         text     "Icon Browser"
         applib   app_icons

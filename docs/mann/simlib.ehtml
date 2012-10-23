@@ -3,7 +3,7 @@
 <<section SYNOPSIS>>
 
 <pre>
-package require simlib 2.0
+package require simlib
 namespace import ::simlib::*
 </pre>
 
@@ -18,17 +18,11 @@ simlib(n) contains non-GUI simulation infrastructure modules.<p>
 simlib(n) includes the following submodules:<p>
 
 <ul>
+  <li> <<xref uram(n)>> -- Unified Regional Analysis Model (URAM) V1.0</i>
   <li> <<xref gram(n)>> -- Generalized Regional Analysis Model (GRAM) V1.0</i>
-  <li> <<xref gram2(n)>> -- Generalized Regional Analysis Model (GRAM) V2.0</i>
   <li> <<xref rmf(n)>> -- Relationship Multiplier Functions</li>
   <li> <<xref simtypes(n)>> -- Simulation Data Types</li>
 </ul>
-
-By default, <<xref gram2(n)>> is loaded.  To use <<xref gram(n)>>, do
-
-<pre>
-package require -exact simlib 1.0
-</pre>
 
 <<section ENVIRONMENT>>
 
@@ -48,13 +42,5 @@ Some content (<<xref gram(n)>>, <<xref rmf(n)>>, and some of the
 <<xref simtypes(n)>>) derives from earlier versions in JNEM's simlib(n).<p>
 
 <</manpage>>
-
-
-
-
-
-
-
-
 
 

@@ -3,23 +3,19 @@
 <<section SYNOPSIS>>
 
 <pre>
-package require -exact simlib 1.0
+package require simlib
 namespace import ::simlib::*
 </pre>
 
 <<swallow {
 # So we can get enum docs.
-package require simlib 2.0
+package require simlib 
 namespace import ::simlib::*
 }>>
 
 <<itemlist>>
 
 <<section DESCRIPTION>>
-
-<<xref gram(n)>> is the Tcl API for V1.0 of the Generalized Regional Analysis
-Model (GRAM); it has been superseded by <<xref gram2(n)>>, and
-will eventually go away.<p>
 
 GRAM models group satisfaction
 and inter-group cooperation within neighborhoods; see the Mars

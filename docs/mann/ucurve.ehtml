@@ -3,7 +3,7 @@
 <<section SYNOPSIS>>
 
 <pre>
-package require simlib 2.0
+package require simlib
 namespace import ::simlib::*
 </pre>
 
@@ -438,3 +438,4 @@ Will Duquette<p>
 Original package, derived from gram(n) v2.0.<p>
 
 <</manpage>>
+
