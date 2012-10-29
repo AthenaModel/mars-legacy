@@ -9,6 +9,23 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.11, 29 October 2012</h3>
+
+This build contains changes required to move Athena from using
+Zulu-time strings to Julian week strings as its human-readable time
+format.  In addition, the underlying Tcl infrastructure was updated to
+the 2012Q3 build of ActiveTcl Enterprise Edition, and code was added
+to make it possible to use geo-registered maps in Athena.<p>
+
+<ul>
+<li> Bug 3729: geotiff(n): geotiff reader for Mars
+<li> Bug 3731: geotiff(n): geotiff reader should give proper error message if file is not found
+<li> Bug 3735: geotiff(n): read GEOGRAPHIC model type from GeoTIFF file.
+<li> Bug 3743: simclock(i) interface
+<li> Bug 3753: Remove gram2(n) and related software
+<li> Bug 3754: Set MARS_TCL_HOME in MakePlatform
+</ul><p>
+
 <h3>Build 2.10, 3 October 2012</h3>
 
 This build contains performance improvements to URAM and to Mars'
