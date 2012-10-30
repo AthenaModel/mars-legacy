@@ -21,7 +21,6 @@ package require Img
 package require BWidget  1.9
 package require treectrl 2.2.10
 package require tablelist 5.1
-package require Plotchart 1.6
 package require Tktable 2.10
 package require Tkhtml 3.0
 
@@ -80,7 +79,6 @@ source [file join $::marsgui::library rb_bintree.tcl     ]
 source [file join $::marsgui::library sqlbrowser.tcl     ]
 source [file join $::marsgui::library querybrowser.tcl   ]
 source [file join $::marsgui::library isearch.tcl        ]
-source [file join $::marsgui::library timeline.tcl       ]
 source [file join $::marsgui::library hbarchart.tcl      ]
 source [file join $::marsgui::library stripchart.tcl     ]
 source [file join $::marsgui::library pwin.tcl           ]
