@@ -9,6 +9,11 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.12, 31 October 2012</h3>
+
+This build removes the obsolete module timeline(n), and the related
+dependency on the Plotchart package.<p>
+
 <h3>Build 2.11, 29 October 2012</h3>
 
 This build contains changes required to move Athena from using
