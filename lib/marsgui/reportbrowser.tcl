@@ -646,6 +646,15 @@ snit::widget ::marsgui::reportbrowser {
     #-------------------------------------------------------------------
     # Public Methods
 
+    # print
+    #
+    # Calls the report viewers print method.
+    # Used by the report browser window.
+
+    method print {} {
+        $viewer print
+    }
+
     # connect dbname
     #
     # dbname      The name of the run-time database object.
