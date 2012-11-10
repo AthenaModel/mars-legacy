@@ -648,7 +648,7 @@ snit::widget ::marsgui::reportbrowser {
 
     # print
     #
-    # Calls the report viewers print method.
+    # Calls the report viewers' print method.
     # Used by the report browser window.
 
     method print {} {
