@@ -10,9 +10,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.72, 10 December 2012</h3>
+
+This build contains one change.<p>
+
+<ul>
+    <li> Bug 3781: Add print capability to report browser window
+</ul><p>
+
 <h3>Build 1.71, 22 October 2012</h3>
 
-This build contains one minor changes.<p>
+This build contains minor changes.<p>
 
 <ul>
     <li> Bug 3692: marsicons(n): Adding a zoom-tool icon
