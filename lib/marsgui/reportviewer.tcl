@@ -194,7 +194,7 @@ snit::widget ::marsgui::reportviewer {
                 # NEXT, The file was made correctly. Try to print the file. 
                 #       It goes to the default printer.
                 if {[catch {
-                    exec cat $filename | lpr
+                    exec cat $filename | lpr -o landscape -o cpi=15 -o lpi=9
                     # Delete the file used, to keep from cluttering filesystem.
                     exec rm $filename
                 } result opts]} {
@@ -272,6 +272,7 @@ snit::widget ::marsgui::reportviewer {
         }
 
         set currentReport $id
+
     }
 
 
