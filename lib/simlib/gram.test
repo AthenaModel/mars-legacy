@@ -2864,7 +2864,7 @@ time driver acontrib curve_id n  g    c
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value "DUMMY", should be a real number no less than 0.0, or one of: XL, L, M, S, XS}
+    } -result {invalid value "DUMMY", should be a real number in range 0.0, 100.0, or one of: XL, L, M, S, XS}
 
     test sat_level-1.9 {negative days} -setup {
         create
@@ -2874,7 +2874,7 @@ time driver acontrib curve_id n  g    c
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value "-1", should be a real number no less than 0.0, or one of: XL, L, M, S, XS}
+    } -result {invalid value "-1", should be a real number in range 0.0, 100.0, or one of: XL, L, M, S, XS}
 
     test sat_level-1.10 {Invalid option} -setup {
         create
@@ -5689,7 +5689,7 @@ time driver acontrib curve_id n  f    g
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value "DUMMY", should be a real number no less than 0.0, or one of: XL, L, M, S, XS}
+    } -result {invalid value "DUMMY", should be a real number in range 0.0, 100.0, or one of: XL, L, M, S, XS}
 
     test coop_level-1.8 {negative days} -setup {
         create
@@ -5699,7 +5699,7 @@ time driver acontrib curve_id n  f    g
         cleanup 
     } -returnCodes {
         error
-    } -result {invalid value "-1", should be a real number no less than 0.0, or one of: XL, L, M, S, XS}
+    } -result {invalid value "-1", should be a real number in range 0.0, 100.0, or one of: XL, L, M, S, XS}
 
     test coop_level-1.9 {Invalid option} -setup {
         create
