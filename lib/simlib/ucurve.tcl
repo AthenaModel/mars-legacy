@@ -33,6 +33,24 @@ namespace eval ::simlib:: {
 #  * Save contributions to each curve by driver and timestamp
 #
 # Instances of ucurve are primarily used by the uram(n) type.
+#
+# Handling of Untracked Curves
+#
+# By definition, untracked curves cannot be adjusted or affected.
+# The A and B values are always equal to the C value.  Thus, it is
+# an error for there to be entries in the adjustments or effects tables
+# for untracked curves.  Therefore:
+#
+# * When a curve becomes untracked, any pending adjustments or effects
+#   are deleted.
+# * The [$ucurve apply] method will throw an error if there are any
+#   pending adjustments or effects for untracked curves; a well-behaved
+#   client shouldn't be providing adjustments or effects for curves
+#   it knows to be untracked.
+#
+# Note that we do not throw an error when the invalid adjustments and
+# effects are created, because doing so requires an additional database
+# query.
 
 snit::type ::simlib::ucurve {
 
@@ -470,6 +488,61 @@ snit::type ::simlib::ucurve {
         $self DbCget ucurve_curves_t [list $id] $option
     }
 
+    # curve track curve_id ?curve_id...?
+    #
+    # curve_id    - A curve ID
+    # b           - A new B value
+    #
+    # NOT UNDOABLE! Sets the tracked flag for each curve.
+    # This is intended as a fast bulk operation, so error-checking is 
+    # minimal.
+
+    method {curve track} {args} {
+        # FIRST, do this in a transaction, so that nothing changes on error.
+        $rdb transaction {
+            foreach curve_id $args {
+                $rdb eval {
+                    UPDATE ucurve_curves_t
+                    SET tracked=1
+                    WHERE curve_id=$curve_id;
+                }
+            }
+        }
+
+        # NEXT, this is not undoable.
+        $self edit reset
+    }
+
+    # curve untrack curve_id ?curve_id...?
+    #
+    # curve_id    - A curve ID
+    # b           - A new B value
+    #
+    # NOT UNDOABLE! Clears the tracked flag for each curve.
+    # This is intended as a fast bulk operation, so error-checking is 
+    # minimal.
+
+    method {curve untrack} {args} {
+        # FIRST, do this in a transaction, so that nothing changes on error.
+        $rdb transaction {
+            foreach curve_id $args {
+                $rdb eval {
+                    UPDATE ucurve_curves_t
+                    SET tracked=0
+                    WHERE curve_id=$curve_id;
+
+                    DELETE FROM ucurve_adjustments_t
+                    WHERE curve_id=$curve_id;
+
+                    DELETE FROM ucurve_effects_t
+                    WHERE curve_id=$curve_id;
+                }
+            }
+        }
+
+        # NEXT, this is not undoable.
+        $self edit reset
+    }
 
     # curve bset curve_id b ?curve_id b...?
     #
@@ -531,6 +604,9 @@ snit::type ::simlib::ucurve {
     #
     # Undoable.  Adds one or more transient effects, all related to a 
     # single driver and cause.
+    #
+    # Note that effects on untracked curves will be accepted here, but
+    # will cause an error on [apply]
     
     method transient {driver_id cause_id args} {
         $self AddEffect 0 $driver_id $cause_id {*}$args
@@ -546,6 +622,9 @@ snit::type ::simlib::ucurve {
     #
     # Undoable.  Adds one or more persistent effects, all related to a 
     # single driver and cause.
+    #
+    # Note that effects on untracked curves will be accepted here, but
+    # will cause an error on [apply]
     
     method persistent {driver_id cause_id args} {
         $self AddEffect 1 $driver_id $cause_id {*}$args
@@ -629,9 +708,9 @@ snit::type ::simlib::ucurve {
                 set b ""
 
                 $rdb eval {
-                    SELECT C.b    AS b,
-                           T.min  AS min,
-                           T.max  AS max
+                    SELECT C.b       AS b,
+                           T.min     AS min,
+                           T.max     AS max
                     FROM ucurve_curves_t AS C
                     JOIN ucurve_ctypes   AS T USING (ct_id)
                     WHERE C.curve_id = $curve_id
@@ -715,8 +794,9 @@ snit::type ::simlib::ucurve {
     #
     # t            - A timestamp
     #
-    # Applies the current set of effects to the curves, and updates
-    # the curves.  
+    # Updates all curves for which we are tracking changes, applying
+    # adjustments and effects.  Untracked curves have their actual and 
+    # baseline levels set to their natural levels.
     #
     # If t=0, then we are initializing at time 0.  The baseline is NOT
     # recomputed, and only transient effects are applied.  Finally,
@@ -725,7 +805,31 @@ snit::type ::simlib::ucurve {
     # make any.)
 
     method apply {t} {
-        # FIRST, handle pending adjustments.
+        # FIRST, complain if there are effects or adjustments on untracked
+        # curves.  There shouldn't be.
+
+        if {[$rdb exists {
+            SELECT e_id FROM ucurve_effects_t
+            JOIN ucurve_curves_t USING (curve_id)
+            WHERE tracked = 0
+            UNION 
+            SELECT a_id FROM ucurve_adjustments_t
+            JOIN ucurve_curves_t USING (curve_id)
+            WHERE tracked = 0
+        }]} {
+            error "Effects or adjustments exist on untracked curves."
+        }
+
+        # NEXT, handle all untracked curves; just set everything to the
+        # natural level.
+        $rdb eval {
+            UPDATE ucurve_curves_t
+            SET a = c,
+                b = c
+            WHERE tracked = 0;
+        }
+
+        # NEXT, handle pending adjustments.
         $self SaveAdjustmentContributions $t
 
         # NEXT, handle baseline effects if the flag is not given.
@@ -778,6 +882,8 @@ snit::type ::simlib::ucurve {
     # t - A timestamp
     #
     # Save the contributions for all of the baseline adjustments.
+    # We should only save contributions for untracked curves...
+    # but we ensured that there were no such in [apply].
 
     method SaveAdjustmentContributions {t} {
         $rdb eval {
@@ -795,7 +901,8 @@ snit::type ::simlib::ucurve {
     # ComputeBaselineAndScalingFactors
     #
     # Recomputes the baseline value B, and also the positive and
-    # negative scaling factors for every curve.
+    # negative scaling factors for every curve, for *tracked*
+    # curves only.
 
     method ComputeBaselineAndScalingFactors {} {
         foreach {curve_id bnew min max} [$rdb eval {
@@ -805,6 +912,7 @@ snit::type ::simlib::ucurve {
                    T.max                                  AS max
             FROM ucurve_ctypes   AS T
             JOIN ucurve_curves_t AS C USING (ct_id)
+            WHERE C.tracked = 1
         }] {
             # Note: This same UPDATE is used in 
             # UpdateBaselineAndScalingFactors; if it's updated here,
@@ -827,6 +935,10 @@ snit::type ::simlib::ucurve {
     # Given the current mode, determine the maximum positive and 
     # negative contributions for each curve and cause and apply them 
     # to the curve's delta.
+    #
+    # NOTE: This should operate only on tracked curves; but since
+    # only tracked curves will have effects we don't need to do
+    # anything special.
     #
     # Returns 1 if there were any contributions, and 0 otherwise.
 
@@ -910,12 +1022,13 @@ snit::type ::simlib::ucurve {
         # in proportion to their magnitude.
 
         $rdb eval {
-            SELECT e_id     AS e_id,
-                   curve_id AS curve_id,
-                   cause_id AS cause_id,
-                   mag      AS mag
-            FROM ucurve_effects_t
-            WHERE pflag=$pflag AND mag != 0.0
+            SELECT E.e_id     AS e_id,
+                   E.curve_id AS curve_id,
+                   E.cause_id AS cause_id,
+                   E.mag      AS mag
+            FROM ucurve_effects_t AS E
+            JOIN ucurve_curves_t AS C USING (curve_id)
+            WHERE C.tracked = 1 AND E.pflag=$pflag AND E.mag != 0.0
         } {
             # FIRST, retrieve the multiplier based on the sign of the
             # magnitude
@@ -941,6 +1054,8 @@ snit::type ::simlib::ucurve {
     # Adds the DeltaB resulting from persistent effects to the baseline,
     # clamping if need be, and updates the scale factors.
     #
+    # Untracked curves are ignored.
+    #
     # On [apply $t -transients], this is called with deltas all zero,
     # just to compute the scaling factors.
 
@@ -952,6 +1067,7 @@ snit::type ::simlib::ucurve {
                    T.max         AS max
             FROM ucurve_curves_t AS C
             JOIN ucurve_ctypes_t AS T USING (ct_id)
+            WHERE C.tracked = 1;
         }] {
             # FIRST, clamp the curve
             if {$bnew > $max} {
@@ -976,7 +1092,8 @@ snit::type ::simlib::ucurve {
     # ComputeCurrentLevels
     #
     # Computes the current level of each curve from the baseline
-    # and delta, and clamps it within bounds.
+    # and delta, and clamps it within bounds.  Untracked curves
+    # are ignored.
 
     method ComputeCurrentLevels {} {
         foreach {curve_id anew min max} [$rdb eval {
@@ -986,6 +1103,7 @@ snit::type ::simlib::ucurve {
                    T.max         AS max
             FROM ucurve_curves_t AS C
             JOIN ucurve_ctypes_t AS T USING (ct_id)
+            WHERE C.tracked = 1;
         }] {
             # FIRST, clamp the curve
             if {$anew > $max} {
@@ -1072,16 +1190,17 @@ snit::type ::simlib::ucurve {
     # $table-where     - Where clause
 
     typevariable tableInfo -array {
-        ucurve_ctypes_t-keys    {name}
-        ucurve_ctypes_t-options {-alpha -gamma}
-        ucurve_ctypes_t-where   {WHERE name=$key(name)}
+        ucurve_ctypes_t-keys      {name}
+        ucurve_ctypes_t-configure {-alpha -gamma}
+        ucurve_ctypes_t-where     {WHERE name=$key(name)}
 
-        ucurve_ctypes-keys      {name}
-        ucurve_ctypes-options   {-min -max -alpha -beta -gamma}
-        ucurve_ctypes-where     {WHERE name=$key(name)}
+        ucurve_ctypes-keys        {name}
+        ucurve_ctypes-cget        {-min -max -alpha -beta -gamma}
+        ucurve_ctypes-where       {WHERE name=$key(name)}
 
         ucurve_curves_t-keys      {curve_id}
-        ucurve_curves_t-options   {-b -c}
+        ucurve_curves_t-configure {-b -c}
+        ucurve_curves_t-cget      {-tracked -b -c}
         ucurve_curves_t-where     {WHERE curve_id=$key(curve_id)}
     }
 
@@ -1100,7 +1219,7 @@ snit::type ::simlib::ucurve {
         }
 
         # NEXT, get the column name
-        if {$option in $tableInfo($table-options)} {
+        if {$option in $tableInfo($table-cget)} {
             set colname [string range $option 1 end]
         } else {
             error "Unknown $table option: \"$option\""
@@ -1158,7 +1277,7 @@ snit::type ::simlib::ucurve {
         while {[llength $opts] > 0} {
             set opt [lshift opts]
 
-            if {$opt in $tableInfo($table-options)} {
+            if {$opt in $tableInfo($table-configure)} {
                 set colname     [string range $opt 1 end]
                 set value($ctr) [lshift opts]
 

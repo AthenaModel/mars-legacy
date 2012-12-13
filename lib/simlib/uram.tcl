@@ -2243,46 +2243,6 @@ snit::type ::simlib::uram {
         }
     }
 
-    # contribs nbmood n ?options...?
-    #
-    # n    - A neighborhood
-    #
-    # Options:
-    #    -start    - Start tick; default is 0
-    #    -end      - End tick; default is now.
-    #
-    # Computes the contributions by driver to nbhood n's mood.  
-    # Contributions to each of the four concerns are weighted by 
-    # population and saliency.
-
-    method {contribs nbmood} {n args} {
-        # FIRST, get the group
-        set n_id [$self GetNbhoodID $n]
-
-        # NEXT, get the options
-        $self ParseContribsOptions opts $args
-
-        # NEXT, clear the output table
-        $rdb eval {DELETE FROM uram_contribs}
-
-        # NEXT, aggregate the ucurve contribs data
-        set ts $opts(-start)
-        set te $opts(-end)
-
-        $rdb eval {
-            INSERT INTO uram_contribs(driver,contrib)
-            SELECT C.driver_id,
-                   total(G.pop*S.saliency*C.contrib)/N.nbmood_denom
-            FROM uram_sat_t AS S
-            JOIN ucurve_contribs_t AS C USING (curve_id)
-            JOIN uram_civ_g AS G ON (G.g_id = S.g_id)
-            JOIN uram_n     AS N ON (N.n_id = G.n_id)
-            WHERE N.n_id = $n_id
-            AND C.t >= $ts AND C.t <= $te
-            GROUP BY C.driver_id
-        }
-    }
-
     # contribs nbcoop n g ?options...?
     #
     # n    - A neighborhood

@@ -80,6 +80,10 @@ CREATE TABLE ucurve_curves_t (
     --------------------------------------------------------------------
     -- Data
 
+    --  Are we tracking changes to this curve?
+    tracked      INTEGER DEFAULT 1
+        CHECK (tracked IN (0,1)),
+
     -- The current A.t, B.t, C.t, and DeltaA.t values
 
     a            DOUBLE

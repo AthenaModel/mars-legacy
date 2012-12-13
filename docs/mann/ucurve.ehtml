@@ -57,6 +57,31 @@ The client is responsible for defining the set of curves to be managed:<p>
        next timestep.
 </ul>
 
+<<subsection "Untracked Curves">>
+
+The client has the option of marking particular curves as "untracked"
+using <<iref curve untrack>>.  Ucurve(n) does not track changes to 
+untracked curves; instead, their current or baseline levels are always
+exactly equal to their natural levels.  For example, if the client
+allows civilian groups to have zero population then the curves related
+to those groups can be untracked.  Tracking can be turned back on
+using <<iref curve track>>, at which point the curve can begin to
+fluctuate from its natural level.<p>
+
+Things to note:<p>
+
+<ul>
+<li> It is an error to add adjustments or effects to an untracked
+     curve.<p>
+
+<li> For performance reasons, the error will not be detected until
+     the next time <<iref apply>> is called, at which point an error
+     will be thrown.<p>
+
+<li> If a curve with pending adjustments or effects is untracked,
+     the pending changes will be deleted automatically.<p>
+</ul>
+
 <<subsection "Undo Stack">>
 
 Many ucurve(n) operations are undoable; to enable the undo stack, set
@@ -193,6 +218,10 @@ This is allows the client to initialize the <b>a</b> values with
 transient effects based on the simulation starting conditions at time
 0.<p>
 
+It is an error if there are pending adjustments or effects on 
+untracked curves.  See <<xref "Untracked Curves">> for more
+details.<p>
+
 <<defitem cget {$obj cget <i>option</i>}>>
 
 Returns the value of the specified <i>option</i>.<p>
@@ -312,8 +341,26 @@ responsibility to ensure that the arguments are valid.<p>
 
 <<defitem "curve cget" {$obj curve cget <i>curve_id option</i>}>>
 
-Retrieves the value of <i>option</i> for curve <i>curve_id</i>.  See
-<<iref curve configure>> for the valid options.<p>
+Retrieves the value of <i>option</i> for curve <i>curve_id</i>.
+The following options can be retrieved:<p>
+
+<<deflist options>>
+
+<<defopt {-b}>>
+
+The curve's B value.<p>
+
+<<defopt {-c}>>
+
+The curve's C value.<p>
+
+<<defopt {-tracked}>>
+
+The curve's "tracked" flag, 1 if the curve is tracked and 0 if it is
+untracked.<p>
+
+
+<</deflist options>>
 
 <<defitem "curve configure" {$obj curve configure <i>curve_id</i> ?<i>options...</i>?}>>
 
@@ -332,7 +379,7 @@ Sets the curve's C value.<p>
 
 <</deflist options>>
 
-<<defitem "curve cset" {$obj curve cset <i>curve_id c</i> ?<i>curve_id c</i>?}>>
+<<defitem "curve cset" {$obj curve cset <i>curve_id c</i> ?<i>curve_id c</i>...?}>>
 
 <b>Not Undoable.</b>  Sets the C values for one or more curve IDs.
 This command is designed for speed; it is the client's
@@ -342,6 +389,18 @@ responsibility to ensure that the arguments are valid.<p>
 
 Returns 1 if there is a curve with the given <i>curve_id</i>, and 0
 otherwise.<p>
+
+<<defitem "curve track" {$obj curve track <i>curve_id</i> ?<i>curve_id</i>...?}>>
+
+<b>Not Undoable.</b>  Given one or more curve IDs, marks all of the
+listed curves "tracked".  See <<xref "Untracked Curves">> for
+details.<p>
+
+<<defitem "curve untrack" {$obj curve untrack <i>curve_id</i> ?<i>curve_id</i>...?}>>
+
+<b>Not Undoable.</b>  Given one or more curve IDs, marks all of the
+listed curves "untracked", and deletes any pending adjustments or
+effects on them.  See <<xref "Untracked Curves">> for details.<p>
 
 <</deflist curve>>
 
