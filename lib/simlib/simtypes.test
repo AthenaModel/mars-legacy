@@ -326,7 +326,7 @@ namespace eval ::simlib::test {
             [qduration cget -min]    \
             [qduration cget -max]    \
             [qduration cget -format]
-    } -result {0.0 {} %3.1f}
+    } -result {0.0 100.0 %3.1f}
 
     #-------------------------------------------------------------------
     # egrouptype
