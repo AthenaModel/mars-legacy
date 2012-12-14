@@ -472,9 +472,7 @@ snit::type ::simlib::uramdb {
             error "schema not defined"
         }
 
-        $db unlock $tableNames
         $tt loadfile $db $dbfile $concernDefinitions
-        $db lock $tableNames
 
         return $db
     }
@@ -497,9 +495,7 @@ snit::type ::simlib::uramdb {
             error "schema not defined"
         }
 
-        $db unlock $tableNames
         $tt load $db $text $concernDefinitions
-        $db lock $tableNames
 
         return
     }

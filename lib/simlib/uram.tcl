@@ -613,6 +613,14 @@ snit::type ::simlib::uram {
         $self PopulateNbhoodCoopTable
         $self PopulateScid
 
+        # NEXT, untrack curves for empty groups.
+        set empty [$rdb eval {
+            SELECT g_id FROM uram_civ_g WHERE pop == 0 
+        }]
+        if {[llength $empty] > 0} {
+            $self SetTracking 0 $empty
+        }
+
         # NEXT, clear the transient data
         array unset trans
     }
@@ -1079,18 +1087,71 @@ snit::type ::simlib::uram {
     # Updates uram_civ_g.pop for the specified groups.
     # The change takes effect on the next time [advance]
     #
+    # At the same time, make note of groups that have become empty
+    # or are no longer empty, and set the tracking for their curves.
+    #
     # NOTE: This routine updates uram_civ_g; do not call it in the body
     # of a query on uram_civ_g.
 
     method {update pop} {args} {
+        set nowTracked [list]
+        set nowUntracked [list]
+
         foreach {g pop} $args {
             set g_id [dict get $db(groupIDs) $g]
+
+            set oldPop [$rdb eval {
+                SELECT pop FROM uram_civ_g WHERE g_id=$g_id
+            }]
+
+            if {$oldPop == 0 && $pop > 0} {
+                lappend nowTracked $g_id
+            } elseif {$oldPop > 0 && $pop == 0} {
+                lappend nowUntracked $g_id
+            }
 
             $rdb eval {
                 UPDATE uram_civ_g
                 SET pop = $pop
                 WHERE g_id=$g_id
             }
+        }
+
+        if {[llength $nowTracked] > 0} {
+            $self SetTracking 1 $nowTracked
+        }
+
+        if {[llength $nowUntracked] > 0} {
+            $self SetTracking 0 $nowUntracked
+        }
+    }
+
+    # SetTracking flag glist
+    #
+    # flag    - 1 or 0
+    # glist   - A list of civilian g_id's
+    #
+    # Tracks or untracks the curves related to the listed civilian
+    # groups.
+
+    method SetTracking {flag glist} {
+        # FIRST, get the list of curve IDs.
+        set gs "([join $glist ,])"
+
+        set curve_ids [$rdb eval "
+            SELECT curve_id FROM uram_hrel_t WHERE f_id IN $gs OR g_id IN $gs
+            UNION
+            SELECT curve_id FROM uram_vrel_t WHERE g_id IN $gs
+            UNION
+            SELECT curve_id FROM uram_sat_t WHERE g_id IN $gs
+            UNION
+            SELECT curve_id FROM uram_coop_t WHERE f_id IN $gs
+        "]
+
+        if {$flag} {
+            $cm curve track $curve_ids 
+        } else {
+            $cm curve untrack $curve_ids
         }
     }
 
@@ -1277,6 +1338,8 @@ snit::type ::simlib::uram {
     #
     # At present, there is no spread algorithm for HREL inputs; the
     # only effect is the direct effect.
+    #
+    # Inputs for civilian groups with zero population are ignored.
 
     method {hrel persistent} {driver cause f g mag} {
         require {$db(time) >= 0} "Persistent inputs not allowed when t=-1"
@@ -1284,6 +1347,10 @@ snit::type ::simlib::uram {
         set cause_id [$self GetCauseID $cause $driver]
         set curve_id [dict get $db(hrelIDs) $f $g]
         set mag      [umag validate $mag]
+
+        if {![$cm istracked $curve_id]} {
+            return
+        }
 
         $cm persistent $driver $cause_id $curve_id $mag
     }
@@ -1308,6 +1375,10 @@ snit::type ::simlib::uram {
         set curve_id [dict get $db(hrelIDs) $f $g]
         set mag      [umag validate $mag]
 
+        if {![$cm istracked $curve_id]} {
+            return
+        }
+
         $cm transient $driver $cause_id $curve_id $mag
     }
 
@@ -1327,6 +1398,9 @@ snit::type ::simlib::uram {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
         set curve_id [dict get $db(hrelIDs) $f $g]
+
+        require {[$cm istracked $curve_id]} "HREL $f $g is not tracked."
+
         snit::double validate $delta
 
         # ucurve adds the necessary record to the undo stack
@@ -1350,6 +1424,9 @@ snit::type ::simlib::uram {
 
         # FIRST, validate inputs.
         set curve_id [dict get $db(hrelIDs) $f $g]
+
+        require {[$cm istracked $curve_id]} "HREL $f $g is not tracked."
+
         qaffinity validate $value
 
         # NEXT, get the current value and compute the delta
@@ -1412,6 +1489,10 @@ snit::type ::simlib::uram {
         set curve_id [dict get $db(vrelIDs) $g $a] 
         set mag      [umag validate $mag]
 
+        if {![$cm istracked $curve_id]} {
+            return
+        }
+
         $cm persistent $driver $cause_id $curve_id $mag
     }
 
@@ -1435,6 +1516,10 @@ snit::type ::simlib::uram {
         set curve_id [dict get $db(vrelIDs) $g $a] 
         set mag      [umag validate $mag]
 
+        if {![$cm istracked $curve_id]} {
+            return
+        }
+
         $cm transient $driver $cause_id $curve_id $mag
     }
 
@@ -1454,6 +1539,8 @@ snit::type ::simlib::uram {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
         set curve_id [dict get $db(vrelIDs) $g $a] 
+        require {[$cm istracked $curve_id]} "VREL $g $a is not tracked."
+
         snit::double validate $delta
 
         # ucurve adds the necessary record to the undo stack
@@ -1477,6 +1564,8 @@ snit::type ::simlib::uram {
 
         # FIRST, validate inputs.
         set curve_id [dict get $db(vrelIDs) $g $a] 
+        require {[$cm istracked $curve_id]} "VREL $g $a is not tracked."
+
         qaffinity validate $value
 
         # NEXT, get the current value and compute the delta
@@ -1537,6 +1626,9 @@ snit::type ::simlib::uram {
     # with magnitude mag.  The input causes a direct effect and
     # possibly also indirect effects depending on the values of -s,
     # -p, and -q.
+    #
+    # There will no indirect effects on empty groups, and if g itself
+    # is empty there will be no effects at all.
 
     method {sat persistent} {driver cause g c mag args} {
         require {$db(time) >= 0} "Persistent inputs not allowed when t=-1"
@@ -1583,6 +1675,9 @@ snit::type ::simlib::uram {
     # with magnitude mag.  The input causes a direct effect and
     # possibly also indirect effects depending on the values of -s,
     # -p, and -q.
+    #
+    # There will no indirect effects on empty groups, and if g itself
+    # is empty there will be no effects at all.
 
     method {sat transient} {driver cause g c mag args} {
         # FIRST, validate the normal inputs and retrieve IDs.
@@ -1644,6 +1739,8 @@ snit::type ::simlib::uram {
     # Computes and returns a satisfaction spread, a dictionary
     # {g_id -> factor}.  The spread is cached for later use during
     # the same timestep.
+    #
+    # Groups with zero population are excluded from the spread.
     
     method SatSpread {g_id s p q} {
         # FIRST, if this spread is cached, return the cached value.
@@ -1661,12 +1758,15 @@ snit::type ::simlib::uram {
         # NEXT, create the empty dictionary
         set spread [dict create]
 
+        # Ignore f's where either f or g has zero population.  We get this
+        # by looking at the tracked flag on the hrel, because the hrel
+        # will be untracked if either group has zero population.
         $rdb eval {
             SELECT f_id      AS f_id,
                    hrel      AS hrel,
                    proximity AS proximity
             FROM uram_civrel 
-            WHERE g_id = $g_id
+            WHERE g_id = $g_id AND tracked
             AND   proximity < $plimit
         } {
             # FIRST, Apply the RAFs.
@@ -1718,6 +1818,8 @@ snit::type ::simlib::uram {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
         set curve_id [dict get $db(satIDs) $g $c]
+        require {[$cm istracked $curve_id]} "SAT $g $c is not tracked."
+
         snit::double validate $delta
 
         # ucurve adds the necessary record to the undo stack
@@ -1741,6 +1843,8 @@ snit::type ::simlib::uram {
 
         # FIRST, validate inputs.
         set curve_id [dict get $db(satIDs) $g $c]
+        require {[$cm istracked $curve_id]} "SAT $g $c is not tracked."
+
         qsat validate $value
 
         # NEXT, get the current value and compute the delta
@@ -1899,6 +2003,9 @@ snit::type ::simlib::uram {
         # Schedule the effects
         set cmlist [list]
 
+        # There are no effects on empty civilian groups.  We check
+        # this using the tracked flag on the relevant hrel curve,
+        # which will always be false if either civilian group is empty.
         $rdb eval {
             SELECT curve_id, factor, proximity 
             FROM uram_coop_spread
@@ -1906,6 +2013,7 @@ snit::type ::simlib::uram {
             AND   dg_id     =  $g_id
             AND   proximity <  $plimit
             AND   civrel    >= $CRL
+            AND   tracked
         } {
             # FIRST, The factor is the HREL between two force groups,
             # and as such is subject to the RAFs.
@@ -1949,6 +2057,8 @@ snit::type ::simlib::uram {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
         set curve_id [dict get $db(coopIDs) $f $g]
+        require {[$cm istracked $curve_id]} "COOP $f $g is not tracked."
+
         snit::double validate $delta
 
         # ucurve adds the necessary record to the undo stack
@@ -1972,6 +2082,8 @@ snit::type ::simlib::uram {
 
         # FIRST, validate inputs.
         set curve_id [dict get $db(coopIDs) $f $g]
+        require {[$cm istracked $curve_id]} "COOP $f $g is not tracked."
+
         qcooperation validate $value
 
         # NEXT, get the current value and compute the delta

@@ -488,19 +488,18 @@ snit::type ::simlib::ucurve {
         $self DbCget ucurve_curves_t [list $id] $option
     }
 
-    # curve track curve_id ?curve_id...?
+    # curve track curve_ids
     #
-    # curve_id    - A curve ID
-    # b           - A new B value
+    # curve_ids    - A list of curve IDs
     #
     # NOT UNDOABLE! Sets the tracked flag for each curve.
     # This is intended as a fast bulk operation, so error-checking is 
     # minimal.
 
-    method {curve track} {args} {
+    method {curve track} {curve_ids} {
         # FIRST, do this in a transaction, so that nothing changes on error.
         $rdb transaction {
-            foreach curve_id $args {
+            foreach curve_id $curve_ids {
                 $rdb eval {
                     UPDATE ucurve_curves_t
                     SET tracked=1
@@ -513,19 +512,18 @@ snit::type ::simlib::ucurve {
         $self edit reset
     }
 
-    # curve untrack curve_id ?curve_id...?
+    # curve untrack curve_ids
     #
-    # curve_id    - A curve ID
-    # b           - A new B value
+    # curve_ids    - A list of curve IDs
     #
     # NOT UNDOABLE! Clears the tracked flag for each curve.
     # This is intended as a fast bulk operation, so error-checking is 
     # minimal.
 
-    method {curve untrack} {args} {
+    method {curve untrack} {curve_ids} {
         # FIRST, do this in a transaction, so that nothing changes on error.
         $rdb transaction {
-            foreach curve_id $args {
+            foreach curve_id $curve_ids {
                 $rdb eval {
                     UPDATE ucurve_curves_t
                     SET tracked=0
@@ -543,6 +541,17 @@ snit::type ::simlib::ucurve {
         # NEXT, this is not undoable.
         $self edit reset
     }
+
+    # istracked curve_id
+    #
+    # Returns if the curve is tracked, and 0 otherwise.
+
+    method istracked {curve_id} {
+        return [$rdb onecolumn {
+            SELECT tracked FROM ucurve_curves_t
+            WHERE curve_id = $curve_id
+        }]
+    }   
 
     # curve bset curve_id b ?curve_id b...?
     #

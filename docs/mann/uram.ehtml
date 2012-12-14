@@ -68,6 +68,18 @@ its operation.  Commands that are neither usually do not affect the
 undo stack one way or another.  The <b>Undoable</b> and <b>Not
 Undoable</b> commands are so marked.<p>
 
+<<subsection "Empty Civilian Groups">>
+
+uram(n) allows civilian groups to be "empty", i.e., to have a
+population of zero.  Curves relating to an empty civilian group
+are "untracked" in <<xref ucurve(n)>>, receive no direct or
+indirect effects, and do not contribute to the neighborhood mood or
+cooperation roll-ups.<p>
+
+Civilian population is dynamic, and can change from tick to tick;
+thus a group might be empty at time 0, gain population at a later
+time, and become empty again still later.<p>
+
 <<section "DATABASE SCHEMA">>
 
 uram(n) stores almost all of its working data in an
@@ -340,6 +352,8 @@ clamped accordingly.<p>
 The adjustment takes effect immediately, and is ascribed to the
 driver at the next <<iref advance>>.<p>
 
+It is an error if group <i>f</i> has a population of zero.<p>
+
 <<defitem "coop bset" {$obj coop bset <i>driver f g value</i>}>>
 
 <b>Undoable.</b>
@@ -351,6 +365,8 @@ the specified <i>driver</i> (see <<xref "ATTITUDE DRIVERS">>).<p>
 
 The change takes effect immediately, and is ascribed to the
 driver at the next <<iref advance>>.<p>
+
+It is an error if group <i>f</i> has a population of zero.<p>
 
 
 <<defitem "coop cset" {$obj coop cset ?<i>f g value...</i>?}>>
@@ -390,6 +406,10 @@ proximity indicated by the following options.  The magnitude of
 the indirect effects is adjusted by the relationship between the
 direct and indirect force groups and the proximity between the 
 direct and indirect civilian groups.<p>
+
+No indirect effects are created for empty civilian groups; and if 
+group <i>f</i> is empty, no effects are created at all.<p>
+
 
 <<deflist options>>
 
@@ -482,6 +502,9 @@ clamped accordingly.<p>
 The adjustment takes effect immediately and is ascribed to the driver
 at the next <<iref advance>>.<p>
 
+It is an error if either group is a civilian group with a population 
+of zero.<p>
+
 <<defitem "hrel bset" {$obj hrel bset <i>driver f g value</i>}>>
 
 <b>Undoable.</b>
@@ -493,6 +516,9 @@ the specified <i>driver</i> (see <<xref "ATTITUDE DRIVERS">>).<p>
 
 The change takes effect immediately, and is ascribed to the
 driver at the next <<iref advance>>.<p>
+
+It is an error if either group is a civilian group with a population 
+of zero.<p>
 
 <<defitem "hrel cset" {$obj hrel cset ?<i>f g value...</i>?}>>
 
@@ -524,6 +550,9 @@ this driver a unique cause.<p>
 
 We have no spread model for horizontal relationship inputs; hence,
 these commands create one direct effect and no indirect effects.<p>
+
+If either group <i>f</i> or group <i>g</i> is empty, no effect is
+created.<p>
 
 <</deflist hrel>>
 
@@ -627,6 +656,8 @@ clamped accordingly.<p>
 The adjustment takes effect immediately, and is ascribed to the driver
 at the next <<iref advance>>.<p>
 
+It is an error if group <i>g</i> has a population of zero.<p>
+
 <<defitem "sat bset" {$obj sat bset <i>driver g c value</i>}>>
 
 <b>Undoable.</b>
@@ -638,6 +669,8 @@ the specified <i>driver</i> (see <<xref "ATTITUDE DRIVERS">>).<p>
 
 The change takes effect immediately, and is ascribed to the
 driver at the next <<iref advance>>.<p>
+
+It is an error if group <i>g</i> has a population of zero.<p>
 
 <<defitem "sat cset" {$obj sat cset ?<i>g c value...</i>?}>>
 
@@ -671,6 +704,9 @@ this case, the driver ID will be used as the numeric cause ID, making
 this driver a unique cause.<p>
 
 The input is a direct effect with indirect effects governed by the options:<p>
+
+No indirect effects are created for empty civilian groups; and if 
+group <i>g</i> is empty, no effects are created at all.<p>
 
 <<deflist options>>
 
@@ -754,6 +790,9 @@ clamped accordingly.<p>
 The adjustment takes effect immediately, and is ascribed to the driver
 at the next <<iref advance>>.<p>
 
+It is an error if group <i>g</i> is a civilian group with 
+a population of zero.<p>
+
 <<defitem "vrel bset" {$obj vrel bset <i>driver g a value</i>}>>
 
 <b>Undoable.</b>
@@ -766,6 +805,8 @@ the specified <i>driver</i> (see <<xref "ATTITUDE DRIVERS">>).<p>
 The change takes effect immediately, and is ascribed to the
 driver at the next <<iref advance>>.<p>
 
+It is an error if group <i>g</i> is a civilian group with 
+a population of zero.<p>
 
 <<defitem "vrel cset" {$obj vrel cset ?<i>g a value...</i>?}>>
 
@@ -796,6 +837,8 @@ this driver a unique cause.<p>
 
 We have no spread model for vertical relationship inputs; hence,
 these commands create one direct effect and no indirect effects.<p>
+
+If group <i>g</i> is empty, no effect is created.<p>
 
 <</deflist vrel>>
 

@@ -81,25 +81,24 @@ namespace eval ::simlib::test {
     # Creates a pre-configured URAM.  All uram options can be
     # used.
     #
-    # -rdb      cmd       - Defaults to RDB created for this test file
-    # -gramdb   contents  - Defaults to contents of test.uramdb
-    # -advance0 flag      - Whether to advance to 0 automatically.
-    #                       Defaults to yes.
+    # -sql               - SQL command run to modify the uramdb data before
+    #                      URAM is initialized.
+    # -advance0  flag    - Whether to advance to 0 automatically.
+    #                      Defaults to yes.
 
     proc create {args} {
         # FIRST, set up the RDB
         rdb clear
         set rdb [namespace current]::rdb
         
-        set uramdb [optval args -gramdb]
         set advance0 [optval args -advance0 yes]
+        set sql [optval args -sql ""]
 
-        if {$uramdb eq ""} {
-            uramdb loadfile ./test.uramdb $rdb
-        } else {
-            uramdb loadfile $uramdb $rdb
+        uramdb loadfile ./test.uramdb $rdb
+
+        if {$sql ne ""} {
+            rdb eval $sql
         }
-
 
         uram jr \
             -rdb     $rdb                                \
@@ -902,7 +901,91 @@ cause_id cause
         cleanup
     } -result {1}
 
+    # init-5.x: Empty civilian groups are untracked on load.
 
+    test init-5.1 {hrel curves are untracked for empty groups} -setup {
+        create -sql {
+            UPDATE uramdb_civ_g SET pop = 0 WHERE g = 'CA2';
+        }
+    } -body {
+        set tracked [rdb onecolumn {
+            SELECT count(tracked) 
+            FROM uram_hrel
+            WHERE (f = 'CA2' OR g = 'CA2') AND tracked; 
+        }]
+        set untracked [rdb onecolumn {
+            SELECT count(tracked) 
+            FROM uram_hrel
+            WHERE (f = 'CA2' OR g = 'CA2') AND NOT tracked; 
+        }]
+
+        list $tracked $untracked
+    } -cleanup {
+        cleanup
+    } -result {0 19}
+
+    test init-5.2 {vrel curves are untracked for empty groups} -setup {
+        create -sql {
+            UPDATE uramdb_civ_g SET pop = 0 WHERE g = 'CA2';
+        }
+    } -body {
+        set tracked [rdb onecolumn {
+            SELECT count(tracked) 
+            FROM uram_vrel
+            WHERE g = 'CA2' AND tracked; 
+        }]
+        set untracked [rdb onecolumn {
+            SELECT count(tracked) 
+            FROM uram_vrel
+            WHERE g = 'CA2' AND NOT tracked; 
+        }]
+
+        list $tracked $untracked
+    } -cleanup {
+        cleanup
+    } -result {0 2}
+
+    test init-5.3 {sat curves are untracked for empty groups} -setup {
+        create -sql {
+            UPDATE uramdb_civ_g SET pop = 0 WHERE g = 'CA2';
+        }
+    } -body {
+        set tracked [rdb onecolumn {
+            SELECT count(tracked) 
+            FROM uram_sat
+            WHERE g = 'CA2' AND tracked; 
+        }]
+        set untracked [rdb onecolumn {
+            SELECT count(tracked) 
+            FROM uram_sat
+            WHERE g = 'CA2' AND NOT tracked; 
+        }]
+
+        list $tracked $untracked
+    } -cleanup {
+        cleanup
+    } -result {0 4}
+
+    test init-5.4 {coop curves are untracked for empty groups} -setup {
+        create -sql {
+            UPDATE uramdb_civ_g SET pop = 0 WHERE g = 'CA2';
+        }
+    } -body {
+        set tracked [rdb onecolumn {
+            SELECT count(tracked) 
+            FROM uram_coop
+            WHERE f = 'CA2' AND tracked; 
+        }]
+        set untracked [rdb onecolumn {
+            SELECT count(tracked) 
+            FROM uram_coop
+            WHERE f = 'CA2' AND NOT tracked; 
+        }]
+
+        list $tracked $untracked
+    } -cleanup {
+        cleanup
+    } -result {0 3}
 
     #-------------------------------------------------------------------
     # clear
@@ -1061,6 +1144,26 @@ pflag f   g   e_id driver_id cause mag
 1     CA1 CB1 2    1001      1001  5.0  
     }
 
+    test hrel_persistent-2.3 {empty civilian groups are ignored} -setup {
+        create
+        jr update pop CA1 0
+    } -body {
+        jr hrel persistent [jr driver] "" CA1 F1 10.0
+        jr hrel persistent [jr driver] "" CB1 F2 5.0
+        
+        pprint [rdb query {
+            SELECT pflag, f, g, e_id, driver_id, cause, mag 
+            FROM uram_hrel_effects
+            ORDER BY e_id
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+pflag f   g  e_id driver_id cause mag 
+----- --- -- ---- --------- ----- --- 
+1     CB1 F2 1    1001      1001  5.0 
+    }
+
     test hrel_persistent-3.1 {effect is undoable} -setup {
         create -undo on
     } -body {
@@ -1162,6 +1265,26 @@ pflag f   g   e_id driver_id cause mag
 0     CA1 CB1 2    1001      1001  5.0  
     }
 
+    test hrel_transient-2.3 {empty civilian groups are ignored} -setup {
+        create
+        jr update pop CA1 0
+    } -body {
+        jr hrel transient [jr driver] "" CA1 F1 10.0
+        jr hrel transient [jr driver] "" CB1 F2 5.0
+        
+        pprint [rdb query {
+            SELECT pflag, f, g, e_id, driver_id, cause, mag 
+            FROM uram_hrel_effects
+            ORDER BY e_id
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+pflag f   g  e_id driver_id cause mag 
+----- --- -- ---- --------- ----- --- 
+0     CB1 F2 1    1001      1001  5.0 
+    }
+
     test hrel_transient-3.1 {effect is undoable} -setup {
         create -undo on
     } -body {
@@ -1224,6 +1347,18 @@ pflag f  g  e_id driver_id cause mag
     } -cleanup {
         cleanup
     } -result {baseline adjustments not allowed when t=-1}
+
+    test hrel_badjust-1.5 {empty group} -setup {
+        create 
+        jr update pop CA1 0
+    } -body {
+        jr hrel badjust [jr driver] F1 CA1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {HREL F1 CA1 is not tracked.}
+
 
 
     test hrel_badjust-2.1 {adjustment is saved} -setup {
@@ -1308,6 +1443,18 @@ F1 F2 1      1000      0.1
     } -cleanup {
         cleanup
     } -result {baseline adjustments not allowed when t=-1}
+
+    test hrel_bset-1.5 {empty group} -setup {
+        create 
+        jr update pop CA1 0
+    } -body {
+        jr hrel bset [jr driver] F1 CA1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {HREL F1 CA1 is not tracked.}
+
 
     test hrel_bset-2.1 {value is set} -setup {
         create
@@ -1506,6 +1653,26 @@ pflag g  a  e_id driver_id cause mag
 1     F2 A2 2    1001      1001  5.0  
     }
 
+    test vrel_persistent-2.3 {empty civilian groups are ignored} -setup {
+        create
+        jr update pop CA1 0
+    } -body {
+        jr vrel persistent [jr driver] "" CA1 A1 10.0
+        jr vrel persistent [jr driver] "" CB1 A2 5.0
+        
+        pprint [rdb query {
+            SELECT pflag, g, a, e_id, driver_id, cause, mag 
+            FROM uram_vrel_effects
+            ORDER BY e_id
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+pflag g   a  e_id driver_id cause mag 
+----- --- -- ---- --------- ----- --- 
+1     CB1 A2 1    1001      1001  5.0 
+    }
+
     test vrel_persistent-3.1 {effect is undoable} -setup {
         create -undo on
     } -body {
@@ -1607,6 +1774,26 @@ pflag g  a  e_id driver_id cause mag
 0     F2 A2 2    1001      1001  5.0  
     }
 
+    test vrel_transient-2.3 {empty civilian groups are ignored} -setup {
+        create
+        jr update pop CA1 0
+    } -body {
+        jr vrel transient [jr driver] "" CA1 A1 10.0
+        jr vrel transient [jr driver] "" CB1 A2 5.0
+        
+        pprint [rdb query {
+            SELECT pflag, g, a, e_id, driver_id, cause, mag 
+            FROM uram_vrel_effects
+            ORDER BY e_id
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+pflag g   a  e_id driver_id cause mag 
+----- --- -- ---- --------- ----- --- 
+0     CB1 A2 1    1001      1001  5.0 
+    }
+
     test vrel_transient-3.1 {effect is undoable} -setup {
         create -undo on
     } -body {
@@ -1669,6 +1856,18 @@ pflag g  a  e_id driver_id cause mag
     } -cleanup {
         cleanup
     } -result {baseline adjustments not allowed when t=-1}
+
+    test vrel_badjust-1.5 {empty group} -setup {
+        create 
+        jr update pop CA1 0
+    } -body {
+        jr vrel badjust [jr driver] CA1 A1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {VREL CA1 A1 is not tracked.}
+
 
     test vrel_badjust-2.1 {adjustment is saved} -setup {
         create
@@ -1752,6 +1951,18 @@ F1 A1 1      1000      -0.25
     } -cleanup {
         cleanup
     } -result {baseline adjustments not allowed when t=-1}
+
+    test vrel_bset-1.5 {empty group} -setup {
+        create 
+        jr update pop CA1 0
+    } -body {
+        jr vrel bset [jr driver] CA1 A1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {VREL CA1 A1 is not tracked.}
+
 
     test vrel_bset-2.1 {value is set} -setup {
         create
@@ -2067,6 +2278,53 @@ CA1 1.0 1.0
 CA2 0.8 1.0  
     }
 
+    test sat_persistent-2.7 {No indirect effects on empty groups} -setup {
+        create
+        
+        # Set up some group proximities
+        setprox CA2 CA1 0  ;# HERE
+        setprox CB1 CA1 1  ;# NEAR
+        setprox CC1 CA1 2  ;# FAR
+        setprox CB2 CA1 3  ;# REMOTE
+        setprox CC2 CA1 3  ;# REMOTE
+        jr update pop CB1 0
+    } -body {
+        jr sat persistent [jr driver] "" CA1 AUT 1.0 -s 1.0 -p 1.0 -q 1.0
+        
+        pprint [rdb query {
+            SELECT g, c, mag
+            FROM uram_sat_effects
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+g   c   mag  
+--- --- ---- 
+CA1 AUT 1.0  
+CA2 AUT 1.0  
+CC1 AUT -0.3 
+    }
+
+    test sat_persistent-2.8 {No effects if g is empty} -setup {
+        create
+        
+        # Set up some group proximities
+        setprox CA2 CA1 0  ;# HERE
+        setprox CB1 CA1 1  ;# NEAR
+        setprox CC1 CA1 2  ;# FAR
+        setprox CB2 CA1 3  ;# REMOTE
+        setprox CC2 CA1 3  ;# REMOTE
+        jr update pop CA1 0
+    } -body {
+        jr sat persistent [jr driver] "" CA1 AUT 1.0 -s 1.0 -p 1.0 -q 1.0
+        
+        rdb onecolumn {
+            SELECT count(*) FROM uram_sat_effects
+        }
+    } -cleanup {
+        cleanup
+    } -result {0}
+
     test sat_persistent-3.1 {effect is undoable} -setup {
         create -undo on
     } -body {
@@ -2256,6 +2514,54 @@ CA1 1.0 1.0
 CA2 0.8 1.0  
     }
 
+    test sat_transient-2.6 {No indirect effects on empty groups} -setup {
+        create
+        
+        # Set up some group proximities
+        setprox CA2 CA1 0  ;# HERE
+        setprox CB1 CA1 1  ;# NEAR
+        setprox CC1 CA1 2  ;# FAR
+        setprox CB2 CA1 3  ;# REMOTE
+        setprox CC2 CA1 3  ;# REMOTE
+        jr update pop CB1 0
+    } -body {
+        jr sat transient [jr driver] "" CA1 AUT 1.0 -s 1.0 -p 1.0 -q 1.0
+        
+        pprint [rdb query {
+            SELECT g, c, mag
+            FROM uram_sat_effects
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+g   c   mag  
+--- --- ---- 
+CA1 AUT 1.0  
+CA2 AUT 1.0  
+CC1 AUT -0.3 
+    }
+
+    test sat_transient-2.7 {No effects if g is empty} -setup {
+        create
+        
+        # Set up some group proximities
+        setprox CA2 CA1 0  ;# HERE
+        setprox CB1 CA1 1  ;# NEAR
+        setprox CC1 CA1 2  ;# FAR
+        setprox CB2 CA1 3  ;# REMOTE
+        setprox CC2 CA1 3  ;# REMOTE
+        jr update pop CA1 0
+    } -body {
+        jr sat transient [jr driver] "" CA1 AUT 1.0 -s 1.0 -p 1.0 -q 1.0
+        
+        rdb onecolumn {
+            SELECT count(*) FROM uram_sat_effects
+        }
+    } -cleanup {
+        cleanup
+    } -result {0}
+
+    
     test sat_transient-3.1 {effect is undoable} -setup {
         create -undo on
     } -body {
@@ -2321,6 +2627,16 @@ pflag g   c   e_id driver_id cause mag
         cleanup
     } -result {baseline adjustments not allowed when t=-1}
 
+    test sat_badjust-1.5 {empty group} -setup {
+        create 
+        jr update pop CA1 0
+    } -body {
+        jr sat badjust [jr driver] CA1 AUT 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {SAT CA1 AUT is not tracked.}
 
     test sat_badjust-2.1 {adjustment is saved} -setup {
         create
@@ -2404,6 +2720,17 @@ CA1 AUT 1      1000      10.0
     } -cleanup {
         cleanup
     } -result {baseline adjustments not allowed when t=-1}
+
+    test sat_bset-1.5 {empty group} -setup {
+        create 
+        jr update pop CA1 0
+    } -body {
+        jr sat bset [jr driver] CA1 AUT 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {SAT CA1 AUT is not tracked.}
 
     test sat_bset-2.1 {value is set} -setup {
         create
@@ -2679,6 +3006,41 @@ pflag f   g  e_id driver_id cause format('%.1f',mag)
 1     CA2 F3 6    1000      1000  -0.8               
     }
 
+    test coop_persistent-2.6 {No indirect effects on empty groups} -setup {
+        create
+        setprox CA2 CA1 1 ;# CA2 is NEAR to CA1
+        jr update pop CA2 0
+    } -body {
+        jr coop persistent [jr driver] "" CA1 F1 10.0 -p 0.1
+        
+        pprint [rdb query {
+            SELECT pflag, f, g, e_id, driver_id, cause, format('%.1f',mag)
+            FROM uram_coop_effects
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+pflag f   g  e_id driver_id cause format('%.1f',mag) 
+----- --- -- ---- --------- ----- ------------------ 
+1     CA1 F1 1    1000      1000  10.0               
+1     CA1 F2 2    1000      1000  8.0                
+1     CA1 F3 3    1000      1000  -8.0               
+    }
+
+    test coop_persistent-2.7 {No effects at all if f is empty} -setup {
+        create
+        setprox CA2 CA1 1 ;# CA2 is NEAR to CA1
+        jr update pop CA1 0
+    } -body {
+        jr coop persistent [jr driver] "" CA1 F1 10.0 -p 0.1
+        
+        rdb onecolumn {
+            SELECT count(*) FROM uram_coop_effects
+        }
+    } -cleanup {
+        cleanup
+    } -result {0}
+
     test coop_persistent-3.1 {effect is undoable} -setup {
         create -undo on
     } -body {
@@ -2834,6 +3196,41 @@ pflag f   g  e_id driver_id cause format('%.1f',mag)
 0     CA2 F3 6    1000      1000  -0.8               
     }
 
+    test coop_transient-2.5 {No indirect effects on empty groups} -setup {
+        create
+        setprox CA2 CA1 1 ;# CA2 is NEAR to CA1
+        jr update pop CA2 0
+    } -body {
+        jr coop transient [jr driver] "" CA1 F1 10.0 -p 0.1
+        
+        pprint [rdb query {
+            SELECT pflag, f, g, e_id, driver_id, cause, format('%.1f',mag)
+            FROM uram_coop_effects
+        }]
+    } -cleanup {
+        cleanup
+    } -result {
+pflag f   g  e_id driver_id cause format('%.1f',mag) 
+----- --- -- ---- --------- ----- ------------------ 
+0     CA1 F1 1    1000      1000  10.0               
+0     CA1 F2 2    1000      1000  8.0                
+0     CA1 F3 3    1000      1000  -8.0               
+    }
+
+    test coop_transient-2.6 {No effects at all if f is empty} -setup {
+        create
+        setprox CA2 CA1 1 ;# CA2 is NEAR to CA1
+        jr update pop CA1 0
+    } -body {
+        jr coop transient [jr driver] "" CA1 F1 10.0 -p 0.1
+        
+        rdb onecolumn {
+            SELECT count(*) FROM uram_coop_effects
+        }
+    } -cleanup {
+        cleanup
+    } -result {0}
+
     test coop_transient-3.1 {effect is undoable} -setup {
         create -undo on
     } -body {
@@ -2898,6 +3295,17 @@ pflag f   g  e_id driver_id cause mag
     } -cleanup {
         cleanup
     } -result {baseline adjustments not allowed when t=-1}
+
+    test coop_badjust-1.5 {empty group} -setup {
+        create 
+        jr update pop CA1 0
+    } -body {
+        jr coop badjust [jr driver] CA1 F1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {COOP CA1 F1 is not tracked.}
 
 
     test coop_badjust-2.1 {adjustment is saved} -setup {
@@ -2981,6 +3389,17 @@ CA1 F1 1      1000      10.0
     } -cleanup {
         cleanup
     } -result {baseline adjustments not allowed when t=-1}
+
+    test coop_bset-1.5 {empty group} -setup {
+        create 
+        jr update pop CA1 0
+    } -body {
+        jr coop bset [jr driver] CA1 F1 5.0
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {COOP CA1 F1 is not tracked.}
 
     test coop_bset-2.1 {value is set} -setup {
         create
@@ -3112,6 +3531,51 @@ CB2 10000
 CC1 10000 
 CC2 10000 
     }
+
+    test update_pop-1.2 {newly empty groups are untracked} -setup {
+        create
+    } -body {
+        jr update pop CA1 5000 CB1 0 CC1 8000
+        
+        # the init-5.* tests verify that SetTracking catches all 
+        # curves.  Here, we'll just check the satisfaction curves.
+         
+        set tracked [rdb onecolumn {
+            SELECT count(tracked) FROM uram_sat WHERE tracked; 
+        }]
+        set untracked [rdb onecolumn {
+            SELECT count(tracked) FROM uram_sat WHERE NOT tracked; 
+        }]
+
+        # Only one group is untracked, so there should be 4 curves
+        # untracked.
+        list $tracked $untracked
+    } -cleanup {
+        cleanup
+    } -result {20 4}
+
+    test update_pop-1.3 {newly populated groups are tracked} -setup {
+        create
+        jr update pop CA1 5000 CB1 0 CC1 8000
+    } -body {
+        jr update pop CA1 5000 CB1 10000 CC1 8000
+
+        # the init-5.* tests verify that SetTracking catches all 
+        # curves.  Here, we'll just check the satisfaction curves.
+         
+        set tracked [rdb onecolumn {
+            SELECT count(tracked) FROM uram_sat WHERE tracked; 
+        }]
+        set untracked [rdb onecolumn {
+            SELECT count(tracked) FROM uram_sat WHERE NOT tracked; 
+        }]
+
+        # All satisfaction curves should be tracked. 
+        list $tracked $untracked
+    } -cleanup {
+        cleanup
+    } -result {24 0}
+
 
     #-------------------------------------------------------------------
     # Parms
@@ -3265,7 +3729,7 @@ g_id g   mood_denom mood mood0
 6    CC2 4.0        0.0  0.0   
     }
 
-    test advance-3.2 {nbhood moods are updated} -setup {
+    test advance-4.1 {nbhood moods are updated} -setup {
         create
         # Set SFT gamma to 0.0, so that it doesn't affect the results.
         uram parm set uram.factors.SFT {0.05 0.0}
@@ -3292,7 +3756,53 @@ n_id n  nbmood_denom nbmood            nbmood0
 2    N2 120000.0     0.0               0.0     
     }
 
-    test advance-4.1 {cooperation roll-ups are updated} -setup {
+    test advance-4.2 {nbhood moods are OK with empty groups} -setup {
+        create
+        # Set SFT gamma to 0.0, so that it doesn't affect the results.
+        uram parm set uram.factors.SFT {0.05 0.0}
+
+        # Empty group CC1.
+        jr update pop CC1 0
+    } -body {
+        jr sat transient [jr driver] "" CA1 AUT 10.0
+        jr sat transient [jr driver] "" CA1 QOL 10.0
+        jr sat transient [jr driver] "" CA1 CUL 10.0
+        jr sat transient [jr driver] "" CA1 SFT 10.0
+        jr advance 1
+
+        pprint [rdb query {SELECT * FROM uram_n}]
+    } -cleanup {
+        uram parm reset
+        cleanup
+    } -result {
+n_id n  nbmood_denom nbmood nbmood0 
+---- -- ------------ ------ ------- 
+1    N1 80000.0      8.0    0.0     
+2    N2 120000.0     0.0    0.0     
+    }
+
+    test advance-4.3 {nbhood moods are OK with empty nbhoods} -setup {
+        create
+        # Set SFT gamma to 0.0, so that it doesn't affect the results.
+        uram parm set uram.factors.SFT {0.05 0.0}
+
+        # Empty all groupis in N1.
+        jr update pop CA1 0 CB1 0 CC1 0
+    } -body {
+        jr advance 1
+
+        pprint [rdb query {SELECT * FROM uram_n}]
+    } -cleanup {
+        uram parm reset
+        cleanup
+    } -result {
+n_id n  nbmood_denom nbmood nbmood0 
+---- -- ------------ ------ ------- 
+1    N1 0.0          0.0    0.0     
+2    N2 120000.0     0.0    0.0     
+    }
+
+    test advance-5.1 {cooperation roll-ups are updated} -setup {
         create
         # Set COOP gamma to 0.0, so that it doesn't affect the results.
         uram parm set uram.factors.COOP {0.05 0.0}
@@ -3323,6 +3833,54 @@ ng_id n_id g_id n  g  nbcoop_denom nbcoop nbcoop0
 6     2    9    N2 F3 30000.0      50.0   50.0    
     }
 
+    test advance-5.2 {nbcoop is OK with empty groups} -setup {
+        create
+        # Set COOP gamma to 0.0, so that it doesn't affect the results.
+        uram parm set uram.factors.COOP {0.05 0.0}
+        jr update pop CC1 0
+    } -body {
+        jr coop transient [jr driver] "" CA1 F1 10.0
+        jr coop transient [jr driver] "" CB1 F1 10.0
+        jr coop transient [jr driver] "" CC1 F1 10.0
+        jr advance 1
+
+        pprint [rdb query {SELECT * FROM uram_nbcoop}]
+    } -cleanup {
+        uram parm reset
+        cleanup
+    } -result {
+ng_id n_id g_id n  g  nbcoop_denom nbcoop nbcoop0 
+----- ---- ---- -- -- ------------ ------ ------- 
+1     1    7    N1 F1 20000.0      55.0   50.0    
+2     1    8    N1 F2 20000.0      54.0   50.0    
+3     1    9    N1 F3 20000.0      46.0   50.0    
+4     2    7    N2 F1 30000.0      50.0   50.0    
+5     2    8    N2 F2 30000.0      50.0   50.0    
+6     2    9    N2 F3 30000.0      50.0   50.0    
+    }
+
+    test advance-5.3 {nbcoop is OK with empty neighborhoods} -setup {
+        create
+        # Set COOP gamma to 0.0, so that it doesn't affect the results.
+        uram parm set uram.factors.COOP {0.05 0.0}
+        jr update pop CA1 0 CB1 0 CC1 0
+    } -body {
+        jr advance 1
+
+        pprint [rdb query {SELECT * FROM uram_nbcoop}]
+    } -cleanup {
+        uram parm reset
+        cleanup
+    } -result {
+ng_id n_id g_id n  g  nbcoop_denom nbcoop nbcoop0 
+----- ---- ---- -- -- ------------ ------ ------- 
+1     1    7    N1 F1 0.0          0.0    50.0    
+2     1    8    N1 F2 0.0          0.0    50.0    
+3     1    9    N1 F3 0.0          0.0    50.0    
+4     2    7    N2 F1 30000.0      50.0   50.0    
+5     2    8    N2 F2 30000.0      50.0   50.0    
+6     2    9    N2 F3 30000.0      50.0   50.0    
+    }
 
 
     #-------------------------------------------------------------------

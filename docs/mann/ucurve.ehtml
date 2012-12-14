@@ -390,15 +390,15 @@ responsibility to ensure that the arguments are valid.<p>
 Returns 1 if there is a curve with the given <i>curve_id</i>, and 0
 otherwise.<p>
 
-<<defitem "curve track" {$obj curve track <i>curve_id</i> ?<i>curve_id</i>...?}>>
+<<defitem "curve track" {$obj curve track <i>curve_ids</i>}>>
 
-<b>Not Undoable.</b>  Given one or more curve IDs, marks all of the
+<b>Not Undoable.</b>  Given a list of curve IDs, marks all of the
 listed curves "tracked".  See <<xref "Untracked Curves">> for
 details.<p>
 
-<<defitem "curve untrack" {$obj curve untrack <i>curve_id</i> ?<i>curve_id</i>...?}>>
+<<defitem "curve untrack" {$obj curve untrack <i>curve_ids</i>}>>
 
-<b>Not Undoable.</b>  Given one or more curve IDs, marks all of the
+<b>Not Undoable.</b>  Given a list of curve IDs, marks all of the
 listed curves "untracked", and deletes any pending adjustments or
 effects on them.  See <<xref "Untracked Curves">> for details.<p>
 
@@ -438,6 +438,10 @@ stack is empty if there are no marks.  It's an error if there is
 no command to be undone.<p>
 
 <</deflist edit>>
+
+<<defitem istracked {$obj istracked <i>curve_id</i>}>>
+
+Returns 1 if the curve is tracked, and 0 otherwise.<p>
 
 <<defitem persistent {$obj persistent <i>driver_id cause_id curve_id mag</i> ?<i>curve_id mag...</i>?}>>
 

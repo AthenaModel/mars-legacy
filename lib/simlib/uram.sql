@@ -157,7 +157,8 @@ SELECT R.fg_id             AS fg_id,
        R.f_id              AS f_id,
        R.g_id              AS g_id,
        R.proximity         AS proximity,
-       C.a                 AS hrel
+       C.a                 AS hrel,
+       C.tracked           AS tracked
 FROM uram_civrel_t AS R
 JOIN ucurve_curves_t AS C ON (C.curve_id = R.hrel_id);
 
@@ -222,7 +223,8 @@ SELECT HREL.fg_id      AS fg_id,
        CRV.c           AS cvalue,
        CRV.a0          AS avalue0,
        CRV.b0          AS bvalue0,
-       CRV.c0          AS cvalue0
+       CRV.c0          AS cvalue0,
+       CRV.tracked     AS tracked
 FROM uram_hrel_t       AS HREL 
 JOIN ucurve_curves_t   AS CRV  USING (curve_id)
 JOIN uram_g            AS F    ON    (HREL.f_id = F.g_id)
@@ -302,7 +304,8 @@ SELECT VREL.ga_id      AS ga_id,
        CRV.c           AS cvalue,
        CRV.a0          AS avalue0,
        CRV.b0          AS bvalue0,
-       CRV.c0          AS cvalue0
+       CRV.c0          AS cvalue0,
+       CRV.tracked     AS tracked
 FROM uram_vrel_t       AS VREL 
 JOIN ucurve_curves_t   AS CRV  USING (curve_id)
 JOIN uram_g            AS G    ON    (VREL.g_id = G.g_id)
@@ -386,7 +389,8 @@ SELECT SAT.gc_id       AS gc_id,
        CRV.c           AS cvalue,
        CRV.a0          AS avalue0,
        CRV.b0          AS bvalue0,
-       CRV.c0          AS cvalue0
+       CRV.c0          AS cvalue0,
+       CRV.tracked     AS tracked
 FROM uram_sat_t        AS SAT
 JOIN ucurve_curves_t   AS CRV USING (curve_id)
 JOIN uram_g            AS G   ON    (SAT.g_id = G.g_id)
@@ -469,7 +473,8 @@ SELECT COOP.fg_id      AS fg_id,
        CRV.c           AS cvalue,
        CRV.a0          AS avalue0,
        CRV.b0          AS bvalue0,
-       CRV.c0          AS cvalue0
+       CRV.c0          AS cvalue0,
+       CRV.tracked     AS tracked
 FROM uram_coop_t       AS COOP 
 JOIN ucurve_curves_t   AS CRV  USING (curve_id)
 JOIN uram_g            AS F    ON    (COOP.f_id = F.g_id)
@@ -525,6 +530,7 @@ SELECT CREL.g_id      AS df_id,       -- Direct f
        CREL.f_id      AS if_id,       -- Indirect f
        CREL.proximity AS proximity,
        CREL.hrel      AS civrel,
+       CREL.tracked   AS tracked,
        FREL.g_id      AS dg_id,       -- Direct g
        FREL.f_id      AS ig_id,       -- Indirect g
        FREL.hrel      AS factor,
