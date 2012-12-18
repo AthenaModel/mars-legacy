@@ -345,10 +345,10 @@ a_id a
     } -cleanup {
         cleanup
     } -result {
-n_id n  nbmood_denom nbmood nbmood0 
----- -- ------------ ------ ------- 
-1    N1 120000.0     0.0    0.0     
-2    N2 120000.0     0.0    0.0     
+n_id n  pop   nbmood_denom nbmood nbmood0 
+---- -- ----- ------------ ------ ------- 
+1    N1 30000 120000.0     0.0    0.0     
+2    N2 30000 120000.0     0.0    0.0     
     }
 
     test init-2.3 {initial contents: uram_mn} -setup {
@@ -729,19 +729,19 @@ CC2 F3 2    10000 50.0
         create
     } -body {
         pprint [rdb query {
-            SELECT n,g,nbcoop_denom, nbcoop,nbcoop0 FROM uram_nbcoop
+            SELECT n,g,nbcoop,nbcoop0 FROM uram_nbcoop
         }]
     } -cleanup {
         cleanup
     } -result {
-n  g  nbcoop_denom nbcoop nbcoop0 
--- -- ------------ ------ ------- 
-N1 F1 30000.0      50.0   50.0    
-N1 F2 30000.0      50.0   50.0    
-N1 F3 30000.0      50.0   50.0    
-N2 F1 30000.0      50.0   50.0    
-N2 F2 30000.0      50.0   50.0    
-N2 F3 30000.0      50.0   50.0    
+n  g  nbcoop nbcoop0 
+-- -- ------ ------- 
+N1 F1 50.0   50.0    
+N1 F2 50.0   50.0    
+N1 F3 50.0   50.0    
+N2 F1 50.0   50.0    
+N2 F2 50.0   50.0    
+N2 F3 50.0   50.0    
     }
 
     test init-2.17 {initial contents: uram_cause} -setup {
@@ -3750,10 +3750,10 @@ g_id g   mood_denom mood mood0
         uram parm reset
         cleanup
     } -result {
-n_id n  nbmood_denom nbmood            nbmood0 
----- -- ------------ ----------------- ------- 
-1    N1 120000.0     4.333333333333333 0.0     
-2    N2 120000.0     0.0               0.0     
+n_id n  pop   nbmood_denom nbmood            nbmood0 
+---- -- ----- ------------ ----------------- ------- 
+1    N1 30000 120000.0     4.333333333333333 0.0     
+2    N2 30000 120000.0     0.0               0.0     
     }
 
     test advance-4.2 {nbhood moods are OK with empty groups} -setup {
@@ -3775,10 +3775,10 @@ n_id n  nbmood_denom nbmood            nbmood0
         uram parm reset
         cleanup
     } -result {
-n_id n  nbmood_denom nbmood nbmood0 
----- -- ------------ ------ ------- 
-1    N1 80000.0      8.0    0.0     
-2    N2 120000.0     0.0    0.0     
+n_id n  pop   nbmood_denom nbmood nbmood0 
+---- -- ----- ------------ ------ ------- 
+1    N1 20000 80000.0      8.0    0.0     
+2    N2 30000 120000.0     0.0    0.0     
     }
 
     test advance-4.3 {nbhood moods are OK with empty nbhoods} -setup {
@@ -3796,10 +3796,10 @@ n_id n  nbmood_denom nbmood nbmood0
         uram parm reset
         cleanup
     } -result {
-n_id n  nbmood_denom nbmood nbmood0 
----- -- ------------ ------ ------- 
-1    N1 0.0          0.0    0.0     
-2    N2 120000.0     0.0    0.0     
+n_id n  pop   nbmood_denom nbmood nbmood0 
+---- -- ----- ------------ ------ ------- 
+1    N1 0     0.0          0.0    0.0     
+2    N2 30000 120000.0     0.0    0.0     
     }
 
     test advance-5.1 {cooperation roll-ups are updated} -setup {
@@ -3823,14 +3823,14 @@ n_id n  nbmood_denom nbmood nbmood0
         uram parm reset
         cleanup
     } -result {
-ng_id n_id g_id n  g  nbcoop_denom nbcoop nbcoop0 
------ ---- ---- -- -- ------------ ------ ------- 
-1     1    7    N1 F1 30000.0      55.0   50.0    
-2     1    8    N1 F2 30000.0      54.0   50.0    
-3     1    9    N1 F3 30000.0      46.0   50.0    
-4     2    7    N2 F1 30000.0      50.0   50.0    
-5     2    8    N2 F2 30000.0      50.0   50.0    
-6     2    9    N2 F3 30000.0      50.0   50.0    
+ng_id n_id g_id n  g  nbcoop nbcoop0 
+----- ---- ---- -- -- ------ ------- 
+1     1    7    N1 F1 55.0   50.0    
+2     1    8    N1 F2 54.0   50.0    
+3     1    9    N1 F3 46.0   50.0    
+4     2    7    N2 F1 50.0   50.0    
+5     2    8    N2 F2 50.0   50.0    
+6     2    9    N2 F3 50.0   50.0    
     }
 
     test advance-5.2 {nbcoop is OK with empty groups} -setup {
@@ -3849,14 +3849,14 @@ ng_id n_id g_id n  g  nbcoop_denom nbcoop nbcoop0
         uram parm reset
         cleanup
     } -result {
-ng_id n_id g_id n  g  nbcoop_denom nbcoop nbcoop0 
------ ---- ---- -- -- ------------ ------ ------- 
-1     1    7    N1 F1 20000.0      55.0   50.0    
-2     1    8    N1 F2 20000.0      54.0   50.0    
-3     1    9    N1 F3 20000.0      46.0   50.0    
-4     2    7    N2 F1 30000.0      50.0   50.0    
-5     2    8    N2 F2 30000.0      50.0   50.0    
-6     2    9    N2 F3 30000.0      50.0   50.0    
+ng_id n_id g_id n  g  nbcoop nbcoop0 
+----- ---- ---- -- -- ------ ------- 
+1     1    7    N1 F1 55.0   50.0    
+2     1    8    N1 F2 54.0   50.0    
+3     1    9    N1 F3 46.0   50.0    
+4     2    7    N2 F1 50.0   50.0    
+5     2    8    N2 F2 50.0   50.0    
+6     2    9    N2 F3 50.0   50.0    
     }
 
     test advance-5.3 {nbcoop is OK with empty neighborhoods} -setup {
@@ -3872,14 +3872,14 @@ ng_id n_id g_id n  g  nbcoop_denom nbcoop nbcoop0
         uram parm reset
         cleanup
     } -result {
-ng_id n_id g_id n  g  nbcoop_denom nbcoop nbcoop0 
------ ---- ---- -- -- ------------ ------ ------- 
-1     1    7    N1 F1 0.0          0.0    50.0    
-2     1    8    N1 F2 0.0          0.0    50.0    
-3     1    9    N1 F3 0.0          0.0    50.0    
-4     2    7    N2 F1 30000.0      50.0   50.0    
-5     2    8    N2 F2 30000.0      50.0   50.0    
-6     2    9    N2 F3 30000.0      50.0   50.0    
+ng_id n_id g_id n  g  nbcoop nbcoop0 
+----- ---- ---- -- -- ------ ------- 
+1     1    7    N1 F1 0.0    50.0    
+2     1    8    N1 F2 0.0    50.0    
+3     1    9    N1 F3 0.0    50.0    
+4     2    7    N2 F1 50.0   50.0    
+5     2    8    N2 F2 50.0   50.0    
+6     2    9    N2 F3 50.0   50.0    
     }
 
 

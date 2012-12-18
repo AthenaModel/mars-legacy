@@ -65,6 +65,7 @@ CREATE TABLE uram_n (
     n            TEXT UNIQUE,         -- Application name
 
     -- Outputs
+    pop          INTEGER DEFAULT 0.0, -- Neighborhood population
     nbmood_denom DOUBLE DEFAULT 0.0,  -- Denominator for nbmood
     nbmood       DOUBLE DEFAULT 0.0,  -- Current neighborhood mood
     nbmood0      DOUBLE DEFAULT 0.0   -- Initial neighborhood mood
@@ -560,7 +561,6 @@ CREATE TABLE uram_nbcoop_t (
                  DEFERRABLE INITIALLY DEFERRED,
 
     -- Outputs
-    nbcoop_denom DOUBLE DEFAULT 0.0,  -- Nbhood cooperation denominator 
     nbcoop       DOUBLE DEFAULT 0.0,  -- Current cooperation of n with g
     nbcoop0      DOUBLE DEFAULT 0.0,  -- Initial cooperation of n with g
 
@@ -573,11 +573,40 @@ SELECT COOP.ng_id        AS ng_id,
        COOP.g_id         AS g_id,
        N.n               AS n,
        G.g               AS g,
-       COOP.nbcoop_denom AS nbcoop_denom,
        COOP.nbcoop       AS nbcoop,
        COOP.nbcoop0      AS nbcoop0
 FROM uram_nbcoop_t       AS COOP 
 JOIN uram_n              AS N ON (COOP.n_id = N.n_id)
 JOIN uram_g              AS G ON (COOP.g_id = G.g_id);
+
+------------------------------------------------------------------------
+-- History tables, required for rolling up historical contributions to
+-- nbmood and nbcoop.
+
+CREATE TABLE uram_civhist_t (
+    -- Civilian history of civilian population figures over
+    -- time, by group.
+
+    t    INTEGER,   -- The timestamp, in ticks
+    g_id INTEGER,   -- The group ID
+    n_id INTEGER,   -- The group's neighborhood ID
+    pop  INTEGER,   -- The number of people in the group at that time.
+
+    PRIMARY KEY (t, g_id)
+);
+
+CREATE TABLE uram_nbhist_t (
+    -- Civilian history of neighborhood civilian population figures over
+    -- time, by neighborhood.
+
+    t     INTEGER,       -- The timestamp, in ticks
+    n_id  INTEGER,       -- The neighborhood ID
+    pop   INTEGER,       -- The neighborhood's civilian population at 
+                         -- the given time.
+    nbmood_denom DOUBLE, -- The nbmood denominator for the neighborhood
+                         -- at the given time.
+    PRIMARY KEY (t, n_id)
+);
+
 
 

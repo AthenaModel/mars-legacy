@@ -1185,6 +1185,11 @@ snit::type ::simlib::uram {
         $self ComputeSatRollups
         $self ComputeCoopRollups
 
+        # NEXT, save historical data.
+        if {[$parm get uram.saveHistory]} {
+            $self SaveHistory $t
+        }
+
         set info(changed) 1
 
         return
@@ -1244,6 +1249,23 @@ snit::type ::simlib::uram {
                 UPDATE uram_n
                 SET nbmood       = $nbmood,
                     nbmood_denom = $denom
+                WHERE n_id=$n_id
+            }
+        }
+
+        # Compute neighborhood population.
+        # TBD: This should be probably be done on load, and on "update pop".
+        # In practice though, this happens once a tick, and "update
+        # pop" happens once a tick, so it doesn't really matter.
+        $rdb eval {
+            SELECT n_id        AS n_id, 
+                   total(pop)  AS pop
+            FROM uram_civ_g
+            GROUP BY n_id
+        } {
+            $rdb eval {
+                UPDATE uram_n
+                SET pop = $pop
                 WHERE n_id=$n_id
             }
         }
@@ -1314,10 +1336,34 @@ snit::type ::simlib::uram {
 
             $rdb eval {
                 UPDATE uram_nbcoop_t
-                SET nbcoop       = $nbcoop,
-                    nbcoop_denom = $denom
+                SET nbcoop = $nbcoop
                 WHERE n_id=$n_id AND g_id=$g_id
             }
+        }
+    }
+
+    #-------------------------------------------------------------------
+    # History
+
+    # SaveHistory t
+    #
+    # t   - The time stamp, in ticks.
+    #
+    # Saves historical data needed to compute contribs.
+
+    method SaveHistory {t} {
+        # FIRST, save the population of each civilian group.
+        $rdb eval {
+            INSERT INTO uram_civhist_t(t, g_id, n_id, pop)
+            SELECT $t, g_id, n_id, pop
+            FROM uram_civ_g;
+        }
+
+        # NEXT, save the nbmood denominator for each neighborhood.
+        $rdb eval {
+            INSERT INTO uram_nbhist_t(t, n_id, pop, nbmood_denom)
+            SELECT $t, n_id, pop, nbmood_denom
+            FROM uram_n;
         }
     }
 
@@ -2343,15 +2389,21 @@ snit::type ::simlib::uram {
 
         $rdb eval {
             INSERT INTO uram_contribs(driver,contrib)
-            SELECT C.driver_id,
-                   total(G.pop*S.saliency*C.contrib)/N.nbmood_denom
-            FROM uram_sat_t AS S
-            JOIN ucurve_contribs_t AS C USING (curve_id)
-            JOIN uram_civ_g AS G ON (G.g_id = S.g_id)
-            JOIN uram_n     AS N ON (N.n_id = G.n_id)
-            WHERE N.n_id = $n_id
-            AND C.t >= $ts AND C.t <= $te
-            GROUP BY C.driver_id
+            SELECT driver_id, total(contrib_at_t)
+            FROM (
+                SELECT C.t             AS t,
+                       C.driver_id     AS driver_id,
+                       total(G.pop*S.saliency*C.contrib)/N.nbmood_denom
+                       AS contrib_at_t
+                FROM ucurve_contribs_t AS C
+                JOIN uram_sat_t        AS S USING (curve_id)
+                JOIN uram_civhist_t    AS G USING (t, g_id)
+                JOIN uram_nbhist_t     AS N USING (t, n_id)
+                WHERE N.n_id = $n_id 
+                AND N.nbmood_denom > 0.0
+                AND C.t >= $ts AND C.t <= $te
+                GROUP BY C.driver_id, C.t
+            ) GROUP BY driver_id
         }
     }
 
@@ -2385,16 +2437,22 @@ snit::type ::simlib::uram {
 
         $rdb eval {
             INSERT INTO uram_contribs(driver,contrib)
-            SELECT C.driver_id,
-                   total(F.pop*C.contrib)/NG.nbcoop_denom
-            FROM uram_coop_t       AS COOP
-            JOIN ucurve_contribs_t AS C USING (curve_id)
-            JOIN uram_civ_g        AS F ON (F.g_id = COOP.f_id)
-            JOIN uram_nbcoop_t     AS NG ON (NG.g_id = COOP.g_id)
-            WHERE COOP.g_id = $g_id
-            AND NG.n_id = $n_id
-            AND C.t >= $ts AND C.t <= $te
-            GROUP BY C.driver_id
+            SELECT driver_id, total(contrib_at_t)
+            FROM (
+                SELECT C.t                          AS t,
+                       C.driver_id                  AS driver_id,
+                       total(F.pop*C.contrib)/N.pop AS contrib_at_t
+                FROM ucurve_contribs_t AS C
+                JOIN uram_coop_t       AS COOP USING (curve_id)
+                JOIN uram_civhist_t    AS F 
+                     ON (F.t = C.t AND F.g_id = COOP.f_id)
+                JOIN uram_nbhist_t     AS N 
+                     ON (N.t = C.t AND N.n_id = F.n_id)
+                WHERE N.n_id = $n_id AND COOP.g_id = $g_id
+                AND N.pop > 0.0
+                AND C.t >= $ts AND C.t <= $te
+                GROUP BY C.driver_id, C.t
+            ) GROUP BY driver_id
         }
     }
 
