@@ -88,6 +88,13 @@ snit::type ::simlib::coverage {
     # Computes the personnel coverage given the inputs.
 
     typemethod eval {func personnel population} {
+        # FIRST, handle the degenerate case when the population
+        # is 0.0.
+        if {$population == 0} {
+            return 0.0
+        }
+
+        # NEXT, handle the normal case.
         lassign $func c d
 
         let td {double($personnel)*$d/$population}

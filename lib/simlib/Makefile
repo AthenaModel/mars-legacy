@@ -17,6 +17,9 @@ include $(TOP_DIR)/MakeDefs
 test:
 	$(TCLSH) simlib.test
 
+test_coverage:
+	$(TCLSH) coverage.test
+
 test_gram:
 	$(TCLSH) gram.test
 
