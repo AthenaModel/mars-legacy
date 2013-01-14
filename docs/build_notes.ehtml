@@ -9,6 +9,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.13, 14 January 2013</h3>
+
+This build contains changes, primarily to uram(n) and ucurve(n), to
+support empty civilian groups, i.e., groups with zero population.  The 
+specific changes are as follows:<p>
+
+<ul>
+<li> Bug 3801: ucurve(n): Untracked Curves
+<li> Bug 3802: uram(n): Support for Empty Civilian Groups
+<li> Bug 3803: uram(n): Roll-up contributions using historical population statistics
+<li> Bug 3810: coverage(n): error if population is 0.
+</ul><p>
+
 <h3>Build 2.12, 31 October 2012</h3>
 
 This build removes the obsolete module timeline(n), and the related
