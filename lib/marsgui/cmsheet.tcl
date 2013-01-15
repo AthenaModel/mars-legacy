@@ -155,12 +155,14 @@ snit::widget ::marsgui::cmsheet {
     #                     double click, but prior to any changes
     #   editValue       - value in the entry widget while the
     #                     cell is being edited.
+    #   validValue      - cell value after validation, "" if invalid.
     
     variable info -array {
         mapped          {}
         cellBeingEdited {}
         cellValue       {}
         editValue       {}
+        validValue      {}
     }
 
     # cell2rc
@@ -186,6 +188,18 @@ snit::widget ::marsgui::cmsheet {
     # Array of -formatcmd values, by cell name
     
     variable formatcmd -array {}
+
+    # validatecmd
+    #
+    # Array of -validatecmd values, by cell name
+
+    variable validatecmd -array {}
+
+    # changecmd
+    #
+    # Array of -changecmd values, by cell name
+
+    variable changecmd -array {}
 
     # data
     #
@@ -482,45 +496,27 @@ snit::widget ::marsgui::cmsheet {
 
     method DoneEditing {keeper {nextEvent ""}} {
         if {$keeper} {
-            set valid 1
-
-            if {$options(-validatecmd) ne ""} {
-                if {[catch {
-                    {*}$options(-validatecmd) \
-                        $info(cellBeingEdited) $info(editValue)
-                } result eopts]} {
-                    if {[dict get $eopts -errorcode] ne "INVALID"} {
-                        return {*}$eopts $result
-                    }
-
-                    set valid 0
-                } else {
-                    set valid 1
-                }
-            } else {
-                if {![string is double -strict $info(editValue)]} {
-                    set valid 0
-                }
-
-                set result $info(editValue)
-            }
+            # FIRST, validate the cell.
+            set cellname $rc2cell($info(cellBeingEdited))
+            set valid [$self Validate $cellname]
             
             if {!$valid} {
                 # Not valid; ring bell, and return.  We stay in the
                 # entry widget.
                 bell
                 return -code break
+            } else {
+                # Set it in the cell model
+                $cm set [list $cellname $info(validValue)]
             }
 
-            # Save the value into the cellmodel
-            set cellname $rc2cell($info(cellBeingEdited))
-            $cm set [list $cellname $result]
-
-            # Display it
+            # NEXT, Display it
             set data($info(cellBeingEdited)) [$self Format $cellname]
 
-            # If there is a change command specified, call it
-            if {$options(-changecmd) ne ""} {
+            # NEXT, If there is a change command specified, call it
+            if {$changecmd($cellname) ne ""} {
+                {*}$changecmd($cellname) $cellname $info(editValue)
+            } elseif {$options(-changecmd) ne ""} {
                 {*}$options(-changecmd) $cellname $info(editValue)
             }
 
@@ -658,7 +654,9 @@ snit::widget ::marsgui::cmsheet {
     #   The options are the standard Tktable tag options, along with
     #   the following:
     #
-    #   -formatcmd cmd - Format command prefix
+    #   -formatcmd   cmd - Format command prefix
+    #   -validatecmd cmd - Validate command prefix
+    #   -changecmd   cmd - Change command prefix 
 
     method mapcell {rc cellname tag args} {
         # FIRST, map the cell, cleaning up any previous cell
@@ -679,7 +677,9 @@ snit::widget ::marsgui::cmsheet {
         }
 
         # Configure the tag if there are options.
-        set opts(-formatcmd) [from args -formatcmd ""]
+        set opts(-formatcmd)   [from args -formatcmd ""]
+        set opts(-validatecmd) [from args -validatecmd ""]
+        set opts(-changecmd)   [from args -changecmd ""]
 
         # NEXT, if the cell is a formula, make it disabled;
         # otherwise, make it white.
@@ -695,7 +695,10 @@ snit::widget ::marsgui::cmsheet {
         $tab tag configure $tag {*}$args
 
         # Tag the cell
-        set formatcmd($cellname) $opts(-formatcmd)
+        set formatcmd($cellname)   $opts(-formatcmd)
+        set validatecmd($cellname) $opts(-validatecmd)
+        set changecmd($cellname)   $opts(-changecmd)
+
         set maptags($rc) $tag
         $tab tag cell $tag $rc
 
@@ -937,6 +940,63 @@ snit::widget ::marsgui::cmsheet {
         } else {
             return [$cm value $cellname]
         }
+    }
+
+    # Validate
+    #
+    # Given a cell name, validates the value of the cell.
+    #
+    # Syntax:
+    #   Validate _cellname_ 
+
+    method Validate {cellname} {
+        # FIRST, default is invalid
+        set valid 0
+        set info(validValue) ""
+
+        # NEXT, cell specific, global or default validation
+        if {$validatecmd($cellname) ne ""} {
+            if {[catch {
+                    {*}$validatecmd($cellname) \
+                        $info(cellBeingEdited) $info(editValue)
+            } result eopts]} {
+                if {[dict get $eopts -errorcode] ne "INVALID"} {
+                    return {*}$eopts $result
+                }
+
+                set valid 0
+            } else {
+                set valid 1
+            }
+
+        } elseif {$options(-validatecmd) ne ""} {
+            if {[catch {
+                {*}$options(-validatecmd) \
+                    $info(cellBeingEdited) $info(editValue)
+            } result eopts]} {
+                if {[dict get $eopts -errorcode] ne "INVALID"} {
+                    return {*}$eopts $result
+                }
+
+                set valid 0
+            } else {
+                set valid 1
+            }
+        } else {
+            if {![string is double -strict $info(editValue)]} {
+                set valid 0
+            }
+            set result $info(editValue)
+
+            set valid 1
+        }
+
+        # NEXT, if validation passes set it in the info array
+        if {$valid} {
+            set info(validValue) $result
+        }
+
+        return $valid
     }
 }
 
