@@ -88,7 +88,7 @@ namespace eval ::test {
             [cm cget -tracecmd]
     } -cleanup {
         CleanUp 
-    } -result {0.0001 100 ::test::TraceCmd}
+    } -result {0.0001 200 ::test::TraceCmd}
 
 
     test creation-1.2 {Empty model} -setup {

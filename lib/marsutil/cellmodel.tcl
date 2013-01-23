@@ -279,7 +279,7 @@ snit::type ::marsutil::cellmodel {
 
     option -maxiters \
         -type    {snit::integer -min 1} \
-        -default 100
+        -default 200
 
     # -tracecmd
     #
