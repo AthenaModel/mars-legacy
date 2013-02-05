@@ -60,6 +60,9 @@ The <i>cmd</i> must be a command prefix taking two additional arguments,
 the name of the cell in the <<xref cellmodel(n)>> and the new value of 
 the cell.<p>
 
+This command can be overridden for particular cells using
+the <b>-changecmd</b> option on <<iref mapcell>> and its peers.<p>
+
 <<defopt {-colorigin <i>num</i>}>>
 
 The numeric index of the first column in the sheet.  The option
@@ -161,6 +164,9 @@ the <<iref cell>> method.<p>
 By default, cmsheet(n) requires all entered values to be valid real
 numbers.<p>
 
+This command can be overridden for particular cells using
+the <b>-validatecmd</b> option on <<iref mapcell>> and its peers.<p>
+
 <<defopt {-width <i>columns</i>}>>
 
 The number of visible columns in the table.  If the value is 0, then the
@@ -235,11 +241,30 @@ Tktable documentation), cmsheet(n) provides the following:<p>
 
 <<deflist options>>
 
+<<defopt {-changecmd <i>cmd</i>}>>
+Specifies a command to be called whenever the cell is successfully edited.
+The <i>cmd</i> must be a command prefix taking two additional arguments,
+the name of the cell in the <<xref cellmodel(n)>> and the new value of 
+the cell.<p>
+
 <<defopt {-formatcmd <i>cmd</i>}>>
 
 The <i>cmd</i> is a command prefix taking one argument, the cell value
 to be formatted. Whenever the mapped cell's value is to be displayed,
 this command will be used to format it for display.<p>
+
+<<defopt {-validatecmd <i>cmd</i>}>>
+
+Specifies a command to call to validate user input.  The command
+should be a prefix to which will be added two arguments, the Tktable
+"r,c" index of the edited cell, and the edited value.  The command
+must either return the (possibly modified) value, or throw an error
+with error code <b>INVALID</b>.  Note that if the table cell is mapped
+to a <<xref cellmodel(n)>> cell, you can retrieve the cell name using
+the <<iref cell>> method.<p>
+
+By default, cmsheet(n) requires all entered values to be valid real
+numbers.<p>
 
 <</deflist options>>
 
