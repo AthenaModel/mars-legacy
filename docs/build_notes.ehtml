@@ -9,6 +9,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.14, 5 February 2013</h3>
+
+This build contains two changes to the cellmodel(n) and cmsheet(n) 
+modules. The cellmodel(n) module now defaults to 200 iterations, this is
+due to more complex cell models being the standard. The cmsheet(n) module
+now supports cell-by-cell validation and change commands for more flexibility.
+The changes are as follows:<p>
+
+<ul>
+<li> Bug 3848: cellmodel(n): change the default of -maxiters to 200
+<li> Bug 3826: cmsheet(n): add cell by cell validation and change command
+</ul><p>
+
 <h3>Build 2.13, 14 January 2013</h3>
 
 This build contains changes, primarily to uram(n) and ucurve(n), to
