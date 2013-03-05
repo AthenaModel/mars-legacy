@@ -840,6 +840,11 @@ snit::type ::marsutil::order {
             set parms($parm) $value
         }
 
+        # NEXT, fill in any missing parms with defaults
+        dict for {parm value} [order fill $name [array get parms]] {
+            set parms($parm) $value
+        }
+
         set parms(_order) $name
 
         # NEXT, in null mode we're done.
