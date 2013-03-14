@@ -198,7 +198,7 @@ The delta is applied immediately; its net delta will be saved as
 part of the driver's contribution the next time
 <<iref apply>> is called.<p>
 
-<<defitem apply {$obj apply <i>t</i>}>>
+<<defitem apply {$obj apply <i>t</i> ?-start?}>>
 
 <b>Not Undoable.</b> Applies and deletes all pending adjustments and
 effects, and records their actual contributions by curve and driver at time
@@ -207,16 +207,15 @@ effects, and records their actual contributions by curve and driver at time
 Note that ucurve(n) has no little real notion of simulation time;
 <i>t</i> is usually used only as a time stamp.<p>
 
-If <i>t</i> is 0, however, ucurve(n) does two special things.  First,
-the current attitude levels are recomputed given any pending transient
+If the option <b>-start</b> is given, ucurve(n) does two special things.  
+First, the current attitude levels are recomputed given any pending transient
 effects; the baseline levels are unchanged, and any pending persistent
 effects will be thrown away unused.  Second, the current <b>a</b>,
 <b>b</b>, and <b>c</b> values for each attitude curve are saved to the 
 <b>a0</b>, <b>b0</b>, and <b>c0</b> columns in the
 <b>ucurve_curves_t</b> table for future reference.
 This is allows the client to initialize the <b>a</b> values with
-transient effects based on the simulation starting conditions at time
-0.<p>
+transient effects based on the simulation starting conditions.<p>
 
 It is an error if there are pending adjustments or effects on 
 untracked curves.  See <<xref "Untracked Curves">> for more

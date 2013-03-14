@@ -3653,7 +3653,7 @@ ct_id name min    max   alpha gamma
         cleanup
     } -result {2}
 
-    test advance-1.3 {advance 0 doesn't update the baseline} -setup {
+    test advance-1.3 {first advance doesn't update the baseline} -setup {
         create -advance0 off
         
         # hrel baseline between F1 and F2 is initially 0.8.

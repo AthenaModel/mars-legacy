@@ -2266,14 +2266,14 @@ curve_id driver_id t contrib
         cleanup
     } -result {0}
 
-    # 11.x -- special behavior at t=0
+    # 11.x -- special behavior on -start
 
     test apply-11.1 {b is not recomputed} -setup {
         create
         uc ctype add T1 -100 100 -alpha 0.1
         uc curve add T1 20.0 50.0 0.0
     } -body {
-        uc apply 0
+        uc apply 0 -start
         rdb eval {SELECT b FROM ucurve_curves_t}
     } -cleanup {
         cleanup
@@ -2285,7 +2285,7 @@ curve_id driver_id t contrib
         uc curve add T1 0.0 50.0 0.0
     } -body {
         uc persistent 1 1 1 10.0
-        uc apply 0
+        uc apply 0 -start
         uc curve cget 1 -b
     } -cleanup {
         cleanup
@@ -2298,7 +2298,7 @@ curve_id driver_id t contrib
         uc transient 1 1 1 10.0
         uc transient 2 2 2 20.0
     } -body {
-        uc apply 0
+        uc apply 0 -start
 
         pprint [rdb query {select curve_id, a, b, delta from ucurve_curves_t}]
     } -cleanup {
@@ -2316,7 +2316,7 @@ curve_id a     b     delta
         uc curve add t1 50.0 50.0 0.0
         uc transient 1 1 1 10.0
     } -body {
-        uc apply 0
+        uc apply 0 -start
 
         pprint [rdb query {select curve_id, a0, b0, c0 from ucurve_curves_t}]
     } -cleanup {

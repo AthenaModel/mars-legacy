@@ -316,6 +316,8 @@ snit::type ::simlib::uram {
     #
     #   initialized - 0 if -loadcmd has never been called, and 1 if 
     #                 it has.
+    #   started     - 0 if the simulation has been initialized but not
+    #                 "advanced" to its initial time.
     #   time        - Simulation Time: integer ticks, starting at -1
     #   nextDriver  - The next driver ID to assign; set from -driverbase.
     #   ssCache     - Satisfaction spread cache: a dictionary
@@ -343,6 +345,7 @@ snit::type ::simlib::uram {
 
     variable clearedDB {
         initialized      0
+        started          0
         time             ""
         nextDriver       ""
         ssCache          {}
@@ -467,6 +470,7 @@ snit::type ::simlib::uram {
 
         # NEXT, set the time to -1.
         set db(time) -1
+        set db(started) 0
 
         # NEXT, reset the driver ID
         set db(nextDriver) $options(-driverbase)
@@ -798,15 +802,15 @@ snit::type ::simlib::uram {
     }
 
 
-    # load hrel f g base nat ?f g base nat...?
+    # load hrel f g current base nat ?f g current base nat...?
     #
-    # f     - Group name
-    # g     - Group name
-    # base  - Initial baseline relationship
-    # nat   - Initial natural relationship
+    # f       - Group name
+    # g       - Group name
+    # current - Initial current baseline relationship
+    # base    - Initial baseline relationship
+    # nat     - Initial natural relationship
     #
-    # Loads horizontal relationships into uram_hrel_t. The current value
-    # is made the same as the baseline, pending an [advance 0].
+    # Loads horizontal relationships into uram_hrel_t.
 
     method {load hrel} {args} {
         assert {$trans(loadstate) eq "otherg"}
@@ -815,12 +819,12 @@ snit::type ::simlib::uram {
 
         set db(vrelIDs) [dict create]
 
-        foreach {f g base nat} $args {
+        foreach {f g current base nat} $args {
             set f_id $gids($f)
             set g_id $gids($g)
 
             # A=B
-            set curve_id [$cm curve add HREL $base $base $nat]
+            set curve_id [$cm curve add HREL $current $base $nat]
 
             $rdb eval {
                 INSERT INTO uram_hrel_t(f_id, g_id, curve_id)
@@ -839,16 +843,15 @@ snit::type ::simlib::uram {
         set trans(loadstate) "hrel"
     }
 
-    # load vrel g a base nat ?g a base nat...?
+    # load vrel g a current base nat ?g a current base nat...?
     #
-    # g     - Group name
-    # a     - Actor name
-    # base  - Initial baseline relationship
-    # nat   - Initial natural relationship
+    # g        - Group name
+    # a        - Actor name
+    # current  - Initial current relationship
+    # base     - Initial baseline relationship
+    # nat      - Initial natural relationship
     #
-    # Loads vertical relationships into uram_ga.  The current value
-    # is made the same as the baseline, pending an [advance 0].
-
+    # Loads vertical relationships into uram_ga.
 
     method {load vrel} {args} {
         assert {$trans(loadstate) eq "hrel"}
@@ -859,12 +862,12 @@ snit::type ::simlib::uram {
 
         set db(vrelIDs) [dict create]
 
-        foreach {g a base nat} $args {
+        foreach {g a current base nat} $args {
             set g_id $gids($g)
             set a_id $aids($a)
 
             # A=B
-            set curve_id [$cm curve add VREL $base $base $nat]
+            set curve_id [$cm curve add VREL $current $base $nat]
 
             $rdb eval {
                 INSERT INTO uram_vrel_t(g_id, a_id, curve_id)
@@ -878,17 +881,17 @@ snit::type ::simlib::uram {
     }
 
 
-    # load sat g c base nat saliency ?g c base nat saliency ...?
+    # load sat g c current base nat saliency ?g c current base nat saliency ...?
     #
     # g        - Group name
     # c        - Concern name
+    # current  - Initial current level
     # base     - Initial baseline level
     # nat      - Initial natural level
     # saliency - Saliency
     #
     # Loads the satisfaction curve data into ucurve(n) and
-    # uram_sat_t.  The current value is made the same as the baseline, 
-    # pending an [advance 0].
+    # uram_sat_t.
 
     method {load sat} {args} {
         assert {$trans(loadstate) eq "vrel"}
@@ -898,12 +901,12 @@ snit::type ::simlib::uram {
 
         set db(satIDs) [dict create]
 
-        foreach {g c base nat saliency} $args {
+        foreach {g c current base nat saliency} $args {
             set g_id $gids($g)
             set c_id $cids($c)
 
             # A=B; C will be set explicitly later.
-            set curve_id [$cm curve add $c $base $base $nat]
+            set curve_id [$cm curve add $c $current $base $nat]
 
             $rdb eval {
                 INSERT INTO uram_sat_t(g_id, c_id, curve_id, saliency)
@@ -916,16 +919,15 @@ snit::type ::simlib::uram {
         set trans(loadstate) "sat"
     }
 
-    # load coop f g base nat ?f g base nat...?
+    # load coop f g current base nat ?f g current base nat...?
     #
-    # f     - Force group name
-    # g     - Civ group name
-    # base  - Initial baseline level
-    # nat   - Initial natural level
+    # f       - Force group name
+    # g       - Civ group name
+    # current - Initial current level
+    # base    - Initial baseline level
+    # nat     - Initial natural level
     #
     # Loads cooperation curve data into ucurve(n) and uram_coop_t.  
-    # The current value is made the same as the baseline, 
-    # pending an [advance 0].
 
     method {load coop} {args} {
         assert {$trans(loadstate) eq "sat"}
@@ -935,13 +937,13 @@ snit::type ::simlib::uram {
 
         set db(coopIDs) [dict create]
 
-        foreach {f g base nat} $args {
+        foreach {f g current base nat} $args {
             set f_id $gids($f)
             set g_id $gids($g)
             set fg_id [dict get $trans(fgids) $f_id,$g_id]
             
             # A=B
-            set curve_id [$cm curve add COOP $base $base $nat]
+            set curve_id [$cm curve add COOP $current $base $nat]
 
             # Make sure we get the same fg_id's as in uram_hrel_t.
             $rdb eval {
@@ -1160,14 +1162,16 @@ snit::type ::simlib::uram {
 
     # advance t
     #
-    # t - The current simulation time.
+    # t        - The current simulation time.
     #
     # Advances simulation time to t, applying all current effects to
     # the attitude curves and computing mood and other outputs.
     #
     # Initializing URAM is expected to involve two calls: [init]
-    # and [advance 0].  When t=0, only transient effects will be 
-    # applied, leaving the initial baseline levels as set by the caller.
+    # and [advance $t], where $t is the starting time for the simulation
+    # run.  On the first advance only transient effects 
+    # will be applied, leaving the initial baseline levels as set by the 
+    # caller.
 
     method advance {t} {
         # FIRST, update the time.
@@ -1179,8 +1183,13 @@ snit::type ::simlib::uram {
         set db(ssCache) [dict create]
 
         # NEXT, Apply current effects to the attitude curves.
-        $cm apply $t
-
+        if {$db(started)} {
+            $cm apply $t
+        } else {
+            $cm apply $t -start 
+            set db(started) 1
+        }
+        
         # NEXT, Compute all roll-ups
         $self ComputeSatRollups
         $self ComputeCoopRollups

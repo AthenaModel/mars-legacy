@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------
-# FILE: uramdb2tcl
+# FILE: uramdb.tcl
 #
 #   Parser for the uramdb(5) database format.
 #
@@ -768,22 +768,22 @@ snit::type ::simlib::uramdb {
         }]
 
         $uram load hrel {*}[$db eval {
-            SELECT f, g, hrel, hrel FROM uramdb_hrel
+            SELECT f, g, hrel, hrel, hrel FROM uramdb_hrel
             ORDER BY f, g
         }]
 
         $uram load vrel {*}[$db eval {
-            SELECT g, a, vrel, vrel FROM uramdb_vrel
+            SELECT g, a, vrel, vrel, vrel FROM uramdb_vrel
             ORDER BY g, a
         }]
 
         $uram load sat {*}[$db eval {
-            SELECT g, c, sat, sat, saliency FROM uramdb_sat
+            SELECT g, c, sat, sat, sat, saliency FROM uramdb_sat
             ORDER BY g, c
         }]
 
         $uram load coop {*}[$db eval {
-            SELECT f, g, coop, coop FROM uramdb_coop
+            SELECT f, g, coop, coop, coop FROM uramdb_coop
             ORDER BY f, g
         }]
     }

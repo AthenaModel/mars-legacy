@@ -30,7 +30,10 @@ URAM initialization is a three-step process.<p>
 <ul>
   <li> First, the client application calls <<iref init>> to initialize
        URAM, loading the client application's data and setting URAM's
-       time to -1.<p>
+       time to -1.  Note that satisfaction and cooperation roll-ups are 
+       computed based on the current levels given to URAM as part of the 
+       data load; these current levels and roll-ups will persist until
+       <<iref advance>> is called.<p>
 
   <li> Next, the client application should enter transient attitude
        inputs reflecting the simulation starting conditions.  Note
@@ -38,17 +41,18 @@ URAM initialization is a three-step process.<p>
        when t = -1.<p>
 
   <li> Finally, the client application calls <<iref advance>> to
-       advance time to 0.  This call to advance is special: it
-       computes the current level of each attitude curve based on the
-       initial baseline and transient inputs provided by the client,
-       <b>without modifying the baseline level</b>.
+       complete the initialization.  This first advance sets the initial
+       simulation time, and computes the current level of each attitude curve
+       based on the initial data load and the transient attitude inputs 
+       just received.  The <b>initial baseline level is not modified</b>.<p>
+
+  <li> To advance to later time steps, the client calls <<iref advance>>
+       again.<p>
 </ul>
 
 <b>Note:</b> URAM requires that time advances monotonically,
 e.g., {0, 1, 2, ...} or perhaps {0, 7, 14, 21, ...}; however, URAM has
-no real understanding of simulation time, and (except for the special
-case of advancing to 0) simply uses the time value to timestamp
-historical data.<p>
+no real understanding of simulation time, and  simply uses the time value to timestamp historical data.<p>
 
 
 <<subsection "Undo Stack">>
@@ -249,7 +253,8 @@ of this method's subcommands.<p>
 ticks, applying all effects scheduled since the previous advance and
 recomputing all attitude levels and related outputs.<p>
 
-Note that advancing time to 0 is a special case; it applies any
+The first call to <<iref advance>> after <<iref init>> is special:  it
+sets the simulation time for the start of simulation, and applies any
 pending transient inputs to compute current attitude levels without
 modifying the initial baseline levels in any way.  See
 <<xref "Initialization and Time Management">> for more information.<p>
@@ -562,8 +567,8 @@ created.<p>
 <b>Not Undoable.</b>
 Resets uram(n) to the attitude levels,
 restoring all variables to their initial values, deleting all
-history, and setting the simulation time to -1.  It will then be
-necessary to <<iref advance>> time to 0 to complete the
+history, computing all roll-ups, and setting the simulation time to -1.  
+It will then be necessary to call <<iref advance>> to complete the
 initialization; see
 <<xref "Initialization and Time Management">> for details.
 <p>
@@ -623,16 +628,22 @@ is <b>FRC</b> or <b>ORG</b>. The groups
 should be sorted by name, and there should be at least one force
 group.<p>
 
-<<defitem "load hrel" {$obj load hrel <i>f g base nat</i> ?<i>f g base nat</i>...?}>>
-<<defitem "load vrel" {$obj load vrel <i>g a base nat</i> ?<i>g a base nat</i>...?}>>
-<<defitem "load sat" {$obj load sat <i>g c base nat saliency</i> ?<i>g c base nat saliency</i>...?}>>
-<<defitem "load coop" {$obj load coop <i>f g base nat</i> ?<i>f g base nat</i>...?}>>
+<<defitem "load hrel" {$obj load hrel <i>f g current base nat</i> ?<i>f g base nat</i>...?}>>
+<<defitem "load vrel" {$obj load vrel <i>g a current base nat</i> ?<i>g a base nat</i>...?}>>
+<<defitem "load sat" {$obj load sat <i>g c current base nat saliency</i> ?<i>g c base nat saliency</i>...?}>>
+<<defitem "load coop" {$obj load coop <i>f g current base nat</i> ?<i>f g base nat</i>...?}>>
 
-These commands are used to specify the initial baseline and natural
-(B and C) levels for each attitude curve (plus, for satisfaction
-curves, the saliency as well).  The current level (A) for each curve 
-is set equal to the initial baseline, pending a possible 
-<<iref advance>> to time 0.<p>
+These commands are used to specify the initial current, baseline, and natural
+(A, B, and C) levels for each attitude curve (plus, for satisfaction
+curves, the saliency as well).<p>
+
+It is usual for the initial <i>current</i> and <i>baseline</i> to be the same,
+especially since the <i>current</i> value will be recomputed on the first
+<<iref advance>>.  If a scenario is created as a follow-on to a preceding
+scenario, however, the client application might have good current levels
+from the preceding run; and if the client application needs access to 
+good attitude levels and roll-ups during its bootstrapping process, it may
+make sense to use them.<p>
 
 <</deflist load>>
 

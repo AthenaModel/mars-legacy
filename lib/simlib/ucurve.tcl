@@ -799,21 +799,22 @@ snit::type ::simlib::ucurve {
     #-------------------------------------------------------------------
     # apply
 
-    # apply t
+    # apply t ?-start?
     #
     # t            - A timestamp
+    # -start       - Start flag.
     #
     # Updates all curves for which we are tracking changes, applying
     # adjustments and effects.  Untracked curves have their actual and 
     # baseline levels set to their natural levels.
     #
-    # If t=0, then we are initializing at time 0.  The baseline is NOT
-    # recomputed, and only transient effects are applied.  Finally,
+    # If -start, then we are initializing the model at time t.  The baseline 
+    # is NOT recomputed, and only transient effects are applied.  Finally,
     # the a, b, and c values for each curve will be saved as a0, b0, and c0.
     # (Any persistent effects will be thrown away unused...so don't 
     # make any.)
 
-    method apply {t} {
+    method apply {t {opt ""}} {
         # FIRST, complain if there are effects or adjustments on untracked
         # curves.  There shouldn't be.
 
@@ -842,7 +843,7 @@ snit::type ::simlib::ucurve {
         $self SaveAdjustmentContributions $t
 
         # NEXT, handle baseline effects if the flag is not given.
-        if {$t > 0} {
+        if {$opt ne "-start"} {
             # NEXT, compute B.t = alpha*A.t-1 + beta*B.t-1 + gamma*C.t,
             # along with scaling factors for B.t.
             $self ComputeBaselineAndScalingFactors
@@ -873,7 +874,7 @@ snit::type ::simlib::ucurve {
         $self PurgeEffectsAndAdjustments
 
         # NEXT, if t=0, save a0, b0, and c0 for all curves.
-        if {$t == 0} {
+        if {$opt eq "-start"} {
             $rdb eval {
                 UPDATE ucurve_curves_t
                 SET a0 = a,
