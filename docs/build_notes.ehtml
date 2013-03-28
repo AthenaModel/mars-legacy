@@ -9,6 +9,17 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.15, 28 March 2013</h3>
+
+This build contains a change to uram(n) in support of simulation rebasing
+and a change to order(n) to automatically fill in default values in the
+'send' method. The packages:<p>
+
+<ul>
+<li> Bug 3914: uram(n): start at t != 0, set current levels on load
+<li> Bug 3902: order(n): fill in default values in the 'send' method 
+</ul><p>
+
 <h3>Build 2.14, 5 February 2013</h3>
 
 This build contains two changes to the cellmodel(n) and cmsheet(n) 
