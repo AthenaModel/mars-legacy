@@ -40,13 +40,26 @@ snit::type ::marsutil::enum {
     # The elements in these lists correspond.
     variable shortnames {}  ;# List of short names
     variable longnames  {}  ;# List of long names
+    variable opts -array {
+        noindex 0
+    }
 
     #-------------------------------------------------------------------
     # Constructor
     
-    # The "deflist" is a list of pairs: shortname longname
-    constructor {deflist} {
+    # The "deflist" is a list of pairs: shortname longname.  If 
+    # opt is -noindex, don't do lookups by index.
+
+    constructor {deflist {opt ""}} {
         $self add $deflist
+
+        if {$opt ne ""} {
+            if {$opt eq "-noindex"} {
+                set opts(noindex) 1
+            } else {
+                error "invalid option: \"$opt\""
+            }
+        } 
     }
 
     #-------------------------------------------------------------------
@@ -245,13 +258,16 @@ snit::type ::marsutil::enum {
     # Input2Index input
     #
     # Given a name or index, returns the related index if possible.  
-    # Otherwise, returns -1.
+    # Otherwise, returns -1.  If -noindex was given on creation, the
+    # input must be a name.
     method Input2index {input} {
         # FIRST, is it an index?
-        if {[string is integer -strict $input] &&
-            $input >= 0 &&
-            $input < [llength $shortnames]} {
-            return $input
+        if {!$opts(noindex)} {
+            if {[string is integer -strict $input] &&
+                $input >= 0 &&
+                $input < [llength $shortnames]} {
+                return $input
+            }
         }
 
         # NEXT, is it a short name?

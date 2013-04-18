@@ -22,7 +22,7 @@ name and a longer descriptive name.<p>
 
 <<deflist>>
 
-<<defitem enum {enum <i>name deflist</i>}>>
+<<defitem enum {enum <i>name deflist</i> ?-noindex?}>>
 
 <<iref enum>> defines a new enumeration definition type called
 <i>name</i>; the short and long names of the enumerated values are
@@ -47,6 +47,13 @@ values can be added later using the <<iref add>> subcommand.<p>
 
 The <i>name</i> becomes a Tcl command, defined in the current scope;
 <<iref enum>> returns the fully-qualified form of <i>name</i>.<p>
+
+By default, a valid enumeration value is a short name, a long name, or the
+numeric index of the short name, where index numbers range from 
+0 to (<<iref size>> - 1).  Allowing index numbers is sometimes convenient,
+but means that short names and long names can't look like integers.  If the 
+<b>-noindex</b> option is included on creation, then numeric indices are no
+longer valid values; and consequently short names can be numeric.<p>
 
 <</deflist>>
 
@@ -86,14 +93,16 @@ another enumeration.<p>
 
 <<defitem index {$enum index <i>input</i>}>>
 
-Given a short name, a long name, or a valid index, returns the index.
+Given a short name, a long name, or (if <b>-noindex</b> is omitted) a 
+valid index, returns the index.
 Given any other <i>input</i>, returns -1.  Name lookups are
 case-insensitive.<p>
 
 <<defitem name {$enum name <i>input</i>}>>
 <<defitem shortname {$enum shortname <i>input</i>}>>
 
-Given a short name, a long name, or a valid index, returns the
+Given a short name, a long name, or (if <b>-noindex</b> is omitted) a 
+valid index, returns the
 corresponding short symbolic name.  Given any other <i>input</i>,
 returns "".  Name lookups are
 case-insensitive.<p>
@@ -102,7 +111,8 @@ The form <<iref shortname>> is deprecated.<p>
 
 <<defitem longname {$enum longname <i>input</i>}>>
 
-Given a short name, a long name, or a valid index, returns the
+Given a short name, a long name, or (if <b>-noindex</b> is omitted) a 
+valid index, returns the
 corresponding long descriptive name.  Given any other <i>input</i>,
 returns "".  Name lookups are
 case-insensitive.<p>

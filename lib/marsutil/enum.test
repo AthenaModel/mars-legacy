@@ -53,6 +53,16 @@ namespace eval ::marsutil::test {
 
     enum badness {}
 
+    # Don't allow lookups by index number; thus, shortnames can be
+    # integers.
+    enum noindex {
+        ALL "All Items"
+        0   "No Items"
+        1   "1 Item"
+        2   "2 Items"
+        3   "3 Items"
+    } -noindex
+
     #-------------------------------------------------------------------
     # Creation Errors
 
@@ -78,6 +88,12 @@ namespace eval ::marsutil::test {
     } -returnCodes {
         error
     } -result {invalid value "VVG", should be one of: VG, G, N, B, VB}
+
+    test enum_validate-1.4 {index numbers are invalid with -noindex} -body {
+        noindex validate 4
+    } -returnCodes {
+        error
+    } -result {invalid value "4", should be one of: ALL, 0, 1, 2, 3}
 
     test enum_validate-2.1 {invalid input yields -errorcode INVALID} -body {
         catch {goodness validate VVG} result opts
@@ -124,6 +140,11 @@ namespace eval ::marsutil::test {
             [goodness name "very good"]
     } -result {VB VG}
 
+    test enum_name-1.6 {name with -noindex} -body {
+        noindex name 0
+    } -result {0}
+
+
     #-------------------------------------------------------------------
     # longname
 
@@ -163,6 +184,10 @@ namespace eval ::marsutil::test {
             [goodness longname vb] \
             [goodness longname "very good"]
     } -result {{Very Bad} {Very Good}}
+
+    test enum_longname-1.6 {name with -noindex} -body {
+        noindex longname 0
+    } -result {No Items}
 
     #-------------------------------------------------------------------
     # index
@@ -206,6 +231,10 @@ namespace eval ::marsutil::test {
             [goodness index "very good"]
     } -result {4 0}
 
+    test enum_index-1.6 {index with -noindex} -body {
+        noindex index 0
+    } -result {1}
+
     #-------------------------------------------------------------------
     # names
 
@@ -216,7 +245,7 @@ namespace eval ::marsutil::test {
     #-------------------------------------------------------------------
     # longnames
 
-    test enum_lognames-1.1 {longnames: nominal case} -body {
+    test enum_longnames-1.1 {longnames: nominal case} -body {
         goodness longnames
     } -result {{Very Good} Good Neutral Bad {Very Bad}}
 
