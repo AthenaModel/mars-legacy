@@ -9,6 +9,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.16, 22 April 2013</h3>
+
+This build has a change to the enum(n) object to allow an enumeration to be
+created that has no indices defined. This is useful for enumerations that have
+numbers for short names.<p>
+
+<ul>
+<li> Bug 3968: enum(n): add -noindex option
+</ul><p>
+
 <h3>Build 2.15, 28 March 2013</h3>
 
 This build contains a change to uram(n) in support of simulation rebasing
