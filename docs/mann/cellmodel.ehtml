@@ -57,7 +57,8 @@ one for each decimal place.<p>
 <<defopt {-failcmd <i>cmd</i>}>>
 
 Specifies a command to call when a cell model solution fails. The command
-is appended with two arguments, the type of failure - either <b>diverge</b>
+is appended with three arguments, the instance of the cell model object, 
+the type of failure - either <b>diverge</b>
 or <b>errors</b> and the page name in which the failure happened.<p>
 
 <<defopt {-maxiters <i>maxiters</i>}>>

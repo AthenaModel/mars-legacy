@@ -1518,7 +1518,7 @@ snit::type ::marsutil::cellmodel {
                 # report them.
                 if {[llength $errors(all)] > 0} {
                     if {$options(-failcmd) ne "" } {
-                        callwith $options(-failcmd) errors $page
+                        callwith $options(-failcmd) $self errors $page
                     }
 
                     return [list errors $page]
@@ -1537,12 +1537,12 @@ snit::type ::marsutil::cellmodel {
 
                 if {[llength $errors(all)] > 0} {
                     if {$options(-failcmd) ne ""} {
-                        callwith $options(-failcmd) errors $page
+                        callwith $options(-failcmd) $self errors $page
                     }
                     return [list errors $page]
                 } else {
                     if {$options(-failcmd) ne ""} {
-                        callwith $options(-failcmd) diverge $page
+                        callwith $options(-failcmd) $self diverge $page
                     }
                     return [list diverge $page]
                 }
