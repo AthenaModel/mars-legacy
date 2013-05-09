@@ -93,6 +93,12 @@ snit::type ::marsutil::dynaform {
     #                    Items on different branches can share a field name.
     # layout-$ftype    - The layout algorithm for this form type.
     #                    Defaults to ncolumn
+    # height-$ftype    - The default form height in pixels; defaults to 
+    #                    200.
+    # width-$ftype     - The default form width in pixels; defaults to 400
+    # shrink-$ftype    - If true, (the default) shrink the form to the 
+    #                    smallest size that will contain the content.  If
+    #                    shrink is set, the height and width are ignored.
     # ft-$fieldtype    - Field type definition singleton
     # aliasto-$alias   - Field type to which the alias refers
     # aliasopts-$alias - Options associated with the alias
@@ -285,6 +291,9 @@ snit::type ::marsutil::dynaform {
         set meta(top-$ftype)       [list]
         set meta(fields-$ftype)    [list]
         set meta(layout-$ftype)    ncolumn
+        set meta(height-$ftype)    200
+        set meta(width-$ftype)     400
+        set meta(shrink-$ftype)    true
 
         # NEXT, evaluate the form definition script, building up data.  
         if {[catch {
@@ -521,16 +530,33 @@ snit::type ::marsutil::dynaform {
     }
 
 
-    # FormLayout layout
+    # FormLayout layout ?options...?
     #
     # layout  - The layout algorithm
+    # options - Layout options
     #
-    # Sets the default layout algorithm for this form type.
+    #    -width 
+    #    -height
+    #    -shrink
+    #
+    # Sets the default layout algorithm for this form type.  Options
+    # are passed down to the htmlframe in the dynaview widget.
 
-    proc FormLayout {layout} {
+    proc FormLayout {layout args} {
         elayout validate $layout
 
         set meta(layout-$compile(ftype)) $layout
+
+        while {[llength $args] > 0} {
+            set opt [lshift args]
+
+            switch -exact -- $opt {
+                -height { set meta(height-$compile(ftype)) [lshift args] }
+                -width  { set meta(width-$compile(ftype)) [lshift args] }
+                -shrink { set meta(shrink-$compile(ftype)) [lshift args] }
+                default { error "Unexpected option: \"$opt\""}
+            }
+        }
     }
 
     # FormPara 
@@ -1011,6 +1037,50 @@ snit::type ::marsutil::dynaform {
 
         return $meta(layout-$ftype)
     }
+
+    # height ftype
+    #
+    # ftype - A form type
+    #
+    # Returns the name of the form's default height.
+
+    typemethod height {ftype} {
+        if {![info exists meta(height-$ftype)]} {
+            return ""
+        }
+
+        return $meta(height-$ftype)
+    }
+
+    # width ftype
+    #
+    # ftype - A form type
+    #
+    # Returns the name of the form's default width.
+
+    typemethod width {ftype} {
+        if {![info exists meta(width-$ftype)]} {
+            return ""
+        }
+
+        return $meta(width-$ftype)
+    }
+
+    # shrink ftype
+    #
+    # ftype - A form type
+    #
+    # Returns the name of the form's default shrink-to-fit flag 
+
+    typemethod shrink {ftype} {
+        if {![info exists meta(shrink-$ftype)]} {
+            return ""
+        }
+
+        return $meta(shrink-$ftype)
+    }
+
+
 
     # item id ?attr?
     #

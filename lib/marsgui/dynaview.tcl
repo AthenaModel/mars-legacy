@@ -110,6 +110,16 @@ snit::widget ::marsgui::dynaview {
             invalid       {}
         }
 
+        # NEXT, configure the frame.
+        set opts [list -shrink [dynaform shrink $ftype]]
+
+        if {![dynaform shrink $ftype]} {
+            lappend opts -width [dynaform width $ftype]
+            lappend opts -height [dynaform height $ftype]
+        }
+
+        $hf configure {*}$opts
+
         # NEXT, create the field widgets
         foreach id [dynaform allitems $ftype] {
             if {[dynaform item $id widget]} {
@@ -200,7 +210,6 @@ snit::widget ::marsgui::dynaview {
     constructor {args} {
         # FIRST, create the htmlframe.
         install hf using htmlframe $win.hf \
-            -shrink yes           \
             -styles $styles
 
         pack $hf -fill both -expand yes
@@ -363,6 +372,16 @@ snit::widget ::marsgui::dynaview {
 
         # NEXT, remember that we've done this layout
         set info(itemsInLayout) $ids
+
+        lassign [$hf bbox] x y wid ht
+
+        if {$wid > [$hf cget -width]} {
+            $hf configure -width $wid
+        }
+
+        if {$ht > [$hf cget -height]} {
+            $hf configure -height $ht
+        }
     }
 
     # LayoutNColumn ids
@@ -504,7 +523,7 @@ snit::widget ::marsgui::dynaview {
         if {$for eq ""} {
             append html_ "$text"
         } else {
-            append html_ "<label for=\"$for\">$text</label>"
+            append html_ "<label for=\"$for\">[nbsp $text]</label>"
         }
 
         if {$mode eq "bold"} {
@@ -545,7 +564,7 @@ snit::widget ::marsgui::dynaview {
 
             append html_ \
                 "<tr><td>\n" \
-                "<label for=\"$field\">$tip:</label>" \
+                "<label for=\"$field\">[nbsp $tip:]</label>" \
                 "</td>\n" \
                 "<td><input name=\"$name_\"></td></tr>\n"
         }
@@ -594,6 +613,16 @@ snit::widget ::marsgui::dynaview {
         append html_ "</body>\n"
 
         return $html_
+    }
+
+    # nbsp text
+    #
+    # text - Some HTML prose.
+    # 
+    # Converts all space characters in the prose into non-breaking
+    # spaces (&nbsp;).
+    proc nbsp {text} {
+       return [string map {" " &nbsp;} $text]
     }
 
     #-------------------------------------------------------------------

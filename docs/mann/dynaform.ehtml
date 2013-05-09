@@ -426,13 +426,38 @@ If a <i>field</i> name is given, the label will be associated with
 that field; if the application marks the field's value invalid, the
 label will be displayed in a way that reflects this.<p>
 
-<<defitem layout {layout <i>algorithm</i>}>>
+When the <b>-for</b> option is used (either here or in the 
+commands that define labels) for the <b>2column</b> and <b>ncolumn</b>
+layout algorithms, the label text is escaped with 
+<code>&amp;nbsp;</code> so that the text is rendered all on one line.<p>
+
+<<defitem layout {layout <i>algorithm</i> ?<i>option value...</i>?}>>
 
 Names the <<xref "Layout Algorithm">> for this form type.  Defaults
 to <b>ncolumn</b>.<p>
 
 This command can appear anywhere in the form; conventionally, if it
 appears it is the first command in the specification script.<p>
+
+The command can also set the following options affecting the layout
+and size of the form:<p>
+
+<<deflist options>>
+
+<<defopt {-shrink <i>flag</i>}>>
+Defaults to <b>true</b>.  By default, then, the form will have the smallest
+size that will contain the currently displayed content.  This is a problem
+for particularly dynamic forms; thus, the form can choose to set <i>flag</i>
+to <b>false</b>, and set the default width and height explicitly.<p>
+
+<<defopt {-height <i>height</i>}>>
+<<defopt {-width <i>width</i>}>>
+Sets the default width and height of the form in pixels.  The form will be
+this size unless the content is larger, in which case it will expand to fit
+(at the cost of a visible jump).  These options are ignored if 
+<b>-shrink</b> is <b>true</b>.<p>
+
+<</deflist options>>
 
 <<defitem multi {multi <i>field</i> ?<i>options...</i>?}>>
 
