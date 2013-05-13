@@ -377,16 +377,17 @@ snit::widget ::marsgui::listfield {
     # Moves the items between the Omit list and the Include list
 
     method MoveItems {op} {
+        # FIRST, move things around.
         switch $op {
             include {
-                set items [$left curselection]
+                set items [$self GetSelectedItems $left]
 
                 $left  togglerowhide $items
                 $right togglerowhide $items
             }
 
             omit {
-                set items [$right curselection]
+                set items [$self GetSelectedItems $right]
 
                 $left  togglerowhide $items
                 $right togglerowhide $items
@@ -400,7 +401,39 @@ snit::widget ::marsgui::listfield {
             }
         }
 
+        # NEXT, clear the selections; otherwise we can get items
+        # selected in both widgets, and that looks odd.
+        $left selection clear 0 end
+        $right selection clear 0 end
+
+        # NEXT, notify the client of what changed.
         $self ValueChanged
+    }
+
+    # GetSelectedItems list
+    #
+    # list   - Either the $left or $right tablelist.
+    #
+    # Retrieves the indices of the selected items for the given list,
+    # ignoring hidden items.
+    #
+    # Tablelist 5.5 was changed so that selections include hidden items.
+    # Thus, if items 3 and 4 are hidden and I shift-select 2 through 5,
+    # I get 3 and 4 as well.  Move the selected items will then result
+    # in moving 3 and 4 back to the other list.  Thus, I need to purge
+    # hidden items from the list of selected items for use by
+    # MoveItems.
+
+    method GetSelectedItems {list} {
+        set result [list]
+
+        foreach i [$list curselection] {
+            if {![$list rowcget $i -hide]} {
+                lappend result $i
+            }
+        }
+
+        return $result
     }
 
     # ValueChanged

@@ -1,3 +1,4 @@
+lappend auto_path ~/mars/lib
 package require marsutil
 package require marsgui
 
@@ -27,8 +28,8 @@ proc ChangeCmd {values} {
 listfield .listf \
     -itemdict  $choices  \
     -changecmd ChangeCmd \
-    -height    10 \
-    -width     25
+    -height    15 \
+    -width     50
 
 pack .listf -fill both
 
