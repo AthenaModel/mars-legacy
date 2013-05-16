@@ -311,7 +311,8 @@ snit::type ::marsutil::sqlib {
     # sql           An SQL query.
     # options       Formatting options
     #
-    #   -mode mc|list        Display mode: mc (multicolumn) or list
+    #   -mode mc|list|csv    Display mode: mc (multicolumn), record list,
+    #                        or CSV.
     #   -maxcolwidth num     Maximum displayed column width, in 
     #                        characters.
     #   -labels list         List of column labels.
@@ -322,6 +323,9 @@ snit::type ::marsutil::sqlib {
     #
     # If -mode is "list", each record is output in two-column
     # format: name  value, etc., with a blank line between records.
+    #
+    # If -mode is "csv", each record is output in CSV format.  
+    # Non-numeric values are quoted.
     #
     # If -mode is "mc" (the default) then multicolumn output is used.
     # In this mode, long values are truncated to -maxcolwidth.
@@ -380,6 +384,45 @@ snit::type ::marsutil::sqlib {
                     append out \
                         [format "%-*s  %s\n" $labelWidth $label $value]
                 }
+            }
+            
+            # NEXT, return the result.
+            return $out
+        }
+
+        # NEXT, if the mode is "list", output the records individually
+        if {$opts(-mode) eq "csv"} {
+            # FIRST, do the query; we'll output the data as we go.
+            set out ""
+            set count 0
+            set labels {}
+            set cols {}
+
+            $db eval $sql row {
+                # FIRST, The first time figure out what the labels are.
+                if {[llength $labels] == 0} {
+                    set cols $row(*)
+
+                    # Did they specify labels?
+                    if {[llength $opts(-labels)] > 0} {
+                        set labels $opts(-labels)
+                    } else {
+                        set labels $row(*)
+                    }
+
+                    unset row(*)
+
+                    append out [CsvRecord $labels]
+                }
+
+                # NEXT, output the record
+                set record [list]
+
+                foreach col $cols {
+                    lappend record $row($col)
+                }
+
+                append out [CsvRecord $record]
             }
             
             # NEXT, return the result.
@@ -485,6 +528,31 @@ snit::type ::marsutil::sqlib {
         }
 
         return $out
+    }
+
+    # CsvRecord record
+    #
+    # record   - A list of values
+    #
+    # Quotes the list entries as a record in a CSV file.
+
+    proc CsvRecord {record} {
+        # FIRST, convert the list to CSV column entries
+        set cols [list]
+
+        foreach value $record {
+            # Quote double quotes
+            set value [string map [list \" \"\"] $value]
+
+            # If non-numeric, add double quotes
+            if {![string is double -strict $value]} {
+                set value "\"$value\""
+            }
+
+            lappend cols $value
+        }
+
+        return "[join $cols {,}]\n"
     }
 
     # mat db table iname jname ename ?options?

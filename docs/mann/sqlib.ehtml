@@ -94,7 +94,7 @@ The command supports the following options:<p>
 
 <<deflist query>>
 
-<<defopt {-mode mc|list}>>
+<<defopt {-mode mc|list|csv}>>
 
 Specifies the output mode; the default is <b>mc</b>, multicolumn.<p>
 
@@ -107,9 +107,13 @@ Each record is output on multiple lines, with (nominally) one line
 per field.  Each line consists of the field name and value; the
 record's field names are values are formatted neatly in parallel columns.<p>
 
+When <b>-mode</b> is <b>csv</b>, the output is in CSV (comma-separated value)
+format, one record per line, beginning with a header record of column labels.
+Non-numeric values are enclosed in double-quotes.<p>
+
 <<defopt {-labels <i>list</i>}>>
 
-Normally <<iref sqlib query>> uses the field names found in the query to
+Normally <<iref sqlib query>> uses the column names found in the query to
 label the fields in the output.  If specified, the value of
 <b>-labels</b> is a list of labels to be used instead.<p>
 
