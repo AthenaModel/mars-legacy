@@ -257,8 +257,129 @@ CREATE TABLE third(g,h,i)}
     #-------------------------------------------------------------------
     # query
 
-    # TBD, however it has been thoroughly exercised in practice.
+    proc query_setup {} {
+        variable db
+        sqlite3 $db :memory:
+        $db eval {
+            CREATE TABLE names(first, last, middle, age INTEGER);
+            INSERT INTO names VALUES("Andrew", "Alpha", "A", 10);
+            INSERT INTO names VALUES("Bill", "Beta", "B", 20);
+            INSERT INTO names VALUES("George", "Gamma", "G", 30);
+        }
+    }
 
+    proc query_cleanup {} {
+        variable db
+        $db close
+    }
+
+    test query-1.1 {mc output, no labels} -setup {
+        query_setup
+    } -body {
+        sqlib query $db {SELECT * FROM names} -mode mc
+    } -cleanup {
+        query_cleanup
+    } -result {first  last  middle age 
+------ ----- ------ --- 
+Andrew Alpha A      10  
+Bill   Beta  B      20  
+George Gamma G      30  
+}
+    
+    test query-1.2 {mc output, labels} -setup {
+        query_setup
+    } -body {
+        sqlib query $db {SELECT * FROM names} -mode mc -labels {F L M A}
+    } -cleanup {
+        query_cleanup
+    } -result {F      L     M A  
+------ ----- - -- 
+Andrew Alpha A 10 
+Bill   Beta  B 20 
+George Gamma G 30 
+}
+
+
+    test query-2.1 {list output, no labels} -setup {
+        query_setup
+    } -body {
+        sqlib query $db {SELECT * FROM names} -mode list
+    } -cleanup {
+        query_cleanup
+    } -result {first   Andrew
+last    Alpha
+middle  A
+age     10
+
+first   Bill
+last    Beta
+middle  B
+age     20
+
+first   George
+last    Gamma
+middle  G
+age     30
+}
+    
+    test query-2.2 {list output, labels} -setup {
+        query_setup
+    } -body {
+        sqlib query $db {SELECT * FROM names} -mode list -labels {F L M A}
+    } -cleanup {
+        query_cleanup
+    } -result {F  Andrew
+L  Alpha
+M  A
+A  10
+
+F  Bill
+L  Beta
+M  B
+A  20
+
+F  George
+L  Gamma
+M  G
+A  30
+}
+
+
+    test query-3.1 {csv output, no labels} -setup {
+        query_setup
+    } -body {
+        sqlib query $db {SELECT * FROM names} -mode csv
+    } -cleanup {
+        query_cleanup
+    } -result {"first","last","middle","age"
+"Andrew","Alpha","A",10
+"Bill","Beta","B",20
+"George","Gamma","G",30
+}
+    
+    test query-3.2 {csv output, labels} -setup {
+        query_setup
+    } -body {
+        sqlib query $db {SELECT * FROM names} -mode csv -labels {F L M A}
+    } -cleanup {
+        query_cleanup
+    } -result {"F","L","M","A"
+"Andrew","Alpha","A",10
+"Bill","Beta","B",20
+"George","Gamma","G",30
+}
+
+    test query-4.1 {queries can reference variables in caller's scope} -setup {
+        query_setup
+    } -body {
+        set limit 25
+        sqlib query $db {SELECT * FROM names WHERE age < $limit} -mode csv
+    } -cleanup {
+        query_cleanup
+    } -result {"first","last","middle","age"
+"Andrew","Alpha","A",10
+"Bill","Beta","B",20
+}
 
     #-------------------------------------------------------------------
     # mat

@@ -31,6 +31,31 @@ snit::type ::marsutil::sqlib {
     pragma -hastypeinfo 0 -hastypedestroy 0 -hasinstances 0
 
     #-------------------------------------------------------------------
+    # Type Variables
+
+    # Transient variables for storing query data as a formatted query 
+    # is produced.
+
+    # The query options
+    typevariable qopts -array {}
+
+    # The row array
+    typevariable qrow -array {}
+
+    # For MC mode, the column widths
+    typevariable qwidths -array {}
+
+    # Other transient data, as needed by the mode
+    #
+    #    names   - Column names, i.e., qrow(*)
+    #    out     - The output
+    #    labels  - The label strings
+    #    rows    - In MC mode, the actual rows of data as dicts
+    typevariable qtrans -array {}
+
+
+
+    #-------------------------------------------------------------------
     # Ensemble subcommands
 
     # clear db
@@ -324,9 +349,6 @@ snit::type ::marsutil::sqlib {
     # If -mode is "list", each record is output in two-column
     # format: name  value, etc., with a blank line between records.
     #
-    # If -mode is "csv", each record is output in CSV format.  
-    # Non-numeric values are quoted.
-    #
     # If -mode is "mc" (the default) then multicolumn output is used.
     # In this mode, long values are truncated to -maxcolwidth.
     #
@@ -336,103 +358,261 @@ snit::type ::marsutil::sqlib {
     #
     # If -mode is "mc" and -headercols is greater than 0, then 
     # duplicate entries in the leading columns are omitted.
+    #
+    # If -mode is "csv", each record is output in CSV format.  
+    # Non-numeric values are double-quoted, and individual " characters
+    # in data are quoted as "".  No other translations are done.
 
     typemethod query {db sql args} {
         # FIRST, get options.
-        array set opts {
+        array unset qopts
+        array set qopts {
             -mode         mc
             -maxcolwidth  30
             -labels       {}
             -headercols   0
         }
-        array set opts $args
+        array set qopts $args
 
-        # NEXT, if the mode is "list", output the records individually
-        if {$opts(-mode) eq "list"} {
-            # FIRST, do the query; we'll output the data as we go.
-            set out ""
-            set labels {}
-            set count 0
+        # NEXT, prepare for the query.  Every mode uses names and out;
+        # other array elements can be used as desired.
+        array set qtrans {
+            names ""
+            out   ""
+            rows  {}
+        }
 
-            $db eval $sql row {
-                # FIRST, The first time figure out what the labels are.
-                if {[llength $labels] == 0} {
-                    # Did they specify labels?
-                    if {[llength $opts(-labels)] > 0} {
-                        set labels $opts(-labels)
-                    } else {
-                        set labels $row(*)
-                    }
+        array unset qwidths
 
-                    # What's the maximum label width?
-                    set labelWidth [lmaxlen $labels]
-                }
+        switch -exact -- $qopts(-mode) {
+            mc    { set rowproc ${type}::QueryMC   }
+            list  { set rowproc ${type}::QueryList }
+            csv   { set rowproc ${type}::QueryCSV  }
+            default { 
+                error "Unknown -mode: \"$qopts(-mode)\"" 
+            }
+        }
 
-                # NEXT, output the record
-                incr count
+        # NEXT, do the query:
+        uplevel 1 [list $db eval $sql ::marsutil::sqlib::qrow $rowproc]
 
-                if {$count > 1} {
-                    append out "\n"
-                }
+        # NEXT, if the mode is not "mc" we're done.
+        if {$qopts(-mode) eq "mc"} {
+            set out [FormatQueryMC]
+        } else {
+            set out $qtrans(out)
+        }
 
-                foreach label $labels name $row(*) {
-                    set leader [string repeat " " $labelWidth]
+        array unset qtrans
+        array unset qrow
+        array unset qopts
+        array unset qwidths
 
-                    regsub -all {\n} [string trimright $row($name)] \
-                        "\n$leader  " value
+        return $out
+    }
 
-                    append out \
-                        [format "%-*s  %s\n" $labelWidth $label $value]
+    # QueryMC
+    #
+    # Save individual rows for MC mode
+
+    proc QueryMC {} {
+        # FIRST, The first time get the column names
+        if {[llength $qtrans(names)] == 0} {
+            # FIRST, get the column names
+            set qtrans(names) $qrow(*)
+            unset qrow(*)
+
+            # NEXT, get the labels
+            if {[llength $qopts(-labels)] > 0} {
+                set qtrans(labels) $qopts(-labels)
+            } else {
+                set qtrans(labels) $qtrans(names)
+            }
+
+            # NEXT, initialize the column width array with the label widths
+            foreach name $qtrans(names) label $qtrans(labels) {
+                set qwidths($name) [string length $label]
+            }
+        }
+
+        # NEXT, do translation on the data, and get the column widths.
+        foreach name $qtrans(names) {
+            set qrow($name) [string map [list \n \\n] $qrow($name)]
+
+            set len [string length $qrow($name)]
+
+            if {$qopts(-maxcolwidth) > 0} {
+                if {$len > $qopts(-maxcolwidth)} {
+                    # At least three characters
+                    set len [::marsutil::max $qopts(-maxcolwidth) 3]
+                    set end [expr {$len - 4}]
+                    set qrow($name) \
+                        "[string range $qrow($name) 0 $end]..."
                 }
             }
-            
-            # NEXT, return the result.
-            return $out
-        }
 
-        # NEXT, if the mode is "list", output the records individually
-        if {$opts(-mode) eq "csv"} {
-            # FIRST, do the query; we'll output the data as we go.
-            set out ""
-            set count 0
-            set labels {}
-            set cols {}
-
-            $db eval $sql row {
-                # FIRST, The first time figure out what the labels are.
-                if {[llength $labels] == 0} {
-                    set cols $row(*)
-
-                    # Did they specify labels?
-                    if {[llength $opts(-labels)] > 0} {
-                        set labels $opts(-labels)
-                    } else {
-                        set labels $row(*)
-                    }
-
-                    unset row(*)
-
-                    append out [CsvRecord $labels]
-                }
-
-                # NEXT, output the record
-                set record [list]
-
-                foreach col $cols {
-                    lappend record $row($col)
-                }
-
-                append out [CsvRecord $record]
+            if {$len > $qwidths($name)} {
+                set qwidths($name) $len
             }
-            
-            # NEXT, return the result.
-            return $out
         }
 
-        # NEXT, if the mode is not "mc", that's an error.
-        if {$opts(-mode) ne "mc"} {
-            error "invalid -mode: \"$opts(-mode)\""
+        # NEXT, save the row
+        lappend qtrans(rows) [array get qrow]
+    }
+
+    # FormatQueryMC
+    #
+    # Formats the current query rows.
+
+    proc FormatQueryMC {} {
+        # FIRST, were there any rows?
+        if {[llength $qtrans(rows)] == 0} {
+            return ""
         }
+
+        # NEXT, format the header lines.
+        set out ""
+
+        foreach label $qtrans(labels) name $qtrans(names) {
+            append out [format "%-*s " $qwidths($name) $label]
+        }
+        append out "\n"
+
+        foreach name $qtrans(names) {
+            append out [string repeat "-" $qwidths($name)]
+            append out " "
+
+            # Initialize the lastrow array
+            set lastrow($name) ""
+        }
+        append out "\n"
+        
+        # NEXT, format the rows
+        foreach entry $qtrans(rows) {
+            array set row $entry
+
+            set i 0
+            foreach name $qtrans(names) {
+                # Append either the column value or a blank, with the
+                # required width
+                if {$i < $qopts(-headercols) && 
+                    $row($name) eq $lastrow($name)} {
+                    append out [format "%-*s " $qwidths($name) "\""]
+                } else {
+                    append out [format "%-*s " $qwidths($name) $row($name)]
+                }
+                incr i
+            }
+            append out "\n"
+
+            array set lastrow $entry
+        }
+
+        return $out
+    }
+
+    # QueryList
+    #
+    # Handle individual rows for list mode
+
+    proc QueryList {} {
+        # FIRST, The first time figure out what the labels are.
+        if {[llength $qtrans(names)] == 0} {
+            # FIRST, get the column names
+            set qtrans(names) $qrow(*)
+            unset qrow(*)
+
+            # NEXT, if they specified labels use them
+            if {[llength $qopts(-labels)] > 0} {
+                set qtrans(labels) $qopts(-labels)
+            } else {
+                set qtrans(labels) $qtrans(names)                
+            }
+
+            # NEXT, What's the maximum label width?
+            set qtrans(labelWidth) [lmaxlen $qtrans(labels)]
+
+            # NEXT, initialize the count.
+            set qtrans(count) 0
+        }
+
+        # NEXT, output the record
+        incr qtrans(count)
+
+        if {$qtrans(count) > 1} {
+            append qtrans(out) "\n"
+        }
+
+        foreach label $qtrans(labels) name $qtrans(names) {
+            set leader [string repeat " " $qtrans(labelWidth)]
+
+            regsub -all {\n} [string trimright $qrow($name)] \
+                "\n$leader  " value
+
+            append qtrans(out) \
+                [format "%-*s  %s\n" $qtrans(labelWidth) $label $value]
+        }
+
+    }
+
+    # QueryCSV 
+    #
+    # Handle individual rows for CSV mode
+
+    proc QueryCSV {} {
+        # FIRST, The first time figure out what the labels are.
+        if {[llength $qtrans(names)] == 0} {
+            # FIRST, get the column names
+            set qtrans(names) $qrow(*)
+            unset qrow(*)
+
+            # NEXT, if they specified labels use those instead
+            if {[llength $qopts(-labels)] > 0} {
+                append qtrans(out) [CsvRecord $qopts(-labels)]
+            } else {
+                append qtrans(out) [CsvRecord $qtrans(names)]
+            }
+
+        }
+
+        # NEXT, output the record
+        set record [list]
+
+        foreach col $qtrans(names) {
+            lappend record $qrow($col)
+        }
+
+        append qtrans(out) [CsvRecord $record]
+
+    }
+
+    # CsvRecord record
+    #
+    # record   - A list of values
+    #
+    # Quotes the list entries as a record in a CSV file.
+
+    proc CsvRecord {record} {
+        # FIRST, convert the list to CSV column entries
+        set cols [list]
+
+        foreach value $record {
+            # Quote double quotes
+            set value [string map [list \" \"\"] $value]
+
+            # If non-numeric, add double quotes
+            if {![string is double -strict $value]} {
+                set value "\"$value\""
+            }
+
+            lappend cols $value
+        }
+
+        return "[join $cols {,}]\n"
+    }
+
+
+    proc dummy {} {
 
         # NEXT, get the data; accumulate column widths as we go.
         set rows {}
@@ -452,10 +632,10 @@ snit::type ::marsutil::sqlib {
 
                 set len [string length $row($name)]
 
-                if {$opts(-maxcolwidth) > 0} {
-                    if {$len > $opts(-maxcolwidth)} {
+                if {$qopts(-maxcolwidth) > 0} {
+                    if {$len > $qopts(-maxcolwidth)} {
                         # At least three characters
-                        set len [::marsutil::max $opts(-maxcolwidth) 3]
+                        set len [::marsutil::max $qopts(-maxcolwidth) 3]
                         set end [expr {$len - 4}]
                         set row($name) \
                             "[string range $row($name) 0 $end]..."
@@ -475,8 +655,8 @@ snit::type ::marsutil::sqlib {
         }
 
         # NEXT, include the label widths.
-        if {[llength $opts(-labels)] > 0} {
-            set labels $opts(-labels)
+        if {[llength $qopts(-labels)] > 0} {
+            set labels $qopts(-labels)
         } else {
             set labels $names
         }
@@ -514,7 +694,7 @@ snit::type ::marsutil::sqlib {
             foreach name $names {
                 # Append either the column value or a blank, with the
                 # required width
-                if {$i < $opts(-headercols) && 
+                if {$i < $qopts(-headercols) && 
                     $row($name) eq $lastrow($name)} {
                     append out [format "%-*s " $colwidth($name) "\""]
                 } else {
@@ -528,31 +708,6 @@ snit::type ::marsutil::sqlib {
         }
 
         return $out
-    }
-
-    # CsvRecord record
-    #
-    # record   - A list of values
-    #
-    # Quotes the list entries as a record in a CSV file.
-
-    proc CsvRecord {record} {
-        # FIRST, convert the list to CSV column entries
-        set cols [list]
-
-        foreach value $record {
-            # Quote double quotes
-            set value [string map [list \" \"\"] $value]
-
-            # If non-numeric, add double quotes
-            if {![string is double -strict $value]} {
-                set value "\"$value\""
-            }
-
-            lappend cols $value
-        }
-
-        return "[join $cols {,}]\n"
     }
 
     # mat db table iname jname ename ?options?
