@@ -86,9 +86,11 @@ in data values are escaped, and long text strings are truncated.<p>
 
 <i>sql</i> can contain any SQL statements understood by SQLite, but in
 practice there's no reason to use this command except for SELECT
-queries. <b>NOTE:</b> If the query contains any Tcl variables, they
-will usually evaluate to the empty string, probably causing the query
-to return nothing.  Interpolate any variables into the query first!<p>
+queries.<p>
+
+<b>Note:</b> as of Mars 2.17, the <i>sql</i> query can reference
+variables in the caller's context, as it can for the normal
+SQLite3 <code>eval</code> subcommand.<p>
 
 The command supports the following options:<p>
 
