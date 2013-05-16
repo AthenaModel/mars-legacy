@@ -855,15 +855,15 @@ snit::type ::marsutil::sqldocument {
     }
 
 
-    # safequery sql
+    # safequery args
     #
     # Like "query", but authorized only to query, not to change
 
-    method safequery {sql} {
+    method safequery {args} {
         # Allow SELECTs only.
         $db authorizer [myproc RdbAuthorizer]
 
-        set code [catch {$self query $sql} result]
+        set code [catch {$self query {*}$args} result]
         
         # Open it up again.
         $db authorizer ""

@@ -1037,6 +1037,16 @@ plus(a,b,c)
 6           
     }
 
+    test safequery-1.4 {Can use options in safequery} -setup {
+        safe_setup
+    } -body {
+        bprint [db safequery { SELECT plus(a,b,c) FROM mytab } -mode list]
+    } -cleanup {
+        cleanup
+    } -result {
+plus(a,b,c)  6
+    }
+
     #-------------------------------------------------------------------
     # monitor
 

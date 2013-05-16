@@ -525,12 +525,15 @@ Compare to <<iref insert>>.<p>
 <<defitem safeeval {$db safeeval <i>args...</i>}>>
 
 This subcommand is just like "eval", but is
-prevented from changing the contents of the database.<p>
+prevented from changing the contents of the database.  It is
+intended for use in commands accessible to the user of the
+application.<p>
 
-<<defitem safequery {$db safequery <i>sql</i>}>>
+<<defitem safequery {$db safequery <i>args...</i>}>>
 
 This subcommand is just like <<iref query>>, but is
-prevented from changing the contents of the database.<p>
+prevented from changing the contents of the database; also,
+the query cannot include variables.<p>
 
 <<defitem saveas {$db saveas <i>filename</i>}>>
 
