@@ -9,6 +9,22 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.17, 22 May 2013</h3>
+
+This build has a mix of enhancements (CSV mode for queries) and bug
+fixes, in support of Athena 5.0.8.<p>
+
+<ul>
+<li> Bug 3980: cellmodel(n): add cell model object instance to -failcmd callback
+<li> Bug 3992: dynaview(n): error, geometry management loop
+<li> Bug 3994: listfield(n): Multi-selection moves go awry
+<li> Bug 3996: Updated Mars 2 to ATEE 2013Q2
+<li> Bug 4000: sqlib(n): query -mode csv
+<li> Bug 4001: sqlib(n) query can use variables
+<li> Bug 4002: sqldocument(n): safequery can take options
+</ul><p>
+
+
 <h3>Build 2.16, 22 April 2013</h3>
 
 This build has a change to the enum(n) object to allow an enumeration to be
