@@ -40,12 +40,6 @@ namespace eval ::marsgui:: {
     namespace import ::marsutil::*
 }
 
-set gtiflib [file join $::marsgui::library libGeoTiff.so]
-
-if {[file exists $gtiflib]} {
-    load $gtiflib
-}
-
 source [file join $::marsgui::library global.tcl         ]
 source [file join $::marsgui::library osgui.tcl          ]
 source [file join $::marsgui::library mkicon.tcl         ]
