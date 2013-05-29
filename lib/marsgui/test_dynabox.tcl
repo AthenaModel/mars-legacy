@@ -71,6 +71,10 @@ proc Validate {dict} {
         }
     } 
 
+    if {$first eq "Joe" && $last eq "Pro"} {
+        return "Tex Fiddler!"
+    }
+
     return
 }
 

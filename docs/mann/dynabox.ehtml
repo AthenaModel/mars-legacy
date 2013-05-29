@@ -73,18 +73,22 @@ The dialog window will have the specified title <i>string</i>.<p>
 <<defopt {-validatecmd <i>command</i>}>>
 
 Specifies a validation command.  The command should take one
-additional argument, the name/value dictionary to validate.  If the
-dictionary is valid, the command should return normally; if it is
-invalid, the command should do one of two things.<p>
+additional argument, the name/value dictionary to validate.<p>
 
+If the dictionary is valid, the command should return normally; if it returns 
+a text string, the string will be displayed at the bottom of the dialog in
+black text.<p>
+
+If the dictionary is invalid, the command should do one of two things:
 First, the command can throw an error with error code <b>INVALID</b>.
-The error message will be displayed in the dialog below the form.<p>
+The error message will be displayed at the bottom of the dialog in red text.<p>
 
 Second, the command can throw an error with error code
 <b>REJECTED</b>.  The error result must then be a dictionary of field
 names and error messages.  The dialog will mark fields with invalid
 values by coloring their labels red, and when an invalid field is
-selected its error message will appear below the form.<p>
+selected its error message will appear at the bottom of the dialog in
+red text.<p>
 
 <</deflist options>>
 

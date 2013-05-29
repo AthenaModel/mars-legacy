@@ -27,23 +27,31 @@ snit::type ::marsgui::dynabox {
     #-------------------------------------------------------------------
     # Type Variables
 
+    # error text colors
+    typevariable colors -array {
+        ok      black
+        error   "#BB0000"
+    }
+
     # dialog -- Name of the dialog widget
     typevariable dialog .dynabox
 
     # opts -- Array of option settings.  See popup for values
     typevariable opts -array {}
 
-    # userdict -- The user's chosen output.  Setting this variable
-    # ends the modal grab.
-    typevariable userdict ""
+    # tinfo -- Type Info Array
+    #
+    #   userdict   - The user's chosen output.  Setting this variable
+    #                ends the modal grab.
+    #   errorText  - The text to show in the error label.
+    #   tinfo(errorDict)  - A field->message dictionary of text to show in the error
+    #                label
 
-    # errorText -- The text to show in the error label.
-    typevariable errorText ""
-
-    # errorDict -- field -> error message.
-    # On REJECTED errors, the error messages are saved
-    # here.
-    typevariable errorDict {}
+    typevariable tinfo -array {
+        userdict {}
+        errorText ""
+        tinfo(errorDict) {}
+    }
 
     #-------------------------------------------------------------------
     # Public methods
@@ -71,8 +79,12 @@ snit::type ::marsgui::dynabox {
     #
     # The command will wait until the user presses a button.  On 
     # "Cancel", it will return "".  On OK, it will call the -validatecmd
-    # on the form dict.  If the -validatecmd throws REJECTED, the
-    # error message will appear in red below the form widget.
+    # on the form dict.  If the -validatecmd throws INVALID, the
+    # error message will appear in red below the form widget.  If the
+    # -validatecmd throws REJECTED, the error is a dictionary of field names
+    # and error messages; the error message for the current field will
+    # appear in red below the form widget.  Otherwise, the -validatecmd's
+    # return value will appear in black.
 
     typemethod popup {args} {
         # FIRST, get the option values
@@ -105,15 +117,19 @@ snit::type ::marsgui::dynabox {
                 -currentcmd [mytypemethod DialogCurrent] \
                 -changecmd  [mytypemethod DialogValidate]
 
-            # Row 2: Error label
+            # Row 2: Separator
+            ttk::separator $dialog.sep \
+                -orient horizontal
+
+            # Row 3: Error label
             label $dialog.error \
-                -textvariable [mytypevar errorText] \
+                -textvariable [mytypevar tinfo(errorText)] \
                 -wraplength   3i                    \
                 -anchor       nw                    \
                 -justify      left                  \
-                -foreground   "#BB0000"
+                -foreground   $colors(error)
 
-            # Row 3: Button Box
+            # Row 4: Button Box
             ttk::frame $dialog.button
 
             # Create the buttons
@@ -138,13 +154,16 @@ snit::type ::marsgui::dynabox {
            
             # Grid it all in
             grid $dialog.form \
-                -row 0 -column 0 -padx 8 -pady 4 -stick nsew
+                -row 0 -column 0 -padx 8 -pady 4 -sticky nsew
+
+            grid $dialog.sep \
+                -row 1 -column 0 -sticky ew
 
             grid $dialog.error \
-                -row 1 -column 0 -padx 8 -pady 4 -sticky new
+                -row 2 -column 0 -padx 8 -pady 4 -sticky new
 
             grid $dialog.button \
-                -row 2 -column 0 -padx 8 -pady 4 -sticky ew
+                -row 3 -column 0 -padx 8 -pady 4 -sticky ew
         }
 
         # NEXT, configure the dialog according to the options
@@ -156,7 +175,7 @@ snit::type ::marsgui::dynabox {
         osgui mktoolwindow $dialog $opts(-parent)
 
         # NEXT, clear the error message.
-        set errorText ""
+        set tinfo(errorText) ""
 
         # NEXT, set the -form, and add the -initvalue.
         $dialog.form configure -formtype $opts(-formtype)
@@ -171,14 +190,14 @@ snit::type ::marsgui::dynabox {
         raise $dialog
 
         # NEXT, do the grab, and wait until they return.
-        set userdict {}
+        set tinfo(userdict) {}
 
         grab set $dialog
-        vwait [mytypevar userdict]
+        vwait [mytypevar tinfo(userdict)]
         grab release $dialog
         wm withdraw $dialog
 
-        return $userdict
+        return $tinfo(userdict)
     }
 
     # ParseOptions arglist
@@ -235,7 +254,7 @@ snit::type ::marsgui::dynabox {
     # Returns the empty string.
 
     typemethod DialogCancel {} {
-        set userdict ""
+        set tinfo(userdict) ""
     }
 
     # DialogOK
@@ -253,7 +272,7 @@ snit::type ::marsgui::dynabox {
 
         # NEXT, save the user's input; this will break us out of the
         # modal dialog.
-        set userdict $dict
+        set tinfo(userdict) $dict
     }
 
     # DialogCurrent field
@@ -264,11 +283,11 @@ snit::type ::marsgui::dynabox {
     # related error message.
 
     typemethod DialogCurrent {field} {
-        if {[dict size $errorDict] > 0} {
-            if {[dict exists $errorDict $field]} {
-                set errorText [dict get $errorDict $field]
+        if {[dict size $tinfo(errorDict)] > 0} {
+            if {[dict exists $tinfo(errorDict) $field]} {
+                set tinfo(errorText) [dict get $tinfo(errorDict) $field]
             } else {
-                set errorText \
+                set tinfo(errorText) \
           "Errors in input; click on fields with red labels for more detail."
             }
         }
@@ -278,7 +297,7 @@ snit::type ::marsgui::dynabox {
     #
     # fields - Names of the fields whose value changed.
     #
-    # Validates the input, setting the errorText as appropriate.
+    # Validates the input, setting the tinfo(errorText) as appropriate.
     
     typemethod DialogValidate {fields} {
         $type ValidateData [$dialog.form get]
@@ -289,24 +308,26 @@ snit::type ::marsgui::dynabox {
     #
     # dict - Form's field dictionary
     #
-    # Validates the input, setting the errorText as appropriate.
+    # Validates the input, setting the tinfo(errorText) as appropriate.
     
     typemethod ValidateData {dict} {
-        if {$opts(-validatecmd) ne ""} {
-            set errorDict {}
-            set errorText ""
+        set tinfo(errorDict) {}
+        set tinfo(errorText) ""
 
+        if {$opts(-validatecmd) ne ""} {
             if {[catch {
                 {*}$opts(-validatecmd) $dict
             } result eopts]} {
                 switch -exact -- [dict get $eopts -errorcode] {
                     INVALID {
-                        set errorText $result
+                        set tinfo(errorText) $result
+                        $dialog.error configure -foreground $colors(error)
                     }
                     REJECTED {
-                        set errorDict $result
+                        set tinfo(errorDict) $result
                         $dialog.form invalid [dict keys $result]
                         $type DialogCurrent [$dialog.form current]
+                        $dialog.error configure -foreground $colors(error)
                     }
                     default {
                         # Rethrow the error
@@ -316,9 +337,11 @@ snit::type ::marsgui::dynabox {
 
                 return 0
             }
-
-            $dialog.form invalid {}
         }
+
+        set tinfo(errorText) $result
+        $dialog.error configure -foreground $colors(ok)
+        $dialog.form invalid {}
 
         return 1
     }
