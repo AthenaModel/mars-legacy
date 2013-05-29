@@ -50,7 +50,7 @@ snit::type ::marsgui::dynabox {
     typevariable tinfo -array {
         userdict {}
         errorText ""
-        tinfo(errorDict) {}
+        errorDict {}
     }
 
     #-------------------------------------------------------------------
