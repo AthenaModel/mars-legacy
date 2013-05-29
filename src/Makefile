@@ -30,7 +30,7 @@ SRCLIBDIR = $(TOP_DIR)/src/lib
 #
 # libGeoTiff isn't yet supported on Windows.
 
-LINUXSUBS   = libGeotrans libGeostars libGeoTiff
+LINUXSUBS   = libGeotrans libGeostars libTiff libGTiff
 WINSUBS     = libGeotrans libGeostars libTiff libGTiff
 OTHERCLEANS = clean-Marsbin
 

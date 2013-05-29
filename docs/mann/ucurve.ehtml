@@ -1,5 +1,7 @@
 <<manpage {simlib(n) ucurve(n)} "URAM Curve Manager">>
 
+<<swallow {package require simlib}>>
+
 <<section SYNOPSIS>>
 
 <pre>
