@@ -181,7 +181,7 @@
         listfield $w \
             -showkeys no                                        \
             -state    [expr {$context ? "disabled" : "normal"}] \
-            -itemdict [list2dict [dict get $idict list]         \
+            -itemdict [list2dict [dict get $idict list]]        \
             {*}[asoptions $idict width height stripe]
     }
 
