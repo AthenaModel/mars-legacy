@@ -389,6 +389,12 @@ A count is a non-negative integer.  (snit::integer)<p>
 
 A distance is a non-negative floating point value. (snit::double)<p>
 
+<<defitem hexcolor {hexcolor validate <i>value</i>}>>
+
+Validates the <i>value</i> as an acceptable Tk color in 24-bit
+hex notation, and returns it in the form
+"<code>#<i>RRGGBB</i></code>".<p>
+
 <<defitem "identifier" {identifier validate <i>value</i>}>>
 
 An identifier is any non-empty string consisting only of ASCII

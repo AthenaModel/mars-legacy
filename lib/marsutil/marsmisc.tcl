@@ -34,6 +34,7 @@ namespace eval ::marsutil:: {
         getcode         \
         gettimeofday    \
         geotiff         \
+        hexcolor        \
         hexquote        \
         identifier      \
         ipaddress       \
@@ -1110,6 +1111,33 @@ snit::integer ::marsutil::count \
 snit::double ::marsutil::distance \
     -min 0
 
+# a 24bit RGB hexadecimal color string: "#RRGGBB"
+snit::type ::marsutil::hexcolor {
+    # Make it a singleton
+    pragma -hasinstances no
+
+    #-------------------------------------------------------------------
+    # Public Type Methods
+
+    # validate color
+    #
+    # color    A Tk color spec
+    #
+    # Validates the color using [winfo rgb], and converts the result
+    # to a 24-bit hex color string.
+
+    typemethod validate {value} {
+        set value [string toupper $value]
+
+        if {![regexp {^#[[:xdigit:]]{6}$} $value]} {
+            return -code error -errorcode INVALID \
+                "Invalid hex color specifier, should be \"#RRGGBB\""
+        }
+
+        # Return in canonical form
+        return $value
+    }
+}
 
 #-------------------------------------------------------------------
 # getcode
