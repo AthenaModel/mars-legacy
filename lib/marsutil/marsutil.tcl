@@ -83,4 +83,4 @@ source [file join $::marsutil::library dynaform.tcl       ]
 source [file join $::marsutil::library dynaform_fields.tcl]
 source [file join $::marsutil::library order.tcl          ]
 source [file join $::marsutil::library undostack.tcl      ]
-
+source [file join $::marsutil::library gradient.tcl       ]

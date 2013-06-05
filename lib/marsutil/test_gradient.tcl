@@ -1,9 +1,10 @@
 package require snit
+package require Tk
 source gradient.tcl
 
 
 proc test {} {
-    set grad [::marsgui::gradient %AUTO%  \
+    set grad [::marsutil::gradient %AUTO%  \
                   -mincolor \#FFCC99  \
                   -maxcolor \#663300  \
                   -minlevel 0         \
