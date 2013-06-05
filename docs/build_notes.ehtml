@@ -9,6 +9,18 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.18, 5 June 2013</h3>
+This build contains some fixes to support building Athena on Linux and for
+running on supercomputing clusters. There's also an enhancement to dynabox(n)
+and a fix to a bug in dynaform_fields(n).
+
+<ul>
+<li> Bug 4021: hexcolor(n): Remove support for X color names
+<li> Bug 4015: dynaform_fields(n): enumlist field error
+<li> Bug 4013: dynabox(n): Display valid results
+<li> Bug 4011: mars(1): Fix Linux build problems
+</ul><p>
+
 <h3>Build 2.17, 22 May 2013</h3>
 
 This build has a mix of enhancements (CSV mode for queries) and bug
