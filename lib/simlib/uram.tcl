@@ -1137,7 +1137,10 @@ snit::type ::simlib::uram {
     # groups.
 
     method SetTracking {flag glist} {
-        # FIRST, get the list of curve IDs.
+        # FIRST, get the list of curve IDs.  For HRELs, it's asymmetric;
+        # when untracking, all of a group's HREL curves are untracked,
+        # but when tracking they only get tracked if the other group is
+        # non-empty.
         set gs "([join $glist ,])"
 
         set curve_ids [$rdb eval "
@@ -1154,6 +1157,22 @@ snit::type ::simlib::uram {
             $cm curve track $curve_ids 
         } else {
             $cm curve untrack $curve_ids
+        }
+
+        # NEXT, if we were tracking, look for HREL curves that shouldn't be
+        # tracked. (Fixed for Bug 4044)
+        if {$flag} {
+            set curve_ids [$rdb eval {
+                SELECT curve_id
+                FROM uram_civ_g AS G
+                JOIN uram_hrel_t AS H ON (H.f_id = G.g_id OR H.g_id = G.g_id)
+                JOIN ucurve_curves_t AS C USING (curve_id)
+                WHERE G.pop = 0 AND C.tracked
+            }]
+
+            if {[llength $curve_ids] > 0} {
+                $cm curve untrack $curve_ids
+            }
         }
     }
 

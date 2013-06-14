@@ -3576,6 +3576,19 @@ CC2 10000
         cleanup
     } -result {24 0}
 
+    test update_pop-1.4 {bug 4044: hrel should remain untracked.} -setup {
+        create
+        jr update pop CA1 0 CB1 0
+    } -body {
+        jr update pop CA1 5000
+
+        rdb onecolumn {
+            SELECT tracked FROM uram_hrel WHERE f='CB1' AND g='CA1'
+        }
+    } -cleanup {
+        cleanup
+    } -result {0}
+
 
     #-------------------------------------------------------------------
     # Parms
