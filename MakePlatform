@@ -35,7 +35,7 @@ ifeq "$(UNAME)" "Linux i686"
     MARS_OS        = linux
     MARS_ARCH      = i686
     MARS_LIBSUFFIX = so
-    export MARS_TCL_HOME  = /usr/local/ActiveTclEE-2013Q2
+    export MARS_TCL_HOME  = /usr/local/AT8.5.14
 else ifeq "$(UNAME)" "Linux x86_64"
     MARS_PLATFORM  = linux64
     MARS_OS        = linux
