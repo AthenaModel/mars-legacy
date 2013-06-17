@@ -47,7 +47,7 @@ else ifeq "$(UNAME)" "MINGW32_NT-6.1 unknown"
     MARS_OS        = win
     MARS_ARCH      = i686
     MARS_LIBSUFFIX = dll
-    export MARS_TCL_HOME = C:/ATEE/2013Q2
+    export MARS_TCL_HOME = C:/Tcl/AT8.5.14
 else
     MARS_PLATFORM  = unknown
     MARS_OS        = unknown
