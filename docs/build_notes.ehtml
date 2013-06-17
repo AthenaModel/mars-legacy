@@ -9,6 +9,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.19, 17 June 2013</h3>
+This build contains two packages. One that makes Mars use the ActiveTcl 
+Community Edition instead of Enterprise Edition and one that fixes a bug
+in uram(n).
+
+<ul>
+<li> Bug 4047: Update Mars 2 to use ActiveTcl 8.5.14
+<li> Bug 4044: uram(n): hrel curves tracked when f or g is empty
+</ul><p>
+
 <h3>Build 2.18, 5 June 2013</h3>
 This build contains some fixes to support building Athena on Linux and for
 running on supercomputing clusters. There's also an enhancement to dynabox(n)
