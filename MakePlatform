@@ -41,7 +41,7 @@ else ifeq "$(UNAME)" "Linux x86_64"
     MARS_OS        = linux
     MARS_ARCH      = x86_64
     MARS_LIBSUFFIX = so
-    export MARS_TCL_HOME = /usr/local/ActiveTclEE-2013Q2-x86_64
+    export MARS_TCL_HOME = /usr/local/AT8.5.14-x86_64
 else ifeq "$(UNAME)" "MINGW32_NT-6.1 unknown"
     MARS_PLATFORM  = win32
     MARS_OS        = win
