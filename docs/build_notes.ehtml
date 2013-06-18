@@ -10,6 +10,11 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 1.74, 18 June 2013</h3>
+
+This build established a baseline for migrating to the standard ActiveTcl 
+from the Enterprise Edition. The MakePlatform is changed accordingly.<p>
+
 <h3>Build 1.73, 13 December 2012</h3>
 
 This build contains one minor enhancement.<p>
