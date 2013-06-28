@@ -48,6 +48,12 @@ else ifeq "$(UNAME)" "MINGW32_NT-6.1 unknown"
     MARS_ARCH      = i686
     MARS_LIBSUFFIX = dll
     export MARS_TCL_HOME = C:/Tcl/AT8.5.14
+else ifeq "$(UNAME)" "Darwin i386"
+    MARS_PLATFORM  = osx
+    MARS_OS        = osx
+    MARS_ARCH      = unknown
+    MARS_LIBSUFFIX = unknown
+    export MARS_TCL_HOME = /usr/local
 else
     MARS_PLATFORM  = unknown
     MARS_OS        = unknown
