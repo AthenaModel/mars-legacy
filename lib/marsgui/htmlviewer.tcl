@@ -90,6 +90,16 @@ snit::widgetadaptor ::marsgui::htmlviewer {
         OL, UL, DD {
             padding-left: 1em;
         }
+
+        SPAN.disabled {
+            text-decoration: line-through;
+            color: #999999;
+        }
+
+        SPAN.invalid {
+            text-decoration: line-through;
+            color: #FF0000;
+        }
     }
 
     #-------------------------------------------------------------------
