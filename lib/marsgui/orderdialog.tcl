@@ -321,6 +321,7 @@ snit::widget ::marsgui::orderdialog {
     # Components
 
     component form       ;# The form(n) widget
+    component raiser     ;# A timeout(n) object.
 
     #-------------------------------------------------------------------
     # Instance Variables
@@ -449,7 +450,7 @@ snit::widget ::marsgui::orderdialog {
         osgui mktoolwindow  $win [$type Parent]
         wm deiconify  $win
         raise $win
-
+        
         # NEXT, if there's saved position, give the dialog the
         # position.
         if {$info(position-$options(-order)) ne ""} {
@@ -470,12 +471,32 @@ snit::widget ::marsgui::orderdialog {
             notifier bind $subject $event $win [mymethod RefreshDialog]
         }
 
+        # NEXT, raise the widget if it's obscured by its parent.
+        install raiser using timeout ${selfns}::raiser \
+            -interval   500 \
+            -repetition yes \
+            -command    [mymethod KeepVisible]
+        $raiser schedule
+
         # NEXT, wait for visibility.
         update idletasks
     }
 
     destructor {
         notifier forget $win
+    }
+
+    #-------------------------------------------------------------------
+    # Event Handlers: Visibility
+
+    # KeepVisible 
+    #
+    # If the dialog is fully obscured, this raises it above its parent.
+
+    method KeepVisible {} {
+        if {[wm stackorder $win isbelow [$type Parent]]} {
+            raise $win
+        }
     }
 
     #-------------------------------------------------------------------
