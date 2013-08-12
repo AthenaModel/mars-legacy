@@ -175,7 +175,7 @@ snit::widget ::marsgui::colorfield {
 
         # Text Field
         install text using textfield $win.text \
-            -width     8                       \
+            -width     16                      \
             -state     normal                  \
             -changecmd [mymethod TextChanged]
 

@@ -391,9 +391,10 @@ A distance is a non-negative floating point value. (snit::double)<p>
 
 <<defitem hexcolor {hexcolor validate <i>value</i>}>>
 
-Validates the <i>value</i> as an acceptable Tk color in 24-bit
+Validates the <i>value</i> as an acceptable Tk color in 24-bit or 48-bit
 hex notation, and returns it in the form
-"<code>#<i>RRGGBB</i></code>".<p>
+"<code>#<i>RRGGBB</i></code>" or 
+"<code>#<i>RRRRGGGGBBBB</i></code>".<p>
 
 <<defitem "identifier" {identifier validate <i>value</i>}>>
 

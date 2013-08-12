@@ -1128,14 +1128,16 @@ snit::type ::marsutil::hexcolor {
 
     typemethod validate {value} {
         set value [string toupper $value]
+        set len [string length $value]
 
-        if {![regexp {^#[[:xdigit:]]{6}$} $value]} {
-            return -code error -errorcode INVALID \
-                "Invalid hex color specifier, should be \"#RRGGBB\""
+        if {[regexp {^#[[:xdigit:]]+$} $value] &&
+            ($len == 7 || $len == 13)
+        } {
+            return $value
         }
 
-        # Return in canonical form
-        return $value
+        return -code error -errorcode INVALID \
+            "Invalid hex color specifier, should be \"#RRGGBB\" or \"#RRRRGGGGBBBB\""
     }
 }
 
