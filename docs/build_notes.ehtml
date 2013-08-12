@@ -9,6 +9,13 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.21, 12 August 2013</h3>
+This build contains one bug fix and an update to the Mars Analyst's Guide.
+
+<ul>
+<li> Bug 4061: htmlviewer(n): SPAN classes
+</ul><p>
+
 <h3>Build 2.20, 1 July 2013</h3>
 This build adds support for building Athena on Mac OSX. There's no plans
 to distribute Athena for Mac at this time, but since we may develop Athena
