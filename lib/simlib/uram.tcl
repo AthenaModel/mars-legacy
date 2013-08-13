@@ -1473,7 +1473,9 @@ snit::type ::simlib::uram {
 
         set curve_id [dict get $db(hrelIDs) $f $g]
 
-        require {[$cm istracked $curve_id]} "HREL $f $g is not tracked."
+        if {![$cm istracked $curve_id]} {
+            return
+        }
 
         snit::double validate $delta
 
@@ -1499,7 +1501,9 @@ snit::type ::simlib::uram {
         # FIRST, validate inputs.
         set curve_id [dict get $db(hrelIDs) $f $g]
 
-        require {[$cm istracked $curve_id]} "HREL $f $g is not tracked."
+        if {![$cm istracked $curve_id]} {
+            return
+        }
 
         qaffinity validate $value
 
@@ -1613,7 +1617,9 @@ snit::type ::simlib::uram {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
         set curve_id [dict get $db(vrelIDs) $g $a] 
-        require {[$cm istracked $curve_id]} "VREL $g $a is not tracked."
+        if {![$cm istracked $curve_id]} {
+            return
+        }
 
         snit::double validate $delta
 
@@ -1638,7 +1644,9 @@ snit::type ::simlib::uram {
 
         # FIRST, validate inputs.
         set curve_id [dict get $db(vrelIDs) $g $a] 
-        require {[$cm istracked $curve_id]} "VREL $g $a is not tracked."
+        if {![$cm istracked $curve_id]} {
+            return
+        }
 
         qaffinity validate $value
 
@@ -1892,7 +1900,9 @@ snit::type ::simlib::uram {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
         set curve_id [dict get $db(satIDs) $g $c]
-        require {[$cm istracked $curve_id]} "SAT $g $c is not tracked."
+        if {![$cm istracked $curve_id]} {
+            return
+        }
 
         snit::double validate $delta
 
@@ -1917,7 +1927,9 @@ snit::type ::simlib::uram {
 
         # FIRST, validate inputs.
         set curve_id [dict get $db(satIDs) $g $c]
-        require {[$cm istracked $curve_id]} "SAT $g $c is not tracked."
+        if {![$cm istracked $curve_id]} {
+            return
+        }
 
         qsat validate $value
 
@@ -2131,7 +2143,9 @@ snit::type ::simlib::uram {
         require {$db(time) >= 0} "baseline adjustments not allowed when t=-1"
 
         set curve_id [dict get $db(coopIDs) $f $g]
-        require {[$cm istracked $curve_id]} "COOP $f $g is not tracked."
+        if {![$cm istracked $curve_id]} {
+            return
+        }
 
         snit::double validate $delta
 
@@ -2156,7 +2170,9 @@ snit::type ::simlib::uram {
 
         # FIRST, validate inputs.
         set curve_id [dict get $db(coopIDs) $f $g]
-        require {[$cm istracked $curve_id]} "COOP $f $g is not tracked."
+        if {![$cm istracked $curve_id]} {
+            return
+        }
 
         qcooperation validate $value
 

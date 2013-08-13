@@ -357,7 +357,7 @@ clamped accordingly.<p>
 The adjustment takes effect immediately, and is ascribed to the
 driver at the next <<iref advance>>.<p>
 
-It is an error if group <i>f</i> has a population of zero.<p>
+The command has no effect if group <i>f</i> has a population of zero.<p>
 
 <<defitem "coop bset" {$obj coop bset <i>driver f g value</i>}>>
 
@@ -371,7 +371,7 @@ the specified <i>driver</i> (see <<xref "ATTITUDE DRIVERS">>).<p>
 The change takes effect immediately, and is ascribed to the
 driver at the next <<iref advance>>.<p>
 
-It is an error if group <i>f</i> has a population of zero.<p>
+The command has no effect if group <i>f</i> has a population of zero.<p>
 
 
 <<defitem "coop cset" {$obj coop cset ?<i>f g value...</i>?}>>
@@ -507,7 +507,7 @@ clamped accordingly.<p>
 The adjustment takes effect immediately and is ascribed to the driver
 at the next <<iref advance>>.<p>
 
-It is an error if either group is a civilian group with a population 
+The command has no effect if either group is a civilian group with a population 
 of zero.<p>
 
 <<defitem "hrel bset" {$obj hrel bset <i>driver f g value</i>}>>
@@ -522,7 +522,7 @@ the specified <i>driver</i> (see <<xref "ATTITUDE DRIVERS">>).<p>
 The change takes effect immediately, and is ascribed to the
 driver at the next <<iref advance>>.<p>
 
-It is an error if either group is a civilian group with a population 
+The command has no effect if either group is a civilian group with a population 
 of zero.<p>
 
 <<defitem "hrel cset" {$obj hrel cset ?<i>f g value...</i>?}>>
@@ -667,7 +667,7 @@ clamped accordingly.<p>
 The adjustment takes effect immediately, and is ascribed to the driver
 at the next <<iref advance>>.<p>
 
-It is an error if group <i>g</i> has a population of zero.<p>
+The command has no effect if group <i>g</i> has a population of zero.<p>
 
 <<defitem "sat bset" {$obj sat bset <i>driver g c value</i>}>>
 
@@ -681,7 +681,7 @@ the specified <i>driver</i> (see <<xref "ATTITUDE DRIVERS">>).<p>
 The change takes effect immediately, and is ascribed to the
 driver at the next <<iref advance>>.<p>
 
-It is an error if group <i>g</i> has a population of zero.<p>
+The command has no effect if group <i>g</i> has a population of zero.<p>
 
 <<defitem "sat cset" {$obj sat cset ?<i>g c value...</i>?}>>
 
@@ -801,7 +801,7 @@ clamped accordingly.<p>
 The adjustment takes effect immediately, and is ascribed to the driver
 at the next <<iref advance>>.<p>
 
-It is an error if group <i>g</i> is a civilian group with 
+The command has no effect if group <i>g</i> is a civilian group with 
 a population of zero.<p>
 
 <<defitem "vrel bset" {$obj vrel bset <i>driver g a value</i>}>>
@@ -816,7 +816,7 @@ the specified <i>driver</i> (see <<xref "ATTITUDE DRIVERS">>).<p>
 The change takes effect immediately, and is ascribed to the
 driver at the next <<iref advance>>.<p>
 
-It is an error if group <i>g</i> is a civilian group with 
+The command has no effect if group <i>g</i> is a civilian group with 
 a population of zero.<p>
 
 <<defitem "vrel cset" {$obj vrel cset ?<i>g a value...</i>?}>>
