@@ -771,12 +771,7 @@ for the specified <i>g</i> and <i>pop</i> pairs
 specified on the command line.<p>
 
 <b>NOTE:</b>  This command is optimized for speed, and consequently
-does little error checking.  The following constraints apply:<p>
-
-<ul>
-  <li> Only civilian groups are allowed.
-  <li> Groups must not be assigned a population of zero.
-</ul><p>
+does little error checking.<p>
 
 <</deflist update>>
 
