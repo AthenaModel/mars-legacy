@@ -9,6 +9,22 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.22, 20 August 2013</h3>
+This build contains a number of bug fixes with the most noticable one being the
+behavior of orderdialog(n).  If an order dialog becomes obscured by the 
+main application window it will pop back to the top after a short time. 
+Having orderdialog(n) always be on top of the application caused other
+problems, so this is a way to alleviate those issues but still have the 
+order dialog window become visible.<p>
+
+<ul>
+<li> Bug 4090: uram(n): error thrown when group is untracked.
+<li> Bug 4088: uram(n): man page error, update population
+<li> Bug 4087: orderdialog(n): Order dialogs can drop behind main window
+<li> Bug 4085: colorfield(n): Selecting a custom color causes an error.
+<li> Bug 4083: orderdialog(n) uses [wm attributes -topmost]
+</ul><p>
+
 <h3>Build 2.21, 12 August 2013</h3>
 This build contains one bug fix and an update to the Mars Analyst's Guide.
 
