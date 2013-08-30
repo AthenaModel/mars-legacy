@@ -62,6 +62,13 @@ snit::type ::marsutil::lazyupdater {
     }
 
     #-------------------------------------------------------------------
+    # Instance Variables
+
+    # Don't reschedule while executing the -command.
+    variable executing 0
+    
+
+    #-------------------------------------------------------------------
     # Constructor
 
     constructor {args} {
@@ -87,7 +94,9 @@ snit::type ::marsutil::lazyupdater {
         if {$options(-window) eq "" ||
             [winfo ismapped $options(-window)]
         } {
-            uplevel \#0 $options(-command)
+            set executing 1
+            bgcatch {uplevel \#0 $options(-command)}
+            set executing 0
         }
     }
 
@@ -100,6 +109,11 @@ snit::type ::marsutil::lazyupdater {
     # Schedules the lazyupdater to call its -command.
 
     method update {} {
+        # Don't reschedule if -command is in progress.
+        if {$executing} {
+            return
+        }
+
         if {$options(-window) eq "" ||
             [winfo ismapped $options(-window)]
         } {
