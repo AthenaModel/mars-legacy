@@ -9,6 +9,13 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.23, 3 September 2013</h3>
+This build contains one bug fix to the lazyupdater(n):<p>
+
+<ul>
+<li> Bug 4119: lazyupdater(n): -command can recursively schedule an update
+</ul><p>
+
 <h3>Build 2.22, 20 August 2013</h3>
 This build contains a number of bug fixes with the most noticable one being the
 behavior of orderdialog(n).  If an order dialog becomes obscured by the 
