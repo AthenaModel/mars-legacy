@@ -52,6 +52,8 @@ font create codefont       -family $baseMono -size -12 -weight normal
 font create codefontitalic -family $baseMono -size -12 -weight normal \
                            -slant italic
 font create codefontbold   -family $baseMono -size -12 -weight bold
+font create codefontstrike -family $baseMono -size -12 -weight normal \
+                           -overstrike yes
 font create tinyfont       -family $baseMono -size  -9 -weight normal
 
 font create messagefont    -family Helvetica -size -12
