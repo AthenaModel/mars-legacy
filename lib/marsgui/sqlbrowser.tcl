@@ -577,14 +577,17 @@ snit::widget ::marsgui::sqlbrowser {
         }
     }
     
-    # ReloadContent
+    # ReloadContent ?force?
     #
-    # Reloads the current -view.  Has no effect if the window is
-    # not mapped.
+    # forceFlag   - If 1, force a reload right now.  If 0, only if mapped.
+    #               Defaults to 0.
+    #
+    # Reloads the current -view.
     
-    method ReloadContent {} {
-        # FIRST, we don't do anything until we're mapped.
-        if {![winfo ismapped $win]} {
+    method ReloadContent {{force 0}} {
+        # FIRST, we don't do anything until we're mapped, unless we're 
+        # forcing a reload.
+        if {!$force && ![winfo ismapped $win]} {
             return
         }
         
@@ -654,6 +657,7 @@ snit::widget ::marsgui::sqlbrowser {
         
         # NEXT, select the same rows, if we have a -uid.
         if {$options(-uid) ne ""} {
+            # TBD: Use -silent?
             $self uid select $ids
         }
     }
@@ -907,14 +911,21 @@ snit::widget ::marsgui::sqlbrowser {
         $tlist delete 0 end
     }
 
-    # reload
+    # reload ?-force?
     #
-    # Schedules a reload of the content.  Note that the reload will
-    # be ignored if the window isn't mapped.
+    # By default, schedules a lazy reload of the content: the content will
+    # be reloaded once, back in the event loop, no matter how many times
+    # this is called, and not until the window is mapped.
+    #
+    # If -force is given, the content is reloaded immediately.
     
-    method reload {} {
-        incr info(reloadRequests)
-        $reloader schedule -nocomplain
+    method reload {{opt ""}} {
+        if {$opt eq ""} {
+            incr info(reloadRequests)
+            $reloader schedule -nocomplain
+        } else {
+            $self ReloadContent 1
+        }
     }
     
     # layout
@@ -1157,16 +1168,17 @@ snit::widget ::marsgui::sqlbrowser {
     }
     
     
-    # uid select uids
+    # uid select uids ?-silent?
     #
-    # uids    A list of UIDs
+    # uids  -  A list of UIDs
     #
     # Selects the rows with the associated UIDs.  Unknown IDs
     # are ignored.
     # 
-    # NOTE: Calling this command calls the -selectioncmd
+    # By default, calling this command calls the -selectioncmd
+    # If -silent is given, it does not.
 
-    method {uid select} {uids} {
+    method {uid select} {uids {opt ""}} {
         $tlist selection clear 0 end
         
         set rows [list]
@@ -1179,7 +1191,9 @@ snit::widget ::marsgui::sqlbrowser {
 
         $tlist selection set $rows
         
-        callwith $options(-selectioncmd)
+        if {$opt eq ""} {
+            callwith $options(-selectioncmd)
+        }
     }
     
 

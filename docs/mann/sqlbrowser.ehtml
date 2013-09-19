@@ -300,11 +300,18 @@ work is done <i>after</i> the caller returns to the Tk event loop.<p>
 The <b>-displaycmd</b>, if defined, will (eventually) be called for
 each row loaded into the browser.<p>
 
-<<defitem reload {<i>win</i> reload}>>
+<<defitem reload {<i>win</i> reload ?-force?}>>
 
 Asks the sqlbrowser(n) to clear its contents and reload all the data
-from the database for the current <b>-view</b>.  Note that the
-work is done <i>after</i> the caller returns to the Tk event loop.<p>
+from the database for the current <b>-view</b>.  By default, the command
+schedules a "lazy" reload: the content will only be reloaded once, no
+matter how times the command is called; the reload will not be done
+until control is returned to the Tk event loop; and not until the 
+browser window is actually mapped.<p>
+
+If the <b>-force</b> option is given, the content will be reloaded
+immediately.  This is suitable for use in code already protected by
+a <<xref lazyupdater(n)>>.<p>
 
 The <b>-displaycmd</b>, if defined, will (eventually) be called for
 each row loaded into the browser.<p>
@@ -373,10 +380,11 @@ it), and needs to be displayed.<p>
 
 The <b>-displaycmd</b> will be called.<p>
 
-<<defitem {uid select} {<i>win</i> uid select <i>uids</i>}>>
+<<defitem {uid select} {<i>win</i> uid select <i>uids</i> ?-silent?}>>
 
-Selects the rows associated with the UIDs, and calls the
-<b>-selectioncmd</b>.  Unknown UIDs are ignored.<p>
+Selects the rows associated with the UIDs, ignoring unknown
+uids.  By default, calls the <b>-selectioncmd</b>; if 
+<b>-silent</b> is given, it does not.<p>
 
 <<defitem {uid setbg} {<i>win</i> uid setbg <i>uid color</i>}>>
 
