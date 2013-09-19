@@ -104,6 +104,8 @@ snit::type ::marsutil::lazyupdater {
     #-------------------------------------------------------------------
     # Public methods
 
+    delegate method cancel to timeout
+
     # update
     #
     # Schedules the lazyupdater to call its -command.

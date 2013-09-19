@@ -69,6 +69,11 @@ Each instance of the <<iref lazyupdater>> object has the following subcommands:<
 
 <<deflist instance>>
 
+<<defitem cancel {<i>obj</i> cancel}>>
+
+Cancels any pending update.  This is useful when the client has
+forced an update for some reason.<p>
+
 <<defitem cget {<i>obj</i> cget <i>option</i>}>>
 
 Returns the value of the specified <i>option</i>.<p>
