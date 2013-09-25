@@ -9,6 +9,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.24, 25 September 2013</h3>
+This build contains some small functional changes to lazyupdater(n)
+and sqlbrowser(n). A new standard strikethrough font is also added.<p>
+
+<ul>
+<li> Bug 4141: lazyupdater(n): cancel subcommand
+<li> Bug 4139: sqlbrowser(n): reload enhancements
+<li> Bug 4122: marsgui(n): codefontstrike
+</ul><p>
+
 <h3>Build 2.23, 3 September 2013</h3>
 This build contains one bug fix to the lazyupdater(n):<p>
 
