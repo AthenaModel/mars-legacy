@@ -151,6 +151,21 @@ specified in HTML length units, e.g., "<code>3in</code>" or
 
 <</deflist options>>
 
+<<defitem check {check <i>field</i> ?<i>options...</i>?}>>
+
+Defines a checkbutton field, i.e., a field for editing boolean flags.
+In addition to the standard field options, 
+the field type defines the following:<p>
+
+<<deflist options>>
+<<defopt {-text <i>text</i>}>>
+Specifies the text to display as the checkbutton label.<p>
+
+<<defopt {-image <i>image</i>}>>
+
+Specifies the Tk image to display as the checkbutton label.<p>
+<</deflist options>>
+
 <<defitem color {color <i>field</i> ?<i>options...</i>?}>>
 
 Defines a color field, based on the <<xref colorfield(n)>> widget.

@@ -36,6 +36,20 @@
 #
 #-----------------------------------------------------------------------
 
+::marsutil::dynaform fieldtype define check {
+    typemethod create {w idict} {
+        typemethod attributes {} {
+            return {text image}
+        }
+
+        set context [dict get $idict context]
+
+        checkfield $w \
+            -state [expr {$context ? "disabled" : "normal"}] \
+            {*}[asoptions $idict text image]
+    }
+}
+
 ::marsutil::dynaform fieldtype define color {
     typemethod create {w idict} {
         set context [dict get $idict context]
