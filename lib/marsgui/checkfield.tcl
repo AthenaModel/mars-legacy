@@ -137,11 +137,14 @@ snit::widget ::marsgui::checkfield {
 
     method set {value {opt ""}} {
         # FIRST, set the value
-        set value [snit::boolean validate $value]
-        if {$value} {
-            set currentValue 1
+        if {$value ne ""} {
+            if {$value} {
+                set currentValue 1
+            } else {
+                set currentValue 0
+            }
         } else {
-            set currentValue 0
+            set currentValue ""   
         }
 
         if {$opt ne ""} {

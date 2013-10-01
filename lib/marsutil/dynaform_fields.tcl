@@ -37,11 +37,11 @@
 #-----------------------------------------------------------------------
 
 ::marsutil::dynaform fieldtype define check {
-    typemethod create {w idict} {
-        typemethod attributes {} {
-            return {text image}
-        }
+    typemethod attributes {} {
+        return {text image}
+    }
 
+    typemethod create {w idict} {
         set context [dict get $idict context]
 
         checkfield $w \
