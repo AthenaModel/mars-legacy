@@ -9,6 +9,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.25, 3 October 2013</h3>
+
+This build adds the checkfield(n) widget, which is a field(i) wrapper around
+ttk::checkbutton.<p>
+
+<ul>
+<li> Bug 4152: checkfield(n): Check Button Field
+</ul><p>
+
 <h3>Build 2.24, 25 September 2013</h3>
 This build contains some small functional changes to lazyupdater(n)
 and sqlbrowser(n). A new standard strikethrough font is also added.<p>
