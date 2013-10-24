@@ -67,6 +67,22 @@ of options and values:<p>
         [list ::sim MagicAggroe]
 </pre>
 
+<<subsection "Functions and Expressions">>
+
+Tcl's default error messages for functions with too many or too few
+arguments are not very helpful, especially for functions defined as
+procedures in the <code>::tcl::mathfunc</code> namespace.  
+smartinterp(n)'s normal smart alias error messages aren't appropriate
+either.  Consequently, smartinterp(n) modifies the built-in
+<<xref tcl:expr(n)>> command to translate ugly error messages into
+more useful ones.<p>
+
+The application can define its own math functions as procedures in the
+<code>::tcl::mathfunc</code> namespace.  Such functions can be defined
+as procedures within the smartinterp(n) itself, i.e., by using
+<<iref proc>>, or as aliases to application commands by using
+<<iref function>>.<p>
+
 <<section COMMANDS>>
 
 <<deflist commands>>
@@ -137,11 +153,32 @@ Sets the value of one or more of the object's options.<p>
 These subcommands are delegated to the underlying Tcl <b>interp</b>;
 see interp(n) for details.<p>
 
+<<defitem {expr eval} {$obj expr eval <i>expression</i>}>>
+
+Evaluates the expression within the interp.
+This is shorthand for<p>
+
+<pre>$obj eval [list expr <i>expression</i>]</pre>
+
+<<defitem {expr validate} {$obj expr validate <i>expression</i>}>>
+
+Attempts to validate the expression, finding any syntax errors.  
+Returns the expression if no errors are found, and throws
+an error with errorcode <b>INVALID</b> otherwise.  The algorithm
+used is necessarily heuristic, but avoids false positives.<p>
+
 <<defitem proc {$obj proc <i>name arglist body</i>}>>
 
 Defines a proc within the interp.  This is shorthand for<p>
 
-<pre>$obj eval [list proc <i>name arglist body</i>]</pre>
+<pre>$obj eval [list expr <i>expression</i>]</pre>
+
+<<defitem function {$obj function <i>name prefix</i>}>>
+
+Defines a new math function within the interp, as an alias to the
+given client command <i>prefix</i>.  When the function is called
+in an expression in the interp, the client's command <i>prefix</i>
+will be called with the function arguments appended.<p>
 
 <<defitem ensemble {$obj ensemble <i>alias</i>}>>
 

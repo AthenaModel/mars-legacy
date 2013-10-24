@@ -28,9 +28,48 @@ snit::type ::marsutil::smartinterp {
     # Type Constructor
 
     typeconstructor {
-        namespace import ::marsutil::* 
+        # TBD: Needed?
         namespace import ::marsutil::*
     }
+
+    #-------------------------------------------------------------------
+    # Lookup Tables
+
+    typevariable builtinSigs -array {
+        abs    x
+        acos   x
+        asin   x
+        atan   x
+        atan2  y,x
+        bool   flag
+        ceil   x
+        cos    x
+        cosh   x
+        double x
+        entier x
+        exp    x
+        floor  x
+        fmod   x,y
+        hypot  x,y
+        int    x
+        isqrt  x
+        log    x
+        log10  x
+        max    a,b,...
+        min    a,b,...
+        pow    x,y
+        rand   ""
+        round  x
+        sin    x
+        sinh   x
+        sqrt   x
+        srand  n
+        tan    x
+        tanh   x
+        wide   x
+    }
+
+    
 
 
     #-------------------------------------------------------------------
@@ -98,6 +137,31 @@ snit::type ::marsutil::smartinterp {
         $interp eval {
             namespace eval ::_smart_:: { }
         }
+
+        # NEXT, redefine the [expr] command
+        $interp eval {
+            rename ::expr ::_smart_::Expr_
+
+            proc ::expr {args} {
+                if {[llength $args] > 1} {
+                    set expression $args
+                } else {
+                    set expression [lindex $args 0]
+                }
+
+                set cmd [list ::_smart_::Expr_ $expression]
+
+                if {![catch {uplevel 1 $cmd} result eopts]} {
+                    return $result
+                }
+
+                set message [::_smart_::TranslateExprError $result]
+
+                return {*}$eopts $message
+            }
+        }
+
+        $interp alias ::_smart_::TranslateExprError $self TranslateExprError
     }
 
     #-------------------------------------------------------------------
@@ -110,6 +174,77 @@ snit::type ::marsutil::smartinterp {
     delegate method hide         to interp
     delegate method hidden       to interp
     delegate method invokehidden to interp
+
+    # function name prefix
+    #
+    # name   - A new function name
+    # prefix - The client's command prefix to which the function arguments
+    #          will be added.
+    #
+    # Defines a new function tcl::mathfunc::$name as an alias to the
+    # caller's command.
+
+    method function {name prefix} {
+        $interp alias ::tcl::mathfunc::$name {*}$prefix
+    } 
+
+    # expr eval expression
+    #
+    # expression   - An expr expression
+    #
+    # Evaluates the expression in the smartinterp.
+
+    method {expr eval} {expression} {
+        return [$interp eval [list expr $expression]]
+    }
+
+    # expr validate expression
+    #
+    # expression  - An expr expression
+    #
+    # Attempts to validate the expression.  It cannot catch run-time errors
+    # or perhaps even all syntax errors, but it's better than nothing.  The
+    # approach is to evaluate the expression, catching any errors.  If there
+    # are none, the expression is valid.  Otherwise, we report the error,
+    # filtering out false positives.  For example, if we get a divide by
+    # zero that means the expression must be syntactically valid.
+
+    method {expr validate} {expression} {
+        if {![catch {$self expr eval $expression} result eopts]} {
+            return $expression
+        }
+
+        set message [$self CheckForSyntaxError $result $eopts]
+
+        if {$message eq ""} {
+            return $expression
+        } else {
+            throw INVALID $message
+        }
+    }
+
+    # CheckForSyntaxError message eopts
+    #
+    # message - An expr error message
+    # eopts   - The error options
+    #
+    # Filters out non-syntax errors.  Returns "" if the expression
+    # is syntactically valid, and the desired error message otherwise.
+
+    method CheckForSyntaxError {message eopts} {
+        # FIRST, rule out arithmetic errors.
+        set code [dict get $eopts -errorcode]
+        if {[string match "ARITH *" $code]} {
+            return ""
+        }
+
+        # NEXT, return the error message we started with.
+        # TBD: It's possible that there might be message translation
+        # we want to do here instead of in TranslateExprError, but
+        # so far I've not seen any.
+
+        return $message
+    }
 
     # proc name arglist body
     #
@@ -337,6 +472,45 @@ snit::type ::marsutil::smartinterp {
         }
 
         return "$leader[join $out \n$leader]"
+    }
+
+    # TranslateExprError message
+    #
+    # message   - An error message from expr
+    #
+    # Translates the error message to make it more user-friendly,
+    # and returns the new message.
+
+    method TranslateExprError {message} {
+        switch -regexp -matchvar match -- $message {
+            {^wrong # args:.*\"tcl::mathfunc::(\S+) (.*)\"$} {
+                lassign $match dummy func arglist
+                set call ${func}([join $arglist ,])
+                return \
+            "error in function ${func}(), wrong # args, should be \"$call\""
+            }
+
+            {^too \w+ arguments for math function \"(\w+)\"$} {
+                lassign $match dummy func
+                set call "${func}($builtinSigs($func))"
+                return \
+            "error in function ${func}(), wrong # args, should be \"$call\""
+            }
+
+            {^invalid command name \"tcl::mathfunc::(\S+)\"$} {
+                lassign $match dummy func
+                return "unknown function: \"${func}()\""
+            }
+
+            {^(invalid bareword \"[^\"]+\").*} {
+                return [lindex $match 1]
+            }
+
+
+            default {
+                return [normalize $message]
+            }
+        }
     }
 
 }
