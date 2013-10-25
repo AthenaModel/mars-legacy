@@ -144,7 +144,6 @@ Sets the value of one or more of the object's options.<p>
 <<defitem alias {$obj alias <i>srcToken</i> {}}>>
 <<defitem alias {$obj alias <i>srcCmd targetCmd</i> ?<i>arg...</i>?}>>
 <<defitem alias {$obj alias <i>srcCmd targetCmd</i> ?<i>arg...</i>?}>>
-<<defitem eval {$obj eval <i>arg</i> ?<i>arg...</i>?}>>
 <<defitem expose {$obj expose <i>hiddenName</i> ?<i>exposedCmdName</i>?}>>
 <<defitem hide {$obj hide <i>exposedCmdName</i> ?<i>hiddenCmdName</i>?}>>
 <<defitem hidden {$obj hidden}>>
@@ -152,6 +151,11 @@ Sets the value of one or more of the object's options.<p>
 
 These subcommands are delegated to the underlying Tcl <b>interp</b>;
 see interp(n) for details.<p>
+
+<<defitem eval {$obj eval <i>script</i>}>>
+
+Evaluates the <i>script</i> in the context of the interpreter, and returns
+the result.<p>
 
 <<defitem {expr eval} {$obj expr eval <i>expression</i>}>>
 

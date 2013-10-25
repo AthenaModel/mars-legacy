@@ -169,11 +169,18 @@ snit::type ::marsutil::smartinterp {
 
     # Delegated methods
     delegate method alias        to interp
-    delegate method eval         to interp
     delegate method expose       to interp
     delegate method hide         to interp
     delegate method hidden       to interp
     delegate method invokehidden to interp
+
+    # eval script
+    #
+    # Evaluate the argument as a script in the context of the interpreter.
+
+    method eval {script} {
+        $interp eval $script
+    }
 
     # function name prefix
     #
@@ -500,6 +507,10 @@ snit::type ::marsutil::smartinterp {
             {^invalid command name \"tcl::mathfunc::(\S+)\"$} {
                 lassign $match dummy func
                 return "unknown function: \"${func}()\""
+            }
+
+            {^invalid command name \"(.+)\"$} {
+                return "unknown command: \"[lindex $match 1]\""
             }
 
             {^(invalid bareword \"[^\"]+\").*} {
