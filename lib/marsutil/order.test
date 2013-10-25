@@ -1162,17 +1162,7 @@ Simulated Error}
         cleanup
     } -result {a {} _order MY:ORDER}
 
-    test prepare-1.2 {Value is trimmed} -setup {
-        setup
-        order define MY:ORDER { form {text a} } {
-            prepare a
-        }
-    } -body {
-        order send app MY:ORDER a " my  value "
-        order lastparms
-    } -cleanup {
-        cleanup
-    } -result {a {my  value} _order MY:ORDER}
+    # prepare-1.2 is obsolete; order send now trims parms automatically.
 
     test prepare-1.3 {prepare: unknown option} -setup {
         setup
@@ -1542,6 +1532,31 @@ No -usedtable specified.}
         }
     } -body {
         order send app MY:ORDER a 0.1 
+        order lastparms
+    } -cleanup {
+        cleanup
+    } -result {a 0.1 _order MY:ORDER}
+
+    test prepare-15.1 {prepare -oncheck allows tests on check} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -oncheck -type ::snit::integer
+            returnOnError -final
+        }
+    } -body {
+        codecatch order check MY:ORDER a 0.1
+    } -cleanup {
+        cleanup
+    } -result {REJECT a {invalid value "0.1", expected integer}}
+
+    test prepare-15.2 {prepare -oncheck disallows tests on send} -setup {
+        setup
+        order define MY:ORDER { form {text a} } {
+            prepare a -oncheck -type ::snit::integer
+            returnOnError -final
+        }
+    } -body {
+        order send app MY:ORDER a 0.1
         order lastparms
     } -cleanup {
         cleanup

@@ -634,30 +634,38 @@ Cancels the order. This command allows an order handler to pop up a
 confirmation dialog, and cancel the order if the user so
 indicates.<p>
 
+<<defitem checking {checking}>>
+
+Returns 1 if the order body was called by <<iref order check>>, and
+0 if it was called by <<iref order send>>.<p>
+
 <<defitem prepare {prepare <i>parm</i> ?<i>options...</i>?}>>
 
 The <<iref prepare>> command prepares the parameter for use by the
-order handler.  It can delete extraneous white space, convert a value
-from its user-editable form to its canonical internal form, and
-validate the value.<p>
+order handler.  It can transform and validate the parameter value in 
+a number of ways.<p>
 
 It is customary to begin each order's body with a succession of
 <<iref prepare>> commands, one for each parameter.  Called with no
-options, <<iref prepare>> does the following:<p>
-
-<ul>
-  <li> It ensures that <i>parm</i> has an entry in the
-       <code>parms()</code> array, setting it to the empty string if
-       it is missing.<p>
-
-  <li> It trims extraneous white space characters from the beginning
-       and end of the parameter's value.<p>
-</ul>
+options, <<iref prepare>> ensures that <i>parm</i> has an entry in the
+<code>parms()</code> array, setting it to the empty string if it is missing.
+<p>
 
 Most of the useful work is done by the options, which are processed in
-order.  The options are as follows:<p>
+order from left to right.  The options are as follows:<p>
 
 <<deflist options>>
+
+<<defopt {-oncheck}>>
+
+Any subsequent options will be processed only when the order body is
+called from <<iref order check>>.  This is useful in cases where
+the order is used to edit a sanity-checked object.  From the order
+dialog, we want to catch any sanity-check failures on input; but
+from order scripts (or paste orders) we want to allow the bad data
+in, and sanity check it afterwards.  Thus, the GUI will call
+<<iref order check>> and get the <code>-oncheck</code> validation, 
+but other interfaces can call <<iref order send>> and avoid it.<p>
 
 <<defopt {-listof <i>valtype</i>}>>
 

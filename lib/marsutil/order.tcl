@@ -837,7 +837,7 @@ snit::type ::marsutil::order {
                 returnOnError
             }
 
-            set parms($parm) $value
+            set parms($parm) [string trim $value]
         }
 
         # NEXT, fill in any missing parms with defaults
@@ -978,7 +978,7 @@ snit::type ::marsutil::order {
         dict for {parm value} $parmdict {
             require {$parm in $validParms} "Unknown parameter: \"$parm\""
 
-            set parms($parm) $value
+            set parms($parm) [string trim $value]
         }
 
         set parms(_order) $name
@@ -1087,6 +1087,14 @@ snit::type ::marsutil::order {
         return $trans(sender)
     }
 
+    # checking
+    #
+    # Returns 1 if we are in [order check], and 0 otherwise.
+
+    proc checking {} {
+        return $trans(checking)
+    }
+
     # prepare parm options...
     #
     # Prepares the parameter for processing, as determined by the
@@ -1098,16 +1106,19 @@ snit::type ::marsutil::order {
             set parms($parm) ""
         }
 
-        # NEXT, trim the data.
-        set parms($parm) [string trim $parms($parm)]
-
-
         # NEXT, process the options, so long as there's no explicit
         # error.
 
         while {![dict exists $trans(errors) $parm] && [llength $args] > 0} {
             set opt [lshift args]
             switch -exact -- $opt {
+                -oncheck {
+                    if {!$trans(checking)} {
+                        # The remaining options are handled only
+                        # in [order check], not [order send]
+                        break
+                    }
+                }
                 -toupper {
                     set parms($parm) [string toupper $parms($parm)]
                 }
