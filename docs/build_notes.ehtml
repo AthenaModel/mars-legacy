@@ -9,6 +9,16 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.26, 28 October 2013</h3>
+This build adds some functionality to order(n) that changes how orders are
+handled at the lower levels. There's also improved expression and function
+support in smartinterp(n).<p>
+
+<ul>
+<li> Bug 4201: order(n): prepare -oncheck
+<li> Bug 4200:smartinterp(n): Improved expression and function support 
+</ul><p>
+
 <h3>Build 2.25, 3 October 2013</h3>
 
 This build adds the checkfield(n) widget, which is a field(i) wrapper around
