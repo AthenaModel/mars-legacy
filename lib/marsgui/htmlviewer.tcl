@@ -100,6 +100,10 @@ snit::widgetadaptor ::marsgui::htmlviewer {
             text-decoration: line-through;
             color: #FF0000;
         }
+
+        SPAN.error {
+            color: #FF0000;
+        }
     }
 
     #-------------------------------------------------------------------
