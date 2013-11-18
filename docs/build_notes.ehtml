@@ -9,6 +9,14 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.27, 18 November 2013</h3>
+This build contains only one change. The htmlviewer(n) object has a new <span>
+class for displaying red text.<p>
+
+<ul>
+<li> Bug 4227: htmlviewer(n): Add "error" span class
+</ul><p>
+
 <h3>Build 2.26, 28 October 2013</h3>
 This build adds some functionality to order(n) that changes how orders are
 handled at the lower levels. There's also improved expression and function
