@@ -328,7 +328,7 @@ namespace eval ::marsutil::test {
 
     # 3.* - General command signature checking
 
-    test check-2.3 {unknown command} -setup {
+    test check-3.1 {unknown command} -setup {
         setup
     } -body {
         pcheck {
@@ -342,7 +342,23 @@ namespace eval ::marsutil::test {
         3 {Warning, undefined command: "foo"}
     }
     
-    test check-2.4 {wrong # args} -setup {
+    test check-3.2 {indeterminate commands} -setup {
+        setup
+    } -body {
+        # Only [bar] should cause an error.
+        pcheck {
+            $win configure -width [bar 3 4]
+            [set win] configure -width 5
+            bar 1 2
+        }
+    } -cleanup {
+        cleanup
+    } -match list -result {
+        2 {Warning, undefined command: "bar"}
+        4 {Warning, undefined command: "bar"}
+    }
+
+    test check-3.3 {wrong # args} -setup {
         setup
     } -body {
         pcheck {

@@ -282,7 +282,7 @@ snit::type ::marsutil::tclchecker {
         # NEXT, if the command name is unknown in the interpreter, 
         # flag it.
 
-        if {$cmdname ni $trans(validCmds)} {
+        if {[$type CommandIsUnknown $cmdname]} {
             lappend errlist $firstnum \
                 "Warning, undefined command: \"$cmdname\""
         }
@@ -319,6 +319,22 @@ snit::type ::marsutil::tclchecker {
                 }
             }
         }
+    }
+
+    # CommandIsUnknown word
+    #
+    # word   - The first word of a command
+    #
+    # Returns 1 if the command is unknown in the client interpreter,
+    # and 0 otherwise.  If the word begins with "$" or "[", we don't
+    # know what the command is going to be, so we assume it's known.
+
+    typemethod CommandIsUnknown {word} {
+        if {[string index $word 0] in [list \[ \$]} {
+            return 0
+        }
+
+        return [expr {$word ni $trans(validCmds)}]
     }
 
 
