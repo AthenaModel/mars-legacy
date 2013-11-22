@@ -152,6 +152,25 @@ Sets the value of one or more of the object's options.<p>
 These subcommands are delegated to the underlying Tcl <b>interp</b>;
 see interp(n) for details.<p>
 
+<<defitem cmdinfo {$obj cmdinfo <i>alias</i>}>>
+
+Returns detailed information about the definition of the alias,
+including the minimum and maximum number of arguments and the command
+prefix to which it maps.  If the alias is an ensemble, information
+information about each subcommand is included.  The command is
+recursive; if the alias is an ensemble with sub-ensembles, the entire
+tree is returned.<p>
+
+<<defitem ensemble {$obj ensemble <i>alias</i>}>>
+
+Defines an ensemble alias, called <i>alias</i>, to which subcommands
+will be added with  <<iref smartalias>>.  If the <i>alias</i> contains
+multiple tokens, the final token is taken to be a sub-ensemble. In
+this case, the leading tokens must have previously been defined as
+an <<iref ensemble>>.<p>
+
+See <<xref "Smart Aliases and Ensembles">> for examples.<p>
+
 <<defitem eval {$obj eval <i>script</i>}>>
 
 Evaluates the <i>script</i> in the context of the interpreter, and returns
@@ -171,28 +190,89 @@ Returns the expression if no errors are found, and throws
 an error with errorcode <b>INVALID</b> otherwise.  The algorithm
 used is necessarily heuristic, but avoids false positives.<p>
 
+<b>NOTE:</b> This command validates the expression by executing it
+in the context of the interpreter's global namespace, and filtering
+out irrelevant errors.  Do not include functions or commands that
+cause side effects!<p>
+
+<b>NOTE:</b> Variable references will be flagged as errors unless
+the variables are defined in the interpreter's global namespace.<p>
+
+<<defitem function {$obj function <i>name min max argsyn prefix</i>}>>
+
+Defines a new math function within the interp, as an alias to the
+given client command <i>prefix</i>, where <i>min</i> is the minimum
+number of function arguments, <i>max</i> is the maximum number
+(or "-" if there is no maximum) and <i>argsyn</i> is the argument
+syntax, specified the same way as for a smart alias.<p>
+
+When the function is called in an expression in the interp, the client's 
+command <i>prefix</i> will be called with the function arguments 
+appended.<p>
+
+<<defitem help {$obj help <i>command</i>}>>
+
+Returns a short "help" message for the named <i>command</i>, which may
+be a <<iref smartinterp>>, <<iref ensemble>>, standard Tcl command, or
+<<iref proc>>.  The message will
+include the command syntax; for ensembles, it will also include the
+list of valid subcommands.<p>
+
+If <i>command</i> is not known to the <<iref smartinterp>>, then
+it will throw the error 'No help found: \"<i>command</i>\"'.<p>
+
+The "help" message is used as part of the <<iref smartinterp>>-generated
+error messages when <code>-cli</code> is enabled.<p>
+
 <<defitem proc {$obj proc <i>name arglist body</i>}>>
 
 Defines a proc within the interp.  This is shorthand for<p>
 
 <pre>$obj eval [list expr <i>expression</i>]</pre>
 
-<<defitem function {$obj function <i>name prefix</i>}>>
+<<defitem setsig {$obj setsig <i>prefix min max argsyn</i>}>>
 
-Defines a new math function within the interp, as an alias to the
-given client command <i>prefix</i>.  When the function is called
-in an expression in the interp, the client's command <i>prefix</i>
-will be called with the function arguments appended.<p>
+Defines the <<iref siginfo>> information for a command defined in
+the interpreter that has no other source of signature information.<p>
 
-<<defitem ensemble {$obj ensemble <i>alias</i>}>>
+When defining signatures for an ensemble command, define
+the signature for the bare command first (e.g., "string") and then for 
+the subcommands (e.g., "string equal").<p>
 
-Defines an ensemble alias, called <i>alias</i>, to which subcommands
-will be added with  <<iref smartalias>>.  If the <i>alias</i> contains
-multiple tokens, the final token is taken to be a sub-ensemble. In
-this case, the leading tokens must have previously been defined as
-an <<iref ensemble>>.<p>
+<<defitem siginfo {$obj siginfo <i>command</i>}>>
 
-See <<xref "Smart Aliases and Ensembles">> for examples.<p>
+Returns signature info for the given command, suitable for doing
+"Wrong # args" checks.  The <i>command</i> can be a single command name,
+an ensemble with subcommands, or an entire command string with all arguments.
+The <<iref siginfo>> method will break the <i>command</i> into words and
+identify the actual command or ensemble subcommand and return the signature
+info for that prefix.<p>
+
+The information is returned as a dictionary with the following keys:<p>
+
+<ul>
+    <li> <b>prefix</b> -- The command prefix extracted from the <i>command</i>
+    <li> <b>min</b> -- The minimum number of arguments required by the
+         command.
+    <li> <b>max</b> -- The maximum number of arguments required, or "-" 
+         if there is no specific maximum.
+    <li> <b>argsyn</b> -- The argument syntax string.
+</ul><p>
+
+For example, the standard <b>set</b> command has <b>prefix</b> "set", 
+<b>min</b> "1",
+<b>max</b> "2", and <b>argsyn</b> "varName ?newValue?".<p>
+
+If the <<iref siginfo>> command cannot find signature info for the given
+command, it returns the empty string.  It will succeed for the following 
+kinds of command:<p>
+
+<ul>
+    <li> Procs defined in the interpreter.
+    <li> Smart aliases and ensembles.
+    <li> A selection of standard Tcl commands, e.g., <b>set</b>.
+    <li> Any commands defined by the client using <<iref setsig>>.
+</ul>
 
 <<defitem smartalias {$obj smartalias <i>alias min max argsyn prefix</i>}>>
 
@@ -215,27 +295,6 @@ ensemble alias must already have been defined using the
 
 See <<xref "Smart Aliases and Ensembles">> for examples.<p>
 
-<<defitem help {$obj help <i>alias</i>}>>
-
-Returns a short "help" message for the named <i>alias</i>, which may
-be a <<iref smartinterp>> or <<iref ensemble>>.  The message will
-include the command syntax; for ensembles, it will also include the
-list of valid subcommands.<p>
-
-If <i>alias</i> is not known to the <<iref smartinterp>>, then
-it will throw the error 'No help found: \"<i>alias</i>\"'.<p>
-
-The "help" message is used as part of the <<iref smartinterp>>-generated
-error messages when <code>-cli</code> is enabled.<p>
-
-<<defitem cmdinfo {$obj cmdinfo <i>alias</i>}>>
-
-Returns detailed information about the definition of the alias,
-including the minimum and maximum number of arguments and the command
-prefix to which it maps.  If the alias is an ensemble, information
-information about each subcommand is included.  The command is
-recursive; if the alias is an ensemble with sub-ensembles, the entire
-tree is returned.<p>
 
 <</deflist instance>>
 

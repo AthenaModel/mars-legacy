@@ -20,7 +20,7 @@ package require Tk 8.5
 package require Img
 package require BWidget  1.9
 package require treectrl 2.2.10
-package require tablelist 5.1
+package require tablelist 5.10
 package require Tktable 2.10
 package require Tkhtml 3.0
 
