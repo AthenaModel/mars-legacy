@@ -249,27 +249,81 @@ namespace eval ::marsutil::test {
 
     #-------------------------------------------------------------------
     # cmdsplit
+
+    proc csplit {command {num 1}} {
+        lassign [tclchecker cmdsplit $command $num] words nums
+
+        set result [list]
+
+        foreach num $nums word $words {
+            lappend result $num $word
+        }
+
+        return $result
+    }
     
     test cmdsplit-1.1 {splits Tcl command into words} -body {
-        tclchecker cmdsplit {set a [expr {$x + $y}]}
-    } -result {{set a {[expr {$x + $y}]}} {1 1 1}}
+        csplit {set a [expr {$x + $y}]}
+    } -match list -result {
+        1 set 
+        1 a 
+        1 {[expr {$x + $y}]}
+    }
 
     test cmdsplit-1.2 {tracks line numbers} -body {
-        tclchecker cmdsplit {if {$a < $b} {
+        csplit {if {$a < $b} {
                 set c $d
             } else {
                 set c $e
             }
         }
-    } -result {{if {{$a < $b}} {{
-                set c $d
-            }} else {{
-                set c $e
-            }}} {1 1 1 3 3}}
+    } -match list -result {
+        1 if 
+        1 {{$a < $b}} 
+        1 {{
+ set c $d
+ }} 
+        3 else 
+        3 {{
+ set c $e
+ }}
+    }
 
     test cmdsplit-1.3 {honors num argument} -body {
-        tclchecker cmdsplit {set a 5} 5
-    } -result {{set a 5} {5 5 5}}
+        csplit {set a 7} 5
+    } -match list -result {
+        5 set
+        5 a
+        5 7
+    }
+
+    test cmdsplit-1.4 {honors separated backslashes} -body {
+        csplit ".win configure \\
+            -width 5 \\
+            -height 10
+        "
+    } -match list -result {
+        1 .win 
+        1 configure 
+        2 -width 
+        2 5 
+        3 -height 
+        3 10
+    }
+
+    test cmdsplit-1.5 {honors unseparated backslashes} -body {
+        csplit ".win configure\\
+            -width 5\\
+            -height 10
+        "
+    } -match list -result {
+        1 .win 
+        1 configure 
+        2 -width 
+        2 5 
+        3 -height 
+        3 10
+    }
 
     #-------------------------------------------------------------------
     # getembedded

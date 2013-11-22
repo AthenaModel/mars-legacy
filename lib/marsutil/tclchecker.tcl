@@ -105,7 +105,7 @@ snit::type ::marsutil::tclchecker {
 
             set cmd $line
             set firstCmdLine $lc
-            while {![info complete $cmd]} {
+            while {![IsComplete $cmd]} {
                 if {[llength $lines] == 0} {
                     throw [list UNTERMINATED $firstCmdLine] \
                         "Unterminated command in script"
@@ -120,6 +120,18 @@ snit::type ::marsutil::tclchecker {
         }
 
         return $result
+    }
+
+    # IsComplete cmd
+    #
+    # cmd   - A full or partial command
+    #
+    # The command is complete if [info complete] is true
+    # AND if it doesn't end with a backslash.
+
+    proc IsComplete {cmd} {
+        set last [string index $cmd end]
+        expr {[info complete $cmd] && $last ne "\\"}
     }
 
 
@@ -137,7 +149,7 @@ snit::type ::marsutil::tclchecker {
     # have list syntax because of interpolated commands.
 
     typemethod cmdsplit {cmd {num 1}} {
-        set tokens [split $cmd " "]
+        set tokens [GetCommandTokens $cmd]
 
         set lineCounter $num
         set words [list]
@@ -151,6 +163,12 @@ snit::type ::marsutil::tclchecker {
             if {$word eq "" && [string first ";#" $next] == 0} {
                 # Skip end-line comment.
                 break;
+            }
+
+            # Skip continuation characters, but increment line numbers.
+            if {$next eq "\\\n"} {
+                incr lineCounter
+                continue
             }
             
             append word " " $next
@@ -176,6 +194,36 @@ snit::type ::marsutil::tclchecker {
         }
 
         return [list $words $nums]
+    }
+
+    # GetCommandTokens command
+    #
+    # command  - A full, possibly multi-line command
+    #
+    # Returns a list of individual tokens, eliminating empty
+    # tokens and putting separating end-of-line backslashes from
+    # the token to which they are attached.
+
+    proc GetCommandTokens {command} {
+        set tokens [list]
+
+        foreach token [split $command " \t"] {
+            # Skip blank tokens
+            if {$token eq ""} {
+                continue
+            }
+
+            # If a token ends with a continuation, save it as
+            # two tokens.
+            if {[string range $token end-1 end] eq "\\\n"} {
+                set code [string range $token 0 end-2]
+                lappend tokens $code "\\\n"
+            } else {
+                lappend tokens $token
+            }
+        }
+
+        return $tokens
     }
 
 
