@@ -129,7 +129,7 @@ snit::type ::marsutil::smartinterp {
         lset                  {2 - "varName ?index ...? newValue"}
         lsort                 {1 - "?options? list"}
         proc                  {3 3 "name args body"}
-        return                {1 1 "result"}
+        return                {0 1 "?result?"}
         set                   {1 2 "varName ?newValue?"}
         source                {1 1 "filename"}
         split                 {1 2 "string ?splitChars?"}
