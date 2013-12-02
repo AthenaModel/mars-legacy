@@ -9,6 +9,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.28, 2 December 2013</h3>
+This build contains a change to the marsgui(n) package to use Tablelist 
+5.10 and introduces the tclchecker(n) package that provides tools for 
+analyzing Tcl scripts making it easier for the user to debug scripts.<p>
+
+<ul>
+<li> Bug 4242: tclchecker(n): Don't check commands beginning with $ or [
+<li> Bug 4240: smartinterp(n): return signature is incorrect; puts is available in safe interpreters
+<li> Bug 4239: tclchecker(n): backslashes are handled incorrectly
+<li> Bug 4237: tclchecker(n): error checking for smartinterp(n) Tcl scripts
+<li> Bug 4233: marsgui(n): Upgrade to Tablelist 5.10 
+</ul><p>
+
 <h3>Build 2.27, 18 November 2013</h3>
 This build contains only one change. The htmlviewer(n) object has a new <span>
 class for displaying red text.<p>
