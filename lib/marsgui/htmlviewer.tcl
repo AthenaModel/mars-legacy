@@ -91,6 +91,8 @@ snit::widgetadaptor ::marsgui::htmlviewer {
             padding-left: 1em;
         }
 
+        /* Spans for different entity states */
+
         SPAN.disabled {
             text-decoration: line-through;
             color: #999999;
@@ -98,11 +100,33 @@ snit::widgetadaptor ::marsgui::htmlviewer {
 
         SPAN.invalid {
             text-decoration: line-through;
-            color: #FF0000;
+            color: #C7001B;
         }
 
         SPAN.error {
-            color: #FF0000;
+            color: #C7001B;
+        }
+
+        /* Table Formatting Classes */
+        TABLE.pretty {
+            border: 1px solid black;
+            border-spacing: 0;
+        }
+
+        TR.header {
+            font-weight: bold;
+            color: white;
+            background-color: #000099;
+        }
+
+        TR.odd {
+            color: black;
+            background-color: white;
+        }
+
+        TR.even {
+            color: black;
+            background-color: #EEEEEE;
         }
     }
 
