@@ -9,6 +9,13 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.29, 6 December 2013</h3>
+This build contains one change: additions to the CSS in htmlviewer(n).<p>
+
+<ul>
+<li> Bug 4256: htmlviewer(n): "Pretty" table properties 
+</ul><p>
+
 <h3>Build 2.28, 2 December 2013</h3>
 This build contains a change to the marsgui(n) package to use Tablelist 
 5.10 and introduces the tclchecker(n) package that provides tools for 
