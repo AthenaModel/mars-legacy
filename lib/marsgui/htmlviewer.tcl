@@ -107,24 +107,27 @@ snit::widgetadaptor ::marsgui::htmlviewer {
             color: #C7001B;
         }
 
-        /* Table Formatting Classes */
+        /* Table Formatting Classes: "pretty" 
+         * Border around the outside, even/odd striping, no internal
+         * border lines.
+         */
         TABLE.pretty {
             border: 1px solid black;
             border-spacing: 0;
         }
 
-        TR.header {
+        TR.pretty_header {
             font-weight: bold;
             color: white;
             background-color: #000099;
         }
 
-        TR.odd {
+        TR.pretty_oddrow {
             color: black;
             background-color: white;
         }
 
-        TR.even {
+        TR.pretty_evenrow {
             color: black;
             background-color: #EEEEEE;
         }

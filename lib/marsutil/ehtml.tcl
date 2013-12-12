@@ -442,9 +442,12 @@ snit::type ::marsutil::ehtml {
     # Begins a change log 
 
     template proc macro::changelog {} {
+        variable itemCounter
+        set itemCounter 0
+    } {
         |<--
-        <table border="1" width="100%" cellpadding="2" cellspacing="0">
-        <tr>
+        <table class="pretty" width="100%" cellpadding="5" cellspacing="0">
+        <tr class="pretty_header">
         <th align="left" width="10%">Status</th>
         <th align="left" width="70%">Nature of Change</th>
         <th align="left" width="10%">Date</th>
@@ -480,6 +483,14 @@ snit::type ::marsutil::ehtml {
 
     # Ends a change entry
     template proc macro::/change {} {
+        variable itemCounter
+
+        if {[incr itemCounter] % 2 == 0} {
+            set rowclass pretty_evenrow
+        } else {
+            set rowclass pretty_oddrow
+        }
+
         set date      [ehtml cget date]
         set status    [ehtml cget status]
         set initiator [ehtml cget initiator]
@@ -487,7 +498,7 @@ snit::type ::marsutil::ehtml {
         set description [ehtml cpop change]
     } {
         |<--
-        <tr valign=top>
+        <tr class="$rowclass" valign=top>
         <td>$status</td>
         <td>$description</td>
         <td>$date</td>
