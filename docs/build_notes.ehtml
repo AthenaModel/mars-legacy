@@ -9,6 +9,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.30, 12 December 2013</h3>
+This build contains some changes to support some new ways of displaying
+HTML tables.<p>
+
+<ul>
+<li> Bug 4279: htmlviewer(n): Pretty table properties, modified
+</ul><p>
+
+
 <h3>Build 2.29, 6 December 2013</h3>
 This build contains one change: additions to the CSS in htmlviewer(n).<p>
 
