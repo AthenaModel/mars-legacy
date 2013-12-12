@@ -116,18 +116,18 @@ snit::widgetadaptor ::marsgui::htmlviewer {
             border-spacing: 0;
         }
 
-        TR.pretty_header {
+        TABLE.pretty TR.header {
             font-weight: bold;
             color: white;
             background-color: #000099;
         }
 
-        TR.pretty_oddrow {
+        TABLE.pretty TR.oddrow {
             color: black;
             background-color: white;
         }
 
-        TR.pretty_evenrow {
+        TABLE.pretty TR.evenrow {
             color: black;
             background-color: #EEEEEE;
         }

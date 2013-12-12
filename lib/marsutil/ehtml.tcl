@@ -447,7 +447,7 @@ snit::type ::marsutil::ehtml {
     } {
         |<--
         <table class="pretty" width="100%" cellpadding="5" cellspacing="0">
-        <tr class="pretty_header">
+        <tr class="header">
         <th align="left" width="10%">Status</th>
         <th align="left" width="70%">Nature of Change</th>
         <th align="left" width="10%">Date</th>
@@ -486,9 +486,9 @@ snit::type ::marsutil::ehtml {
         variable itemCounter
 
         if {[incr itemCounter] % 2 == 0} {
-            set rowclass pretty_evenrow
+            set rowclass evenrow
         } else {
-            set rowclass pretty_oddrow
+            set rowclass oddrow
         }
 
         set date      [ehtml cget date]
