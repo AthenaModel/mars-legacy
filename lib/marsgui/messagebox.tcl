@@ -255,6 +255,8 @@ snit::type ::marsgui::messagebox {
     # -message string        Message to display.  Will be wrapped.
     # -parent window         The message box appears over the parent window
     # -title string          Title of the message box
+    # -wraplength len        Wrap length for the message; defaults to 4i.
+    #                        if "", no wrapping is done.
     #
     # Pops up the message box.  The -buttons will appear at the bottom,
     # left to right, packed to the right.  The specified button will be
@@ -283,57 +285,61 @@ snit::type ::marsgui::messagebox {
             return $opts(-ignoredefault)
         }
 
-        # NEXT, create the dialog if it doesn't already exist.
-        if {![winfo exists $dialog]} {
-            # FIRST, create it
-            toplevel $dialog           \
-                -borderwidth 4         \
-                -highlightthickness 0
+        # NEXT, create the dialog.
+        toplevel $dialog           \
+            -borderwidth 4         \
+            -highlightthickness 0
 
-            # NEXT, withdraw it; we don't want to see it yet
-            wm withdraw $dialog
+        # NEXT, withdraw it; we don't want to see it yet
+        wm withdraw $dialog
 
-            # NEXT, the user can't resize it
-            wm resizable $dialog 0 0
+        # NEXT, the user can't resize it
+        wm resizable $dialog 0 0
 
-            # NEXT, it can't be closed
-            wm protocol $dialog WM_DELETE_WINDOW \
-                [mytypemethod PopupClose]
+        # NEXT, it can't be closed
+        wm protocol $dialog WM_DELETE_WINDOW \
+            [mytypemethod PopupClose]
 
 
-            # NEXT, it must be on top
-            wm attributes $dialog -topmost 1
+        # NEXT, it must be on top
+        wm attributes $dialog -topmost 1
 
-            # NEXT, create and grid the standard widgets
-            
-            # Row 1: Icon and message
-            ttk::frame $dialog.top
+        # NEXT, create and grid the standard widgets
+        
+        # Row 1: Icon and message
+        ttk::frame $dialog.top
 
-            ttk::label $dialog.top.icon \
-                -image  ${type}::icon::info \
-                -anchor nw
+        ttk::label $dialog.top.icon \
+            -image  ${type}::icon::info \
+            -anchor nw
 
-            ttk::label $dialog.top.message \
-                -textvariable [mytypevar opts(-message)] \
-                -wraplength   3i                         \
-                -anchor       nw                         \
-                -justify      left
-
-            grid $dialog.top.icon \
-                -row 0 -column 0 -padx 8 -pady 4 -sticky nw 
-            grid $dialog.top.message \
-                -row 0 -column 1 -padx 8 -pady 4 -sticky new
-
-            # Row 2: Ignore checkbox
-            ttk::checkbutton $dialog.ignore                   \
-                -text   "Do not show this message again"
-            
-            # Row 3: button box
-            ttk::frame $dialog.button
-
-            pack $dialog.top    -side top    -fill x
-            pack $dialog.button -side bottom -fill x
+        if {$opts(-wraplength) eq ""} {
+            set wrap [list]
+        } else {
+            set wrap "-wraplength $opts(-wraplength)"
         }
+
+        ttk::label $dialog.top.message \
+            -textvariable [mytypevar opts(-message)] \
+            -anchor       nw                         \
+            -justify      left                       \
+            {*}$wrap
+
+
+        grid $dialog.top.icon \
+            -row 0 -column 0 -padx 8 -pady 4 -sticky nw 
+        grid $dialog.top.message \
+            -row 0 -column 1 -padx 8 -pady 4 -sticky new
+
+        # Row 2: Ignore checkbox
+        ttk::checkbutton $dialog.ignore                   \
+            -text   "Do not show this message again"
+        
+        # Row 3: button box
+        ttk::frame $dialog.button
+
+        pack $dialog.top    -side top    -fill x
+        pack $dialog.button -side bottom -fill x
 
         # NEXT, configure the dialog according to the options
         
@@ -402,7 +408,7 @@ snit::type ::marsgui::messagebox {
         grab set $dialog
         vwait [mytypevar choice]
         grab release $dialog
-        wm withdraw $dialog
+        destroy $dialog
 
         return $choice
     }
@@ -425,6 +431,7 @@ snit::type ::marsgui::messagebox {
             -message       {}
             -parent        {}
             -title         {}
+            -wraplength    3i
         }
 
         # NEXT, get the option values
@@ -440,7 +447,8 @@ snit::type ::marsgui::messagebox {
                 -ignoredefault -
                 -message       -
                 -parent        -
-                -title         {
+                -title         -
+                -wraplength    {
                     set opts($opt) [::marsutil::lshift arglist]
                 }
                 default {

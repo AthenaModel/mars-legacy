@@ -113,6 +113,12 @@ The message box will appear over the specfied window.<p>
 
 The dialog window will have the specified title <i>string</i>.<p>
 
+<<defopt {-wraplength <i>len</i>}>>
+
+Species the <code>-wraplength</code> for the Tk label widget that will 
+display the user's message.  Defaults to "3i".  If "" is given, no wrapping
+will be done.<p>
+
 <</deflist options>>
 
 <<defitem reset {messagebox reset ?<i>tag</i>?}>>
