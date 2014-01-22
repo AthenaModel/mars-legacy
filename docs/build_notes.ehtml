@@ -9,6 +9,13 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.31, 22 January 2014</h3>
+This build contains one change to messagebox(n):<p>
+
+<ul>
+<li> Bug 4309: messagebox(n): add -wraplength option to [messagebox popup] 
+</ul><p>
+
 <h3>Build 2.30, 12 December 2013</h3>
 This build contains some changes to support some new ways of displaying
 HTML tables.<p>
