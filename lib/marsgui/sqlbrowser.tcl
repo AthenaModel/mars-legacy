@@ -38,6 +38,7 @@ snit::widget ::marsgui::sqlbrowser {
     component changer   ;# Timeout that calls -selectioncmd on delete.
     component toolbar   ;# The browser toolbar
     component filter    ;# filter(n) component used to filter entries
+    component vlabel    ;# Label for vmenu
     component vmenu     ;# Pulldown of available views
     component cbar      ;# The client's toolbar, for application-specific
                          # widgets
@@ -215,7 +216,60 @@ snit::widget ::marsgui::sqlbrowser {
     #
     # TBD: We might want to be able to add to the list dynamically.
     
-    option -views -readonly yes
+    option -views \
+        -configuremethod ConfigureViews
+
+    # ConfigureViews opt val
+    #
+    # -configuremethod.  Saves the option value, configures the 
+    # View: pulldown, and configures the view.
+
+    method ConfigureViews {opt val} {
+        # FIRST, if it didn't change, ignore it.
+        set val [string trim $val]
+
+        if {$val eq $options($opt)} {
+            return
+        }
+        
+        # NEXT, save the change
+        set options($opt) $val
+
+        # NEXT, we need either multiple views or none.  (Treat one
+        # like none.)  If none, hide the widget.
+        if {[dict size $options(-views)] < 2} {
+            set info(views) {}
+            pack forget $vmenu
+            pack forget $vlabel
+            return
+        }
+
+        # NEXT, Invert the list of views.
+        set info(views) {}
+        dict for {view label} $options(-views) {
+            dict set info(views) $label $view
+        }
+        
+        # NEXT, configure the pulldown.
+        set labels [dict keys $info(views)]
+
+        $vmenu configure \
+            -width     [expr {[lmaxlen $labels] + 2}]  \
+            -values    $labels                         \
+            -command   [mymethod SetView]
+
+        # NEXT, display the widgets.
+        pack $vmenu   -side right -fill y -padx {2 0}
+        pack $vlabel  -side right -fill y -padx {2 0}
+
+        # NEXT, if -view isn't one of the keys then configure it.
+        if {[dict exists $options(-views) $options(-view)]} {
+            $vmenu set [dict get $options(-views) $options(-view)]
+        } else {
+            $self configure \
+                -view [lindex [dict keys $options(-views)] 0]
+        } 
+    }
 
     # -columnsorting flag
     #
@@ -360,6 +414,27 @@ snit::widget ::marsgui::sqlbrowser {
             -orient  horizontal           \
             -command [list $tlist xview]
 
+        # Browser Toolbar
+        install toolbar using ttk::frame $win.toolbar
+        
+        # Filter box
+        set options(-filterbox) [from args -filterbox]
+        if {$options(-filterbox)} {
+            install filter using filter $toolbar.filter \
+                -width      15                          \
+                -filtertype incremental                 \
+                -ignorecase yes                         \
+                -filtercmd  [mymethod FilterData]
+        
+            pack $filter -side right -fill y -padx {5 0}
+        }
+        
+        # View Label and Menu
+        install vlabel using ttk::label $toolbar.vlabel \
+            -text "View:"
+
+        install vmenu using menubox $toolbar.vmenu
+
 
         # NEXT, configure the options
         $self configurelist $args
@@ -367,15 +442,7 @@ snit::widget ::marsgui::sqlbrowser {
         # Save the database handle
         set db $options(-db)
         
-        # Invert the list of views
-        dict for {view label} $options(-views) {
-            dict set info(views) $label $view
-        }
-        
         # NEXT, create the rest of the components
-        
-        # Browser Toolbar
-        install toolbar using ttk::frame $win.toolbar
         
         # Reload Button
         if {$options(-reloadbtn)} {
@@ -390,51 +457,10 @@ snit::widget ::marsgui::sqlbrowser {
                 -text "Reload contents of browser"
         }
         
-        # Filter box
-        if {$options(-filterbox)} {
-            install filter using filter $toolbar.filter \
-                -width      15                          \
-                -filtertype incremental                 \
-                -ignorecase yes                         \
-                -filtercmd  [mymethod FilterData]
-        
-            pack $filter -side right -fill y -padx {5 0}
-        }
-        
         # Client Toolbar
         install cbar using ttk::frame $toolbar.cbr
         pack $cbar -side left -fill x -expand yes
-        
-        # Views pulldown if any.
-        # Install the views pulldown, if any.
-        if {$options(-views) ne ""} {
-            # FIRST, Get the list of labels
-            set labels [dict keys $info(views)]
-
-            # NEXT, Create the widgets
-            ttk::label $toolbar.viewlabel \
-                -text "View:"
-
-            install vmenu using menubox $toolbar.vmenu     \
-                -width     [expr {[lmaxlen $labels] + 2}]  \
-                -values    $labels                         \
-                -command   [mymethod SetView]
-
-            pack $vmenu              -side right -fill y -padx {2 0}
-            pack $toolbar.viewlabel  -side right -fill y -padx {2 0}
-
-            # NEXT, either display the current view, or select the
-            # first view.
-            if {$options(-view) ne ""} {
-                $vmenu set [dict get $options(-views) $options(-view)]
-            } else {
-                $self configure \
-                    -view [lindex [dict keys $options(-views)] 0]
-            }
-        } else {
-            set vmenu ""
-        }
-        
+                        
         # NEXT, layout the major components
         grid $toolbar     -row 0 -column 0 -columnspan 2 -sticky ew -pady 2
         grid $tlist       -row 1 -column 0 -sticky nsew
