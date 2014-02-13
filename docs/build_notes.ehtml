@@ -9,6 +9,13 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.32, 6 February 2014</h3>
+This build updates sqlbrowser(n) so that views can be set after creation.<p>
+
+<ul>
+<li> Bug 4318: sqlbrowser(n): -views option can be set after creation
+</ul><p>
+
 <h3>Build 2.31, 22 January 2014</h3>
 This build contains one change to messagebox(n):<p>
 
