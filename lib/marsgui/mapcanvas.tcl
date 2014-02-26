@@ -102,8 +102,8 @@ snit::widgetadaptor ::marsgui::mapcanvas {
         bind Mapcanvas <Enter>  {%W MapEnter}
         bind Mapcanvas <Leave>  {%W MapLeave}
 
-        # Support -refvariable
-        bind Mapcanvas <Motion> {%W MaprefSet %x %y}
+        # Support -locvariable
+        bind Mapcanvas <Motion> {%W MaplocSet %x %y}
 
         # NEXT, Define the bindtags for the interaction modes
 
@@ -285,12 +285,12 @@ snit::widgetadaptor ::marsgui::mapcanvas {
 
     option -projection
 
-    # -refvariable
+    # -locvariable
     #
-    # A variable name.  It is set to the map reference string of the
+    # A variable name.  It is set to the map location string of the
     # location under the mouse pointer.
 
-    option -refvariable -default ""
+    option -locvariable -default ""
 
     # -modevariable
     #
@@ -780,19 +780,19 @@ snit::widgetadaptor ::marsgui::mapcanvas {
     }
 
 
-    # MaprefSet wx wy
+    # MaplocSet wx wy
     #
     # wx,wy    Position in window units
     #
-    # Sets the -refvariable, if any
+    # Sets the -locvariable, if any
 
-    method MaprefSet {wx wy} {
+    method MaplocSet {wx wy} {
         if {$info(gotPointer) 
-            && $options(-refvariable) ne "" 
+            && $options(-locvariable) ne "" 
         } {
-            set ref [$self w2ref $wx $wy]
+            set ref [$self w2loc $wx $wy]
 
-            uplevel \#0 [list set $options(-refvariable) $ref]
+            uplevel \#0 [list set $options(-locvariable) $ref]
         }
     }
 
@@ -1269,6 +1269,16 @@ snit::widgetadaptor ::marsgui::mapcanvas {
 
     method w2ref {wx wy} {
         $proj c2ref $info(zoom) [$hull canvasx $wx] [$hull canvasy $wy]
+    }
+
+    # w2loc wx wy
+    #
+    # wx,wy    Position in window units
+    #
+    # Returns the position as a map location for display
+
+    method w2loc {wx wy} {
+        $proj c2loc $info(zoom) [$hull canvasx $wx] [$hull canvasy $wy]
     }
 
     #-------------------------------------------------------------------
