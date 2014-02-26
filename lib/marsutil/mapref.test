@@ -125,6 +125,33 @@ namespace eval ::marsutil::test {
 
 
     #-------------------------------------------------------------------
+    # c2loc
+
+    test c2loc-1.1 {Convert origin} -setup setup -body {
+        proj c2loc 100 0 0
+    } -cleanup {
+        cleanup
+    } -result {A00A00}
+
+    test c2loc-1.2 {Convert bounds} -setup setup -body {
+        proj c2loc 100 1500 1000
+    } -cleanup {
+        cleanup
+    } -result {K99G66}
+
+    test c2loc-1.3 {Convert midpoint} -setup setup -body {
+        proj c2loc 100 750 500
+    } -cleanup {
+        cleanup
+    } -result {F00D33}
+
+    test c2loc-1.4 {Convert with zoom} -setup setup -body {
+        proj c2ref 200 3000 2000
+    } -cleanup {
+        cleanup
+    } -result {K99G66}
+
+    #-------------------------------------------------------------------
     # m2c
 
     test m2c-1.1 {Convert origin} -setup setup -body {

@@ -94,14 +94,15 @@ snit::type ::marsutil::maprect {
 
     constructor {args} {
 
+        # FIRST, get the options
         $self configurelist $args
 
+        # NEXT, set up projection information
         set mwid $options(-width)
         set mht  $options(-height)
+
         set dmx [expr {($options(-maxlon)-$options(-minlon))/$options(-width)}]
         set dmy [expr {($options(-maxlat)-$options(-minlat))/$options(-height)}]
-
-        puts "mwid= $mwid, mht= $mht, dmx= $dmx, dmy= $dmy"
     }
 
     #-------------------------------------------------------------------
@@ -191,10 +192,14 @@ snit::type ::marsutil::maprect {
         set fac  [expr {$zoom/100.0}]
         set lon  [expr {$options(-minlon)+$cx/$fac*$dmx}] 
         set lat  [expr {$options(-maxlat)-$cy/$fac*$dmy}]
-        set mgrs [latlong tomgrs [list $lat $lon]]
 
-        set flon [format "%.6f" $lon]
-        set flat [format "%.6f" $lat]
+        # Only 3 digits of precision for display
+        set mgrs [latlong tomgrs [list $lat $lon] 3]
+
+        # 4 digits of precision corresponds to ~10m at equator and
+        # ~5m at 67deg N or S
+        set flon [format "%.4f" $lon]
+        set flat [format "%.4f" $lat]
 
         return "$mgrs ($flat, $flon)"
     }

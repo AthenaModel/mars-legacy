@@ -70,24 +70,11 @@ snit::type ::marsutil::mapref {
     # Width and height of map, in pixels
     option -width  \
         -type {snit::integer -min 1}  \
-        -configuremethod ConfigureDim \
         -default 1000
 
     option -height \
         -type {snit::integer -min 1}  \
-        -configuremethod ConfigureDim \
         -default 1000
-
-    method ConfigureDim {opt val} {
-        set options($opt) $val
-
-        set mapFactor [expr {
-            max($options(-width),$options(-height))/999.0
-        }]
-
-        set mwid [expr {round($options(-width)  / $mapFactor)}]
-        set mht  [expr {round($options(-height) / $mapFactor)}]
-    }
 
     #-------------------------------------------------------------------
     # Instance Variables
@@ -105,7 +92,17 @@ snit::type ::marsutil::mapref {
     #-------------------------------------------------------------------
     # Constructor
 
-    # None needed
+    constructor {args} {
+
+        $self configurelist $args
+
+        set mapFactor [expr {
+            max($options(-width),$options(-height))/999.0
+        }]
+
+        set mwid [expr {round($options(-width)  / $mapFactor)}]
+        set mht  [expr {round($options(-height) / $mapFactor)}]
+    }
 
     #-------------------------------------------------------------------
     # Methods
@@ -169,6 +166,19 @@ snit::type ::marsutil::mapref {
         set fac [expr {$mapFactor * ($zoom/100.0)}]
 
         return [GetRef $fac $cx][GetRef $fac $cy]
+    }
+
+
+    # c2loc zoom cx cy
+    #
+    # zoom     Zoom factor
+    # cx,cy    Position in canvas units
+    #
+    # Returns the position as a map location for purposes of display, 
+    # which in the projection is trivially the map reference string.
+
+    method c2loc {zoom cx cy} {
+        return [$self c2ref $zoom $cx $cy]
     }
 
     # ref2c zoom ref...

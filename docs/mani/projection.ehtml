@@ -68,6 +68,12 @@ Given a <i>zoom</i> factor and a canvas coordinate pair <i>cx</i> and
 Given a <i>zoom</i> factor and a canvas coordinate pair <i>cx</i> and
 <i>cy</i>, returns a map reference string.<p>
 
+<<defitem c2loc {<i>object</i> c2ref <i>zoom cx cy</i>}>>
+
+Given a <i>zoom</i> factor and a canvas coordinate pair <i>cx</i> and
+<i>cy</i>, returns a map location for purposes of display. How a location
+is displayed to a user is projection dependant.<p>
+
 <<defitem dim {<i>object</i> dim}>>
 
 Returns the dimensions of the map in map units.<p>
