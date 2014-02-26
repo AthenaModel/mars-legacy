@@ -1,0 +1,291 @@
+# -*-Tcl-*-
+#-----------------------------------------------------------------------
+# TITLE:
+#    mapref.test
+#
+# AUTHOR:
+#    Will Duquette
+#
+# DESCRIPTION:
+#    Tcltest test suite for marsutil(n), mapref.tcl
+#
+#-----------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+# Initialize tcltest(n)
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest 2.2 
+    eval ::tcltest::configure $argv
+}
+ 
+#-----------------------------------------------------------------------
+# Load the package to be tested
+
+package require marsutil 1.0
+
+#-----------------------------------------------------------------------
+# Test Suite
+#
+# The tests run in a namespace so as not to interfere with other
+# test suites.
+
+namespace eval ::marsutil::test {
+    #-------------------------------------------------------------------
+    # Set up the test environment
+
+    # Import tcltest(n)
+    namespace import ::tcltest::*
+
+    # Import the code to be tested
+    namespace import ::marsutil::*
+
+    # Setup for tests
+
+    proc setup {} {
+        maprect proj -width 1500   \
+                    -height 1000  \
+                    -minlon 30.0  \
+                    -maxlon 35.0  \
+                    -minlat -10.0 \
+                    -maxlat 10.0 
+
+        proj init
+    }
+
+    proc cleanup {} {
+        proj destroy
+    }
+
+    #-------------------------------------------------------------------
+    # box
+
+    test box-1.1 {Retrieve bounding box} -setup setup -body {
+        proj box
+    } -cleanup {
+        cleanup
+    } -result {0 0 1500 1000}
+
+    #-------------------------------------------------------------------
+    # dim
+
+    test dim-1.1 {Retrieve dimensions} -setup setup -body {
+        proj dim
+    } -cleanup {
+        cleanup
+    } -result {1500 1000}
+
+    #-------------------------------------------------------------------
+    # c2m
+
+    test c2m-1.1 {Convert origin} -setup setup -body {
+        proj c2m 100 0 0
+    } -cleanup {
+        cleanup
+    } -result {10.0 30.0}
+
+    test c2m-1.2 {Convert bounds} -setup setup -body {
+        proj c2m 100 1500 1000
+    } -cleanup {
+        cleanup
+    } -result {-10.0 35.0}
+
+    test c2m-1.3 {Convert midpoint} -setup setup -body {
+        proj c2m 100 750 500
+    } -cleanup {
+        cleanup
+    } -result {0.0 32.5}
+
+    test c2m-1.4 {Convert bounds} -setup setup -body {
+        proj c2m 200 3000 2000
+    } -cleanup {
+        cleanup
+    } -result {-10.0 35.0}
+    
+
+    #-------------------------------------------------------------------
+    # c2ref
+
+    test c2ref-1.1 {Convert origin} -setup setup -body {
+        # Corresponds to upper left corner (10.0 lat, 30.0 lon)
+        proj c2ref 100 0 0
+    } -cleanup {
+        cleanup
+    } -result {36PSS7107106909}
+
+    test c2ref-1.2 {Convert bounds} -setup setup -body {
+        proj c2ref 100 1500 1000
+    } -cleanup {
+        cleanup
+    } -result {36LYP1923393923}
+
+    test c2ref-1.3 {Convert midpoint} -setup setup -body {
+        proj c2ref 100 750 500
+    } -cleanup {
+        cleanup
+    } -result {36NVF4436200000}
+
+    test c2ref-1.4 {Convert with zoom} -setup setup -body {
+        proj c2ref 200 3000 2000
+    } -cleanup {
+        cleanup
+    } -result {36LYP1923393923}
+
+
+    #-------------------------------------------------------------------
+    # m2c
+
+    test m2c-1.1 {Convert origin} -setup setup -body {
+        proj m2c 100 10.0 30.0
+    } -cleanup {
+        cleanup
+    } -result {0 0}
+
+    test m2c-1.2 {Convert bounds} -setup setup -body {
+        proj m2c 100 -10.0 35.0
+    } -cleanup {
+        cleanup
+    } -result {1500 1000}
+
+    test m2c-1.3 {Convert midpoint} -setup setup -body {
+        proj m2c 100 0.0 32.5
+    } -cleanup {
+        cleanup
+    } -result {750 500}
+
+    test m2c-1.4 {Convert with zoom} -setup setup -body {
+        proj m2c 200 -10.0 35.0
+    } -cleanup {
+        cleanup
+    } -result {3000 2000}
+
+    test m2c-1.5 {Convert many} -setup setup -body {
+        proj m2c 100 10.0 30.0 0.0 32.5 -10.0 35.0 
+    } -cleanup {
+        cleanup
+    } -result {0 0 750 500 1500 1000}
+
+    #-------------------------------------------------------------------
+    # m2ref
+
+    test m2ref-1.1 {Convert origin} -setup setup -body {
+        proj m2ref 10.0 30.0
+    } -cleanup {
+        cleanup
+    } -result {36PSS7107106909}
+
+    test m2ref-1.2 {Convert bounds} -setup setup -body {
+        proj m2ref -10.0 35.0
+    } -cleanup {
+        cleanup
+    } -result {36LYP1923393923}
+
+    test m2ref-1.3 {Convert midpoint} -setup setup -body {
+        proj m2ref 0.0 32.5
+    } -cleanup {
+        cleanup
+    } -result {36NVF4436200000}
+
+    test m2ref-1.4 {Convert several coordinates} -setup setup -body {
+        proj m2ref 0.0 0.0 -10.0 30.0 10 35.0
+    } -cleanup {
+        cleanup
+    } -result {31NAA6602100000 36LSP7107193091 36PYS1923306077}
+
+
+    #-------------------------------------------------------------------
+    # ref2c
+
+    test ref2c-1.1 {Convert origin} -setup setup -body {
+        proj ref2c 100 36PSS7107106909
+    } -cleanup {
+        cleanup
+    } -result {0 0}
+
+    test ref2c-1.2 {Convert bounds} -setup setup -body {
+        proj ref2c 100 36LYP1923393923
+    } -cleanup {
+        cleanup
+    } -result {1500 1000}
+
+    test ref2c-1.3 {Convert midpoint} -setup setup -body {
+        proj ref2c 100 36NVF4436200000
+    } -cleanup {
+        cleanup
+    } -result {750 500}
+
+    test ref2c-1.4 {Convert with zoom} -setup setup -body {
+        proj ref2c 200 36LYP1923393923
+    } -cleanup {
+        cleanup
+    } -result {3000 2000}
+
+    test ref2c-1.5 {Convert list} -setup setup -body {
+        proj ref2c 100 36PSS7107106909 36NVF4436200000 36LYP1923393923
+    } -cleanup {
+        cleanup
+    } -result {0 0 750 500 1500 1000}
+
+
+    #-------------------------------------------------------------------
+    # ref2m
+
+    test ref2m-1.1 {Convert origin} -setup setup -body {
+        proj ref2m 36PSS7107106909
+    } -cleanup {
+        cleanup
+    } -result {10.000001294794568 29.99999758290437}
+
+    test ref2m-1.2 {Convert bounds} -setup setup -body {
+        proj ref2m 36LYP1923393923
+    } -cleanup {
+        cleanup
+    } -result {-9.999998835196118 34.99999872682095}
+
+    test ref2m-1.3 {Convert midpoint} -setup setup -body {
+        proj ref2m 36NVF4436200000
+    } -cleanup {
+        cleanup
+    } -result {0.0 32.50000172938096}
+
+    test ref2m-1.4 {Convert list} -setup setup -body {
+        proj ref2m 36PSS7107106909 36NVF4436200000 36LYP1923393923
+    } -cleanup {
+        cleanup
+    } -result {10.000001294794568 29.99999758290437 0.0 32.50000172938096 -9.999998835196118 34.99999872682095}
+
+    #-------------------------------------------------------------------
+    # ref validate
+
+    test ref_validate-1.1 {bad syntax} -setup setup -body {
+        proj ref validate FOOBARBAZ
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid MGRS coordinate: "FOOBARBAZ"}
+
+    test ref_validate-1.2 {multiple points} -setup setup -body {
+        proj ref validate 36PSS7107106909 FOOBARBAZ 36PSS7107106909
+    } -returnCodes {
+        error
+    } -cleanup {
+        cleanup
+    } -result {invalid MGRS coordinate: "FOOBARBAZ"}
+
+    test ref_validate-1.3 {valid} -setup setup -body {
+        proj ref validate 36PSS7107106909 36PSS7107106909
+    } -cleanup {
+        cleanup
+    } -result {36PSS7107106909 36PSS7107106909}
+
+    #-------------------------------------------------------------------
+    # Cleanup
+
+    cleanupTests
+}
+
+namespace delete ::marsutil::test
+
+
+
