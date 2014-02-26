@@ -285,16 +285,9 @@ snit::widgetadaptor ::marsgui::htmlviewer {
     # Completes a selection, if any is in progress.
 
     proc ButtonRelease-1 {w x y} {
-        # FIRST, are we sweeping out a selection?
+        # FIRST, are we sweeping out a selection?  If so, extend it.
         if {$tinfo(sweep-$w) ne ""} {
-            # FIRST, extend the selection to the current coordinates.
-            set endNI [ExtendSelection $w $x $y]
-
-            # NEXT, save it.
-            if {$tinfo(sweep-$w) ne $endNI} {
-                set tinfo(start-$w) $tinfo(sweep-$w)
-                set tinfo(end-$w)   $endNI
-            }
+            ExtendSelection $w $x $y
         }
 
         # NEXT, either way, we're not sweeping out a selection now.
@@ -384,8 +377,11 @@ snit::widgetadaptor ::marsgui::htmlviewer {
         }
 
         # Clear old selection and add new selection.
+        set tinfo(start-$w) $tinfo(sweep-$w)
+        set tinfo(end-$w) $endNI
+
         $w tag delete selection
-        $w tag add selection {*}$tinfo(sweep-$w) {*}$endNI
+        $w tag add selection {*}$tinfo(start-$w) {*}$tinfo(end-$w)
 
         # Make it look right
         # TBD: These should be configurable, or set according
