@@ -481,14 +481,11 @@ snit::widget ::marsgui::databrowser {
     # Reloads the list of records.
     
     method ReloadContent {} {
-        puts "ReloadContent A"
         # FIRST, Layout the columns if need be.
         if {!$info(layoutFlag)} {
             $self LayoutColumns
-            parray layout
         }
         
-        puts "ReloadContent B"
         # NEXT, if there are no known columns, just clear the
         # tablelist and return.
         if {[llength $info(columns)] == 0} {
@@ -534,9 +531,9 @@ snit::widget ::marsgui::databrowser {
     }
 
     method GetRecordAsList {uid} {
-        # FIRStT get the record dictionary, and fill in the
+        # FIRST get the record dictionary, and fill in the
         # _uid.
-        set rdict [$options(-dictcmd) $uid]
+        set rdict [{*}$options(-dictcmd) $uid]
         dict set rdict _uid $uid
 
         # NEXT, extract just the columns in the layout.
@@ -576,7 +573,6 @@ snit::widget ::marsgui::databrowser {
     # column info.
     
     method ParseLayoutSpec {} {
-        puts "ParseLayoutSpec"
         # FIRST, get the layout spec and add the _uid column.
         set bspec $options(-layout)
         lappend bspec [list _uid _uid -hide 1]
