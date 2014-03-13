@@ -9,6 +9,19 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.33, 13 March 2014</h3>
+This build adds a new rectangular projection to mars and updates the 
+projection(i) interface with a new method for use by clients that need to
+display a map location.  A new data table browser is introduced.<p>
+
+<ul>
+<li> Bug 4432: databrowser(n): Data Table Browser
+<li> Bug 4424: htmlviewer(n): Sometimes copying text on the Detail browser causes error
+<li> Bug 4417: sqldocument(n): -readonly option
+<li> Bug 4412: marsutil(n): add map location to projection(i)
+<li> Bug 4400: marsutil(n): rectangular projection for use in geo-referenced maps
+</ul><p>
+
 <h3>Build 2.32, 6 February 2014</h3>
 This build updates sqlbrowser(n) so that views can be set after creation.<p>
 
