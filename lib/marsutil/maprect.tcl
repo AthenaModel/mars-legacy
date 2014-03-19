@@ -266,11 +266,10 @@ snit::type ::marsutil::maprect {
     # Validates the map reference for form and content.
 
     method {ref validate} {args} {
-        set prefix ""
-
         foreach ref $args {
             if {[catch {latlong frommgrs $ref} result]} {
-                error "invalid MGRS coordinate: \"$ref\""
+                return -code error -errorcode INVALID\
+                    "invalid MGRS coordinate: \"$ref\""
             }
         }
 
