@@ -72,7 +72,7 @@ while {$ndx > -1} {
 
 lappend auto_path $libdir
 
-package require Tcl 8.5
+package require Tcl 8.6
 
 #-----------------------------------------------------------------------
 # Application Metadata

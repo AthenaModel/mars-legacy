@@ -360,6 +360,9 @@ try {
 In this case, the file will get closed even if there's an error while
 reading from it.<p>
 
+This command is forward compatible (so far as it goes) with Tcl 8.6's
+<b>::throw</b> command, and is only loaded in Tcl 8.5.<p>
+
 <<defitem wildToRegexp {wildToRegexp <i>pattern</i>}>>
 
 Converts a wildcard match pattern (? matches any 1 character, * matches

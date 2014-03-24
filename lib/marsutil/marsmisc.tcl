@@ -65,9 +65,13 @@ namespace eval ::marsutil:: {
         require         \
         restrict        \
         stringToRegexp  \
-        throw           \
-        try             \
         wildToRegexp
+
+    if {[package vcompare [info patchlevel] 8.6.0] < 0} {
+        namespace export \
+            throw        \
+            try
+    } 
 
     variable version ""
     variable pi      [expr {acos(-1.0)}]
@@ -209,36 +213,39 @@ proc restrict {varname vtype defval} {
     return
 }
 
-# try script1 ?"finally" script2
-#
-# script1  A script to evaluate
-# script2  A script that executes even if there are errors in the 
-#          first script.
-#
-# Implements a try/finally construct.  Code is by Donal K Fellows; found at
-# the Tcler's Wiki at http://wiki.tcl.tk/990.
 
-proc ::marsutil::try {script1 args} {
-    upvar 1 try___msg msg try___opts opts
-    if {[llength $args]!=0 && [llength $args]!=2} {
-        return -code error "wrong \# args: should be \"try script1 ?finally script2?\""
-    }
-    if {[llength $args] == 2} {
-        if {[lindex $args 0] ne "finally"} {
-            return -code error "mis-spelt \"finally\" keyword"
+if {[package vcompare [info patchlevel] 8.6.0] < 0} {
+
+    # try script1 ?"finally" script2
+    #
+    # script1  A script to evaluate
+    # script2  A script that executes even if there are errors in the 
+    #          first script.
+    #
+    # Implements a try/finally construct.  Code is by Donal K Fellows; found at
+    # the Tcler's Wiki at http://wiki.tcl.tk/990.
+
+    proc ::marsutil::try {script1 args} {
+        upvar 1 try___msg msg try___opts opts
+        if {[llength $args]!=0 && [llength $args]!=2} {
+            return -code error "wrong \# args: should be \"try script1 ?finally script2?\""
         }
+        if {[llength $args] == 2} {
+            if {[lindex $args 0] ne "finally"} {
+                return -code error "mis-spelt \"finally\" keyword"
+            }
+        }
+        set code [uplevel 1 [list catch $script1 try___msg try___opts]]
+        if {[llength $args] == 2} {
+            uplevel 1 [lindex $args 1]
+        }
+        if {$code} {
+            dict incr opts -level 1
+            return -options $opts $msg
+        }
+        return $msg
     }
-    set code [uplevel 1 [list catch $script1 try___msg try___opts]]
-    if {[llength $args] == 2} {
-        uplevel 1 [lindex $args 1]
-    }
-    if {$code} {
-        dict incr opts -level 1
-        return -options $opts $msg
-    }
-    return $msg
 }
-
 
 #-----------------------------------------------------------------------
 # List functions
