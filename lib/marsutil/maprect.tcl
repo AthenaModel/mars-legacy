@@ -77,6 +77,7 @@ snit::type ::marsutil::maprect {
     option -minlat -type snit::double -default 3.0
     option -maxlat -type snit::double -default 0.0
 
+
     #-------------------------------------------------------------------
     # Instance Variables
 
@@ -96,6 +97,11 @@ snit::type ::marsutil::maprect {
 
         # FIRST, get the options
         $self configurelist $args
+
+        set options(-minlat) [expr double($options(-minlat))]
+        set options(-maxlat) [expr double($options(-maxlat))]
+        set options(-minlon) [expr double($options(-minlon))]
+        set options(-maxlon) [expr double($options(-maxlon))]
 
         # NEXT, set up projection information
         set mwid $options(-width)
@@ -176,7 +182,7 @@ snit::type ::marsutil::maprect {
         set fac [expr {$zoom/100.0}]
         set lon [expr {$options(-minlon)+$cx/$fac*$dmx}] 
         set lat [expr {$options(-maxlat)-$cy/$fac*$dmy}]
-        return [latlong tomgrs [list $lat $lon]]
+        return [latlong tomgrs [clamp $lat $lon]]
     }
 
     # c2loc zoom cx cy
@@ -194,7 +200,7 @@ snit::type ::marsutil::maprect {
         set lat  [expr {$options(-maxlat)-$cy/$fac*$dmy}]
 
         # Only 3 digits of precision for display
-        set mgrs [latlong tomgrs [list $lat $lon] 3]
+        set mgrs [latlong tomgrs [clamp $lat $lon] 3]
 
         # 4 digits of precision corresponds to ~10m at equator and
         # ~5m at 67deg N or S
@@ -236,7 +242,7 @@ snit::type ::marsutil::maprect {
         set result [list]
 
         foreach {lat lon} $args {
-            lappend result [latlong tomgrs [list $lat $lon]]
+            lappend result [latlong tomgrs [clamp $lat $lon]]
         }
         
         return $result
@@ -274,6 +280,15 @@ snit::type ::marsutil::maprect {
         }
 
         return $args
+    }
+
+    proc clamp {lat lon} {
+        if {$lat < -90.0}  {set lat -90.0}
+        if {$lat >  90.0}  {set lat  90.0}
+        if {$lon < -180.0} {set lon -180.0}
+        if {$lon >  180.0} {set lon  180.0}
+
+        return [list $lat $lon]
     }
 }
 
