@@ -41,7 +41,7 @@ snit::widget ::marsgui::cli {
         option add *Cli.borderWidth        1
         option add *Cli.relief             flat
         option add *Cli.background         black
-        option add *Cli.Foreground         green
+        option add *Cli.Foreground         "#5FDB00"
         option add *Cli.font               codefont
         option add *Cli.width              80
         option add *Cli.height             24
