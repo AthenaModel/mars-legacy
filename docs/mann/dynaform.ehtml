@@ -221,9 +221,19 @@ All contextkey fields will then use the same database handle.<p>
 Defines a field for displaying an arbitrary, read-only text string.
 (i.e., a <<xref dispfield(n)>> widget).  This is useful for
 displaying ancillary data to the user that the user is not allowed to
-edit.  The field type defines the following additional option:<p>
+edit.  The field type defines the following additional options:<p>
 
 <<deflist options>>
+<<defopt {-textcmd <i>cmd</i>}>>
+Specifies a command to be called to retrieve the field's value
+for display.  The command may contain references to the values of
+any upstream fields.  The return value is placed in the field.<p>
+
+This option is useful for translating numeric object IDs and other
+opaque references into human-readable values.  The true ID goes in
+an upstream field (and is quite possibly invisible); this one takes
+the true ID and produces the value for display.<p>
+
 <<defopt {-width <i>columns</i>}>>
 Specifies the width of the field in characters of the current
 font.<p>

@@ -71,11 +71,22 @@
 
 ::marsutil::dynaform fieldtype define disp {
     typemethod attributes {} {
-        return {width}
+        return {width textcmd}
     }
 
     typemethod create {w idict} {
         dispfield $w {*}[asoptions $idict width]
+    }
+
+    typemethod reconfigure {w idict vdict} {
+        # If the field has a -textcmd, call it and display
+        # result.
+        dict with idict {}
+
+        if {$textcmd ne ""} {
+            set text [formcall $vdict $textcmd] 
+            $w set $text 
+        }
     }
 }
 
