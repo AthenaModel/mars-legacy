@@ -1,42 +1,16 @@
 #-----------------------------------------------------------------------
-# FILE: mam.tcl
-#
-#   MAM: Mars Affinity Model Prototype
-#
-# PACKAGE:
-#   simlib(n) -- Simulation Infrastructure Package
-#
-# PROJECT:
-#   Mars Simulation Infrastructure Library
+# TITLE:
+#    mam.tcl
 #
 # AUTHOR:
 #    Will Duquette
 #
-# NOTES:
+# DESCRIPTION:
+#    Mars Affinity Model
 #
-# * For this package I'm trying out a new error handling scheme.  In
-#   GRAM, I very much use a precondition-based strategy.  Validate all
-#   of the inputs before doing anything, and make all error messages
-#   highly detailed.  This approach led directly to trying to use
-#   internal error messages as user error messages, which has proven
-#   to be a mistake.  In newer code (e.g., Athena) all user input is
-#   validated by orders before any actions are taken; the code in
-#   which the actions are taken should produce errors for the developer.
-#
-#   Consequently, I'm going to try to catch all of the relevant input
-#   errors; but I'm not going to worry about doing them all upfront,
-#   and I'm not going to worry about end-user error messages.  In 
-#   particular, I'm going to let SQLite check constraints, insofar
-#   as that's possible.
-#
-#   This approach is based on allowing rollbacks in the RDB, 
-#   e.g., -rollback on.
-#
-# * In addition, I'm trying to leverage SQLite's new foreign key
-#   capabilities, and particularly cascading update and cascading
-#   delete.  The foreign key references are all declared
-#   DEFERRABLE INITIALLY DEFERRED so that the constraints are 
-#   checked at the end of the transaction.
+#    This module is a pure-Tcl replacement for the original 
+#    mam(n), which made heavy use of SQLite.  It is a 
+#    saveable(i) module.
 #
 #-----------------------------------------------------------------------
 
@@ -44,694 +18,897 @@ namespace eval ::simlib:: {
     namespace export mam
 }
 
-#-----------------------------------------------------------------------
-# mam Type
-#
-# MAM -- Mars Affinity Model Prototype
-#
-# Instances of the mam object type do the following.
-#
-#  * Bookkeep MAM inputs.
-#  * Allow changes to MAM inputs to be undone.
-#  * Recompute MAM outputs.
-#  * Allow introspection of all inputs and outputs.
+#-------------------------------------------------------------------
+# mam
 
 snit::type ::simlib::mam {
-    #-------------------------------------------------------------------
-    # Type Constructor
-
-    typeconstructor {
-        # FIRST, Import needed commands from other packages.
-        namespace import ::marsutil::*
-    }
+    # Make it a singleton
+    pragma -hasinstances 0
 
     #-------------------------------------------------------------------
-    # sqlsection(i) implementation
-    #
-    # The following routines implement the module's 
-    # sqlsection(i) interface.
+    # Lookup Tables
 
-    # sqlsection title
-    #
-    # Returns a human-readable title for the section.
+    # Default topic attributes.  The "name" attribute is set 
+    # programmatically.
 
-    typemethod {sqlsection title} {} {
-        return "mam(n)"
+    typevariable defaultTopic {
+        affinity  1
+        relevance 1.0
     }
 
-    # sqlsection schema
-    #
-    # Returns the section's persistent schema definitions, which are
-    # read from mam.sql.
+    # Default system attributes.  The "name" attribute is set
+    # programmatically.
 
-    typemethod {sqlsection schema} {} {
-        return [readfile [file join $::simlib::library mam.sql]]
+    typevariable defaultSystem {
+        commonality 1.0
     }
 
-    # sqlsection tempschema
-    #
-    # Returns the section's temporary schema definitions.
+    # Default belief attributes.
 
-    typemethod {sqlsection tempschema} {} {
-        return ""
+    typevariable defaultBelief {
+        position 0.0
+        emphasis 0.5
     }
-
-    # sqlsection functions
-    #
-    # Returns a dictionary of function names and command prefixes.
-
-    typemethod {sqlsection functions} {} {
-        return [list]
-    }
+    
 
     #-------------------------------------------------------------------
     # Type Variables
-   
-    # rdbTracker array
+
+    # db: Array variable for most of the module's saved data.  Many
+    #     of the entries are dictionaries. 
     #
-    # Array, mam(n) instance by RDB. This array tracks which RDBs are
-    # in use by mam instances; thus, if we create a new instance on an
-    # RDB that's already in use by a MAM instance, we can throw an error.
+    #   changed => Changed flag, for saveable(i)
+    #
+    #   playbox => Dictionary of playbox-wide settings
+    #           -> commonality => playbox commonality fraction (gamma)
+    #
+    #   sids => List of belief system IDs
+    #   system-$sid => Dictionary for belief system $sid
+    #               -> name => belief system name
+    #               -> commonality => commonality fraction
+    #   beliefs-$sid => Dictionary of beliefs by topic.  If a tid is missing,
+    #                   the belief is presumed to be {0.0, 0.0}.
+    #                -> $tid => Belief dictionary
+    #                        -> position => position on topic
+    #                        -> emphasis => emphasis on topic 
+    #
+    #   tids => List of topic IDs
+    #   topic-$tid => Dictionary for topic $tid
+    #              -> name => Topic name
+    #              -> affinity => Affinity flag
+    #              -> relevance => Topic relevance fraction
+    #     
+
+    typevariable db -array {
+        changed    0
+        playbox    {gamma 1.0}
+        sids       {}
+        tids       {}
+    }
+
+    # cache: Computed results dictionary.  The cache is cleared whenever
+    # any input data changes.  The keys are as follows:
+    #
+    #  affinity => dictionary of computed affinity values by sid1,sid2
+    #           -> $sid1 => dictionary of affinities of $sid1 with others
+    #                    -> $sid2 => computed affinity.
+    #  atids    => List of topic IDs of affinity topics
+    #  etaPlaybox => etaPlaybox commonality value
+    #  P => dictionary of relevant positions by sid
+    #    -> $sid => List of positions P for each atid
+    #  tau => dictionary of relevant emphases by sid
+    #      -> $sid => List of emphases tau for each atid.
+    #
+    # The cache is cleared when any data is changed.
+
+    typevariable cache {}
+
+    #-------------------------------------------------------------------
+    # General Typemethods
+
+    # clear
+    #
+    # Deletes all content, returning the module to its initial state.
+
+    typemethod clear {} {
+        array unset db
+        array set db {
+            changed    1
+            playbox    {gamma 1.0}
+            sids       {}
+            tids       {}
+        }
+
+        set cache [dict create]
+    }
+
+    #-------------------------------------------------------------------
+    # Playbox typemethods
     
-    typevariable rdbTracker -array { }
-
-    #-------------------------------------------------------------------
-    # Options
-
-    # Option: -rdb
+    # playbox set attr value ?attr value...?
+    # playbox set attrdict
     #
-    # The name of the sqldocument(n) instance in which
-    # mam(n) will store its working data.  After creation, the
-    # value will be stored in the rdb component.
-    option -rdb -readonly 1
-
-    # Option: -undo
+    # attr     - An attribute name
+    # value    - An attribute value
+    # attrdict - A dictionary of attribute names and values.
     #
-    # A boolean flag, defaulting to "on".  If on, undo information
-    # is saved and the "edit undo" command is available.  If
-    # off, no undo information is saved.
+    # Set playbox attributes.
 
-    option -undo \
-        -type            snit::boolean \
-        -default         on            \
-        -configuremethod ConfigUndo
-
-    method ConfigUndo {opt val} {
-        # FIRST, save the option value
-        set options($opt) $val
-
-        # NEXT, if -undo is off, clear the undo stack.
-        if {!$val} {
-            $self edit reset
-        }
+    typemethod {playbox set} {args} {
+        SaveAttributes playbox playbox {} [args2dict $args] 
     }
 
-    #-------------------------------------------------------------------
-    # Components
+    # playbox get ?attr?
     #
-    # Each instance of mam(n) uses the following components.
-
-    component rdb     ;# sqldocument(n), for structured data.
-    
-    #-------------------------------------------------------------------
-    # Constructor
-
-    constructor {args} {
-        # FIRST, get the creation arguments.
-        $self configurelist $args
-
-        # NEXT, save the RDB component, verifying that no other instance
-        # of MAM is using it.
-        set rdb $options(-rdb)
-        assert {[info commands $rdb] ne ""}
-
-        require {$type in [$rdb sections]} \
-            "mam(n) is not registered with database $rdb"
-        
-        if {[info exists rdbTracker($rdb)]} {
-            return -code error \
-                "RDB $rdb already in use by MAM $rdbTracker($rdb)"
-        }
-        
-        set rdbTracker($rdb) $self
-
-        # NEXT, create the mam_playbox entry
-        $rdb eval {
-            INSERT INTO mam_playbox(pid) VALUES(1);
-        }
-    }
-    
-    # destructor
+    # attr   - An attribute name
     #
-    # Removes the instance's rdb from the rdbTracker, and deletes
-    # the instance's content from the relevant rdb tables.
+    # Returns the value of the named attribute, or the whole dictionary
+    # if $attr is omitted.
 
-    destructor {
-        catch {
-            unset -nocomplain rdbTracker($rdb)
-            $self ClearTables destroy
-            
-        }
+    typemethod {playbox get} {{attr ""}} {
+        return [GetAttributes $db(playbox) $attr]
     }
 
-    #-------------------------------------------------------------------
-    # Playbox Data Methods
-
-    # playbox cget option
+    # playbox cget opt
     #
-    # option  - The name of a playbox option.  See [playbox configure].
+    # opt - An option name.
     #
-    # Retrieves the value of a playbox option.
+    # Returns an attribute using option notation.
 
-    method {playbox cget} {option} {
-        $self DbCget mam_playbox 1 $option
-    }
-    
-    # playbox configure ?options...?
-    #
-    # options  - A list of option names and values.
-    #
-    # Sets playbox option values.
-
-    method {playbox configure} {args} {
-        # FIRST, get the undo script.  Don't save it yet, as there
-        # might be an error in the arguments.
-        set script [list $rdb ungrab [$rdb grab mam_playbox {pid=1}]]
-
-        # NEXT, make the change.
-        $self DbConfigure mam_playbox 1 $args
-
-        # NEXT, save the undo script
-        $self SaveUndo $script
-
-        return
+    typemethod {playbox cget} {opt} {
+        return [$type playbox get [string range $opt 1 end]]
     }
 
-
-
-
-    #-------------------------------------------------------------------
-    # Entity Methods
-
-    # entity names
+    # playbox configure opt val ?opt val...?
     #
-    # Returns a list of the entity IDs.
+    # opt - An option name.
+    # val - An option value.
+    #
+    # Configures a playbox using option notation.
 
-    method {entity names} {} {
-        $rdb eval {SELECT eid FROM mam_entity ORDER BY eid}
+    typemethod {playbox configure} {args} {
+        return [$type playbox set [optlist2dict $args]]
     }
 
-    # entity add eid ?options...?
+    # playbox view
     #
-    # eid - The new entity ID.
-    #
-    # Adds a new entity to the entities table.  In addition:
-    #
-    # - Adds the dependent records to the belief and affinity tables.
-    # - Sets the entity's values.
+    # Returns a formatted [playbox get] dictionary.
 
-    method {entity add} {eid args} {
-        # FIRST, use a transaction, so that if there's an error
-        # in an option or option value, there will be no change
-        # to the database.
-        $rdb transaction {
-            # FIRST, add the entity record
-            $rdb eval {
-                INSERT INTO mam_entity(eid) VALUES($eid);
-                
-                INSERT INTO mam_belief(eid,tid)
-                SELECT $eid, tid FROM mam_topic;
-                
-                INSERT INTO mam_affinity(f,g)
-                SELECT $eid, eid FROM mam_entity;
-                
-                INSERT INTO mam_affinity(f,g)
-                SELECT eid, $eid FROM mam_entity WHERE eid != $eid;
-            }
+    typemethod {playbox view} {} {
+        set view [$type playbox get]
 
-            # NEXT, set the option values.
-            $self DbConfigure mam_entity [list $eid] $args
+        dict with view {
+            set gamma [format "%.2f" $gamma]
         }
 
-        $self SaveUndo [list $self MutateEntityDelete $eid]
-
-        return
-    }
-
-    # MutateEntityDelete eid
-    #
-    # eid - The entity ID.
-    #
-    # Deletes an entity from the entities table, including dependent
-    # records from the belief and affinity tables.
-
-    method MutateEntityDelete {eid} {
-        # FIRST, delete the entity record; the dependent records
-        # will be deleted automatically.
-        $rdb eval {
-            DELETE FROM mam_entity WHERE eid=$eid;
-        }
-    }
-
-
-
-    # entity delete eid
-    #
-    # eid - The entity ID.
-    #
-    # Deletes an entity from the entities table.  In addition:
-    #
-    # - Deletes the dependent records from the belief and affinity tables.
-
-    method {entity delete} {eid} {
-        # FIRST, delete the entity, grabbing the undo data set.
-        set data [$rdb delete -grab mam_entity {eid=$eid}]
-
-        # NEXT, save the undo script.
-        $self SaveUndo [list $rdb ungrab $data]
-
-        return
-    }
-
-    # entity cget eid option
-    #
-    # eid     - The entity ID
-    # option  - The name of a entity option.  See [entity add].
-    #
-    # Retrieves the value of a entity's option.
-
-    method {entity cget} {eid option} {
-        $self DbCget mam_entity [list $eid] $option
+        return $view
     }
     
-    # entity configure eid ?options...?
-    #
-    # eid      - The entity ID
-    # options  - A list of option names and values.
-    #
-    # Sets entity option values.
-
-    method {entity configure} {eid args} {
-        # FIRST, get the undo script.  Don't save it yet, as there
-        # might be an error in the arguments.
-        set script [list $rdb ungrab [$rdb grab mam_entity {eid=$eid}]]
-
-        # NEXT, make the change.
-        $self DbConfigure mam_entity [list $eid] $args
-
-        # NEXT, save the undo script
-        $self SaveUndo $script
-
-        return
-    }
-
-
-    # entity rename old new
-    #
-    # old - The old entity ID.
-    # new - The new entity ID.
-    #
-    # Renames an entity in the entities table and all
-    # dependent tables, and saves an undo script.
-
-    method {entity rename} {old new} {
-        # FIRST, Rename the entity.
-        if {[catch {
-            $self MutateEntityRename $old $new
-        } result]} {
-            error "Could not rename entity \"$old\" to \"$new\": $result"
-        }
-
-        # NEXT, if nothing happened, $old is not a valid entity ID.
-        if {[$rdb changes] == 0} {
-            error "Unknown mam_entity key: \"$old\""
-        }
-
-        # NEXT, save the undo script.
-        $self SaveUndo [list $self MutateEntityRename $new $old]
-
-        return
-    }
-
-
-    # MutateEntityRename old new
-    #
-    # old - The old entity ID.
-    # new - The new entity ID.
-    #
-    # Renames an entity in the entities table and all
-    # dependent tables.
-
-    method MutateEntityRename {old new} {
-        # FIRST, rename the entity; the dependent records
-        # will be updated automatically.
-        $rdb eval {
-            UPDATE mam_entity
-            SET   eid = $new
-            WHERE eid = $old
-        }
-    }
-
 
     #-------------------------------------------------------------------
-    # Topic Methods
+    # System typemethods
 
-    # topic names
+    # system ids
     #
-    # Returns a list of the topic IDs.
+    # Returns a list of system IDs (sids)
 
-    method {topic names} {} {
-        $rdb eval {SELECT tid FROM mam_topic ORDER BY tid}
+    typemethod {system ids} {} {
+        return $db(sids)
     }
 
-    # topic add tid ?options...?
+    # system namedict
     #
-    # tid - The new topic ID.
+    # Returns a dictionary $sid => $name for all belief systems.
+
+    typemethod {system namedict} {} {
+        set ndict [dict create]
+        foreach sid $db(sids) {
+            dict set ndict $sid [dict get $db(system-$sid) name]
+        }
+
+        return $ndict
+    }
+
+    # system add sid
     #
-    # Options:
+    # sid - a system ID (a unique token).
+    #
+    # Adds a new system with the given ID; returns the ID.
+
+    typemethod {system add} {sid} {
+        assert {![$type system exists $sid]}
+
+        lappend db(sids) $sid
+
+        set db(system-$sid) \
+            [dict create name "System $sid" {*}$defaultSystem]
+        set db(beliefs-$sid) [dict create]
+
+        # Mark data changed
+        MarkChanged
+
+        return $sid
+    }
+
+    # system set sid attr value ?attr value...?
+    # system set sid attrdict
+    #
+    # sid      - A system ID
+    # attr     - An attribute name
+    # value    - An attribute value
+    # attrdict - A dictionary of attribute names and values.
+    #
+    # Set system attributes.
+
+    typemethod {system set} {sid args} {
+        SaveAttributes system system-$sid {} [args2dict $args] 
+    }
+
+    # system get sid ?attr?
+    #
+    # sid    - A system ID
+    # attr   - An attribute name
+    #
+    # Returns the value of the named attribute, or the whole dictionary
+    # if $attr is omitted.
+
+    typemethod {system get} {sid {attr ""}} {
+        return [GetAttributes $db(system-$sid) $attr]
+    }
+
+    # system delete sid
+    #
+    # sid - A system ID
+    #
+    # Deletes the system ID. Returns the undo data for [system undelete].
+
+    typemethod {system delete} {sid} {
+        # FIRST, save the undo data.
+        set undoData \
+            [list $sid $db(sids) $db(system-$sid) $db(beliefs-$sid)]
+
+        # NEXT, remove the system and its beliefs
+        ldelete db(sids) $sid
+        unset -nocomplain db(system-$sid)
+        unset -nocomplain db(beliefs-$sid)
+
+        # Mark data changed
+        MarkChanged
+
+        # NEXT, return the undo data.
+        return $undoData
+    }
+
+    # system undelete undoData
+    #
+    # undoData - An undo data string returned by [system delete].
     # 
-    #   -title     - The topic's human-readable title
-    #   -relevance - The topic's relevance (0.0 to 1.0)
-    #   -affinity  - 1 if the topic used when computing affinity,
-    #                and 0 otherwise.
-    #
-    # Adds a new topic to the topics table.  In addition:
-    #
-    # - Adds the dependent records to the belief table.
-    # - Sets the topic's values.
+    # Undeletes the deleted system, restoring system attributes and
+    # all beliefs, under normal undo conditions, and returns the
+    # system ID.
 
-    method {topic add} {tid args} {
-        # FIRST, use a transaction, so that if there's an error
-        # in an option or option value, there will be no change
-        # to the database.
-        $rdb transaction {
-            # FIRST, add the topic records.
-            $rdb eval {
-                INSERT INTO mam_topic(tid) VALUES($tid);
+    typemethod {system undelete} {undoData} {
+        # FIRST, get the system ID.
+        set sid [lindex $undoData 0]
 
-                INSERT INTO mam_belief(eid,tid) 
-                SELECT eid, $tid FROM mam_entity;
-            }
+        # NEXT, restore the system's data.
+        set db(sids)         [lindex $undoData 1]
+        set db(system-$sid)  [lindex $undoData 2]
+        set db(beliefs-$sid) [lindex $undoData 3]
 
-            # NEXT, set the option values.
-            $self DbConfigure mam_topic [list $tid] $args
-        }
+        # Mark data changed
+        MarkChanged
 
-        $self SaveUndo [list $self MutateTopicDelete $tid]
-
-        return
+        # NEXT, return the system ID.
+        return $sid
     }
 
-    # MutateTopicDelete tid
-    #
-    # tid - The topic ID.
-    #
-    # Deletes a topic from the topics table, including 
-    # dependent records from the mam_belief table.
 
-    method MutateTopicDelete {tid} {
-        # FIRST, delete the topic record; the dependent records
-        # will be deleted automatically.
-        $rdb eval {
-            DELETE FROM mam_topic WHERE tid=$tid;
+    # system exists sid
+    #
+    # sid - A system ID
+    #
+    # Returns 1 if there's a system with the given ID, and 0 otherwise.
+
+    typemethod {system exists} {sid} {
+        return [info exists db(system-$sid)]
+    }
+
+    # system cget sid opt
+    #
+    # sid - A system ID
+    # opt - An option name.
+    #
+    # Returns an attribute using option notation.
+
+    typemethod {system cget} {sid opt} {
+        return [$type system get $sid [string range $opt 1 end]]
+    }
+
+    # system configure sid opt val ?opt val...?
+    #
+    # sid - A system ID
+    # opt - An option name.
+    # val - An option value.
+    #
+    # Configures a system using option notation.
+
+    typemethod {system configure} {sid args} {
+        return [$type system set $sid [optlist2dict $args]]
+    }
+
+    # system id name
+    #
+    # name - A system name
+    #
+    # Returns the system's id given its name, or "" if no such system is
+    # found.
+
+    typemethod {system id} {name} {
+        foreach sid $db(sids) {
+            if {[dict get $db(system-$sid) name] eq $name} {
+                return $sid
+            }
         }
+
+        return ""
+    }
+
+    # system view sid
+    #
+    # sid - A system ID
+    #
+    # Returns a formatted [system get] dictionary with the following
+    # additions:
+    #
+    #    sid - The system ID
+
+    typemethod {system view} {sid} {
+        set view [$type system get $sid]
+
+        dict set view sid $sid
+
+        dict with view {
+            set commonality [format "%.2f" $commonality]
+        }
+
+        return $view
+    }
+
+
+    
+    #-------------------------------------------------------------------
+    # Topic typemethods
+
+    # topic ids
+    #
+    # Returns a list of topic IDs (tids)
+
+    typemethod {topic ids} {} {
+        return $db(tids)
+    }
+
+    # topic namedict
+    #
+    # Returns a dictionary $tid => $name for all belief topics.
+
+    typemethod {topic namedict} {} {
+        set ndict [dict create]
+        foreach tid $db(tids) {
+            dict set ndict $tid [dict get $db(topic-$tid) name]
+        }
+
+        return $ndict
+    }
+
+    # topic add tid
+    #
+    # tid  - a topic ID (a unique token)
+    #
+    # Adds a new topic, returning the ID.
+
+    typemethod {topic add} {tid} {
+        assert {![$type topic exists $tid]}
+
+        lappend db(tids) $tid
+
+        set db(topic-$tid) \
+            [dict create name "Topic $tid" {*}$defaultTopic]
+
+        # Mark data changed
+        MarkChanged
+
+        return $tid
+    }
+
+    # topic set tid attr value ?attr value...?
+    # topic set tid attrdict
+    #
+    # tid      - A topic ID
+    # attr     - An attribute name
+    # value    - An attribute value
+    # attrdict - A dictionary of attribute names and values.
+    #
+    # Set topic attributes.
+
+    typemethod {topic set} {tid args} {
+        SaveAttributes topic topic-$tid {} [args2dict $args] 
+    }
+
+    # topic get tid ?attr?
+    #
+    # tid    - A topic ID
+    # attr   - An attribute name
+    #
+    # Returns the value of the named attribute, or the whole dictionary
+    # if $attr is omitted.
+
+    typemethod {topic get} {tid {attr ""}} {
+        return [GetAttributes $db(topic-$tid) $attr]
     }
 
     # topic delete tid
     #
-    # tid - The topic ID.
+    # tid - A topic ID
     #
-    # Deletes a topic from the topics table.  In addition:
-    #
-    # - Deletes the dependent records from the belief table.
+    # Deletes the topic ID.  If it was the most recently created entity,
+    # decrements the ID counter.  That way, [topic delete] can be used
+    # to undo [topic add].  Returns the undo data for [topic undelete].
 
-    method {topic delete} {tid} {
-        # FIRST, delete the topic and dependent data, grabbing
-        # the undo data.
-        set data [$rdb delete -grab mam_topic {tid=$tid}]
+    typemethod {topic delete} {tid} {
+        # FIRST, begin to accumulate the undo data.
+        set undoData [list $tid $db(tids) $db(topic-$tid)]
 
-        # NEXT, save the undo script if the delete succeeded.
-        $self SaveUndo [list $rdb ungrab $data]
+        # NEXT, remove the topic itself
+        ldelete db(tids) $tid
+        unset -nocomplain db(topic-$tid)
 
-        return
-    }
-
-    # topic cget tid option
-    #
-    # tid     - The topic ID
-    # option  - The name of a topic option.  See [topic add].
-    #
-    # Retrieves the value of a topic's option.
-
-    method {topic cget} {tid option} {
-        $self DbCget mam_topic [list $tid] $option
-    }
-    
-    # topic configure tid ?options...?
-    #
-    # tid      - The topic ID
-    # options  - A list of option names and values.
-    #
-    # Sets topic option values.
-
-    method {topic configure} {tid args} {
-        # FIRST, get the undo script.  Don't save it yet, as there
-        # might be an error in the arguments.
-        set script [list $rdb ungrab [$rdb grab mam_topic {tid=$tid}]]
-
-        # NEXT, make the change.
-        $self DbConfigure mam_topic [list $tid] $args
-
-        # NEXT, save the undo script
-        $self SaveUndo $script
-
-        return
-    }
-
-
-    # topic rename old new
-    #
-    # old - The old topic ID.
-    # new - The new topic ID.
-    #
-    # Renames an topic in the topics table and all
-    # dependent tables, and saves an undo script.
-
-    method {topic rename} {old new} {
-        # FIRST, Rename the topic.
-        if {[catch {
-            $self MutateTopicRename $old $new
-        } result]} {
-            error "Could not rename topic \"$old\" to \"$new\": $result"
+        # NEXT, remove any beliefs for this topic
+        foreach sid $db(sids) {
+            if {[dict exists $db(beliefs-$sid) $tid]} {
+                lappend undoData $sid [dict get $db(beliefs-$sid) $tid]
+                dict unset db(beliefs-$sid) $tid
+            }
         }
 
-        # NEXT, if nothing happened, $old is not a valid topic ID.
-        if {[$rdb changes] == 0} {
-            error "Unknown mam_topic key: \"$old\""
-        }
+        # Mark data changed
+        MarkChanged
 
-        # NEXT, save the undo script.
-        $self SaveUndo [list $self MutateTopicRename $new $old]
-
-        return
+        return $undoData
     }
 
-
-    # MutateTopicRename old new
+    # topic undelete undoData
     #
-    # old - The old topic ID.
-    # new - The new topic ID.
-    #
-    # Renames an topic in the topics table and all
-    # dependent tables.
+    # undoData - An undo data string returned by [topic delete].
+    # 
+    # Undeletes the deleted topic, restoring topic attributes and
+    # all beliefs, under normal undo conditions, and returns the
+    # topic ID.
 
-    method MutateTopicRename {old new} {
-        # FIRST, rename the topic; the dependent records
-        # will be updated automatically.
-        $rdb eval {
-            UPDATE mam_topic
-            SET   tid = $new
-            WHERE tid = $old
+    typemethod {topic undelete} {undoData} {
+        # FIRST, get the topic ID.
+        set tid [lindex $undoData 0]
+
+        # NEXT, restore the topic's ID to the list.
+        set db(tids) [lindex $undoData 1]
+
+        # NEXT, restore the topic's data
+        set db(topic-$tid) [lindex $undoData 2]
+
+        # NEXT, restore the topic's beliefs
+        foreach {sid bdata} [lrange $undoData 3 end] {
+            dict set db(beliefs-$sid) $tid $bdata
         }
+
+        # NEXT, mark changed
+        MarkChanged
+
+        # NEXT, return the topic ID.
+        return $tid
+    }
+
+    # topic exists tid
+    #
+    # tid - A topic ID
+    #
+    # Returns 1 if there's a topic with the given ID, and 0 otherwise.
+
+    typemethod {topic exists} {tid} {
+        return [info exists db(topic-$tid)]
+    }
+
+    # topic cget tid opt
+    #
+    # tid - A topic ID
+    # opt - An option name.
+    #
+    # Returns an attribute using option notation.
+
+    typemethod {topic cget} {tid opt} {
+        return [$type topic get $tid [string range $opt 1 end]]
+    }
+
+    # topic configure tid opt val ?opt val...?
+    #
+    # tid - A topic ID
+    # opt - An option name.
+    # val - An option value.
+    #
+    # Configures a topic using option notation.
+
+    typemethod {topic configure} {tid args} {
+        return [$type topic set $tid [optlist2dict $args]]
+    }
+
+    # topic id name
+    #
+    # name - A topic name
+    #
+    # Returns the topic's id given its name, or "" if no such topic is
+    # found.
+
+    typemethod {topic id} {name} {
+        foreach tid $db(tids) {
+            if {[dict get $db(topic-$tid) name] eq $name} {
+                return $tid
+            }
+        }
+
+        return ""
+    }
+
+    # topic view tid
+    #
+    # tid - A topic ID
+    #
+    # Returns a formatted [topic get] dictionary with the following
+    # additions:
+    #
+    #    tid   - The topic ID
+    #    aflag - The affinity flag as a human-readable string
+
+    typemethod {topic view} {tid} {
+        set view [$type topic get $tid]
+
+        dict with view {}
+
+        dict set view tid       $tid
+        dict set view aflag     [expr {$affinity ? "Yes" : "No"}]
+        dict set view relevance [format "%.2f" $relevance]
+
+        return $view
     }
 
     #-------------------------------------------------------------------
-    # Belief methods
-    
-    # belief cget eid tid option
-    #
-    # eid     - The entity ID
-    # tid     - The topic ID
-    # option  - The name of a belief option.  See [belief configure].
-    #
-    # Retrieves the value of a belief's option.
+    # Belief typemethods
 
-    method {belief cget} {eid tid option} {
-        $self DbCget mam_belief [list $eid $tid] $option
+    # belief set sid tid attr value ?attr value...?
+    # belief set sid tid attrdict
+    #
+    # sid      - A system ID
+    # tid      - A topic ID
+    # attr     - An attribute name
+    # value    - An attribute value
+    # attrdict - A dictionary of attribute names and values.
+    #
+    # Set belief attributes.
+
+    typemethod {belief set} {sid tid args} {
+        # FIRST, ensure sid and tid exist.
+        if {![info exists db(system-$sid)]} {
+            error "Invalid system"
+        }
+
+        if {![info exists db(topic-$tid)]} {
+            error "Invalid topic"
+        }
+
+        # NEXT, if there's no belief created yet for this sid and tid, 
+        # put in the default.
+        if {![dict exists $db(beliefs-$sid) $tid]} {
+            dict set db(beliefs-$sid) $tid $defaultBelief
+        }
+
+        # NEXT, save the new attributes.
+        SaveAttributes belief beliefs-$sid $tid [args2dict $args] 
     }
-    
-    # belief configure eid tid ?options...?
+
+    # belief get sid tid ?attr?
     #
-    # eid      - The entity ID
-    # tid      - The topic ID
-    # options  - A list of option names and values.
+    # sid    - A system ID
+    # tid    - A topic ID
+    # attr   - An attribute name
     #
-    # Sets belief option values.
+    # Returns the value of the named attribute, or the whole dictionary
+    # if $attr is omitted.
 
-    method {belief configure} {eid tid args} {
-        # FIRST, get the undo script.  Don't save it yet, as there
-        # might be an error in the arguments.
-        set rows [$rdb grab mam_belief {eid=$eid AND tid=$tid}]
+    typemethod {belief get} {sid tid {attr ""}} {
+        if {[dict exists $db(beliefs-$sid) $tid]} {
+            set bdict [dict get $db(beliefs-$sid) $tid]
+        } else {
+            set bdict [dict create {*}$defaultBelief]
+        }
 
-        # NEXT, make the change.
-        $self DbConfigure mam_belief [list $eid $tid] $args
-
-        # NEXT, save the undo script
-        $self SaveUndo [list $rdb ungrab $rows]
-
-        return
+        return [GetAttributes $bdict $attr]
     }
+
+    # belief cget sid tid opt
+    #
+    # sid - A system ID
+    # tid - A topic ID
+    # opt - An option name.
+    #
+    # Returns an attribute using option notation.
+
+    typemethod {belief cget} {sid tid opt} {
+        return [$type belief get $sid $tid [string range $opt 1 end]]
+    }
+
+    # belief configure sid tid opt val ?opt val...?
+    #
+    # sid - A system ID
+    # tid - A topic ID
+    # opt - An option name.
+    # val - An option value.
+    #
+    # Configures a belief using option notation.
+
+    typemethod {belief configure} {sid tid args} {
+        return [$type belief set $sid $tid [optlist2dict $args]]
+    }
+
+    # belief view sid tid
+    #
+    # sid - A system ID
+    # tid - A topic ID
+    #
+    # Returns a formatted [belief get] dictionary with the following
+    # additions:
+    #
+    #    sid - The system ID
+    #    tid - The belief ID
+
+    typemethod {belief view} {sid tid} {
+        set view [$type belief get $sid $tid]
+
+        set p [dict get $view position]
+        set e [dict get $view emphasis]
+
+        dict set view sid      $sid
+        dict set view tid      $tid
+        dict set view position [::simlib::qposition name $p]
+        dict set view emphasis [::simlib::qemphasis name $e]
+        dict set view textpos  [::simlib::qposition longname $p]
+        dict set view textemph [::simlib::qemphasis longname $e]
+
+        return $view
+    }
+
 
     #-------------------------------------------------------------------
-    # Computation
+    # Affinity Computation
+
+    # affinity sid1 sid2
     #
-    # This section contains the code that actually computes affinities.
+    # sid1 - A system ID
+    # sid2 - A system ID
+    #
+    # Returns the affinity of sid1 for sid2, computing it if need be.
+
+    typemethod affinity {sid1 sid2} {
+        if {![dict exists $cache affinity $sid1 $sid2]} {
+            $type ComputeAffinity $sid1 $sid2
+        }
+
+        return [dict get $cache affinity $sid1 $sid2]
+    }
 
     # compute
     #
-    # Computes the affinities for all pairs of entities using the
-    # newest RGC method.
+    # Computes the affinity of every system for every other system,
+    # based on the topics for which the affinity flag is set.
+    # Clears the cache before proceeding.
 
-    method compute {} {
-        # FIRST, retrieve gamma and compute the commonality of the
-        # playbox, eta.playbox.
-        set gamma [$rdb onecolumn {SELECT gamma FROM mam_playbox}]
+    typemethod compute {} {
+        set cache [dict create]
+        $type ComputeAffinity $db(sids) $db(sids)
+    }
 
-        set totalRelevance [$rdb onecolumn {
-            SELECT total(relevance) FROM mam_topic
-            WHERE affinity = 1
-        }]
+    # ComputeAffinity asids bsids
+    #
+    # asids  - "a" system IDs
+    # bsids  - "b" system IDs
+    #
+    # Computes affinity.ab for all systems A and all systems B.
 
-        let etaPlaybox {$gamma*$totalRelevance}
+    typemethod ComputeAffinity {asids bsids} {
+        # FIRST, get the affinity topics and compute eta.playbox.
+        set atids      [$type Cache_atids]
+        set etaPlaybox [$type Cache_etaPlaybox]
 
-        # NEXT, get each entity's participation in the commonality
-        # of the playbox, theta:
-
-        array set theta [$rdb eval {
-            SELECT eid, commonality FROM mam_entity
-        }]
-        
-
-        # NEXT, Get each entity's signs, strengths, and emphases.
-        # The entity's position is attenuated by the relevance of the
-        # topic.
-        set count 0
-        $rdb eval {
-            SELECT B.eid                    AS eid, 
-                   B.position * T.relevance AS position, 
-                   B.emphasis               AS emphasis
-            FROM mam_belief AS B
-            JOIN mam_topic  AS T USING (tid)
-            WHERE T.affinity = 1
-            ORDER by eid, tid
-        } {
-            incr count
-
-            lappend P($eid)   $position
-            lappend tau($eid) $emphasis
-        }
-
-        # NEXT, if there's no data just set all affinities to zero.
-        if {$count == 0} {
-            $rdb eval {
-                UPDATE mam_affinity SET affinity = 0.0
+        # NEXT, if we have no affinity tactics we're done.  All affinities
+        # are 1.0.
+        if {[llength $atids] == 0} {
+            foreach s1 $asids {
+                foreach s2 $bsids {
+                    dict set cache affinity $s1 $s2 [expr {0.0}]
+                }
             }
 
             return
         }
 
-        # NEXT, compute the affinity for each pair of entities.
-        $rdb eval {
-            SELECT F.eid AS f,
-                   G.eid AS g
-            FROM mam_entity AS F
-            JOIN mam_entity AS G
-        } {
-            let eta {$etaPlaybox * min($theta($f),$theta($g))}
+        # NEXT, compute the affinity for each pair of entities.  If there 
+        # are no affinity topics, then all affinities are zero.
 
-            set a [Affinity $eta $P($f) $tau($f) $P($g)]
+        foreach s1 $asids {
+            foreach s2 $bsids {
+                set theta1 [dict get $db(system-$s1) commonality]
+                set theta2 [dict get $db(system-$s2) commonality]
 
-            $rdb eval {
-                UPDATE mam_affinity
-                SET affinity=$a
-                WHERE f=$f AND g=$g
+                let eta {$etaPlaybox * min($theta1,$theta2)}
+
+                $type Cache_PTau $s1 $atids
+                $type Cache_PTau $s2 $atids
+
+                set P1  [dict get $cache P $s1]
+                set tau [dict get $cache tau $s1]
+                set P2  [dict get $cache P $s2]
+
+                dict set cache affinity $s1 $s2 \
+                   [Affinity $eta $P1 $tau $P2]
             }
         }
     }
 
-    # congruence eid theta hook
+    # Cache_atids
     #
-    # eid     - An entity ID.
-    # theta   - The hook's entity commonality, 0.0 to 1.0
+    # Returns the list of affinity topics, using the cache.
+
+    typemethod Cache_atids {} {
+        if {![dict exists $cache atids]} {
+            set atids [list]
+            foreach tid $db(tids) {
+                if {[dict get $db(topic-$tid) affinity]} {
+                    lappend atids $tid
+                }
+            }
+            dict set cache atids $atids
+        }
+
+        return [dict get $cache atids]
+    }
+
+    # Cache_etaPlaybox
+    #
+    # Returns etaPlaybox for the affinity topics.
+
+    typemethod Cache_etaPlaybox {} {
+        if {![dict exists $cache etaPlaybox]} {
+            dict set cache etaPlaybox [etaPlaybox [$type Cache_atids]]
+        }
+
+        return [dict get $cache etaPlaybox]
+    }
+
+    # Cache_PTau sid atids
+    #
+    # sid   - A system ID
+    # atids - The affinity topic IDs
+    #
+    # Caches the list of P and tau values for the system, given the
+    # affinity topics.  Does nothing if the data is already cached.
+
+    typemethod Cache_PTau {sid atids} {
+        if {[dict exists $cache P $sid]} {
+            return
+        }
+
+        set pList [list]
+        set tauList [list]
+
+        foreach tid $atids {
+            set rel [dict get $db(topic-$tid) relevance]
+            lassign [getBelief $sid $tid] pos emph
+
+            lappend pList   [expr {$pos*$rel}]
+            lappend tauList $emph
+        }
+
+        dict set cache P $sid $pList
+        dict set cache tau $sid $tauList
+    }
+
+    # congruence sid theta hook
+    #
+    # sid     - A system ID.
+    # theta   - The hook's system commonality, 0.0 to 1.0
     # hook    - A dictionary {tid -> position}
     #
-    # Computes the congruence of the hook with the entity,
-    # given the hook's entity commonality.  Essentially, 
-    # the congruence of the hook with an entity is simply the 
-    # affinity of the entity with the hook considering only the
+    # Computes the congruence of the hook with the system,
+    # given the hook's system commonality.  Essentially, 
+    # the congruence of the hook with a belief system is simply the 
+    # affinity of the system with the hook considering only the
     # explicit topics included in the hook, along with the 
     # implicit topics implied by the playbox commonality setting
-    # and the entity's and hook's entity commonality.
+    # and the system's and hook's system commonality.
 
-    method congruence {eid theta hook} {
+    typemethod congruence {sid theta hook} {
         # FIRST, if there are no topics in the hook, return 0.0.
         if {[dict size $hook] == 0} {
             return 0.0
         }
 
-        # NEXT, create an "IN" clause for the topics in the hook.
-        set topics [dict keys $hook]
-        set topicSet "('[join $topics ',']')"
-        
-        # NEXT, retrieve gamma and compute the commonality of the
-        # playbox, eta.playbox, for the topics in the topic set.
-        set gamma [$rdb onecolumn {SELECT gamma FROM mam_playbox}]
+        # NEXT, compute eta.playbox for the topics in the topic set.
+        set etaPlaybox [etaPlaybox [dict keys $hook]]
 
-        set totalRelevance [$rdb onecolumn "
-            SELECT total(relevance) FROM mam_topic
-            WHERE tid IN $topicSet
-        "]
+        # NEXT, get sid's entity commonality, and compute eta.
 
-        let etaPlaybox {$gamma*$totalRelevance}
-
-        # NEXT, get eid's entity commonality, and compute eta.
-        set eid_theta [$rdb onecolumn {
-            SELECT commonality FROM mam_entity WHERE eid=$eid
-        }]
-        
-        let eta {$etaPlaybox * min($eid_theta, $theta)}
+        set sid_theta [dict get $db(system-$sid) commonality]
+       
+        let eta {$etaPlaybox * min($sid_theta, $theta)}
 
         # NEXT, Get the entity's signs, strengths, and emphases.
         # The entity's position is attenuated by the relevance of the
         # topic.
-        $rdb eval "
-            SELECT B.position   AS position, 
-                   B.emphasis   AS emphasis,
-                   B.tid        AS tid,
-                   T.relevance  AS relevance
-            FROM mam_belief AS B
-            JOIN mam_topic  AS T USING (tid)
-            WHERE eid=\$eid AND tid IN $topicSet
-            ORDER by tid
-        " {
-            lappend ePos [expr {$relevance * $position}]
-            lappend hPos [expr {$relevance * [dict get $hook $tid]}]
-            lappend tau $emphasis
+
+        foreach tid [dict keys $hook] {
+            set rel [dict get $db(topic-$tid) relevance]
+            lassign [getBelief $sid $tid] pos emph
+
+            lappend ePos [expr {$rel * $pos}]
+            lappend hPos [expr {$rel * [dict get $hook $tid]}]
+            lappend tau $emph
+
         }
 
         return [Affinity $eta $ePos $tau $hPos]
     }
 
+
+
+    # getBelief sid tid
+    #
+    # sid  - A system ID
+    # tid  - A topic ID
+    #
+    # Returns a list of the position and emphasis for the belief, 
+    # providing the default values if nothing's been set.
+
+    proc getBelief {sid tid} {
+        if {[dict exists $db(beliefs-$sid) $tid]} {
+            set bdict [dict get $db(beliefs-$sid) $tid]
+        } else {
+            set bdict [dict create {*}$defaultBelief]
+        }
+
+        list \
+            [dict get $bdict position] \
+            [dict get $bdict emphasis]
+    }
+
+    # etaPlaybox tlist
+    #
+    # tlist   - A list of topics
+    #
+    # Computes the playbox commonality for the topics in the tlist.
+
+    proc etaPlaybox {tlist} {
+        # FIRST, retrieve gamma and compute eta.playbox.
+        set gamma [dict get $db(playbox) gamma]
+
+        set totalRelevance 0.0
+
+        foreach tid $tlist {
+            set totalRelevance [expr {
+                $totalRelevance + [dict get $db(topic-$tid) relevance]
+            }]
+        }
+
+        return [expr {$gamma*$totalRelevance}]
+    }
+
+    
     # Affinity $eta pfList eList pgList
     #
     # eta     - A measure of the commonality between the entities
@@ -861,233 +1038,195 @@ snit::type ::simlib::mam {
     }
 
     #-------------------------------------------------------------------
-    # edit
+    # Debugging aids
+
+    # dump
     #
-    # This family of subcommands is patterned after the Tk text
-    # widget's "edit" command.
+    # Debugging dump
 
-    # edit reset
-    #
-    # Clears the undo stack.
+    typemethod dump {} {
+        set out ""
+        append out "playbox:     $db(playbox)\n"
+        append out "sids:        $db(sids)\n"
+        append out "tids:        $db(tids)\n"
 
-    method {edit reset} {} {
-        $rdb eval {DELETE FROM mam_undo}
-    }
-
-    # edit undo
-    #
-    # Undoes the last operation.  It's an error if there's nothing
-    # to undo.
-
-    method {edit undo} {} {
-        # FIRST, get the maximum id from the mam_undo table.
-        set id ""
-
-        $rdb eval {
-            -- Note: Retrieving "script" in this way only works
-            -- reliably when there is exactly one row for which
-            -- "id" has the maximum value.
-            SELECT MAX(id) AS id, script
-            FROM mam_undo
-        } {}
-
-        if {$id eq ""} {
-            error "nothing to undo"
+        append out "\n"
+        foreach tid $db(tids) {
+            append out "topic-$tid:  $db(topic-$tid)\n"
         }
 
-        # NEXT, delete the script from the undo stack
-        $rdb eval {
-            DELETE FROM mam_undo WHERE id=$id
+        foreach sid $db(sids) {
+            append out "\n"
+            append out "system-$sid: $db(system-$sid)\n"
+            foreach tid $db(tids) {
+                append out "belief $tid: [getBelief $sid $tid]]\n"
+            }
         }
 
-        # NEXT, execute the script
-        namespace eval :: $script
-
-        return
-    }
-
-    # edit canundo
-    #
-    # Returns 1 if there's anything on the undo stack, and 0 otherwise.
-
-    method {edit canundo} {} {
-        $rdb exists { SELECT * FROM mam_undo }
-    }
-
-
-    # SaveUndo script
-    #
-    # Saves an undo script in the mam_undo table, provided that 
-    # undo is enabled.
-
-    method SaveUndo {script} {
-        if {!$options(-undo)} {
-            return
+        if {[dict size $cache] == 0} {
+            return $out
         }
 
-        $rdb eval {
-            INSERT INTO mam_undo(script) VALUES($script)
+        append out "\n"
+        dict for {s1 sdict} [dict get $cache affinity] {
+            dict for {s2 affinity} $sdict {
+                append out \
+                "affinity $s1,$s2 = $affinity\n"
+
+            }
         }
+
+        return $out
     }
+
+    
 
     #-------------------------------------------------------------------
-    # Other Public Methods
+    # Utility Procedures
 
-    # clear
+    # SaveAttributes etype dictname keylist adict
     #
-    # Uninitializes mam, returning it to its initial state on 
-    # creation and deleting all of the instance's data from the rdb.
-    # This command is not undoable.
-
-    method clear {} {
-        # FIRST, Clear the RDB
-        $self ClearTables clear
-    }
-
-    # ClearTables mode
+    # etype     - The entity type, used in error message
+    # dictname  - The dictionary name in db()
+    # keylist   - Any nested keys, or "" for none
+    # adict     - The attribute dictionary
     #
-    # mode - clear|destroy
-    #
-    # Deletes all data from the mam.sql tables for this instance.
-    # If mode is "clear", then mam_playbox is retained but reset; we should 
-    # always have one record in that table.
+    # Saves the attributes in the db() dictionary.  Verifies
+    # attribute names.
 
-    method ClearTables {mode} {
-        $rdb eval {
-            -- The dependent records are deleted automatically
-            DELETE FROM mam_entity;
-            DELETE FROM mam_topic;
-            DELETE FROM mam_undo;
+    proc SaveAttributes {etype dictname keylist adict} {
+        # FIRST, verify that the dictname exists
+        if {![info exists db($dictname)]} {
+            error "Invalid $etype"
         }
 
-        if {$mode eq "clear"} {
-            $rdb eval {
-                INSERT OR REPLACE INTO 
-                mam_playbox(pid,gamma) 
-                VALUES(1,1.0)
+        # NEXT, save the data
+        dict for {attr value} $adict {
+            if {[dict exists $db($dictname) {*}$keylist $attr]} {
+                dict set db($dictname) {*}$keylist $attr $value 
+            } else {
+                error "Invalid $etype attribute: $attr"
             }
+        }
+
+        # NEXT, clear the cache; any computation might be invalid.
+        MarkChanged
+    }
+
+    # GetAttributes adict attr
+    #
+    # adict - An attribute dictionary.
+    # attr  - The attribute name, or ""
+    #
+    # Retrieves the named attribute, or the whole dictionary if "".
+
+    proc GetAttributes {adict attr} {
+        if {$attr eq ""} {
+            return $adict
         } else {
-            $rdb eval {
-                DELETE FROM mam_playbox;
-            }
+            return [dict get $adict $attr]
         }
     }
 
+    # args2adict argv
+    #
+    # argv   - An argument list
+    #
+    # If argv is one item, extract its first entry; otherwise return it.
+    # This is used in commands that can take a dictionary as individual
+    # arguments or as a single value.
+
+    proc args2dict {argv} {
+        if {[llength $argv] == 1} {
+            return [lindex $argv 0]
+        } else {
+            return $argv
+        }
+    }
+
+    # optlist2dict optlist
+    #
+    # optlist - A list of option names and values
+    #
+    # Returns the optlist as a dictionary, with the hyphens removed.
+
+    proc optlist2dict {optlist} {
+        foreach {opt val} $optlist {
+            dict set result [string range $opt 1 end] $val
+        }
+
+        return $result
+    }
+
+    # dict2optlist optlist
+    #
+    # dict - An attribute dictionary
+    #
+    # Returns the dictionary as an option list, adding hyphens to the
+    # key names.
+
+    proc dict2optlist {dict} {
+        dict for {attr val} $dict {
+            lappend result -$attr $value
+        }
+
+        return $result
+    }
+   
     #-------------------------------------------------------------------
-    # Generic DB Methods
+    # saveable(i) interface
+
+    # checkpoint ?-saved?
     #
-    # These routines implement a generic way to set and get table
-    # column values using a configure/cget interface.  The specifics
-    # of the table are defined in the tableInfo array, and then the
-    # public interface calls the Db* interface.
+    # Returns a checkpoint of the non-RDB simulation data.  If 
+    # -saved is specified, the data is marked unchanged.
 
-    # Table Info Array
-    #
-    # This table contains data used by the generic routines.
-    #
-    # $table-keys      - List of names of primary key columns.
-    # $table-options   - List of names of table options
-    # $table-where     - Where clause
+    typemethod checkpoint {{option ""}} {
+        if {$option eq "-saved"} {
+            set db(changed) 0
+        }
 
-    typevariable tableInfo -array {
-        mam_playbox-keys    {pid}
-        mam_playbox-options {-gamma}
-        mam_playbox-where   {WHERE pid=$key(pid)}
-
-        mam_entity-keys     eid
-        mam_entity-options  {-commonality}
-        mam_entity-where    {WHERE eid=$key(eid)}
-
-        mam_topic-keys      tid
-        mam_topic-options   {-title -relevance -affinity}
-        mam_topic-where     {WHERE tid=$key(tid)}
-
-        mam_belief-keys     {eid tid}
-        mam_belief-options  {-position -emphasis}
-        mam_belief-where    {WHERE eid=$key(eid) AND tid=$key(tid)}
+        return [array get db]
     }
 
-    # DbCget table keyVals option
+    # restore checkpoint ?-saved?
     #
-    # table    - The name of the table
-    # keyVals  - A list of the values of the key fields
-    # option   - The name of the option to retrieve.
+    # checkpoint - A string returned by the checkpoint typemethod
     #
-    # Retrieves the value of a table column
+    # Restores the non-RDB state of the module to that contained
+    # in the checkpoint.  If -saved is specified, the data is marked
+    # unchanged.
+    
+    typemethod restore {checkpoint {option ""}} {
+        # FIRST, restore the checkpoint data
+        $type clear
+        array set db $checkpoint
 
-    method DbCget {table keyVals option} {
-        # FIRST, get the key array
-        foreach name $tableInfo($table-keys) val $keyVals {
-            set key($name) $val
+        if {$option eq "-saved"} {
+            set db(changed) 0
         }
-
-        # NEXT, get the column name
-        if {$option in $tableInfo($table-options)} {
-            set colname [string range $option 1 end]
-        } else {
-            error "Unknown $table option: \"$option\""
-        }
-
-        # NEXT, get the value
-        $rdb eval "
-            SELECT $colname FROM $table 
-            $tableInfo($table-where)
-        " row {
-            return $row($colname)
-        }
-
-        # NEXT, there's no such tid.
-        error "Unknown $table key: \"$keyVals\""
     }
 
-    # DbConfigure table keyVals optList
+    # changed
     #
-    # table     - The name of a table in tableInfo
-    # keyVals   - A list of the values of the key field(s)
-    # optList   - A list of option names and values.
+    # Returns 1 if saveable(i) data has changed, and 0 otherwise.
     #
-    # Sets column values in the row specified by the
-    # keyVals.  If there is an
-    # error in one of the options or values, the database
-    # will be rolled back (provided rollbacks are enabled,
-    # and that this routine wasn't called from within a wider
-    # transaction).
+    # Syntax:
+    #   changed
 
-    method DbConfigure {table keyVals optList} {
-        # FIRST, get the key array
-        foreach name $tableInfo($table-keys) val $keyVals {
-            set key($name) $val
-        }
-
-        # NEXT, do this in a transaction, so that an error doesn't
-        # change the database.
-        $rdb transaction {
-            while {[llength $optList] > 0} {
-                set opt [lshift optList]
-
-                if {$opt in $tableInfo($table-options)} {
-                    set colname [string range $opt 1 end]
-                    set value   [lshift optList]
-
-                    if {[catch {
-                        $rdb eval "
-                            UPDATE $table
-                            SET $colname = \$value
-                            $tableInfo($table-where)
-                        "
-                    } result]} {
-                        error "Invalid $table $opt: $result"
-                    }
-
-                    if {[$rdb changes] == 0} {
-                        error "Unknown $table key: \"$keyVals\""
-                    }
-                } else {
-                    error "Unknown $table option: \"$opt\""
-                }
-            }
-        }
-
-        return
+    typemethod changed {} {
+        return $db(changed)
     }
+
+    # MarkChanged
+    #
+    # Sets the changed flag, and clears the cache.
+
+    proc MarkChanged {} {
+        set db(changed) 1
+        set cache [dict create]
+    }
+
+
 }
+
