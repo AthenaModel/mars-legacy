@@ -1230,7 +1230,7 @@ plus(a,b,c)  6
     } -result {{SELECT * FROM mytab} {selectid  0
 order     0
 from      0
-detail    SCAN TABLE mytab (~1000000 rows)
+detail    SCAN TABLE mytab
 }}
 
     #-------------------------------------------------------------------

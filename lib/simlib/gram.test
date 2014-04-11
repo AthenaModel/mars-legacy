@@ -2078,6 +2078,7 @@ ORGB  0.0000
                    format('%4.1f',acontrib) AS acontrib
             FROM gram_sat_contribs
             WHERE driver != 0
+            ORDER BY driver, n, g, c
         }]
     } -cleanup {
         cleanup
@@ -2112,6 +2113,7 @@ time driver n  g    c   acontrib
                    format('%4.1f',acontrib) AS acontrib
             FROM gram_sat_contribs
             WHERE driver != 0
+            ORDER BY time, driver, n, g, c
         }]
     } -cleanup {
         cleanup
@@ -2459,7 +2461,10 @@ time delta n  f    g
     } -body {
         jr sat adjust 1 N1 SHIA AUT 5
         jr sat adjust 2 N1 KURD CUL 3
-        pprint [rdb query {SELECT * FROM gram_sat_contribs}]
+        pprint [rdb query {
+            SELECT * FROM gram_sat_contribs
+            ORDER BY time, driver
+        }]
     } -cleanup {
         cleanup
     } -result {
@@ -2737,7 +2742,10 @@ time driver acontrib curve_id n  g    c
     } -body {
         jr sat set 1 N1 SHIA AUT 5
         jr sat set 2 N1 KURD CUL 3
-        pprint [rdb query {SELECT * FROM gram_sat_contribs}]
+        pprint [rdb query {
+            SELECT * FROM gram_sat_contribs
+            ORDER BY time, driver
+        }]
     } -cleanup {
         cleanup
     } -result {
