@@ -9,6 +9,22 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.34, 14 April 2014</h3>
+This build contains a complete reimplementation of mam(n) to be pure Tcl rather
+than SQLite based.  There is also an upgrade to Tcl/Tk 8.6 along with a number
+of bug fixes.<p>
+
+<ul>
+<li> Bug 4450: Mars: sqlite 3.8.3 test failures
+<li> Bug 4448: mam(n): Reimplementation
+<li> Bug 4445: dynaform(n): "disp" field type gets -textcmd option
+<li> Bug 4444: marsicons(n): New "Pencil B" icon
+<li> Bug 4443: cli(n): default text color is too dark
+<li> Bug 4440: Tcl/Tk 8.6 upgrade
+<li> Bug 4436: marsicons(n): New "+T" icon
+<li> Bug 4432: databrowser(n): Data Table Browser 
+</ul><p>
+
 <h3>Build 2.33, 13 March 2014</h3>
 This build adds a new rectangular projection to mars and updates the 
 projection(i) interface with a new method for use by clients that need to
