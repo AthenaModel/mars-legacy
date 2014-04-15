@@ -1,13 +1,13 @@
 # -*-Tcl-*-
 #-----------------------------------------------------------------------
 # TITLE:
-#    mapref.test
+#    maprect.test
 #
 # AUTHOR:
-#    Will Duquette
+#    Dave Hanks
 #
 # DESCRIPTION:
-#    Tcltest test suite for marsutil(n), mapref.tcl
+#    Tcltest test suite for marsutil(n), maprect.tcl
 #
 #-----------------------------------------------------------------------
 
