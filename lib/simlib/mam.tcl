@@ -680,6 +680,8 @@ snit::type ::simlib::mam {
         dict set view emphasis [::simlib::qemphasis name $e]
         dict set view textpos  [::simlib::qposition longname $p]
         dict set view textemph [::simlib::qemphasis longname $e]
+        dict set view numpos   $p
+        dict set view numemph  $e
 
         return $view
     }
