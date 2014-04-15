@@ -43,16 +43,26 @@ namespace eval ::marsutil::test {
     # Setup for tests
 
     proc setup {} {
-        maprect proj -width 1500   \
-                    -height 1000  \
-                    -minlon 30.0  \
-                    -maxlon 35.0  \
-                    -minlat -10.0 \
-                    -maxlat 10.0 
+        maprect proj -width 1500 \
+                    -height 1000 \
+                    -minlon 2.0  \
+                    -maxlon 4.0  \
+                    -minlat 2.0  \
+                    -maxlat 6.0 
     }
 
     proc cleanup {} {
         proj destroy
+    }
+
+    proc formatloc {latlon} {
+        foreach {lat lon} $latlon {
+            set flat [format "%.4f" $lat]
+            set flon [format "%.4f" $lon]
+            lappend result $flat $flon
+        }
+
+        return $result
     }
 
     #-------------------------------------------------------------------
@@ -80,113 +90,113 @@ namespace eval ::marsutil::test {
         proj c2m 100 0 0
     } -cleanup {
         cleanup
-    } -result {10.0 30.0}
+    } -result {6.0 2.0}
 
     test c2m-1.2 {Convert bounds} -setup setup -body {
         proj c2m 100 1500 1000
     } -cleanup {
         cleanup
-    } -result {-10.0 35.0}
+    } -result {2.0 4.0}
 
     test c2m-1.3 {Convert midpoint} -setup setup -body {
         proj c2m 100 750 500
     } -cleanup {
         cleanup
-    } -result {0.0 32.5}
+    } -result {4.0 3.0}
 
     test c2m-1.4 {Convert bounds} -setup setup -body {
         proj c2m 200 3000 2000
     } -cleanup {
         cleanup
-    } -result {-10.0 35.0}
+    } -result {2.0 4.0}
     
 
     #-------------------------------------------------------------------
     # c2ref
 
     test c2ref-1.1 {Convert origin} -setup setup -body {
-        # Corresponds to upper left corner (10.0 lat, 30.0 lon)
+        # Corresponds to upper left corner (6.0 lat, 2.0 lon)
         proj c2ref 100 0 0
     } -cleanup {
         cleanup
-    } -result {36PSS7107106909}
+    } -result {31NCG8932563306}
 
     test c2ref-1.2 {Convert bounds} -setup setup -body {
         proj c2ref 100 1500 1000
     } -cleanup {
         cleanup
-    } -result {36LYP1923393923}
+    } -result {31NFC1121321095}
 
     test c2ref-1.3 {Convert midpoint} -setup setup -body {
         proj c2ref 100 750 500
     } -cleanup {
         cleanup
-    } -result {36NVF4436200000}
+    } -result {31NEE0000042127}
 
-    test c2ref-1.4 {Convert with zoom} -setup setup -body {
-        proj c2ref 200 3000 2000
+    test c2ref-1.4 {Convert with zoom; midpoint} -setup setup -body {
+        proj c2ref 200 1500 1000
     } -cleanup {
         cleanup
-    } -result {36LYP1923393923}
+    } -result {31NEE0000042127}
 
     #-------------------------------------------------------------------
     # c2loc
 
     test c2loc-1.1 {Convert origin} -setup setup -body {
-        # Corresponds to upper left corner (10.0 lat, 30.0 lon)
+        # Corresponds to upper left corner (6.0 lat, 2.0 lon)
         proj c2loc 100 0 0
     } -cleanup {
         cleanup
-    } -result {36PSS711069 (10.0000, 30.0000)}
+    } -result {31NCG893633 (6.0000, 2.0000)}
 
     test c2loc-1.2 {Convert bounds} -setup setup -body {
         proj c2loc 100 1500 1000
     } -cleanup {
         cleanup
-    } -result {36LYP192939 (-10.0000, 35.0000)}
+    } -result {31NFC112211 (2.0000, 4.0000)}
 
     test c2loc-1.3 {Convert midpoint} -setup setup -body {
         proj c2loc 100 750 500
     } -cleanup {
         cleanup
-    } -result {36NVF444000 (0.0000, 32.5000)}
+    } -result {31NEE000421 (4.0000, 3.0000)}
 
-    test c2loc-1.4 {Convert with zoom} -setup setup -body {
-        proj c2loc 200 3000 2000
+    test c2loc-1.4 {Convert with zoom; midpoint} -setup setup -body {
+        proj c2loc 200 1500 1000
     } -cleanup {
         cleanup
-    } -result {36LYP192939 (-10.0000, 35.0000)}
+    } -result {31NEE000421 (4.0000, 3.0000)}
 
 
     #-------------------------------------------------------------------
     # m2c
 
     test m2c-1.1 {Convert origin} -setup setup -body {
-        proj m2c 100 10.0 30.0
+        proj m2c 100 6.0 2.0
     } -cleanup {
         cleanup
     } -result {0 0}
 
     test m2c-1.2 {Convert bounds} -setup setup -body {
-        proj m2c 100 -10.0 35.0
+        proj m2c 100 2.0 4.0
     } -cleanup {
         cleanup
     } -result {1500 1000}
 
     test m2c-1.3 {Convert midpoint} -setup setup -body {
-        proj m2c 100 0.0 32.5
+        proj m2c 100 4.0 3.0
     } -cleanup {
         cleanup
     } -result {750 500}
 
     test m2c-1.4 {Convert with zoom} -setup setup -body {
-        proj m2c 200 -10.0 35.0
+        proj m2c 200 2.0 4.0
     } -cleanup {
         cleanup
     } -result {3000 2000}
 
     test m2c-1.5 {Convert many} -setup setup -body {
-        proj m2c 100 10.0 30.0 0.0 32.5 -10.0 35.0 
+        proj m2c 100 6.0 2.0 4.0 3.0 2.0 4.0 
     } -cleanup {
         cleanup
     } -result {0 0 750 500 1500 1000}
@@ -195,59 +205,59 @@ namespace eval ::marsutil::test {
     # m2ref
 
     test m2ref-1.1 {Convert origin} -setup setup -body {
-        proj m2ref 10.0 30.0
+        proj m2ref 6.0 2.0
     } -cleanup {
         cleanup
-    } -result {36PSS7107106909}
+    } -result {31NCG8932563306}
 
     test m2ref-1.2 {Convert bounds} -setup setup -body {
-        proj m2ref -10.0 35.0
+        proj m2ref 2.0 4.0
     } -cleanup {
         cleanup
-    } -result {36LYP1923393923}
+    } -result {31NFC1121321095}
 
     test m2ref-1.3 {Convert midpoint} -setup setup -body {
-        proj m2ref 0.0 32.5
+        proj m2ref 4.0 3.0
     } -cleanup {
         cleanup
-    } -result {36NVF4436200000}
+    } -result {31NEE0000042127}
 
     test m2ref-1.4 {Convert several coordinates} -setup setup -body {
-        proj m2ref 0.0 0.0 -10.0 30.0 10 35.0
+        proj m2ref 6.0 2.0 4.0 3.0 2.0 4.0 
     } -cleanup {
         cleanup
-    } -result {31NAA6602100000 36LSP7107193091 36PYS1923306077}
+    } -result {31NCG8932563306 31NEE0000042127 31NFC1121321095}
 
 
     #-------------------------------------------------------------------
     # ref2c
 
     test ref2c-1.1 {Convert origin} -setup setup -body {
-        proj ref2c 100 36PSS7107106909
+        proj ref2c 100 31NCG8932563306
     } -cleanup {
         cleanup
     } -result {0 0}
 
     test ref2c-1.2 {Convert bounds} -setup setup -body {
-        proj ref2c 100 36LYP1923393923
+        proj ref2c 100 31NFC1121321095
     } -cleanup {
         cleanup
     } -result {1500 1000}
 
     test ref2c-1.3 {Convert midpoint} -setup setup -body {
-        proj ref2c 100 36NVF4436200000
+        proj ref2c 100 31NEE0000042127
     } -cleanup {
         cleanup
     } -result {750 500}
 
-    test ref2c-1.4 {Convert with zoom} -setup setup -body {
-        proj ref2c 200 36LYP1923393923
+    test ref2c-1.4 {Convert with zoom; midpoint} -setup setup -body {
+        proj ref2c 200 31NEE0000042127
     } -cleanup {
         cleanup
-    } -result {3000 2000}
+    } -result {1500 1000}
 
     test ref2c-1.5 {Convert list} -setup setup -body {
-        proj ref2c 100 36PSS7107106909 36NVF4436200000 36LYP1923393923
+        proj ref2c 100 31NCG8932563306 31NEE0000042127 31NFC1121321095
     } -cleanup {
         cleanup
     } -result {0 0 750 500 1500 1000}
@@ -257,28 +267,28 @@ namespace eval ::marsutil::test {
     # ref2m
 
     test ref2m-1.1 {Convert origin} -setup setup -body {
-        proj ref2m 36PSS7107106909
+        formatloc [proj ref2m 31NCG8932563306]
     } -cleanup {
         cleanup
-    } -result {10.000001294794568 29.99999758290437}
+    } -result {6.0000 2.0000}
 
     test ref2m-1.2 {Convert bounds} -setup setup -body {
-        proj ref2m 36LYP1923393923
+        formatloc [proj ref2m 31NFC1121321095]
     } -cleanup {
         cleanup
-    } -result {-9.999998835196118 34.99999872682095}
+    } -result {2.0000 4.0000}
 
     test ref2m-1.3 {Convert midpoint} -setup setup -body {
-        proj ref2m 36NVF4436200000
+        formatloc [proj ref2m 31NEE0000042127]
     } -cleanup {
         cleanup
-    } -result {0.0 32.50000172938096}
+    } -result {4.0000 3.0000}
 
     test ref2m-1.4 {Convert list} -setup setup -body {
-        proj ref2m 36PSS7107106909 36NVF4436200000 36LYP1923393923
+        formatloc [proj ref2m 31NCG8932563306 31NEE0000042127 31NFC1121321095]
     } -cleanup {
         cleanup
-    } -result {10.000001294794568 29.99999758290437 0.0 32.50000172938096 -9.999998835196118 34.99999872682095}
+    } -result {6.0000 2.0000 4.0000 3.0000 2.0000 4.0000}
 
     #-------------------------------------------------------------------
     # ref validate
