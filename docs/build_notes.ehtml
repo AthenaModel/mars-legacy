@@ -10,10 +10,12 @@ Library</h1>
 <h2>Build Notes</h2>
 
 <h3>Build 2.35, 17 April 2014</h3>
-This build contains only one package related to the new mam(n).<p>
+This build contains only one package related to the new mam(n) and a
+retooling of some maprect(n) projection tests.<p>
 
 <ul>
 <li> Bug 4460: mam(n): belief view data
+<li> Bug 4457: maprect(n): test suite failures
 </ul><p>
 
 <h3>Build 2.34, 14 April 2014</h3>
