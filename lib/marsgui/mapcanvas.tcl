@@ -166,7 +166,7 @@ snit::widgetadaptor ::marsgui::mapcanvas {
             bindings {
                 icon   <ButtonPress-1>    {%W Icon-1 %x %y}
                 icon   <ButtonPress-3>    {%W Icon-3 %x %y %X %Y}
-                icon   <Control-Button-1> {%W IconMark %x %y}
+                icon   <Button-1>         {%W IconMark %x %y}
                 icon   <B1-Motion>        {%W IconDrag %x %y}
                 icon   <B1-ButtonRelease> {%W IconRelease %x %y}
                 nbhood <ButtonPress-1>    {%W Nbhood-1 %x %y %X %Y}
