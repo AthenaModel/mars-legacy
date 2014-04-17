@@ -164,7 +164,6 @@ snit::widgetadaptor ::marsgui::mapcanvas {
             cursor   left_ptr
             cleanup  {}
             bindings {
-                icon   <ButtonPress-1>    {%W Icon-1 %x %y}
                 icon   <ButtonPress-3>    {%W Icon-3 %x %y %X %Y}
                 icon   <Button-1>         {%W IconMark %x %y}
                 icon   <B1-Motion>        {%W IconDrag %x %y}
@@ -797,25 +796,6 @@ snit::widgetadaptor ::marsgui::mapcanvas {
     }
 
 
-    # Icon-1 wx wy
-    #
-    # wx    x window coordinate
-    # wy    y window coordinate
-    #
-    # Generates the <<Icon-1>> virtual event for the selected icon.
-
-    method Icon-1 {wx wy} {
-        set id [lindex [$win gettags current] 0]
-
-        $win raise $id
-
-        event generate $win <<Icon-1>> \
-            -x    $wx                  \
-            -y    $wy                  \
-            -data $id
-    }
-
-
     # IconMark wx wy
     #
     # wx    x window coordinate
@@ -839,6 +819,12 @@ snit::widgetadaptor ::marsgui::mapcanvas {
         # NEXT, raise the icon, so it when moved it will be over
         # the others.
         $win raise $trans(id)
+
+        # NEXT, notify the app
+        event generate $win <<Icon-1>> \
+            -x    $wx                  \
+            -y    $wy                  \
+            -data $trans(id)
     }
 
     # IconDrag wx wy
