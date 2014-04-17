@@ -893,7 +893,7 @@ namespace eval ::simlib::test {
         mam belief view 1 1
     } -cleanup {
         cleanup
-    } -result {position A emphasis NEITHER sid 1 tid 1 textpos Ambivalent textemph Neither}
+    } -result {position A emphasis NEITHER sid 1 tid 1 textpos Ambivalent textemph Neither numpos 0.0 numemph 0.5}
 
 
     #-------------------------------------------------------------------
