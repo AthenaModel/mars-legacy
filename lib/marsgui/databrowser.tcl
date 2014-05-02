@@ -63,17 +63,21 @@ snit::widget ::marsgui::databrowser {
     # To hull frame
     delegate option -borderwidth to hull
     delegate option -relief      to hull
-    
+
     # To Tablelist
-    delegate option -height           to tlist
-    delegate option -width            to tlist
-    delegate option -selectmode       to tlist
-    delegate option -titlecolumns     to tlist
-    delegate option -editstartcommand to tlist
-    delegate option -editendcommand   to tlist
-    delegate option -stripebackground to tlist
-    delegate option -stripeforeground to tlist
-    delegate option -stripeheight     to tlist
+    delegate option -autoscan            to tlist
+    delegate option -highlightcolor      to tlist
+    delegate option -highlightthickness  to tlist
+    delegate option -highlightbackground to tlist
+    delegate option -height              to tlist
+    delegate option -width               to tlist
+    delegate option -selectmode          to tlist
+    delegate option -titlecolumns        to tlist
+    delegate option -editstartcommand    to tlist
+    delegate option -editendcommand      to tlist
+    delegate option -stripebackground    to tlist
+    delegate option -stripeforeground    to tlist
+    delegate option -stripeheight        to tlist
 
     #-------------------------------------------------------------------
     # Data Source options
@@ -725,6 +729,7 @@ snit::widget ::marsgui::databrowser {
     delegate method rowcget         to tlist
     delegate method selection       to tlist
     delegate method windowpath      to tlist
+    delegate method tlistbody       to tlist as bodypath
     
     # toolbar
     #
@@ -733,6 +738,14 @@ snit::widget ::marsgui::databrowser {
 
     method toolbar {} {
         return $cbar
+    }
+
+    # tlist
+    #
+    # Returns the widget's tablelist component.
+
+    method tlist {} {
+        return $tlist
     }
     
     

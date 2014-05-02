@@ -93,15 +93,19 @@ The <<iref databrowser>> widget may be created with the following options:<p>
 <<defopt {-relief <i>relief</i>}>>
 These options are delegated to the hull ttk::frame widget.<p>
 
-<<defopt {-editstartcommand <i>command</i>}>>
+<<defopt {-autoscan <i>flag</i>}>>
 <<defopt {-editendcommand <i>command</i>}>>
+<<defopt {-editstartcommand <i>command</i>}>>
 <<defopt {-height <i>height</i>}>>
-<<defopt {-width <i>width</i>}>>
+<<defopt {-highlightbackground <i>color</i>}>>
+<<defopt {-highlightcolor <i>color</i>}>>
+<<defopt {-highlightthickness <i>pixels</i>}>>
 <<defopt {-selectmode <i>mode</i>}>>
 <<defopt {-stripebackground <i>color</i>}>>
 <<defopt {-stripeforeground <i>color</i>}>>
 <<defopt {-stripeheight <i>rows</i>}>>
 <<defopt {-titlecolumns <i>number</i>}>>
+<<defopt {-width <i>width</i>}>>
 
 These options are delegated to the underlying tablelist(n) widget.<p>
 
@@ -301,6 +305,15 @@ will <i>not</i> be called.<p>
 Sorts the contents of the browser on the column named <i>cname</i>;
 the sort direction defaults to <b>-increasing</b>, but can be set to
 either <b>-increasing</b> or <b>-decreasing</b>.<p>
+
+<<defitem tlist {<i>win</i> tlist}>>
+
+Returns the widget's underlying tablelist(n) widget.<p>
+
+<<defitem tlistbody {<i>win</i> tlistbody}>>
+
+Returns the name of the widget's underlying tablelist(n)'s "body" 
+widget, which is sometimes needed for event bindings.<p>
 
 <<defitem toolbar {<i>win</i> toolbar}>>
 
