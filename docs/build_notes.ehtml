@@ -9,6 +9,14 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.37, 29 April 2014</h3>
+This build contains enhancements to the databrowser(n).  More of the underlying
+tablebrowser functionality is exposed in the databrowser(n) widget.<p>
+
+<ul>
+<li> Bug 4488: databrowser(n): Expose more tablelist(n) API
+</ul><p>
+
 <h3>Build 2.36, 29 April 2014</h3>
 This build contains one package that allows icons on a mapcanvas to be
 dragged on a left single click.<p>
