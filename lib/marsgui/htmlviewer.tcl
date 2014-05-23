@@ -468,11 +468,27 @@ snit::widgetadaptor ::marsgui::htmlviewer {
         # NEXT, install the link watcher
         $hull handler node a [mymethod Handler_a]
 
+        # NEXT, bind to <MouseWheel> events in the document
+        bind $win.document <MouseWheel> [mymethod MouseWheel %D]
+
         # NEXT, prepare for the bindings to fire.
         set tinfo(href-$win)  {}
         set tinfo(src-$win)   {}
 
         $self reset
+    }
+
+    #------------------------------------------------------------------
+    # Event Bindings
+
+    # MouseWheel d
+    #
+    # d  - amount of scroll in the mouse wheel event
+    #
+    # Scrolls the window in response to MouseWheel events.
+
+    method Wheel {d} {
+        $win yview scroll [expr -$d/120] units
     }
 
     #-------------------------------------------------------------------
