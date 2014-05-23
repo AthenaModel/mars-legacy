@@ -487,7 +487,7 @@ snit::widgetadaptor ::marsgui::htmlviewer {
     #
     # Scrolls the window in response to MouseWheel events.
 
-    method Wheel {d} {
+    method MouseWheel {d} {
         $win yview scroll [expr -$d/120] units
     }
 
