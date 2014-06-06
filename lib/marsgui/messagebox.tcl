@@ -1174,7 +1174,7 @@ snit::type ::marsgui::messagebox {
     # Returns the empty string.
 
     typemethod ListCancel {} {
-        set choice ""
+        set choice [list cancel]
     }
 
     # ListOK
@@ -1182,7 +1182,7 @@ snit::type ::marsgui::messagebox {
     # Returns the selected string.
     
     typemethod ListOK {} {
-        set choice [$listdlg.top.listfield get]
+        set choice [list ok [$listdlg.top.listfield get]]
     }
 }
 

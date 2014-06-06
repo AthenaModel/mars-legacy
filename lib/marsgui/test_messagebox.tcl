@@ -18,6 +18,7 @@ exec tclsh8.5 "$0" "$@"
 #
 #-----------------------------------------------------------------------
 
+lappend auto_path ~/mars/lib
 package require Tk
 package require marsutil
 package require marsgui

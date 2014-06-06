@@ -228,10 +228,10 @@ from a list.  The list is displayed in parallel columns; the
 right-hand column shows the items the user has chosen, and the
 left-hand column shows all remaining items.<p>
 
-On "Cancel", returns the empty string; on
-"OK", returns a list of the keys of the items selected from the list
-field.  Pressing the window manager's close button is the same as pressing
-"Cancel".<p>
+On "OK", returns a list whose first element is <b>ok</b> and whose second
+element is a list of the keys of the items selected from the list
+field.  On "Cancel", returns a list of one element, <b>cancel</b>.  Pressing the 
+window manager's close button is the same as pressing "Cancel".<p>
 
 <<deflist options>>
 
