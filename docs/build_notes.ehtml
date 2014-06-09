@@ -9,6 +9,15 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.39, 9 June 2014</h3>
+
+This build contains a change to messagebox(n), fixing a 
+fatal ambiguity in the API for the [messagebox listselect] command.<p>
+
+<ul>
+<li> Bug 4537: messagebox(n) listselect -- ambiguous API    
+</ul><p>
+
 <h3>Build 2.38, 27 May 2014</h3>
 This build contains an update to htmlviewer(n) to make it respond to mouse
 wheel events.<p>
