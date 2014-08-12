@@ -176,6 +176,7 @@ snit::type ::marsutil::order {
     # errors    - Dictionary of parameter names and error messages
     # level     - Error level: NONE or REJECT
     # undo      - Undo script for this order
+    # redo      - Redo helper script for this order
     # checking  - 1 if in "order check" and 0 otherwise.
 
     typevariable trans -array {}
@@ -857,6 +858,7 @@ snit::type ::marsutil::order {
         set trans(errors) [dict create]
         set trans(level)  NONE
         set trans(undo)   {}
+        set trans(redo)   {}
 
         if {[catch {
             # FIRST, check the state.  Note that if the interface is
@@ -932,7 +934,7 @@ snit::type ::marsutil::order {
         # NEXT, Trace the order.
         if {[dict get $trans(idict) -trace]} {
             callwith $info(ordercmd) \
-                $interface $name $parmdict $trans(undo)
+                $interface $name $parmdict $trans(undo) $trans(redo)
         }
 
         # NEXT, notify the app that the order has been accepted.
@@ -988,6 +990,7 @@ snit::type ::marsutil::order {
         set trans(errors) [dict create]
         set trans(level)  NONE
         set trans(undo)   {}
+        set trans(redo)   {}
 
         # NEXT, call the handler
         set code [catch { $handler($name) } result opts]
@@ -1356,6 +1359,17 @@ snit::type ::marsutil::order {
 
     proc setundo {script} {
         set trans(undo) $script
+        return
+    }
+
+    # setredo script
+    #
+    # script    An undo script
+    #
+    # Sets the redo helper script for the current order.
+
+    proc setredo {script} {
+        set trans(redo) $script
         return
     }
 

@@ -1030,7 +1030,7 @@ Simulated Error}
     } -cleanup {
         cleanup
     } -result {
-        app MY:ORDER {a 1 b 2} {}
+        app MY:ORDER {a 1 b 2} {} {}
     }
 
     test send-7.3 {interface -trace: no trace on error} -setup {
@@ -1734,9 +1734,27 @@ Simulated Error}
     } -cleanup {
         cleanup
     } -result {
-        app MY:ORDER {} {undo order}
+        app MY:ORDER {} {undo order} {}
     }
 
+    #-------------------------------------------------------------------
+    # setredo
+
+
+    test setredo-1.1 {redo script is passed to -ordercmd} -setup {
+        setup
+        order define MY:ORDER {} {
+            setredo "redo helper"
+        }
+        order interface configure app -trace yes
+    } -body {
+        order send app MY:ORDER
+        getacc orders
+    } -cleanup {
+        cleanup
+    } -result {
+        app MY:ORDER {} {} {redo helper}
+    }
 
     #-------------------------------------------------------------------
     # check
