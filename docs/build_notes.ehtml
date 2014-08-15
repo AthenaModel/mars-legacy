@@ -9,6 +9,14 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.40, 15 August 2014</h3>
+
+This build adds the "setredo" command to order(n).<p>
+
+<ul>
+<li> Bug 4576: order(n): setredo
+</ul><p>
+
 <h3>Build 2.39, 9 June 2014</h3>
 
 This build contains a change to messagebox(n), fixing a 
