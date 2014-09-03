@@ -9,6 +9,11 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.41, 3 Sep 2014</h3>
+
+This build contains a fix to orderdialog(n) which prevents an annoying bgerror
+from being generated.<p>
+
 <h3>Build 2.40, 29 Aug 2014</h3>
 
 This build contains an addition to the order(n) API.  The setredo command is
