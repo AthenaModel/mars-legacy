@@ -9,6 +9,11 @@ Library</h1>
 
 <h2>Build Notes</h2>
 
+<h3>Build 2.42, 2 Oct 2014</h3>
+
+This build fixes a problem with the mapcanvas(n) scrolling behavior. Maps can
+no longer be scrolled when they are maximized beyond their boundaries.<p>
+
 <h3>Build 2.41, 3 Sep 2014</h3>
 
 This build contains a fix to orderdialog(n) which prevents an annoying bgerror
