@@ -6,4 +6,4 @@ This repository contains the code for Mars 1.x and Mars 2.x, which were used wit
 
 ## License
 
-See [LICENSE](LICENSE).
+This code has been open-sourced by the California Institute of Technology under JPL NTR-47857; see [LICENSE](LICENSE) for the license terms.
